@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Filter, Download } from 'lucide-react';
+import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -12,9 +12,6 @@ interface Enrollment {
   participant_email: string;
   status: 'invited' | 'active' | 'completed' | 'withdrawn';
   created_at: string;
-  research_project?: {
-    title: string;
-  };
 }
 
 interface Project {
@@ -27,30 +24,24 @@ const ParticipantsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const projectIdFromUrl = searchParams.get('project');
-  
+
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>(projectIdFromUrl || '');
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [customMessage, setCustomMessage] = useState('');
   const [sendingInvite, setSendingInvite] = useState(false);
   const [researcher, setResearcher] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Redirect to auth if not logged in
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/easyresearch/auth');
-    }
+    if (!authLoading && !user) navigate('/easyresearch/auth');
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
-      loadProjects();
-    }
+    if (user) loadProjects();
   }, [user]);
 
   useEffect(() => {
@@ -93,7 +84,6 @@ const ParticipantsPage: React.FC = () => {
         return;
       }
 
-      // Select first valid project
       const nextSelected = projectIdFromUrl || nextProjects[0]?.id || '';
       if (nextSelected && nextSelected !== selectedProject) {
         setSelectedProject(nextSelected);
@@ -116,14 +106,7 @@ const ParticipantsPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      const projectTitle = projects.find(p => p.id === selectedProject)?.title;
-      setEnrollments(
-        (data || []).map((e: any) => ({
-          ...e,
-          research_project: projectTitle ? { title: projectTitle } : undefined
-        })) as any
-      );
+      setEnrollments((data || []) as Enrollment[]);
     } catch (error) {
       console.error('Error loading enrollments:', error);
     } finally {
@@ -136,7 +119,6 @@ const ParticipantsPage: React.FC = () => {
       toast.error('Please enter a valid email and select a project');
       return;
     }
-
     if (!researcher?.id || !researcher?.organization_id) {
       toast.error('Researcher information not found');
       return;
@@ -145,8 +127,6 @@ const ParticipantsPage: React.FC = () => {
     setSendingInvite(true);
     try {
       const emailLower = inviteEmail.trim().toLowerCase();
-
-      // Check if already enrolled
       const { data: existing } = await supabase
         .from('enrollment')
         .select('id')
@@ -155,28 +135,19 @@ const ParticipantsPage: React.FC = () => {
         .maybeSingle();
 
       if (existing) {
-        toast.error('This participant is already enrolled in this project');
+        toast.error('This participant is already enrolled');
         return;
       }
 
-      // Create enrollment with invited status
       const { error: enrollError } = await supabase
         .from('enrollment')
-        .insert({
-          project_id: selectedProject,
-          participant_email: emailLower,
-          status: 'invited',
-        });
+        .insert({ project_id: selectedProject, participant_email: emailLower, status: 'invited' });
 
       if (enrollError) throw enrollError;
 
-      toast.success(`Participant ${emailLower} added successfully`);
-
+      toast.success(`Participant ${emailLower} added`);
       setShowInviteModal(false);
       setInviteEmail('');
-      setCustomMessage('');
-      
-      // Refresh enrollments
       loadEnrollments();
     } catch (error: any) {
       console.error('Error sending invitation:', error);
@@ -187,47 +158,34 @@ const ParticipantsPage: React.FC = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, { bg: string; color: string; icon: React.ReactNode }> = {
-      invited: { bg: '#fef3c7', color: '#d97706', icon: <Mail size={14} /> },
-      active: { bg: '#d1fae5', color: '#059669', icon: <CheckCircle size={14} /> },
-      completed: { bg: '#dbeafe', color: '#2563eb', icon: <CheckCircle size={14} /> },
-      withdrawn: { bg: '#fee2e2', color: '#dc2626', icon: <XCircle size={14} /> }
+    const config: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+      invited: { bg: 'bg-amber-50', text: 'text-amber-600', icon: <Mail size={12} /> },
+      active: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: <CheckCircle size={12} /> },
+      completed: { bg: 'bg-blue-50', text: 'text-blue-600', icon: <CheckCircle size={12} /> },
+      withdrawn: { bg: 'bg-red-50', text: 'text-red-500', icon: <XCircle size={12} /> }
     };
-    const style = styles[status] || styles.invited;
-    
+    const c = config[status] || config.invited;
     return (
-      <span 
-        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-        style={{ backgroundColor: style.bg, color: style.color }}
-      >
-        {style.icon}
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${c.bg} ${c.text}`}>
+        {c.icon}
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
 
   const filteredEnrollments = enrollments.filter(e => {
-    const matchesSearch = !searchQuery || 
-      e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !searchQuery || e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const exportToCSV = () => {
     if (filteredEnrollments.length === 0) return;
-    
     const headers = ['Email', 'Status', 'Enrolled At'];
     const csvData = filteredEnrollments.map(e => [
-      e.participant_email,
-      e.status,
-      new Date(e.created_at).toLocaleString()
+      e.participant_email, e.status, new Date(e.created_at).toLocaleString()
     ]);
-    
-    const csv = [
-      headers.join(','),
-      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
+    const csv = [headers.join(','), ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -238,164 +196,143 @@ const ParticipantsPage: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Participants
-              </h1>
-              <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Manage and invite participants to your studies
-              </p>
-            </div>
-            <button
-              onClick={() => setShowInviteModal(true)}
-              disabled={!selectedProject}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white hover:opacity-90 transition-all disabled:opacity-50"
-              style={{ backgroundColor: 'var(--color-green)' }}
-            >
-              <UserPlus size={20} />
-              Invite Participants
-            </button>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Participants</h1>
+            <p className="text-[13px] text-neutral-400 mt-1">Manage and invite participants to your studies</p>
           </div>
+          <button
+            onClick={() => setShowInviteModal(true)}
+            disabled={!selectedProject}
+            className="px-4 py-2 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+          >
+            <UserPlus size={16} />
+            Invite
+          </button>
+        </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-4 mb-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {[
+            { label: 'Total', value: enrollments.length, icon: Users },
+            { label: 'Invited', value: enrollments.filter(e => e.status === 'invited').length, icon: Mail },
+            { label: 'Active', value: enrollments.filter(e => e.status === 'active').length, icon: CheckCircle },
+            { label: 'Completed', value: enrollments.filter(e => e.status === 'completed').length, icon: Clock }
+          ].map(stat => (
+            <div key={stat.label} className="bg-white rounded-xl p-4 border border-black/[0.04]">
+              <stat.icon size={16} className="text-emerald-600 mb-3" />
+              <p className="text-2xl font-semibold tracking-tight text-neutral-900">{stat.value}</p>
+              <p className="text-[12px] text-neutral-400 mt-0.5">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2">
             <select
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
               disabled={projects.length === 0}
-              className="px-4 py-2 rounded-lg border bg-white disabled:opacity-50"
-              style={{ borderColor: 'var(--border-light)' }}
+              className="px-3 py-1.5 rounded-lg text-[13px] border border-black/[0.08] bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 disabled:opacity-50"
             >
-              {projects.length === 0 && (
-                <option value="" disabled>No projects</option>
-              )}
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.title}</option>
-              ))}
+              {projects.length === 0 && <option value="" disabled>No projects</option>}
+              {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
-
-            <div className="relative flex-1 max-w-xs">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }} />
+            <div className="flex gap-1 bg-neutral-100 rounded-lg p-0.5">
+              {['all', 'invited', 'active', 'completed'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setStatusFilter(tab)}
+                  className={`px-3 py-1.5 rounded-md text-[12px] font-medium capitalize transition-all ${
+                    statusFilter === tab
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {tab === 'all' ? 'All' : tab}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search by email..."
+                placeholder="Search email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border"
-                style={{ borderColor: 'var(--border-light)' }}
+                className="pl-8 pr-3 py-1.5 rounded-lg w-48 text-[13px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white"
               />
             </div>
-
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 rounded-lg border bg-white"
-              style={{ borderColor: 'var(--border-light)' }}
-            >
-              <option value="all">All Statuses</option>
-              <option value="invited">Invited</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="withdrawn">Withdrawn</option>
-            </select>
-
             <button
               onClick={exportToCSV}
               disabled={filteredEnrollments.length === 0}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
-              style={{ borderColor: 'var(--border-light)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="p-1.5 rounded-lg border border-black/[0.08] hover:bg-neutral-50 disabled:opacity-40 transition-colors"
+              title="Export CSV"
             >
-              <Download size={18} />
-              Export
+              <Download size={16} className="text-neutral-500" />
             </button>
           </div>
+        </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            {[
-              { label: 'Total', count: enrollments.length, color: 'var(--text-primary)' },
-              { label: 'Invited', count: enrollments.filter(e => e.status === 'invited').length, color: '#d97706' },
-              { label: 'Active', count: enrollments.filter(e => e.status === 'active').length, color: '#059669' },
-              { label: 'Completed', count: enrollments.filter(e => e.status === 'completed').length, color: '#2563eb' }
-            ].map(stat => (
-              <div key={stat.label} className="bg-white rounded-xl p-4" style={{ border: '1px solid var(--border-light)' }}>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{stat.label}</p>
-                <p className="text-2xl font-bold" style={{ color: stat.color }}>{stat.count}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Participants List */}
+        {/* Table */}
+        <div className="bg-white rounded-xl border border-black/[0.04] overflow-hidden">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: 'var(--color-green)' }} />
+            <div className="p-12 text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-600 border-t-transparent mx-auto"></div>
             </div>
           ) : projects.length === 0 ? (
-            <div className="bg-white rounded-2xl p-16 text-center" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
-                <Users style={{ color: 'var(--color-green)' }} size={40} />
+            <div className="p-16 text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Users className="text-emerald-600" size={24} />
               </div>
-              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                No Projects Yet
-              </h3>
-              <p className="mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                Create a research project first, then you can invite participants to your studies.
+              <h3 className="text-[15px] font-semibold text-neutral-900 mb-1.5">No Projects Yet</h3>
+              <p className="text-[13px] text-neutral-400 mb-5 max-w-sm mx-auto">
+                Create a research project first, then invite participants.
               </p>
               <button
                 onClick={() => navigate('/easyresearch/dashboard?create=true')}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: 'var(--color-green)' }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
               >
-                <UserPlus size={20} />
-                Create Your First Survey
+                Create Project
               </button>
             </div>
           ) : filteredEnrollments.length === 0 ? (
-            <div className="bg-white rounded-2xl p-16 text-center" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
-                <Users style={{ color: 'var(--color-green)' }} size={40} />
+            <div className="p-16 text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Users className="text-emerald-600" size={24} />
               </div>
-              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                No Participants Yet
-              </h3>
-              <p className="mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                Start building your research panel by inviting participants to your study.
+              <h3 className="text-[15px] font-semibold text-neutral-900 mb-1.5">No Participants</h3>
+              <p className="text-[13px] text-neutral-400 mb-5 max-w-sm mx-auto">
+                Invite participants to start collecting responses.
               </p>
               <button
                 onClick={() => setShowInviteModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: 'var(--color-green)' }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
               >
-                <UserPlus size={20} />
-                Invite Your First Participant
+                <UserPlus size={14} /> Invite
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-light)' }}>
+            <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                    <th className="text-left px-6 py-4 font-medium" style={{ color: 'var(--text-secondary)' }}>Email</th>
-                    <th className="text-left px-6 py-4 font-medium" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                    <th className="text-left px-6 py-4 font-medium" style={{ color: 'var(--text-secondary)' }}>Enrolled</th>
+                  <tr className="border-b border-black/[0.04] bg-neutral-50/50">
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-neutral-500 uppercase tracking-wider">Email</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-neutral-500 uppercase tracking-wider">Status</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-neutral-500 uppercase tracking-wider">Enrolled</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-black/[0.04]">
                   {filteredEnrollments.map(enrollment => (
-                    <tr key={enrollment.id} className="border-t" style={{ borderColor: 'var(--border-light)' }}>
-                      <td className="px-6 py-4">
-                        <span style={{ color: 'var(--text-primary)' }}>{enrollment.participant_email}</span>
-                      </td>
-                      <td className="px-6 py-4">{getStatusBadge(enrollment.status)}</td>
-                      <td className="px-6 py-4" style={{ color: 'var(--text-secondary)' }}>
-                        {new Date(enrollment.created_at).toLocaleDateString()}
-                      </td>
+                    <tr key={enrollment.id} className="hover:bg-neutral-50/50 transition-colors">
+                      <td className="px-4 py-3 text-[13px] font-medium text-neutral-900">{enrollment.participant_email}</td>
+                      <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
+                      <td className="px-4 py-3 text-[12px] text-neutral-400">{new Date(enrollment.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -407,45 +344,47 @@ const ParticipantsPage: React.FC = () => {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => setShowInviteModal(false)}
         >
-          <div 
-            className="bg-white rounded-2xl p-6 w-full max-w-md"
+          <div
+            className="bg-white rounded-xl w-full max-w-sm shadow-xl border border-black/[0.04]"
             onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Invite Participants
-            </h2>
-            <p className="mb-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Add a participant by email. They can access the survey via the shared link.
-            </p>
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="participant@example.com"
-              className="w-full p-3 rounded-lg border"
-              style={{ borderColor: 'var(--border-light)' }}
-            />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="flex-1 py-3 rounded-lg font-medium border"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-              >
-                Cancel
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.04]">
+              <h2 className="text-[15px] font-semibold text-neutral-900">Invite Participant</h2>
+              <button onClick={() => setShowInviteModal(false)} className="p-1 rounded-lg hover:bg-neutral-50">
+                <X size={16} className="text-neutral-400" />
               </button>
-              <button
-                onClick={sendInvitation}
-                disabled={sendingInvite || !inviteEmail.trim()}
-                className="flex-1 py-3 rounded-lg font-medium text-white disabled:opacity-50"
-                style={{ backgroundColor: 'var(--color-green)' }}
-              >
-                {sendingInvite ? 'Adding...' : 'Add Participant'}
-              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="participant@example.com"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-[14px] bg-neutral-50 border border-black/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  onKeyDown={(e) => e.key === 'Enter' && sendInvitation()}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="flex-1 py-2.5 rounded-lg text-[13px] font-medium text-neutral-600 border border-black/[0.08] hover:bg-neutral-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={sendInvitation}
+                  disabled={sendingInvite || !inviteEmail.trim()}
+                  className="flex-1 py-2.5 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                >
+                  {sendingInvite ? 'Adding...' : 'Add'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
