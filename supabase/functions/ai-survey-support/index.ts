@@ -107,7 +107,7 @@ Guidelines:
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Failed to process AI support request'
+        error: (error as Error).message || 'Failed to process AI support request'
       }),
       {
         status: 500,

@@ -5,12 +5,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 4002,
+    port: 8080,
     strictPort: true,
     host: '0.0.0.0'
   },
   preview: {
-    port: 4002,
+    port: 8080,
     strictPort: true,
     host: '0.0.0.0'
   },
