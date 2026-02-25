@@ -52,8 +52,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) 
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
                 active
-                  ? 'text-emerald-700 bg-emerald-50'
-                  : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+                  ? 'text-indigo-600 bg-indigo-50'
+                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
               }`}
               title={collapsed ? item.label : undefined}
             >
@@ -64,18 +64,18 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) 
         })}
       </nav>
 
-      <div className="px-3 py-3 border-t border-black/[0.04]">
+      <div className="px-3 py-3 border-t border-slate-100">
         {user && !collapsed && (
           <div className="mb-3 px-3">
-            <p className="text-[12px] font-medium text-neutral-800 truncate">
+            <p className="text-[12px] font-medium text-slate-700 truncate">
               {user.email}
             </p>
-            <p className="text-[11px] text-neutral-400">Researcher</p>
+            <p className="text-[11px] text-slate-400">Researcher</p>
           </div>
         )}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50 transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors"
           title={collapsed ? 'Sign Out' : undefined}
         >
           <LogOut size={18} strokeWidth={1.5} />
@@ -90,30 +90,30 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) 
       {/* Mobile Menu Toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-[60px] left-3 z-[60] p-2 bg-white rounded-lg shadow-sm border border-black/[0.06]"
+        className="lg:hidden fixed top-[60px] left-3 z-[60] p-2 bg-white rounded-lg shadow-sm border border-slate-100"
       >
-        <Menu size={20} className="text-neutral-600" />
+        <Menu size={20} className="text-slate-500" />
       </button>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-[70] bg-black/30 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm"
           onClick={() => setMobileOpen(false)}
         >
           <div
             className="w-60 h-full bg-white flex flex-col pt-3 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 pb-3 border-b border-black/[0.04]">
+            <div className="flex items-center justify-between px-4 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">Er</span>
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+                  <span className="text-white text-[11px] font-bold">E</span>
                 </div>
-                <span className="text-[14px] font-semibold text-neutral-900">EasierResearch</span>
+                <span className="text-[14px] font-semibold text-slate-900">Easier</span>
               </div>
-              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-neutral-50">
-                <X size={18} className="text-neutral-400" />
+              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-slate-50">
+                <X size={18} className="text-slate-400" />
               </button>
             </div>
             <div className="flex-1 flex flex-col py-2">
@@ -125,16 +125,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) 
 
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col bg-white fixed left-0 top-14 bottom-0 transition-all duration-200 z-40 border-r border-black/[0.04] ${
+        className={`hidden lg:flex flex-col bg-white fixed left-0 top-14 bottom-0 transition-all duration-200 z-40 border-r border-slate-100 ${
           collapsed ? 'w-16' : 'w-56'
         }`}
       >
         {onToggle && (
           <button
             onClick={onToggle}
-            className="absolute -right-3 top-5 w-6 h-6 bg-white rounded-full shadow-sm border border-black/[0.06] flex items-center justify-center hover:bg-neutral-50 transition-colors"
+            className="absolute -right-3 top-5 w-6 h-6 bg-white rounded-full shadow-sm border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+            {collapsed ? <ChevronRight size={12} className="text-slate-400" /> : <ChevronLeft size={12} className="text-slate-400" />}
           </button>
         )}
         <div className="flex-1 flex flex-col py-2 overflow-y-auto">

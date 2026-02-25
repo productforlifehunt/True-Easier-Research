@@ -32,8 +32,8 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b" style={{ borderColor: 'var(--border-light)' }}>
         <div className="flex items-center gap-2">
-          <BarChart3 style={{ color: 'var(--color-green)' }} size={24} />
-          <span className="font-bold" style={{ color: 'var(--text-primary)' }}>EasierResearch</span>
+          <BarChart3 className="text-indigo-500" size={24} />
+          <span className="font-bold text-slate-900">Easier</span>
         </div>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
