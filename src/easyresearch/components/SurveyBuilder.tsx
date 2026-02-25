@@ -704,4 +704,78 @@ const SurveyBuilder: React.FC = () => {
                                       {/* Actions */}
                                       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={(e) => { e.stopPropagation(); moveQuestion(question.id, 'up'); }} disabled={index === 0}
-                                          className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors
+                                          className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
+                                          <ChevronUp size={14} className="text-stone-400" />
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); moveQuestion(question.id, 'down'); }} disabled={index === questions.length - 1}
+                                          className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
+                                          <ChevronDown size={14} className="text-stone-400" />
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); duplicateQuestion(question); }}
+                                          className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
+                                          <Copy size={14} className="text-stone-400" />
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); deleteQuestion(question.id); }}
+                                          className="p-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                                          <Trash2 size={14} className="text-red-400" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Editor Panel */}
+            <div className="lg:col-span-1">
+              {selectedQuestion ? (
+                <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm sticky top-24">
+                  <div className="p-5 border-b border-stone-100">
+                    <h3 className="text-[14px] font-semibold text-stone-800">Edit Question</h3>
+                  </div>
+                  <div className="p-5">
+                    <QuestionEditor
+                      question={selectedQuestion}
+                      project={project}
+                      onUpdateQuestion={updateQuestion}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-8 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-3">
+                    <Settings size={20} className="text-stone-300" />
+                  </div>
+                  <p className="text-[13px] text-stone-400 font-light">Select a question to edit its properties</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'logic' && (
+          <SurveyLogic questions={questions} projectId={projectId} onUpdateLogic={(rules) => console.log('Logic updated', rules)} />
+        )}
+
+        {activeTab === 'settings' && project && (
+          <SurveySettings project={project} onUpdateProject={(updates) => setProject(updates)} />
+        )}
+
+        {activeTab === 'preview' && (
+          <SurveyPreview questions={questions} projectTitle={project.title || ''} projectDescription={project.description || ''} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SurveyBuilder;
