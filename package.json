@@ -8,6 +8,7 @@
     "dev:dementia": "pnpm --filter @survey/dementia-survey dev",
     "dev:easyresearch": "pnpm --filter @survey/easyresearch dev",
     "build": "tsc -b && vite build",
+    "build:dev": "vite build --mode development",
     "build:dementia": "pnpm --filter @survey/dementia-survey build",
     "build:easyresearch": "pnpm --filter @survey/easyresearch build",
     "lint": "eslint .",
