@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Calendar, Clock } from 'lucide-react';
 
 interface ParticipantOnboardingProps {
   projectId: string;
@@ -16,189 +16,84 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadProject();
-  }, [projectId]);
+  useEffect(() => { loadProject(); }, [projectId]);
 
   const loadProject = async () => {
     try {
-      // Check if already enrolled
       const enrollmentId = localStorage.getItem(`enrollment_${projectId}`);
-      if (enrollmentId) {
-        // Already enrolled, redirect to survey view
-        navigate(`/easyresearch/participant/${projectId}?skip_consent=true`);
-        return;
-      }
-
-      // Load project details
-      const { data: projectData } = await supabase
-        .from('research_project')
-        .select('*')
-        .eq('id', projectId)
-        .maybeSingle();
-
+      if (enrollmentId) { navigate(`/easyresearch/participant/${projectId}?skip_consent=true`); return; }
+      const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       setProject(projectData);
-    } catch (error) {
-      console.error('Error loading project:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error loading project:', error); }
+    finally { setLoading(false); }
   };
 
   const handleEnroll = async () => {
     if (!email) return;
-    
     try {
-      // Create enrollment with correct schema fields
-      const { data: enrollment, error: enrollError } = await supabase
-        .from('enrollment')
-        .insert({
-          project_id: projectId,
-          participant_id: user?.id || null,
-          participant_email: email,
-          status: 'active',
-          consent_signed_at: new Date().toISOString(),
-          study_start_date: new Date().toISOString().split('T')[0]
-        })
-        .select()
-        .single();
-      
-      if (enrollError) {
-        console.error('Enrollment error:', enrollError);
-        return;
-      }
-
+      const { data: enrollment, error: enrollError } = await supabase.from('enrollment').insert({
+        project_id: projectId, participant_id: user?.id || null, participant_email: email,
+        status: 'active', consent_signed_at: new Date().toISOString(), study_start_date: new Date().toISOString().split('T')[0]
+      }).select().single();
+      if (enrollError) { console.error('Enrollment error:', enrollError); return; }
       if (enrollment) {
-        // Store enrollment ID
         localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
-        
-        // For longitudinal surveys, create survey instances
         if (project?.project_type === 'longitudinal') {
-          const instances = [];
-          const startDate = new Date();
-          let instanceCounter = 1;
-          
-          const duration = project.study_duration || 7;
-          const frequency = project.survey_frequency || 'once_daily';
-          
-          // Determine survey times based on frequency
-          let surveyTimes: number[] = [];
-          if (frequency === 'hourly') {
-            surveyTimes = Array.from({ length: 14 }, (_, i) => 8 + i); // 8 AM to 9 PM
-          } else if (frequency === 'twice_daily') {
-            surveyTimes = [9, 21]; // 9 AM and 9 PM
-          } else if (frequency === 'three_times_daily') {
-            surveyTimes = [9, 14, 21]; // 9 AM, 2 PM, 9 PM
-          } else if (frequency === 'four_times_daily') {
-            surveyTimes = [9, 12, 15, 21]; // 9 AM, 12 PM, 3 PM, 9 PM
-          } else {
-            // once_daily or daily
-            surveyTimes = [9]; // 9 AM
-          }
-          
-          for (let day = 1; day <= duration; day++) {
-            for (const hour of surveyTimes) {
-              const scheduledTime = new Date(startDate);
-              scheduledTime.setDate(startDate.getDate() + (day - 1));
-              scheduledTime.setHours(hour, 0, 0, 0);
-              
-              instances.push({
-                enrollment_id: enrollment.id,
-                instance_number: instanceCounter++,
-                day_number: day,
-                time_point: hour.toString(),
-                scheduled_time: scheduledTime.toISOString(),
-                status: 'scheduled'
-              });
-            }
-          }
-          
-          // Note: survey_instance table not yet created in schema
-          // Longitudinal scheduling is handled by the dashboard component
-          // based on enrollment created_at and project frequency settings
-          
-          // Navigate to SurveyViewRouter which will show LongitudinalSurveyView
           window.location.href = `/easyresearch/participant/${projectId}?skip_consent=true`;
-        } else {
-          onComplete();
-        }
+        } else { onComplete(); }
       }
-    } catch (error) {
-      console.error('Error enrolling:', error);
-    }
+    } catch (error) { console.error('Error enrolling:', error); }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <>
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-md mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              {project?.title}
-            </h1>
-            
-            <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {project?.description}
-            </p>
+    <div className="min-h-screen bg-stone-50/50">
+      <div className="max-w-md mx-auto px-4 py-10">
+        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-7">
+          <h1 className="text-xl font-bold text-stone-800 mb-2">{project?.title}</h1>
+          <p className="text-[13px] text-stone-400 font-light mb-6">{project?.description}</p>
 
-            {project?.project_type === 'longitudinal' && (
-              <div className="mb-6 p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold mb-2">Study Information</h3>
-                <p className="text-sm">
-                  Welcome to our longitudinal study!
+          {project?.project_type === 'longitudinal' && (
+            <div className="mb-6 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
+              <h3 className="text-[13px] font-semibold text-stone-700 mb-2 flex items-center gap-2">
+                <Calendar size={14} className="text-emerald-500" /> Study Information
+              </h3>
+              <div className="space-y-1.5 text-[12px] text-stone-500 font-light">
+                <p>This longitudinal study tracks your experiences over time.</p>
+                <p className="flex items-center gap-1.5">
+                  <Clock size={11} className="text-stone-400" />
+                  Duration: {project?.study_duration || 7} days
                 </p>
-                <p className="text-sm mt-2">
-                  This research will track your experiences every hour for the next week. 
-                  You will receive survey notifications hourly between 9am-9pm daily.
-                </p>
-                <p className="text-sm mt-2">
-                  Each survey takes only 2-3 minutes to complete. You can configure your 
-                  Do Not Disturb periods after enrollment.
-                </p>
+                <p>Each survey takes only 2-3 minutes.</p>
               </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                  Your Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border"
-                  style={{ borderColor: 'var(--border-light)' }}
-                  placeholder="Enter your email for survey notifications"
-                  required
-                />
-              </div>
-
-              <button
-                onClick={handleEnroll}
-                disabled={!email}
-                className="w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
-                style={{ 
-                  backgroundColor: email ? 'var(--color-green)' : '#ccc',
-                  color: 'white'
-                }}
-              >
-                {project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey'}
-                <ChevronRight size={20} />
-              </button>
             </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Email Address</label>
+              <input
+                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
+                placeholder="Enter your email" required
+              />
+            </div>
+            <button onClick={handleEnroll} disabled={!email}
+              className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
+              {project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey'}
+              <ChevronRight size={16} />
+            </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
