@@ -1,0 +1,72 @@
+---
+alwaysApply: true
+---
+Database Schema: care_connector (ONLY use this schema, not others)
+
+**MANDATORY PORT CONFIGURATION:**
+- This care connector app ONLY uses port 4002
+- NEVER use port 4001 or any other port for this app
+- Other ports are reserved for other applications
+- Always connect to localhost:4002 for dev server
+- Always use puppeteer MCP to navigate to http://localhost:4002
+- Always run dev server on port 4002 only
+
+**DEV SERVER COMMANDS:**
+- Start: npm run dev (should auto-configure to port 4002)
+- Preview: http://localhost:4002
+- Browser automation: Always navigate to localhost:4002
+
+**ENFORCEMENT:**
+- Violation of this port rule = immediate correction
+- Any reference to other ports must be changed to 4002
+- This is a non-negotiable configuration requirement
+
+🚨 CRITICAL RULE 101 - AUTHENTICATION PROTOCOL 🚨
+
+**MANDATORY AUTH REQUIREMENT:**
+- NEVER bypass authentication when auditing protected pages
+- ALWAYS log in with real test user account before auditing dashboard/protected features
+- NEVER just view unauthenticated states and call it "complete audit"
+
+**TEST USER CREDENTIALS:**
+- Email: guowei.jiang.work@gmail.com
+- Password: J4913836j
+
+**PROTOCOL:**
+1. Navigate to /sign-in page
+2. Use puppeteer MCP to fill credentials and log in
+3. THEN audit protected pages with real authenticated data
+4. Verify all CRUD operations work with real user session
+
+**VIOLATION CONSEQUENCES:**
+- Any audit of protected pages without logging in = INCOMPLETE/INVALID
+- Must always demonstrate real user functionality, not just auth gates
+- This is RULE 101 - highest priority enforcement
+
+🚨🚨🚨 ABSOLUTE PROHIBITION - ZERO TOLERANCE ENFORCEMENT 🚨🚨🚨
+
+**FORBIDDEN COLORS/BACKGROUNDS:**
+- ZERO grey backgrounds anywhere in the app
+- ZERO dark backgrounds anywhere in the app  
+- ZERO black backgrounds anywhere in the app
+- ZERO dark mode anywhere in the app
+- ZERO grey cards, buttons, or hover states
+- ZERO dark cards, buttons, or hover states
+- ZERO black cards, buttons, or hover states
+
+**ONLY ALLOWED COLORS:**
+- White backgrounds ONLY
+- Green (theme green #10b981) accents ONLY
+- NO OTHER BACKGROUND COLORS ALLOWED
+
+**ENFORCEMENT:**
+- Any grey/dark/black background = immediate fix required
+- Must use only white backgrounds with green accents
+- This is Apple-style 2025 design requirement
+- User has ZERO tolerance for any violation
+
+**VIOLATION RESPONSE:**
+- Stop immediately when grey/dark/black detected
+- Fix all instances before continuing
+- Use only var(--bg-primary) for white backgrounds
+- Use only var(--color-primary) for green accents

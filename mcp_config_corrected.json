@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "env": {}
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_7c53cc8ccddecb6dbc756f7e29fbf91ee7e12d45",
+        "--project-ref",
+        "yekarqanirdkdckimpna"
+      ],
+      "env": {
+        "SUPABASE_PROJECT_REF": "yekarqanirdkdckimpna"
+      }
+    }
+  }
+}

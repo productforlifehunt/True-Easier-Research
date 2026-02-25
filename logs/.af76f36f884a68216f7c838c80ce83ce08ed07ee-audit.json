@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/guoweijiang/Downloads/caring-nexus-connect-4444/2careconnectorlite/logs/.af76f36f884a68216f7c838c80ce83ce08ed07ee-audit.json",
+    "files": [
+        {
+            "date": 1754001077829,
+            "name": "/Users/guoweijiang/Downloads/caring-nexus-connect-4444/2careconnectorlite/logs/mcp-puppeteer-2025-08-01.log",
+            "hash": "6871160ada163786434739f4b27e5028a1f084fcb1b1e9ef891472062f31e37f"
+        }
+    ],
+    "hashType": "sha256"
+}

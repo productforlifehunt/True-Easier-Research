@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Features Test - Care Connector</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #10b981; }
+        h2 { color: #333; margin-top: 0; }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover { background: #059669; }
+        button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0fdf4;
+            border: 1px solid #10b981;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .error {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+        .loading {
+            color: #6b7280;
+            font-style: italic;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .suggestions {
+            list-style: none;
+            padding: 0;
+        }
+        .suggestions li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #f9fafb;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+        }
+        .suggestions li:hover {
+            background: #f3f4f6;
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <h1>AI diagnostics page disabled</h1>
+        <p>This route is not available in production builds.</p>
+    </div>
+</body>
+</html>

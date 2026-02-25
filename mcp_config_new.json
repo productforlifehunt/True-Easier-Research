@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "mcp1_puppeteer": {
+      "command": "npx",
+      "args": ["@playwright/mcp"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "mcp2_supabase": {
+      "command": "npx",
+      "args": ["@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_URL": "https://yekarqanirdkdckimpna.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlla2FycWFuaXJka2Rja2ltcG5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUzNTAwNzcsImV4cCI6MjA1MDkyNjA3N30.0Rx8jn-6X1YyebZ0EeFRz4h-4_HFZPG_c5VHWrVNL0M"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp"]
+    },
+    "supabase": {
+      "command": "npx", 
+      "args": ["@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_PROJECT_ID": "yekarqanirdkdckimpna",
+        "SUPABASE_URL": "https://yekarqanirdkdckimpna.supabase.co",
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlla2FycWFuaXJka2Rja2ltcG5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUzNTAwNzcsImV4cCI6MjA1MDkyNjA3N30.0Rx8jn-6X1YyebZ0EeFRz4h-4_HFZPG_c5VHWrVNL0M"
+      }
+    }
+  }
+}

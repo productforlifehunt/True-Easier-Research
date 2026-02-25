@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Tab Test</title>
+</head>
+<body>
+    <h1>Dashboard Tab Loading Test</h1>
+    <button onclick="testDashboard()">Test Dashboard Tabs</button>
+    <div id="results"></div>
+
+    <script>
+        async function testDashboard() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing dashboard tabs...</p>';
+            
+            // Set mock auth
+            localStorage.setItem('sb-yekarqanirdkdckimpna-auth-token', JSON.stringify({
+                access_token: 'test-token',
+                user: {
+                    id: '068215cb-d0d2-48c7-91c4-a311d76489f9',
+                    email: 'guowei.jiang.work@gmail.com',
+                    role: 'authenticated',
+                    app_metadata: {},
+                    user_metadata: {},
+                    aud: 'authenticated'
+                }
+            }));
+            
+            // Navigate to dashboard
+            window.location.href = '/dashboard';
+        }
+    </script>
+</body>
+</html>

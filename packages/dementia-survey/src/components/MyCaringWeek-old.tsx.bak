@@ -1,0 +1,604 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Calendar, Clock, HelpCircle, Wrench, ChevronDown,
+  LayoutGrid, GitBranch, Filter, MessageSquare, Users
+} from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+
+interface SurveyEntry {
+  id: number;
+  user_id: string;
+  entry_type?: string;
+  description: string;
+  difficulties_challenges?: string;
+  struggles_encountered?: string;
+  tools_using?: string;
+  tools_wanted?: string;
+  people_with?: string;
+  people_want_with?: string;
+  communication_challenges?: string;
+  collaboration_challenges?: string;
+  cooperation_challenges?: string;
+  help_reaching_challenges?: string;
+  knowledge_gaps?: string;
+  support_needed?: string;
+  emotional_impact?: string;
+  urgency_level?: string;
+  time_spent?: number;
+  created_at?: string;
+  entry_timestamp?: string;
+  liability_concerns?: string;
+  ai_summary?: string;
+}
+
+// Build natural paragraph from entry fields (fallback if no AI summary)
+const buildNaturalParagraph = (entry: SurveyEntry, zh: boolean): string => {
+  const parts: string[] = [];
+  const h = (s?: string) => s && s.trim().length > 0;
+  
+  if (h(entry.description)) {
+    parts.push(entry.description);
+  }
+  if (h(entry.difficulties_challenges)) {
+    parts.push(entry.difficulties_challenges!);
+  }
+  if (h(entry.struggles_encountered)) {
+    parts.push(entry.struggles_encountered!);
+  }
+  if (h(entry.communication_challenges)) {
+    parts.push(entry.communication_challenges!);
+  }
+  if (h(entry.collaboration_challenges)) {
+    parts.push(entry.collaboration_challenges!);
+  }
+  if (h(entry.cooperation_challenges)) {
+    parts.push(entry.cooperation_challenges!);
+  }
+  if (h(entry.help_reaching_challenges)) {
+    parts.push(entry.help_reaching_challenges!);
+  }
+  if (h(entry.knowledge_gaps)) {
+    parts.push(entry.knowledge_gaps!);
+  }
+  if (h(entry.tools_using)) {
+    parts.push(zh ? `目前使用${entry.tools_using}` : `Currently using ${entry.tools_using}`);
+  }
+  if (h(entry.tools_wanted)) {
+    parts.push(zh ? `希望有${entry.tools_wanted}` : `Wishing for ${entry.tools_wanted}`);
+  }
+  if (h(entry.support_needed)) {
+    parts.push(zh ? `需要${entry.support_needed}` : `Needs ${entry.support_needed}`);
+  }
+  if (h(entry.emotional_impact)) {
+    parts.push(zh ? `感到${entry.emotional_impact}` : `Feeling ${entry.emotional_impact}`);
+  }
+  if (h(entry.people_with)) {
+    parts.push(zh ? `通常和${entry.people_with}一起` : `Usually with ${entry.people_with}`);
+  }
+  if (h(entry.people_want_with)) {
+    parts.push(zh ? `希望能和${entry.people_want_with}一起` : `Would like to do with ${entry.people_want_with}`);
+  }
+  if (h(entry.liability_concerns)) {
+    parts.push(entry.liability_concerns!);
+  }
+  
+  return parts.join(' ') || (zh ? '暂无详细信息。' : 'No details available.');
+}
+
+interface Props {
+  language: string;
+}
+
+// Aspects based on ACTUAL survey fields - using full clear names
+const ASPECTS = {
+  communication: { label: { en: 'Communication Challenges', zh: '沟通挑战' }, icon: MessageSquare },
+  collaboration: { label: { en: 'Collaboration Challenges', zh: '协作挑战' }, icon: Users },
+  cooperation: { label: { en: 'Cooperation Challenges', zh: '配合挑战' }, icon: Users },
+  knowledge: { label: { en: 'Knowledge Gap', zh: '知识缺口' }, icon: HelpCircle },
+  tools: { label: { en: 'Tools Wanted', zh: '想要的工具' }, icon: Wrench },
+  support: { label: { en: 'Support Needed', zh: '需要的支持' }, icon: HelpCircle },
+};
+
+type ViewMode = 'list' | 'timeline';
+
+export default function MyCaringWeek({ language }: Props) {
+  const { user } = useAuth();
+  const [entries, setEntries] = useState<SurveyEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<number>(0); // 0 = show all
+  const [aspectFilter, setAspectFilter] = useState<string | null>(null);
+  const [aiSummaries, setAiSummaries] = useState<Record<number, string>>({});
+  const [loadingSummary, setLoadingSummary] = useState<number | null>(null);
+  
+  const zh = language === 'zh';
+
+  // Fetch AI summary for an entry
+  const fetchAiSummary = async (entry: SurveyEntry) => {
+    if (aiSummaries[entry.id]) return; // Already have it
+    
+    setLoadingSummary(entry.id);
+    try {
+      const response = await fetch('https://yekarqanirdkdckimpna.supabase.co/functions/v1/summarize-entry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ entry, language })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.summary) {
+          setAiSummaries(prev => ({ ...prev, [entry.id]: data.summary }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching AI summary:', error);
+    } finally {
+      setLoadingSummary(null);
+    }
+  };
+
+  // Handle expand - also fetch AI summary
+  const handleExpand = (entry: SurveyEntry) => {
+    const newExpandedId = expandedId === entry.id ? null : entry.id;
+    setExpandedId(newExpandedId);
+    if (newExpandedId && !aiSummaries[entry.id]) {
+      fetchAiSummary(entry);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchEntries();
+    }
+  }, [user?.id]);
+
+  const fetchEntries = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('survey_entries')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setEntries(data || []);
+    } catch (error) {
+      console.error('Error fetching entries:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasContent = (val?: string) => val && val.trim().length > 0;
+
+  // Get which aspects an entry has (based on filled fields)
+  const getEntryAspects = (entry: SurveyEntry): string[] => {
+    const aspects: string[] = [];
+    if (hasContent(entry.communication_challenges)) aspects.push('communication');
+    if (hasContent(entry.collaboration_challenges)) aspects.push('collaboration');
+    if (hasContent(entry.cooperation_challenges)) aspects.push('cooperation');
+    if (hasContent(entry.knowledge_gaps)) aspects.push('knowledge');
+    if (hasContent(entry.tools_using) || hasContent(entry.tools_wanted)) aspects.push('tools');
+    if (hasContent(entry.support_needed)) aspects.push('support');
+    return aspects;
+  };
+
+  // Get difficulty level (0-5)
+  const getDifficulty = (entry: SurveyEntry) => {
+    if (!entry.urgency_level) return 0;
+    return parseInt(entry.urgency_level) || 0;
+  };
+
+  // Filter entries
+  const filteredEntries = entries.filter(entry => {
+    // Filter by difficulty
+    if (difficultyFilter > 0 && getDifficulty(entry) < difficultyFilter) return false;
+    // Filter by aspect
+    if (aspectFilter && !getEntryAspects(entry).includes(aspectFilter)) return false;
+    return true;
+  });
+
+  // Get date for display
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(zh ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric' });
+  };
+
+  // Group by date for timeline
+  const entriesByDate = filteredEntries.reduce((acc, entry) => {
+    const dateStr = entry.entry_timestamp || entry.created_at;
+    const date = dateStr ? new Date(dateStr).toDateString() : 'Unknown';
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(entry);
+    return acc;
+  }, {} as Record<string, SurveyEntry[]>);
+
+  const sortedDates = Object.keys(entriesByDate).sort((a, b) => 
+    new Date(b).getTime() - new Date(a).getTime()
+  );
+
+  // Count entries with each aspect
+  const aspectCounts = Object.keys(ASPECTS).reduce((acc, key) => {
+    acc[key] = entries.filter(e => getEntryAspects(e).includes(key)).length;
+    return acc;
+  }, {} as Record<string, number>);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  // Entry Card Component
+  const EntryCard = ({ entry }: { entry: SurveyEntry }) => {
+    const isExpanded = expandedId === entry.id;
+    const difficulty = getDifficulty(entry);
+    const aspects = getEntryAspects(entry);
+
+    return (
+      <div 
+        className="rounded-lg border-2 transition-all overflow-hidden"
+        style={{ 
+          borderColor: isExpanded ? 'var(--color-green)' : 'var(--border-light)',
+          background: 'white'
+        }}
+      >
+        {/* Header - Click to expand */}
+        <div 
+          className="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => handleExpand(entry)}
+        >
+          <div className="flex items-start gap-3">
+            {/* Difficulty indicator */}
+            <div 
+              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+              style={{ 
+                background: difficulty >= 4 ? '#DC2626' : difficulty >= 2 ? '#F59E0B' : 'var(--color-green)'
+              }}
+            >
+              {difficulty || '-'}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm line-clamp-2" style={{ color: 'var(--text-primary)' }}>
+                {entry.description}
+              </p>
+              
+              {/* Meta info */}
+              <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <span className="flex items-center gap-1">
+                  <Calendar size={10} />
+                  {formatDate(entry.entry_timestamp || entry.created_at)}
+                </span>
+                {entry.time_spent && (
+                  <span className="flex items-center gap-1">
+                    <Clock size={10} />
+                    {entry.time_spent}m
+                  </span>
+                )}
+              </div>
+              
+              {/* Aspect badges - show what survey fields are filled */}
+              {aspects.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {aspects.map(asp => {
+                    const aspect = ASPECTS[asp as keyof typeof ASPECTS];
+                    if (!aspect) return null;
+                    const AspectIcon = aspect.icon;
+                    return (
+                      <span 
+                        key={asp}
+                        className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium text-white"
+                        style={{ background: 'var(--color-green)' }}
+                      >
+                        <AspectIcon size={10} />
+                        {zh ? aspect.label.zh : aspect.label.en}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+            </div>
+            
+            <ChevronDown 
+              size={16} 
+              className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--text-secondary)' }}
+            />
+          </div>
+        </div>
+
+        {/* Expanded content - Paragraph summary + Category list */}
+        {isExpanded && (
+          <div className="px-3 pb-3 pt-2 border-t" style={{ borderColor: 'var(--border-light)', background: '#fafafa' }}>
+            {/* 1. AI-generated paragraph summary */}
+            <div className="text-xs leading-relaxed mb-3 p-2 rounded" style={{ background: 'rgba(16,185,129,0.05)', color: 'var(--text-primary)' }}>
+              {loadingSummary === entry.id ? (
+                <span className="flex items-center gap-2 text-gray-500">
+                  <span className="animate-spin">⏳</span>
+                  {zh ? '正在生成AI摘要...' : 'Generating AI summary...'}
+                </span>
+              ) : aiSummaries[entry.id] ? (
+                <span className="italic">{aiSummaries[entry.id]}</span>
+              ) : (
+                <span className="italic">{buildNaturalParagraph(entry, zh)}</span>
+              )}
+            </div>
+            
+            {/* 2. Category list - bullet points */}
+            <div className="space-y-1.5 pt-2 border-t" style={{ borderColor: 'var(--border-light)' }}>
+              {hasContent(entry.difficulties_challenges) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(220,38,38,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#DC2626' }}>{zh ? '困难挑战: ' : 'Challenges: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.difficulties_challenges}</span>
+                </div>
+              )}
+              {hasContent(entry.communication_challenges) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(16,185,129,0.08)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{zh ? '沟通挑战: ' : 'Communication Challenges: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.communication_challenges}</span>
+                </div>
+              )}
+              {hasContent(entry.collaboration_challenges) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(16,185,129,0.08)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{zh ? '协作挑战: ' : 'Collaboration Challenges: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.collaboration_challenges}</span>
+                </div>
+              )}
+              {hasContent(entry.cooperation_challenges) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(16,185,129,0.08)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{zh ? '配合挑战: ' : 'Cooperation Challenges: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.cooperation_challenges}</span>
+                </div>
+              )}
+              {hasContent(entry.knowledge_gaps) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(59,130,246,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#3B82F6' }}>{zh ? '知识缺口: ' : 'Knowledge Gap: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.knowledge_gaps}</span>
+                </div>
+              )}
+              {hasContent(entry.tools_wanted) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(107,114,128,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#6B7280' }}>{zh ? '想要的工具: ' : 'Tools Wanted: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.tools_wanted}</span>
+                </div>
+              )}
+              {hasContent(entry.tools_using) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(107,114,128,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#6B7280' }}>{zh ? '使用的工具: ' : 'Tools Using: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.tools_using}</span>
+                </div>
+              )}
+              {hasContent(entry.support_needed) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(16,185,129,0.08)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{zh ? '需要的支持: ' : 'Support Needed: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.support_needed}</span>
+                </div>
+              )}
+              {hasContent(entry.emotional_impact) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(139,92,246,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#8B5CF6' }}>{zh ? '情感影响: ' : 'Emotional Impact: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.emotional_impact}</span>
+                </div>
+              )}
+              {hasContent(entry.people_with) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(6,182,212,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#06B6D4' }}>{zh ? '一起的人: ' : 'People With: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.people_with}</span>
+                </div>
+              )}
+              {hasContent(entry.people_want_with) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(6,182,212,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#06B6D4' }}>{zh ? '想一起的人: ' : 'Want to Do With: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.people_want_with}</span>
+                </div>
+              )}
+              {hasContent(entry.struggles_encountered) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(220,38,38,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#DC2626' }}>{zh ? '遇到的困难: ' : 'Struggles: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.struggles_encountered}</span>
+                </div>
+              )}
+              {hasContent(entry.help_reaching_challenges) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(245,158,11,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#F59E0B' }}>{zh ? '求助困难: ' : 'Help Reaching Challenges: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.help_reaching_challenges}</span>
+                </div>
+              )}
+              {hasContent(entry.liability_concerns) && (
+                <div className="text-xs p-2 rounded" style={{ background: 'rgba(220,38,38,0.08)' }}>
+                  <span className="font-semibold" style={{ color: '#DC2626' }}>{zh ? '责任顾虑: ' : 'Liability Concerns: '}</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{entry.liability_concerns}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="text-center">
+        <h3 className="text-lg font-bold" style={{ color: 'var(--color-green)' }}>
+          {zh ? '我的照护周' : 'My Caring Week'}
+        </h3>
+        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {zh 
+            ? `${entries.length} 条记录 • 点击展开查看详情` 
+            : `${entries.length} entries • Click to expand details`}
+        </p>
+      </div>
+
+      {/* Difficulty Slider Filter */}
+      <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border-light)', background: 'var(--bg-secondary)' }}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Filter size={14} style={{ color: 'var(--color-green)' }} />
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {zh ? '按挑战程度筛选' : 'Filter by Challenge Level'}
+            </span>
+          </div>
+          <span 
+            className="text-xs font-bold px-2 py-0.5 rounded-full text-white"
+            style={{ background: 'var(--color-green)' }}
+          >
+            {difficultyFilter === 0 ? (zh ? '全部' : 'All') : `≥ ${difficultyFilter}`}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>0</span>
+          <input
+            type="range"
+            min="0"
+            max="5"
+            value={difficultyFilter}
+            onChange={(e) => setDifficultyFilter(parseInt(e.target.value))}
+            className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+            style={{ 
+              background: `linear-gradient(to right, var(--color-green) ${difficultyFilter * 20}%, #e5e7eb ${difficultyFilter * 20}%)`
+            }}
+          />
+          <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>5</span>
+        </div>
+        {/* Challenge level counts inline */}
+        <div className="flex items-center justify-between mt-2 text-[10px]">
+          <span style={{ color: 'var(--text-secondary)' }}>
+            {zh 
+              ? `显示 ${filteredEntries.length} / ${entries.length} 条`
+              : `Showing ${filteredEntries.length} / ${entries.length}`}
+          </span>
+          <div className="flex items-center gap-3">
+            <span style={{ color: '#DC2626' }}>
+              {zh ? '高' : 'High'} (4-5): {entries.filter(e => getDifficulty(e) >= 4).length}
+            </span>
+            <span style={{ color: '#F59E0B' }}>
+              {zh ? '中' : 'Med'} (2-3): {entries.filter(e => getDifficulty(e) >= 2 && getDifficulty(e) < 4).length}
+            </span>
+            <span style={{ color: '#10B981' }}>
+              {zh ? '低' : 'Low'} (0-1): {entries.filter(e => getDifficulty(e) < 2).length}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Aspect Filters */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          {zh ? '按类型:' : 'By type:'}
+        </span>
+        <button
+          onClick={() => setAspectFilter(null)}
+          className={`px-2 py-1 rounded text-[10px] font-medium transition-all`}
+          style={{ 
+            background: !aspectFilter ? 'var(--color-green)' : 'rgba(16,185,129,0.1)',
+            color: !aspectFilter ? 'white' : 'var(--color-green)'
+          }}
+        >
+          {zh ? '全部' : 'All'}
+        </button>
+        {Object.entries(ASPECTS).map(([key, asp]) => {
+          const count = aspectCounts[key];
+          if (count === 0) return null;
+          const AspIcon = asp.icon;
+          return (
+            <button
+              key={key}
+              onClick={() => setAspectFilter(aspectFilter === key ? null : key)}
+              className="px-2 py-1 rounded text-[10px] font-medium transition-all flex items-center gap-1"
+              style={{ 
+                background: aspectFilter === key ? 'var(--color-green)' : 'rgba(16,185,129,0.1)',
+                color: aspectFilter === key ? 'white' : 'var(--color-green)'
+              }}
+            >
+              <AspIcon size={10} />
+              {zh ? asp.label.zh : asp.label.en}
+              <span className="opacity-70">({count})</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* View Mode Toggle */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setViewMode('list')}
+          className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-all`}
+          style={{ 
+            background: viewMode === 'list' ? 'var(--color-green)' : 'rgba(16,185,129,0.1)',
+            color: viewMode === 'list' ? 'white' : 'var(--color-green)'
+          }}
+        >
+          <LayoutGrid size={12} />
+          {zh ? '列表' : 'List'}
+        </button>
+        <button
+          onClick={() => setViewMode('timeline')}
+          className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-all`}
+          style={{ 
+            background: viewMode === 'timeline' ? 'var(--color-green)' : 'rgba(16,185,129,0.1)',
+            color: viewMode === 'timeline' ? 'white' : 'var(--color-green)'
+          }}
+        >
+          <GitBranch size={12} />
+          {zh ? '时间线' : 'Timeline'}
+        </button>
+      </div>
+
+      {/* Entries */}
+      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+        {filteredEntries.length === 0 ? (
+          <div className="text-center py-8 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            {zh ? '暂无符合条件的记录' : 'No matching entries'}
+          </div>
+        ) : viewMode === 'list' ? (
+          filteredEntries.map(entry => <EntryCard key={entry.id} entry={entry} />)
+        ) : (
+          // Timeline view
+          <div className="relative pl-8">
+            <div 
+              className="absolute left-3 top-0 bottom-0 w-0.5"
+              style={{ background: 'var(--color-green)' }}
+            />
+            {sortedDates.map(dateStr => {
+              const dayEntries = entriesByDate[dateStr];
+              const date = new Date(dateStr);
+              return (
+                <div key={dateStr} className="relative mb-4">
+                  <div 
+                    className="absolute -left-5 w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-[10px]"
+                    style={{ background: 'var(--color-green)' }}
+                  >
+                    {date.getDate()}
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {date.toLocaleDateString(zh ? 'zh-CN' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {dayEntries.map(entry => <EntryCard key={entry.id} entry={entry} />)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+}
