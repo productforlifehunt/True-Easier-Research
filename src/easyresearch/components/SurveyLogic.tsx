@@ -24,242 +24,111 @@ const SurveyLogic: React.FC<SurveyLogicProps> = ({ questions, projectId, existin
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (existingRules) {
-      setRules(existingRules);
-    }
-  }, [existingRules]);
+  useEffect(() => { if (existingRules) setRules(existingRules); }, [existingRules]);
 
   const addRule = () => {
-    const newRule: LogicRule = {
-      id: `rule_${Date.now()}`,
-      questionId: questions[0]?.id || '',
-      condition: 'equals',
-      value: '',
-      action: 'skip',
-      targetQuestionId: questions[1]?.id || ''
-    };
-    setRules([...rules, newRule]);
+    setRules([...rules, { id: `rule_${Date.now()}`, questionId: questions[0]?.id || '', condition: 'equals', value: '', action: 'skip', targetQuestionId: questions[1]?.id || '' }]);
   };
 
   const updateRule = (index: number, field: keyof LogicRule, value: any) => {
-    const updatedRules = [...rules];
-    updatedRules[index] = { ...updatedRules[index], [field]: value };
-    setRules(updatedRules);
-    setSaved(false);
+    const updated = [...rules]; updated[index] = { ...updated[index], [field]: value }; setRules(updated); setSaved(false);
   };
 
-  const deleteRule = (index: number) => {
-    const updatedRules = rules.filter((_, i) => i !== index);
-    setRules(updatedRules);
-    setSaved(false);
-  };
+  const deleteRule = (index: number) => { setRules(rules.filter((_, i) => i !== index)); setSaved(false); };
 
   const saveRules = async () => {
     setSaving(true);
-    try {
-      // Pass rules to parent which handles the actual Supabase save
-      await onUpdateLogic(rules);
-      setSaved(true);
-      toast.success('Logic rules saved!');
-      setTimeout(() => setSaved(false), 2000);
-    } catch (error) {
-      toast.error('Failed to save logic rules');
-    } finally {
-      setSaving(false);
-    }
+    try { await onUpdateLogic(rules); setSaved(true); toast.success('Logic rules saved!'); setTimeout(() => setSaved(false), 2000); }
+    catch { toast.error('Failed to save logic rules'); }
+    finally { setSaving(false); }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-4xl mx-auto space-y-5">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Survey Logic
-          </h2>
-          <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Configure skip logic, branching, and conditional questions
-          </p>
+          <h2 className="text-[17px] font-semibold tracking-tight text-stone-800">Logic</h2>
+          <p className="text-[13px] text-stone-400 mt-0.5 font-light">Skip, show, or hide questions based on responses</p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={addRule}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium hover:opacity-90"
-            style={{ backgroundColor: 'var(--color-green)' }}
-          >
-            <Plus size={16} />
-            Add Rule
+          <button onClick={addRule} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200">
+            <Plus size={14} /> Add Rule
           </button>
           {rules.length > 0 && (
-            <button
-              onClick={saveRules}
-              disabled={saving || saved}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 border"
-              style={{ 
-                borderColor: saved ? '#10b981' : 'var(--border-light)',
-                backgroundColor: saved ? '#f0fdf4' : 'white',
-                color: saved ? '#10b981' : 'var(--text-primary)'
-              }}
-            >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : saved ? <CheckCircle size={16} /> : <Save size={16} />}
-              {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Rules'}
+            <button onClick={saveRules} disabled={saving || saved}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-all ${
+                saved ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'border border-stone-200 text-stone-600 hover:bg-stone-50'
+              } disabled:opacity-50`}>
+              {saving ? <Loader2 size={14} className="animate-spin" /> : saved ? <CheckCircle size={14} /> : <Save size={14} />}
+              {saving ? 'Saving...' : saved ? 'Saved' : 'Save'}
             </button>
           )}
         </div>
       </div>
 
       {rules.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center" style={{ border: '1px solid var(--border-light)' }}>
-          <GitBranch className="mx-auto mb-4" style={{ color: 'var(--text-secondary)' }} size={48} />
-          <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-            No logic rules yet
-          </h3>
-          <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
-            Create conditional logic to show, hide, or skip questions based on responses
-          </p>
-          <button
-            onClick={addRule}
-            className="px-6 py-3 rounded-lg text-white font-medium hover:opacity-90"
-            style={{ backgroundColor: 'var(--color-green)' }}
-          >
+        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-16 text-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+            <GitBranch className="text-emerald-500" size={24} />
+          </div>
+          <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">No logic rules</h3>
+          <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">Create conditional logic to personalize the survey flow.</p>
+          <button onClick={addRule} className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200">
             Create First Rule
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {rules.map((rule, index) => (
-            <div 
-              key={rule.id}
-              className="bg-white rounded-2xl p-6" 
-              style={{ border: '1px solid var(--border-light)' }}
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* IF Question */}
+            <div key={rule.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      IF Question
-                    </label>
-                    <CustomDropdown
-                      options={questions.map(q => ({
-                        value: q.id,
-                        label: `Q${questions.indexOf(q) + 1}: ${q.question_text?.substring(0, 30)}...`
-                      }))}
-                      value={rule.questionId}
-                      onChange={(value) => updateRule(index, 'questionId', value)}
-                      placeholder="Select question"
-                    />
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1.5">IF Question</label>
+                    <CustomDropdown options={questions.map(q => ({ value: q.id, label: `Q${questions.indexOf(q) + 1}: ${q.question_text?.substring(0, 25)}...` }))} value={rule.questionId} onChange={(v) => updateRule(index, 'questionId', v)} placeholder="Select question" />
                   </div>
-
-                  {/* Condition */}
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      Condition
-                    </label>
-                    <CustomDropdown
-                      options={[
-                        { value: 'equals', label: 'Equals' },
-                        { value: 'not_equals', label: 'Not Equals' },
-                        { value: 'contains', label: 'Contains' },
-                        { value: 'greater_than', label: 'Greater Than' },
-                        { value: 'less_than', label: 'Less Than' },
-                        { value: 'is_empty', label: 'Is Empty' },
-                        { value: 'is_not_empty', label: 'Is Not Empty' }
-                      ]}
-                      value={rule.condition}
-                      onChange={(value) => updateRule(index, 'condition', value)}
-                      placeholder="Select condition"
-                    />
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1.5">Condition</label>
+                    <CustomDropdown options={[{value:'equals',label:'Equals'},{value:'not_equals',label:'Not Equals'},{value:'contains',label:'Contains'},{value:'greater_than',label:'Greater Than'},{value:'less_than',label:'Less Than'},{value:'is_empty',label:'Is Empty'},{value:'is_not_empty',label:'Is Not Empty'}]} value={rule.condition} onChange={(v) => updateRule(index, 'condition', v)} placeholder="Condition" />
                   </div>
-
-                  {/* Value */}
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      Value
-                    </label>
-                    <input
-                      type="text"
-                      value={rule.value}
-                      onChange={(e) => updateRule(index, 'value', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border"
-                      style={{ borderColor: 'var(--border-light)' }}
-                      placeholder="Enter value..."
-                    />
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1.5">Value</label>
+                    <input type="text" value={rule.value} onChange={(e) => updateRule(index, 'value', e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Value..." />
                   </div>
-
-                  {/* THEN Action */}
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                      THEN Action
-                    </label>
-                    <CustomDropdown
-                      options={[
-                        { value: 'skip', label: 'Skip to Question' },
-                        { value: 'show', label: 'Show Question' },
-                        { value: 'hide', label: 'Hide Question' }
-                      ]}
-                      value={rule.action}
-                      onChange={(value) => updateRule(index, 'action', value as any)}
-                      placeholder="Select action"
-                    />
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1.5">THEN</label>
+                    <CustomDropdown options={[{value:'skip',label:'Skip to'},{value:'show',label:'Show'},{value:'hide',label:'Hide'}]} value={rule.action} onChange={(v) => updateRule(index, 'action', v as any)} placeholder="Action" />
                   </div>
                 </div>
-
-                <button
-                  onClick={() => deleteRule(index)}
-                  className="p-2 rounded-lg hover:bg-red-50 transition-colors"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  <Trash2 size={16} />
+                <button onClick={() => deleteRule(index)} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors mt-5">
+                  <Trash2 size={14} className="text-red-400" />
                 </button>
               </div>
-
-              {/* Target Question */}
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border-light)' }}>
-                <div className="flex items-center gap-3">
-                  <ArrowRight style={{ color: 'var(--color-green)' }} size={20} />
-                  <CustomDropdown
-                    options={[
-                      { value: '', label: 'Select target question' },
-                      ...questions.map(q => ({
-                        value: q.id,
-                        label: `Q${questions.indexOf(q) + 1}: ${q.question_text?.substring(0, 50)}...`
-                      }))
-                    ]}
-                    value={rule.targetQuestionId}
-                    onChange={(value) => updateRule(index, 'targetQuestionId', value)}
-                    placeholder="Select target question"
-                    className="flex-1"
-                  />
-                </div>
+              <div className="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2">
+                <ArrowRight size={14} className="text-emerald-500 shrink-0" />
+                <CustomDropdown
+                  options={[{ value: '', label: 'Select target' }, ...questions.map(q => ({ value: q.id, label: `Q${questions.indexOf(q) + 1}: ${q.question_text?.substring(0, 40)}...` }))]}
+                  value={rule.targetQuestionId} onChange={(v) => updateRule(index, 'targetQuestionId', v)} placeholder="Target question" className="flex-1" />
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Logic Summary */}
       {rules.length > 0 && (
-        <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid var(--border-light)' }}>
-          <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-            Logic Flow Summary
-          </h3>
-          <div className="space-y-2">
+        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+          <h3 className="text-[14px] font-semibold text-stone-800 mb-3">Flow Summary</h3>
+          <div className="space-y-1.5">
             {rules.map((rule, index) => {
               const sourceQ = questions.find(q => q.id === rule.questionId);
               const targetQ = questions.find(q => q.id === rule.targetQuestionId);
               return (
-                <div key={rule.id} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  <span className="font-medium" style={{ color: 'var(--color-green)' }}>
-                    Rule {index + 1}:
-                  </span>
-                  <span>
-                    IF "{sourceQ?.question_text?.substring(0, 30)}..." {rule.condition} "{rule.value}"
-                  </span>
-                  <ArrowRight size={14} />
-                  <span>
-                    {rule.action.toUpperCase()} "{targetQ?.question_text?.substring(0, 30)}..."
-                  </span>
+                <div key={rule.id} className="flex items-center gap-2 text-[12px] text-stone-500">
+                  <span className="font-medium text-emerald-600">Rule {index + 1}:</span>
+                  <span>IF "{sourceQ?.question_text?.substring(0, 25)}..." {rule.condition} "{rule.value}"</span>
+                  <ArrowRight size={12} className="text-stone-300" />
+                  <span>{rule.action.toUpperCase()} "{targetQ?.question_text?.substring(0, 25)}..."</span>
                 </div>
               );
             })}

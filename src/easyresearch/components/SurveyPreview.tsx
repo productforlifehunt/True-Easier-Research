@@ -15,10 +15,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ questions, projectTitle, 
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
-
-  const handleResponse = (questionId: string, value: any) => {
-    setResponses({ ...responses, [questionId]: value });
-  };
+  const handleResponse = (questionId: string, value: any) => setResponses({ ...responses, [questionId]: value });
 
   const renderQuestion = (question: any) => {
     const value = responses[question.id];
@@ -26,311 +23,105 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ questions, projectTitle, 
 
     switch (normalizedType) {
       case 'single_choice':
-        return (
-          <div className="space-y-3">
-            {question.options?.map((option: any, index: number) => {
-              const optionText = typeof option === 'string' ? option : option.option_text || option;
-              const optionValue = typeof option === 'string' ? option : option.id || option.option_text;
-              return (
-                <label
-                  key={index}
-                  className="flex items-center p-4 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
-                  style={{
-                    borderColor: value === optionValue ? 'var(--color-green)' : 'var(--border-light)',
-                    backgroundColor: value === optionValue ? '#f0fdf4' : 'white'
-                  }}
-                >
-                  <input
-                    type="radio"
-                    checked={value === optionValue || false}
-                    onChange={() => handleResponse(question.id, optionValue)}
-                    className="mr-3"
-                  />
-                  <span style={{ color: 'var(--text-primary)' }}>{optionText}</span>
-                </label>
-              );
-            })}
-          </div>
-        );
-
+        return (<div className="space-y-2">{question.options?.map((option: any, index: number) => { const optText = typeof option === 'string' ? option : option.option_text; const optVal = typeof option === 'string' ? option : option.id || option.option_text; return (<label key={index} className={`flex items-center p-3.5 rounded-xl border-2 cursor-pointer transition-all ${value === optVal ? 'border-emerald-400 bg-emerald-50' : 'border-stone-100 hover:border-emerald-200'}`}><input type="radio" checked={value === optVal || false} onChange={() => handleResponse(question.id, optVal)} className="mr-3 accent-emerald-500" /><span className="text-[14px] text-stone-700">{optText}</span></label>);})}</div>);
       case 'multiple_choice':
-        return (
-          <div className="space-y-3">
-            {question.options?.map((option: any, index: number) => {
-              const optionText = typeof option === 'string' ? option : option.option_text || option;
-              const optionValue = typeof option === 'string' ? option : option.id || option.option_text;
-              const selected = Array.isArray(value) ? value.includes(optionValue) : false;
-              return (
-                <label
-                  key={index}
-                  className="flex items-center p-4 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
-                  style={{
-                    borderColor: selected ? 'var(--color-green)' : 'var(--border-light)',
-                    backgroundColor: selected ? '#f0fdf4' : 'white'
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected || false}
-                    onChange={(e) => {
-                      const currentValues = value || [];
-                      if (e.target.checked) {
-                        handleResponse(question.id, [...currentValues, optionValue]);
-                      } else {
-                        handleResponse(question.id, currentValues.filter((v: string) => v !== optionValue));
-                      }
-                    }}
-                    className="mr-3"
-                  />
-                  <span style={{ color: 'var(--text-primary)' }}>{optionText}</span>
-                </label>
-              );
-            })}
-          </div>
-        );
-
+        return (<div className="space-y-2">{question.options?.map((option: any, index: number) => { const optText = typeof option === 'string' ? option : option.option_text; const optVal = typeof option === 'string' ? option : option.id || option.option_text; const selected = Array.isArray(value) ? value.includes(optVal) : false; return (<label key={index} className={`flex items-center p-3.5 rounded-xl border-2 cursor-pointer transition-all ${selected ? 'border-emerald-400 bg-emerald-50' : 'border-stone-100 hover:border-emerald-200'}`}><input type="checkbox" checked={selected} onChange={(e) => { const cur = value || []; handleResponse(question.id, e.target.checked ? [...cur, optVal] : cur.filter((v: string) => v !== optVal)); }} className="mr-3 accent-emerald-500" /><span className="text-[14px] text-stone-700">{optText}</span></label>);})}</div>);
       case 'text_short':
-        return (
-          <input
-            type="text"
-            value={value || ''}
-            onChange={(e) => handleResponse(question.id, e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border-2"
-            style={{ borderColor: 'var(--border-light)' }}
-            placeholder="Type your answer..."
-          />
-        );
-
+        return <input type="text" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Your answer..." />;
       case 'text_long':
-        return (
-          <textarea
-            value={value || ''}
-            onChange={(e) => handleResponse(question.id, e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border-2 resize-none"
-            style={{ borderColor: 'var(--border-light)' }}
-            rows={6}
-            placeholder="Type your answer..."
-          />
-        );
-
-      case 'number':
-        return (
-          <input
-            type="number"
-            value={value || ''}
-            onChange={(e) => handleResponse(question.id, e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border-2"
-            style={{ borderColor: 'var(--border-light)' }}
-            placeholder="Enter a number..."
-          />
-        );
-
-      case 'date':
-        return (
-          <input
-            type="date"
-            value={value || ''}
-            onChange={(e) => handleResponse(question.id, e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border-2"
-            style={{ borderColor: 'var(--border-light)' }}
-          />
-        );
-
+        return <textarea value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" rows={5} placeholder="Your answer..." />;
+      case 'number': return <input type="number" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Enter number..." />;
+      case 'date': return <input type="date" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />;
+      case 'time': return <input type="time" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />;
+      case 'email': return <input type="email" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="email@example.com" />;
       case 'likert_scale':
-        const likertConfig = question.question_config || {};
-        const likertLabels = likertConfig.labels || {};
-        const likertScaleType = likertConfig.scale_type || '1-5';
-        const [likertMin, likertMax] = likertScaleType.split('-').map(Number);
-        const likertScaleOptions: number[] = [];
-        for (let i = likertMin; i <= likertMax; i++) {
-          likertScaleOptions.push(i);
-        }
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between gap-2">
-              {likertScaleOptions.map((optionValue) => (
-                <div
-                  key={optionValue}
-                  onClick={() => handleResponse(question.id, optionValue)}
-                  className="flex-1 text-center cursor-pointer transition-all"
-                >
-                  <div
-                    className="w-full aspect-square flex items-center justify-center rounded-lg border-2 font-semibold text-lg mb-2 hover:scale-105"
-                    style={{
-                      borderColor: value === optionValue ? 'var(--color-green)' : 'var(--border-light)',
-                      backgroundColor: value === optionValue ? 'var(--color-green)' : 'white',
-                      color: value === optionValue ? 'white' : 'var(--text-primary)'
-                    }}
-                  >
-                    {optionValue}
-                  </div>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    {likertLabels[optionValue] || ''}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
+        const lc = question.question_config || {}; const ll = lc.labels || {}; const ls = lc.scale_type || '1-5'; const [lmin, lmax] = ls.split('-').map(Number); const lo: number[] = []; for (let i = lmin; i <= lmax; i++) lo.push(i);
+        return (<div className="flex justify-between gap-1.5">{lo.map(v => (<div key={v} onClick={() => handleResponse(question.id, v)} className={`flex-1 text-center cursor-pointer`}><div className={`aspect-square flex items-center justify-center rounded-xl border-2 font-semibold text-[15px] mb-1 transition-all hover:scale-105 ${value === v ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-stone-200 text-stone-600'}`}>{v}</div><p className="text-[10px] text-stone-400">{ll[v] || ''}</p></div>))}</div>);
       case 'dropdown':
-        return (<select value={value||''} onChange={(e)=>handleResponse(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2 bg-white" style={{borderColor:'var(--border-light)'}}><option value="">Select...</option>{question.options?.map((o:any,i:number)=>(<option key={i} value={o.id||o.option_text||o}>{o.option_text||o}</option>))}</select>);
+        return <select value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-[14px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"><option value="">Select...</option>{question.options?.map((o: any, i: number) => <option key={i} value={o.id || o.option_text || o}>{o.option_text || o}</option>)}</select>;
       case 'slider':
-        const sliderMin = question.question_config?.min_value ?? 0;
-        const sliderMax = question.question_config?.max_value ?? 10;
-        const sliderStep = question.question_config?.step ?? 1;
-        return (<div className="space-y-4"><input type="range" min={sliderMin} max={sliderMax} step={sliderStep} value={value ?? sliderMin} onChange={(e)=>handleResponse(question.id,Number(e.target.value))} className="w-full cursor-pointer" style={{accentColor:'var(--color-green)'}}/><div className="flex justify-between text-sm" style={{color:'var(--text-secondary)'}}><span>{sliderMin}</span><span className="text-xl font-bold" style={{color:'var(--color-green)'}}>{value ?? sliderMin}</span><span>{sliderMax}</span></div></div>);
+        const sMin = question.question_config?.min_value ?? 0; const sMax = question.question_config?.max_value ?? 10; const sStep = question.question_config?.step ?? 1;
+        return (<div className="space-y-3"><input type="range" min={sMin} max={sMax} step={sStep} value={value ?? sMin} onChange={(e) => handleResponse(question.id, Number(e.target.value))} className="w-full cursor-pointer accent-emerald-500" /><div className="flex justify-between text-[13px] text-stone-400"><span>{sMin}</span><span className="text-xl font-bold text-emerald-600">{value ?? sMin}</span><span>{sMax}</span></div></div>);
       case 'rating':
-        const maxRating = question.question_config?.max_value ?? 5;
-        return (<div className="flex gap-2 justify-center">{Array.from({length: maxRating}, (_, i) => i + 1).map(s=>(<button key={s} type="button" onClick={()=>handleResponse(question.id,s)} className="text-3xl hover:scale-110 transition-transform" style={{color:(value||0)>=s?'#fbbf24':'#d1d5db'}}>★</button>))}</div>);
+        const maxR = question.question_config?.max_value ?? 5;
+        return (<div className="flex gap-2 justify-center">{Array.from({length: maxR}, (_, i) => i + 1).map(s => (<button key={s} type="button" onClick={() => handleResponse(question.id, s)} className="text-3xl hover:scale-110 transition-transform" style={{color: (value || 0) >= s ? '#fbbf24' : '#d1d5db'}}>★</button>))}</div>);
       case 'nps':
-        return (<div className="flex flex-wrap gap-2 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n=>(<button key={n} type="button" onClick={()=>handleResponse(question.id,n)} className="w-10 h-10 rounded-lg font-medium" style={{backgroundColor:value===n?'var(--color-green)':'var(--bg-secondary)',color:value===n?'white':'var(--text-primary)'}}>{n}</button>))}</div>);
-      case 'time':
-        return (<input type="time" value={value||''} onChange={(e)=>handleResponse(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}}/>);
-      case 'email':
-        return (<input type="email" value={value||''} onChange={(e)=>handleResponse(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}} placeholder="Enter email..."/>);
-      default:
-        return <div style={{ color: 'var(--text-secondary)' }}>Question type: {question.question_type}</div>;
+        return (<div className="flex flex-wrap gap-1.5 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n => (<button key={n} type="button" onClick={() => handleResponse(question.id, n)} className={`w-10 h-10 rounded-xl font-medium text-[13px] transition-all ${value === n ? 'bg-emerald-500 text-white shadow-sm' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>{n}</button>))}</div>);
+      default: return <p className="text-[13px] text-stone-400">Type: {question.question_type}</p>;
     }
   };
 
-  const containerStyle = previewMode === 'mobile' 
-    ? { maxWidth: '375px', margin: '0 auto' }
-    : { maxWidth: '800px', margin: '0 auto' };
-
   return (
-    <div className="space-y-6">
-      {/* Preview Mode Toggle */}
+    <div className="max-w-4xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Survey Preview
-        </h2>
-        <div className="flex gap-2 bg-white rounded-lg p-1" style={{ border: '1px solid var(--border-light)' }}>
-          <button
-            onClick={() => setPreviewMode('desktop')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-              previewMode === 'desktop' ? 'bg-green-50' : ''
-            }`}
-            style={{
-              color: previewMode === 'desktop' ? 'var(--color-green)' : 'var(--text-secondary)'
-            }}
-          >
-            <Monitor size={16} />
-            Desktop
-          </button>
-          <button
-            onClick={() => setPreviewMode('mobile')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-              previewMode === 'mobile' ? 'bg-green-50' : ''
-            }`}
-            style={{
-              color: previewMode === 'mobile' ? 'var(--color-green)' : 'var(--text-secondary)'
-            }}
-          >
-            <Smartphone size={16} />
-            Mobile
-          </button>
+        <h2 className="text-[17px] font-semibold tracking-tight text-stone-800">Preview</h2>
+        <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
+          {[{mode: 'desktop' as const, icon: Monitor, label: 'Desktop'}, {mode: 'mobile' as const, icon: Smartphone, label: 'Mobile'}].map(m => (
+            <button key={m.mode} onClick={() => setPreviewMode(m.mode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${previewMode === m.mode ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'}`}>
+              <m.icon size={13} /> {m.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Preview Container */}
-      <div className="bg-gray-50 rounded-2xl p-8" style={{ backgroundColor: '#f9fafb' }}>
-        <div style={containerStyle}>
-          <div className="bg-white rounded-2xl p-8 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
+      <div className="bg-stone-50 rounded-2xl p-6 lg:p-10">
+        <div style={{ maxWidth: previewMode === 'mobile' ? '375px' : '640px', margin: '0 auto' }}>
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                {projectTitle || 'Untitled Project'}
-              </h1>
-              <p style={{ color: 'var(--text-secondary)' }}>
-                {projectDescription || 'Project description'}
-              </p>
+            <div className="px-6 pt-6 pb-4">
+              <h1 className="text-[18px] font-semibold text-stone-800 mb-1">{projectTitle || 'Untitled'}</h1>
+              <p className="text-[13px] text-stone-400 font-light">{projectDescription || 'Description'}</p>
             </div>
-
-            {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between text-sm mb-2">
-                <span style={{ color: 'var(--text-secondary)' }}>
-                  Question {currentQuestionIndex + 1} of {questions.length}
-                </span>
-                <span style={{ color: 'var(--text-secondary)' }}>
-                  {Math.round(progress)}% Complete
-                </span>
+            {/* Progress */}
+            <div className="px-6 pb-4">
+              <div className="flex justify-between text-[12px] text-stone-400 mb-1.5">
+                <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
+                <span>{Math.round(progress)}%</span>
               </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full transition-all duration-300"
-                  style={{ width: `${progress}%`, backgroundColor: 'var(--color-green)' }}
-                />
+              <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
               </div>
             </div>
-
             {/* Question */}
-            {questions.length === 0 ? (
-              <div className="text-center py-12">
-                <p style={{ color: 'var(--text-secondary)' }}>No questions to preview. Add questions first.</p>
-              </div>
-            ) : currentQuestion && (
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  {currentQuestion.question_text || 'New Question'}
-                  {currentQuestion.required && (
-                    <span className="text-red-500 ml-1">*</span>
-                  )}
-                </h2>
-                {currentQuestion.question_description && (
-                  <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
-                    {currentQuestion.question_description}
-                  </p>
-                )}
-                {renderQuestion(currentQuestion)}
-              </div>
-            )}
-
-            {/* Navigation */}
-            <div className="flex justify-between pt-6 border-t" style={{ borderColor: 'var(--border-light)' }}>
-              <button
-                onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-2 px-6 py-3 rounded-lg border font-semibold hover:bg-gray-50 disabled:opacity-50 transition-all"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-              >
-                <ChevronLeft size={20} />
-                Previous
-              </button>
-
-              {currentQuestionIndex === questions.length - 1 ? (
-                <button
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90 transition-all"
-                  style={{ backgroundColor: 'var(--color-green)' }}
-                >
-                  Submit Survey
-                  <Check size={20} />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90 transition-all"
-                  style={{ backgroundColor: 'var(--color-green)' }}
-                >
-                  Next
-                  <ChevronRight size={20} />
-                </button>
+            <div className="px-6 pb-6">
+              {questions.length === 0 ? (
+                <p className="text-center py-12 text-[13px] text-stone-400">No questions to preview.</p>
+              ) : currentQuestion && (
+                <div className="mb-6">
+                  <h2 className="text-[16px] font-semibold text-stone-800 mb-1">
+                    {currentQuestion.question_text || 'New Question'}
+                    {currentQuestion.required && <span className="text-red-500 ml-1">*</span>}
+                  </h2>
+                  {currentQuestion.question_description && <p className="text-[13px] text-stone-400 mb-3">{currentQuestion.question_description}</p>}
+                  {renderQuestion(currentQuestion)}
+                </div>
               )}
+              {/* Navigation */}
+              <div className="flex justify-between pt-4 border-t border-stone-100">
+                <button onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))} disabled={currentQuestionIndex === 0}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium border border-stone-200 text-stone-500 hover:bg-stone-50 disabled:opacity-40 transition-all">
+                  <ChevronLeft size={14} /> Back
+                </button>
+                {currentQuestionIndex === questions.length - 1 ? (
+                  <button className="flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">
+                    Submit <Check size={14} />
+                  </button>
+                ) : (
+                  <button onClick={() => setCurrentQuestionIndex(Math.min(questions.length - 1, currentQuestionIndex + 1))}
+                    className="flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">
+                    Next <ChevronRight size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Preview Info */}
-      <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid var(--border-light)' }}>
-        <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Preview Mode
-        </h3>
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          This is how participants will see your survey. Responses in preview mode are not saved. 
-          Switch between desktop and mobile views to test responsiveness.
-        </p>
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+        <h3 className="text-[14px] font-semibold text-stone-800 mb-1">Preview Mode</h3>
+        <p className="text-[13px] text-stone-400 font-light">This is how participants see your survey. Responses are not saved.</p>
       </div>
     </div>
   );
