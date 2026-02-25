@@ -11,20 +11,15 @@ const ResearcherLayout: React.FC<ResearcherLayoutProps> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      {/* Unified Header - same component used across all pages */}
+    <div className="min-h-screen bg-neutral-50/50">
       <AppHeader />
-
-      {/* Sidebar - positioned below header */}
-      <AppSidebar 
-        collapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+      <AppSidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      
-      {/* Main content - offset for header and sidebar */}
-      <main 
-        className={`pt-16 transition-all duration-300 ${
-          sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+      <main
+        className={`pt-14 transition-all duration-200 ${
+          sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-56'
         }`}
       >
         <div className="p-4 sm:p-6 lg:p-8">
