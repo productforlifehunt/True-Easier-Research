@@ -17,10 +17,7 @@ const SettingsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<UserSettings>({
-    email_notifications: true,
-    response_alerts: true,
-    weekly_digest: false,
-    organization_name: ''
+    email_notifications: true, response_alerts: true, weekly_digest: false, organization_name: ''
   });
 
   useEffect(() => {
@@ -33,8 +30,7 @@ const SettingsPage: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      const { data: researcher } = await supabase
-        .from('researcher')
+      const { data: researcher } = await supabase.from('researcher')
         .select('id, organization_id, email_notifications, response_alerts, weekly_digest')
         .eq('user_id', user?.id).maybeSingle();
       const { data: org } = researcher?.organization_id
@@ -42,8 +38,7 @@ const SettingsPage: React.FC = () => {
         : { data: null as any };
       if (researcher) {
         setSettings(prev => ({
-          ...prev,
-          organization_name: org?.name || '',
+          ...prev, organization_name: org?.name || '',
           email_notifications: researcher.email_notifications ?? true,
           response_alerts: researcher.response_alerts ?? true,
           weekly_digest: researcher.weekly_digest ?? false
@@ -55,14 +50,12 @@ const SettingsPage: React.FC = () => {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      const { data: researcher } = await supabase
-        .from('researcher').select('organization_id').eq('user_id', user?.id).maybeSingle();
-      const { error: researcherError } = await supabase
-        .from('researcher').update({
-          email_notifications: settings.email_notifications,
-          response_alerts: settings.response_alerts,
-          weekly_digest: settings.weekly_digest
-        }).eq('user_id', user?.id);
+      const { data: researcher } = await supabase.from('researcher').select('organization_id').eq('user_id', user?.id).maybeSingle();
+      const { error: researcherError } = await supabase.from('researcher').update({
+        email_notifications: settings.email_notifications,
+        response_alerts: settings.response_alerts,
+        weekly_digest: settings.weekly_digest
+      }).eq('user_id', user?.id);
       if (researcherError) throw researcherError;
       if (researcher?.organization_id && settings.organization_name.trim()) {
         await supabase.from('organization').update({ name: settings.organization_name.trim() }).eq('id', researcher.organization_id);
@@ -73,16 +66,16 @@ const SettingsPage: React.FC = () => {
   };
 
   const Toggle = ({ enabled, onChange, label, description }: { enabled: boolean; onChange: (v: boolean) => void; label: string; description: string }) => (
-    <div className="flex items-center justify-between py-3">
+    <div className="flex items-center justify-between py-3.5">
       <div>
-        <p className="text-[14px] font-medium text-neutral-900">{label}</p>
-        <p className="text-[12px] text-neutral-400 mt-0.5">{description}</p>
+        <p className="text-[14px] font-medium text-slate-900">{label}</p>
+        <p className="text-[12px] text-slate-400 mt-0.5 font-light">{description}</p>
       </div>
       <button
         onClick={() => onChange(!enabled)}
-        className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-emerald-500' : 'bg-neutral-200'}`}
+        className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-indigo-500' : 'bg-slate-200'}`}
       >
-        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${enabled ? 'left-5.5 translate-x-0' : 'left-0.5'}`}
+        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform`}
           style={{ left: enabled ? '22px' : '2px' }}
         />
       </button>
@@ -92,11 +85,11 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Settings</h1>
         <button
           onClick={saveSettings}
           disabled={saving}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           Save
@@ -105,41 +98,41 @@ const SettingsPage: React.FC = () => {
 
       <div className="space-y-4">
         {/* Organization */}
-        <div className="bg-white rounded-xl p-5 border border-black/[0.04]">
-          <div className="flex items-center gap-2.5 mb-4">
-            <Users size={16} className="text-emerald-600" />
-            <h2 className="text-[15px] font-semibold text-neutral-900">Organization</h2>
+        <div className="bg-white rounded-2xl p-6 border border-slate-100">
+          <div className="flex items-center gap-2.5 mb-5">
+            <Users size={16} className="text-indigo-500" strokeWidth={1.5} />
+            <h2 className="text-[15px] font-semibold text-slate-900">Organization</h2>
           </div>
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Organization Name</label>
+              <label className="block text-[12px] font-medium text-slate-400 mb-1.5">Organization Name</label>
               <input
                 type="text"
                 value={settings.organization_name}
                 onChange={(e) => setSettings({ ...settings, organization_name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg text-[13px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
                 placeholder="Your organization"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Account Email</label>
+              <label className="block text-[12px] font-medium text-slate-400 mb-1.5">Account Email</label>
               <input
                 type="email"
                 value={user?.email || ''}
                 disabled
-                className="w-full px-3 py-2 rounded-lg text-[13px] border border-black/[0.08] bg-neutral-50 text-neutral-400"
+                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-slate-100 bg-slate-50 text-slate-400"
               />
             </div>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-xl p-5 border border-black/[0.04]">
-          <div className="flex items-center gap-2.5 mb-4">
-            <Bell size={16} className="text-emerald-600" />
-            <h2 className="text-[15px] font-semibold text-neutral-900">Notifications</h2>
+        <div className="bg-white rounded-2xl p-6 border border-slate-100">
+          <div className="flex items-center gap-2.5 mb-5">
+            <Bell size={16} className="text-indigo-500" strokeWidth={1.5} />
+            <h2 className="text-[15px] font-semibold text-slate-900">Notifications</h2>
           </div>
-          <div className="divide-y divide-black/[0.04]">
+          <div className="divide-y divide-slate-100">
             <Toggle
               enabled={settings.email_notifications}
               onChange={(v) => setSettings({ ...settings, email_notifications: v })}
