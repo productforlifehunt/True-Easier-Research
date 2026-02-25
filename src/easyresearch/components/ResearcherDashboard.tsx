@@ -199,8 +199,19 @@ const ResearcherDashboard: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    // All badges use white background with green border and text
-    return 'bg-white border border-green-500 text-green-600';
+    switch (status) {
+      case 'published':
+      case 'active':
+        return 'bg-green-50 border border-green-500 text-green-600';
+      case 'draft':
+        return 'bg-yellow-50 border border-yellow-500 text-yellow-600';
+      case 'completed':
+        return 'bg-gray-50 border border-gray-400 text-gray-500';
+      case 'paused':
+        return 'bg-orange-50 border border-orange-500 text-orange-600';
+      default:
+        return 'bg-white border border-gray-300 text-gray-500';
+    }
   };
 
   const handleDeleteProject = async (projectId: string) => {
