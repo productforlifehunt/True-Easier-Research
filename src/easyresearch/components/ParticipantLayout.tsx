@@ -5,7 +5,7 @@ import EasyResearchBottomNav from './EasyResearchBottomNav';
 const ParticipantLayout: React.FC = () => {
   return (
     <>
-      <div className="md:pt-16 md:min-h-screen flex flex-col">
+      <div className="md:pt-14 md:min-h-screen flex flex-col bg-stone-50/50">
         <div className="flex-grow">
           <Outlet />
         </div>

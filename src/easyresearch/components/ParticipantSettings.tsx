@@ -1,26 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
-import { ArrowLeft, Bell, Moon, Sun, Globe, Lock, Shield, HelpCircle, LogOut, Trash2, User, LogIn, FileText } from 'lucide-react';
+import { Bell, Moon, User, LogOut, LogIn, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface ProfileQuestion {
-  id: string;
-  question_text: string;
-  question_type: string;
-  required: boolean;
-  options?: any[];
-}
-
-interface EnrollmentQuestion {
-  id: string;
-  project_id: string;
-  question_text: string;
-  question_type: string;
-  options: any[] | null;
-  required: boolean;
-  order_index: number;
-}
+interface ProfileQuestion { id: string; question_text: string; question_type: string; required: boolean; options?: any[]; }
+interface EnrollmentQuestion { id: string; project_id: string; question_text: string; question_type: string; options: any[] | null; required: boolean; order_index: number; }
 
 const ParticipantSettings: React.FC = () => {
   const { projectId } = useParams();
@@ -37,450 +22,199 @@ const ParticipantSettings: React.FC = () => {
   const [enrollmentResponses, setEnrollmentResponses] = useState<any>({});
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  useEffect(() => {
-    loadSettings();
-    checkAuth();
-  }, [projectId]);
+  useEffect(() => { loadSettings(); checkAuth(); }, [projectId]);
 
-  const checkAuth = async () => {
-    const { data: { user } } = await authClient.auth.getUser();
-    setCurrentUser(user);
-  };
+  const checkAuth = async () => { const { data: { user } } = await authClient.auth.getUser(); setCurrentUser(user); };
 
   const loadSettings = async () => {
     try {
-      // Load project
-      const { data: projectData } = await supabase
-        .from('research_project')
-        .select('*')
-        .eq('id', projectId)
-        .maybeSingle();
-
+      const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
-        setProject({
-          ...(projectData as any),
-          profile_questions: (projectData as any).profile_questions ?? (projectData as any).profile_question,
-        });
-        
-        // Load profile questions if configured
-        if ((projectData as any).profile_question) {
-          setProfileQuestions((projectData as any).profile_question);
-        }
+        setProject({ ...(projectData as any), profile_questions: (projectData as any).profile_questions ?? (projectData as any).profile_question });
+        if ((projectData as any).profile_question) setProfileQuestions((projectData as any).profile_question);
       }
-
-      // Load enrollment questions
-      const { data: questionsData } = await supabase
-        .from('enrollment_question')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('order_index');
-
-      if (questionsData) {
-        setEnrollmentQuestions(
-          (questionsData as any[]).map((q: any) => ({
-            ...q,
-            options: q.options ?? q.option ?? null,
-          }))
-        );
-      }
-
-      // Load enrollment
+      const { data: questionsData } = await supabase.from('enrollment_question').select('*').eq('project_id', projectId).order('order_index');
+      if (questionsData) setEnrollmentQuestions((questionsData as any[]).map((q: any) => ({ ...q, options: q.options ?? q.option ?? null })));
       const enrollmentId = localStorage.getItem(`enrollment_${projectId}`);
       if (enrollmentId) {
-        const { data: enrollmentData } = await supabase
-          .from('enrollment')
-          .select('*')
-          .eq('id', enrollmentId)
-          .maybeSingle();
-
-        if (enrollmentData) {
-          setEnrollment(enrollmentData);
-          setProfileData(enrollmentData.profile_data || {});
-          setEnrollmentResponses(enrollmentData.enrollment_data || {});
-          setDndSettings(enrollmentData.dnd_setting || { periods: [] });
-        }
+        const { data: enrollmentData } = await supabase.from('enrollment').select('*').eq('id', enrollmentId).maybeSingle();
+        if (enrollmentData) { setEnrollment(enrollmentData); setProfileData(enrollmentData.profile_data || {}); setEnrollmentResponses(enrollmentData.enrollment_data || {}); setDndSettings(enrollmentData.dnd_setting || { periods: [] }); }
       }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error loading settings:', error); }
+    finally { setLoading(false); }
   };
 
   const saveSettings = async () => {
     if (!enrollment) return;
-    
     setSaving(true);
     try {
-      await supabase
-        .from('enrollment')
-        .update({
-          profile_data: profileData,
-          enrollment_data: enrollmentResponses,
-          dnd_setting: dndSettings
-        })
-        .eq('id', enrollment.id);
-
-      toast.success('Settings saved successfully!');
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Failed to save settings');
-    } finally {
-      setSaving(false);
-    }
+      await supabase.from('enrollment').update({ profile_data: profileData, enrollment_data: enrollmentResponses, dnd_setting: dndSettings }).eq('id', enrollment.id);
+      toast.success('Settings saved!');
+    } catch (error) { console.error('Error saving settings:', error); toast.error('Failed to save'); }
+    finally { setSaving(false); }
   };
 
-  const addDndPeriod = () => {
-    setDndSettings({
-      ...dndSettings,
-      periods: [
-        ...(dndSettings.periods || []),
-        { start_time: '22:00', end_time: '08:00', days: ['all'] }
-      ]
-    });
-  };
-
-  const updateDndPeriod = (index: number, field: string, value: any) => {
-    const newPeriods = [...dndSettings.periods];
-    newPeriods[index] = { ...newPeriods[index], [field]: value };
-    setDndSettings({ ...dndSettings, periods: newPeriods });
-  };
-
-  const removeDndPeriod = (index: number) => {
-    setDndSettings({
-      ...dndSettings,
-      periods: dndSettings.periods.filter((_: any, i: number) => i !== index)
-    });
-  };
-
-  const handleLogin = () => {
-    navigate('/easyresearch/auth');
-  };
-
-  const handleLogout = async () => {
-    await authClient.auth.signOut();
-    setCurrentUser(null);
-    window.location.reload();
-  };
+  const addDndPeriod = () => { setDndSettings({ ...dndSettings, periods: [...(dndSettings.periods || []), { start_time: '22:00', end_time: '08:00', days: ['all'] }] }); };
+  const updateDndPeriod = (index: number, field: string, value: any) => { const newPeriods = [...dndSettings.periods]; newPeriods[index] = { ...newPeriods[index], [field]: value }; setDndSettings({ ...dndSettings, periods: newPeriods }); };
+  const removeDndPeriod = (index: number) => { setDndSettings({ ...dndSettings, periods: dndSettings.periods.filter((_: any, i: number) => i !== index) }); };
+  const handleLogin = () => { navigate('/easyresearch/auth'); };
+  const handleLogout = async () => { await authClient.auth.signOut(); setCurrentUser(null); window.location.reload(); };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--color-green)' }}></div>
+      <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
       </div>
     );
   }
 
+  const SectionCard = ({ icon: Icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
+    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm mb-4 overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-stone-50">
+        <Icon size={18} className="text-emerald-500" />
+        <h2 className="text-[14px] font-semibold text-stone-800">{title}</h2>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
+  );
+
   return (
     <>
-      <div className="min-h-screen pb-20" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Settings
-            </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Manage your profile and notification preferences
-            </p>
+      <div className="min-h-screen pb-20 bg-stone-50/50">
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Settings</h1>
+            <p className="text-[13px] text-stone-400 font-light mt-1">Manage your profile and preferences</p>
           </div>
 
-          {/* Account Section */}
-          <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid var(--border-light)' }}>
-            <div className="flex items-center gap-3 mb-6">
-              <User size={24} style={{ color: 'var(--color-green)' }} />
-              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Account
-              </h2>
-            </div>
-
+          <SectionCard icon={User} title="Account">
             {currentUser ? (
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Email
-                  </p>
-                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {currentUser.email}
-                  </p>
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-xl bg-stone-50">
+                  <p className="text-[11px] font-medium text-stone-400 mb-0.5">Email</p>
+                  <p className="text-[13px] font-medium text-stone-700">{currentUser.email}</p>
                 </div>
-                <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    User ID
-                  </p>
-                  <p className="font-mono text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {currentUser.id}
-                  </p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90"
-                  style={{ backgroundColor: '#ef4444', color: 'white' }}
-                >
-                  <LogOut size={20} />
-                  Sign Out
+                <button onClick={handleLogout}
+                  className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center justify-center gap-2 border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                  <LogOut size={14} /> Sign Out
                 </button>
               </div>
             ) : (
-              <div className="text-center py-6">
-                <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Sign in to access your researches and manage your account
-                </p>
-                <button
-                  onClick={handleLogin}
-                  className="w-full px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:opacity-90"
-                  style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
-                >
-                  <LogIn size={20} />
-                  Sign In
+              <div className="text-center py-4">
+                <p className="text-[13px] text-stone-400 font-light mb-3">Sign in to access your researches</p>
+                <button onClick={handleLogin}
+                  className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                  <LogIn size={14} /> Sign In
                 </button>
               </div>
             )}
-          </div>
+          </SectionCard>
 
-          {/* Enrollment Questions */}
           {enrollmentQuestions.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <FileText size={24} style={{ color: 'var(--color-green)' }} />
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Enrollment Information
-                </h2>
-              </div>
-
+            <SectionCard icon={FileText} title="Enrollment Information">
               <div className="space-y-4">
                 {enrollmentQuestions.map((question) => (
                   <div key={question.id}>
-                    <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                      {question.question_text}
-                      {question.required && <span style={{ color: '#ef4444' }}> *</span>}
+                    <label className="block text-[12px] font-medium text-stone-600 mb-1.5">
+                      {question.question_text}{question.required && <span className="text-red-400"> *</span>}
                     </label>
-                    
-                    {question.question_type === 'number' && (
-                      <input
-                        type="number"
-                        value={enrollmentResponses[question.id] || ''}
+                    {['number', 'short_text'].includes(question.question_type) && (
+                      <input type={question.question_type === 'number' ? 'number' : 'text'} value={enrollmentResponses[question.id] || ''}
                         onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400" />
                     )}
-                    
-                    {question.question_type === 'short_text' && (
-                      <input
-                        type="text"
-                        value={enrollmentResponses[question.id] || ''}
-                        onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
-                    )}
-                    
                     {question.question_type === 'long_text' && (
-                      <textarea
-                        value={enrollmentResponses[question.id] || ''}
-                        onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
-                        rows={4}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
+                      <textarea value={enrollmentResponses[question.id] || ''} onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
+                        rows={3} className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400" />
                     )}
-                    
-                    {question.question_type === 'single_choice' && question.options && (
-                      <select
-                        value={enrollmentResponses[question.id] || ''}
-                        onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      >
+                    {(question.question_type === 'single_choice' || question.question_type === 'yes_no') && (
+                      <select value={enrollmentResponses[question.id] || ''} onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
                         <option value="">Select an option</option>
-                        {question.options.map((option: string, idx: number) => (
-                          <option key={idx} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    
-                    {question.question_type === 'yes_no' && (
-                      <select
-                        value={enrollmentResponses[question.id] || ''}
-                        onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      >
-                        <option value="">Select an option</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
+                        {question.question_type === 'yes_no' ? (
+                          <><option value="yes">Yes</option><option value="no">No</option></>
+                        ) : (
+                          (question.options || []).map((option: string, idx: number) => (
+                            <option key={idx} value={option}>{option}</option>
+                          ))
+                        )}
                       </select>
                     )}
                   </div>
-                ))}
+                )))}
               </div>
-            </div>
+            </SectionCard>
           )}
 
-          {/* Profile Questions */}
           {profileQuestions.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center gap-3 mb-6">
-                <User size={24} style={{ color: 'var(--color-green)' }} />
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Profile Information
-                </h2>
-              </div>
-
+            <SectionCard icon={User} title="Profile Information">
               <div className="space-y-4">
                 {profileQuestions.map((question) => (
                   <div key={question.id}>
-                    <label className="block font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                      {question.question_text}
-                      {question.required && <span style={{ color: '#ef4444' }}> *</span>}
+                    <label className="block text-[12px] font-medium text-stone-600 mb-1.5">
+                      {question.question_text}{question.required && <span className="text-red-400"> *</span>}
                     </label>
-                    
                     {question.question_type === 'short_text' && (
-                      <input
-                        type="text"
-                        value={profileData[question.id] || ''}
-                        onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
+                      <input type="text" value={profileData[question.id] || ''} onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400" />
                     )}
-                    
                     {question.question_type === 'long_text' && (
-                      <textarea
-                        value={profileData[question.id] || ''}
-                        onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
-                        rows={4}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
+                      <textarea value={profileData[question.id] || ''} onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
+                        rows={3} className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400" />
                     )}
-                    
                     {question.question_type === 'single_choice' && (
-                      <select
-                        value={profileData[question.id] || ''}
-                        onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      >
+                      <select value={profileData[question.id] || ''} onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
                         <option value="">Select an option</option>
                         {(question.options || []).map((option: any) => (
-                          <option key={option.id} value={option.id}>
-                            {option.text || option.option_text}
-                          </option>
-                        ))}
+                          <option key={option.id} value={option.id}>{option.text || option.option_text}</option>
+                        )))}
                       </select>
                     )}
                   </div>
-                ))}
+                )))}
               </div>
-            </div>
+            </SectionCard>
           )}
 
-          {/* Notification Settings */}
-          <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid var(--border-light)' }}>
-            <div className="flex items-center gap-3 mb-6">
-              <Bell size={24} style={{ color: 'var(--color-green)' }} />
-              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Notifications
-              </h2>
-            </div>
-
-            <div className="flex items-center justify-between mb-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+          <SectionCard icon={Bell} title="Notifications">
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
               <div>
-                <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Enable Notifications
-                </p>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  Receive reminders for scheduled surveys
-                </p>
+                <p className="text-[13px] font-medium text-stone-700">Enable Notifications</p>
+                <p className="text-[11px] text-stone-400 font-light">Receive reminders for surveys</p>
               </div>
-              <button
-                onClick={() => setNotificationEnabled(!notificationEnabled)}
-                className="w-12 h-6 rounded-full transition-all"
-                style={{
-                  backgroundColor: notificationEnabled ? 'var(--color-green)' : '#d1d5db'
-                }}
-              >
-                <div
-                  className="w-5 h-5 bg-white rounded-full transition-all"
-                  style={{
-                    transform: notificationEnabled ? 'translateX(24px)' : 'translateX(2px)'
-                  }}
-                />
+              <button onClick={() => setNotificationEnabled(!notificationEnabled)}
+                className={`w-10 h-5 rounded-full transition-all relative ${notificationEnabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${notificationEnabled ? 'left-5' : 'left-0.5'}`} />
               </button>
             </div>
-          </div>
+          </SectionCard>
 
-          {/* Do Not Disturb */}
-          <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid var(--border-light)' }}>
-            <div className="flex items-center gap-3 mb-6">
-              <Moon size={24} style={{ color: 'var(--color-green)' }} />
-              <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Do Not Disturb
-              </h2>
-            </div>
-
-            <div className="space-y-4">
+          <SectionCard icon={Moon} title="Do Not Disturb">
+            <div className="space-y-3">
               {(dndSettings.periods || []).map((period: any, index: number) => (
-                <div key={index} className="p-4 rounded-lg" style={{ border: '1px solid var(--border-light)' }}>
-                  <div className="flex gap-4 items-center mb-4">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                        Start Time
-                      </label>
-                      <input
-                        type="time"
-                        value={period.start_time}
-                        onChange={(e) => updateDndPeriod(index, 'start_time', e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                        End Time
-                      </label>
-                      <input
-                        type="time"
-                        value={period.end_time}
-                        onChange={(e) => updateDndPeriod(index, 'end_time', e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg"
-                        style={{ border: '1px solid var(--border-light)' }}
-                      />
-                    </div>
-                    <button
-                      onClick={() => removeDndPeriod(index)}
-                      className="mt-6 px-4 py-2 rounded-lg text-white"
-                      style={{ backgroundColor: '#ef4444' }}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                <div key={index} className="flex items-center gap-2 p-3 rounded-xl border border-stone-100">
+                  <input type="time" value={period.start_time || ''} onChange={(e) => updateDndPeriod(index, 'start_time', e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <span className="text-[11px] text-stone-400">to</span>
+                  <input type="time" value={period.end_time || ''} onChange={(e) => updateDndPeriod(index, 'end_time', e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                  <button onClick={() => removeDndPeriod(index)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition-colors text-[12px]">✕</button>
                 </div>
-              ))}
-
-              <button
-                onClick={addDndPeriod}
-                className="w-full px-4 py-3 rounded-lg font-semibold"
-                style={{ border: '2px dashed var(--color-green)', color: 'var(--color-green)' }}
-              >
+                ))
+              <button onClick={addDndPeriod}
+                className="w-full py-2.5 rounded-xl border border-dashed border-stone-200 text-[12px] font-medium text-emerald-500 hover:bg-emerald-50/50 transition-colors">
                 + Add DND Period
               </button>
             </div>
-          </div>
+          </SectionCard>
 
-          {/* Save Button */}
-          <button
-            onClick={saveSettings}
-            disabled={saving}
-            className="w-full px-6 py-4 rounded-lg text-white font-semibold text-lg hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: 'var(--color-green)' }}
-          >
-            {saving ? 'Saving...' : 'Save Settings'}
-          </button>
+          {enrollment && (
+            <button onClick={saveSettings} disabled={saving}
+              className="w-full py-3 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all disabled:opacity-50">
+              {saving ? 'Saving...' : 'Save Settings'}
+            </button>
+          )}
         </div>
       </div>
     </>

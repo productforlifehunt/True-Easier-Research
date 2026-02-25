@@ -279,7 +279,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             </div>
           )}
           {questionnaireTab === 'schedule' && project.id && (
-            <QuestionnaireScheduler projectId={project.id} />
+            <QuestionnaireScheduler projectId={project.id} studyDuration={project.study_duration || 7} />
           )}
         </SectionCard>
       )}
