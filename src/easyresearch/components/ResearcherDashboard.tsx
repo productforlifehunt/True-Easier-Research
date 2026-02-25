@@ -369,248 +369,157 @@ const ResearcherDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="flex items-center justify-center py-32">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: 'var(--color-green)' }}></div>
-          <p className="mt-4" style={{ color: 'var(--text-secondary)' }}>Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-600 border-t-transparent mx-auto"></div>
+          <p className="mt-3 text-[13px] text-neutral-400">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                  My Projects
+                <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+                  Projects
                 </h1>
-                <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
-                  {organization?.name} • {(organization?.plan || 'free').toUpperCase()} Plan
+                <p className="text-[13px] text-neutral-400 mt-1">
+                  {organization?.name} · {(organization?.plan || 'free').charAt(0).toUpperCase() + (organization?.plan || 'free').slice(1)} Plan
                 </p>
               </div>
               <button
                 onClick={() => setShowCreateDialog(true)}
-                className="px-6 py-3 rounded-xl font-semibold text-white hover:opacity-90 transition-all flex items-center gap-2"
-                style={{ backgroundColor: 'var(--color-green)' }}
+                className="px-4 py-2 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center gap-1.5 shadow-sm"
               >
-                <Plus size={20} />
+                <Plus size={16} />
                 New Project
               </button>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <FileText style={{ color: 'var(--color-green)' }} size={24} />
-                <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor('active')}`}>
-                  {stats.activeProjects} Active
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {stats.totalProjects}
-              </h3>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Total Projects
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <Users style={{ color: 'var(--color-green)' }} size={24} />
-                <TrendingUp className="text-green-500" size={16} />
-              </div>
-              <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {stats.totalParticipants}
-              </h3>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Total Participants
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <BarChart3 style={{ color: 'var(--color-green)' }} size={24} />
-                <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  This Month
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {stats.totalResponses}
-              </h3>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Total Responses
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <CheckCircle style={{ color: 'var(--color-green)' }} size={24} />
-                <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  Rate
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                {stats.avgCompletionRate}%
-              </h3>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Completion Rate
-              </p>
-            </div>
-          </div>
-
-          {/* Search and Tabs */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex gap-2 border-b flex-1" style={{ borderColor: 'var(--border-light)' }}>
-                {(['all', 'active', 'draft', 'completed'] as const).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 font-medium capitalize transition-all ${
-                      activeTab === tab 
-                        ? 'border-b-2' 
-                        : ''
-                    }`}
-                    onMouseEnter={(e) => activeTab !== tab && (e.currentTarget.style.backgroundColor = 'var(--bg-secondary)')}
-                    onMouseLeave={(e) => activeTab !== tab && (e.currentTarget.style.backgroundColor = 'transparent')}
-                    style={{
-                      color: activeTab === tab ? 'var(--color-green)' : 'var(--text-secondary)',
-                      borderColor: activeTab === tab ? 'var(--color-green)' : 'transparent'
-                    }}
-                  >
-                    {tab === 'all' ? 'All Projects' : tab}
-                  </button>
-                ))}
-              </div>
-              <div className="relative ml-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-                <input
-                  type="text"
-                  placeholder="Search projects..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  style={{ border: '1px solid var(--border-light)' }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Projects List */}
-          <div className="space-y-4">
-            {filteredProjects.length === 0 ? (
-              <div className="bg-white rounded-2xl p-16 text-center" style={{ border: '1px solid var(--border-light)' }}>
-                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
-                  <FileText style={{ color: 'var(--color-green)' }} size={40} />
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            {[
+              { label: 'Projects', value: stats.totalProjects, sub: `${stats.activeProjects} active`, icon: FileText },
+              { label: 'Participants', value: stats.totalParticipants, sub: 'enrolled', icon: Users },
+              { label: 'Responses', value: stats.totalResponses, sub: 'collected', icon: BarChart3 },
+              { label: 'Completion', value: `${stats.avgCompletionRate}%`, sub: 'avg rate', icon: CheckCircle },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white rounded-xl p-4 border border-black/[0.04]">
+                <div className="flex items-center justify-between mb-3">
+                  <stat.icon size={16} className="text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
-                  No projects yet
-                </h3>
-                <p className="mb-6 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
-                  Create your first research project to start collecting valuable insights from participants.
+                <p className="text-2xl font-semibold tracking-tight text-neutral-900">{stat.value}</p>
+                <p className="text-[12px] text-neutral-400 mt-0.5">{stat.label} · {stat.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Tabs + Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div className="flex gap-1 bg-neutral-100 rounded-lg p-0.5">
+              {(['all', 'active', 'draft', 'completed'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3.5 py-1.5 rounded-md text-[13px] font-medium capitalize transition-all ${
+                    activeTab === tab
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {tab === 'all' ? 'All' : tab}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-1.5 rounded-lg w-full sm:w-56 text-[13px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white"
+              />
+            </div>
+          </div>
+
+          {/* Projects */}
+          <div className="space-y-2">
+            {filteredProjects.length === 0 ? (
+              <div className="bg-white rounded-xl p-16 text-center border border-black/[0.04]">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <FileText className="text-emerald-600" size={24} />
+                </div>
+                <h3 className="text-[15px] font-semibold text-neutral-900 mb-1.5">No projects yet</h3>
+                <p className="text-[13px] text-neutral-400 mb-5 max-w-sm mx-auto">
+                  Create your first research project to start collecting insights.
                 </p>
                 <button
                   onClick={() => setShowCreateDialog(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: 'var(--color-green)' }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors"
                 >
-                  <Plus size={20} />
-                  Create Your First Project
+                  <Plus size={16} /> Create Project
                 </button>
               </div>
             ) : (
               filteredProjects.map(project => (
                 <div
                   key={project.id}
-                  className="bg-white rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] transform"
-                  style={{ border: '1px solid var(--border-light)' }}
+                  className="bg-white rounded-xl px-5 py-4 border border-black/[0.04] hover:border-emerald-200 hover:shadow-sm transition-all cursor-pointer group"
                   onClick={() => navigate(`/easyresearch/project/${project.id}`)}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-1">
+                        <h3 className="text-[15px] font-semibold text-neutral-900 truncate group-hover:text-emerald-700 transition-colors">
                           {project.title}
                         </h3>
-                        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
-                          {getStatusIcon(project.status)}
+                        <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium ${getStatusColor(project.status)}`}>
                           {project.status}
                         </span>
-                        {project.project_type && project.project_type !== 'one_time' && (
-                          <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white border" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-light)' }}>
-                            {project.project_type === 'longitudinal' ? 'Longitudinal' : project.project_type === 'esm' ? 'ESM' : project.project_type}
-                          </span>
-                        )}
                       </div>
-                      <p className="mb-4 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-                        {project.description}
-                      </p>
-                      <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <p className="text-[13px] text-neutral-400 line-clamp-1 mb-2">{project.description}</p>
+                      <div className="flex items-center gap-4 text-[12px] text-neutral-400">
                         <span className="flex items-center gap-1">
-                          <Users size={14} />
-                          {(project as any).current_participant}/{(project as any).max_participant || '∞'} participants
+                          <Users size={12} />
+                          {(project as any).current_participant || 0}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          Created {new Date(project.created_at).toLocaleDateString()}
+                          <Clock size={12} />
+                          {new Date(project.created_at).toLocaleDateString()}
                         </span>
-                        {(project as any).end_at && (
-                          <span className="flex items-center gap-1">
-                            <AlertCircle size={14} />
-                            Ends {new Date((project as any).end_at).toLocaleDateString()}
-                          </span>
-                        )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      {project.completion_rate && (
-                        <div className="text-right mb-2">
-                          <p className="text-2xl font-bold" style={{ color: 'var(--color-green)' }}>
-                            {project.completion_rate}%
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                            Completion Rate
-                          </p>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <button 
-                          className="p-2 rounded-lg transition-colors hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDuplicateProject(project);
-                          }}
-                          title="Duplicate Project"
-                          disabled={actionLoading}
-                        >
-                          <Copy size={16} style={{ color: 'var(--text-secondary)' }} />
-                        </button>
-                        <button 
-                          className="p-2 rounded-lg transition-colors hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowDeleteConfirm(project.id);
-                          }}
-                          title="Delete Project"
-                        >
-                          <Trash2 size={16} className="text-red-500" />
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        className="p-1.5 rounded-lg hover:bg-neutral-50 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleDuplicateProject(project); }}
+                        title="Duplicate"
+                        disabled={actionLoading}
+                      >
+                        <Copy size={14} className="text-neutral-400" />
+                      </button>
+                      <button
+                        className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(project.id); }}
+                        title="Delete"
+                      >
+                        <Trash2 size={14} className="text-red-400" />
+                      </button>
                     </div>
                   </div>
                 </div>
               ))
             )}
           </div>
-
         </div>
-        
+
         {/* Create Project Dialog */}
         <CreateProjectDialog
           isOpen={showCreateDialog}
@@ -618,35 +527,32 @@ const ResearcherDashboard: React.FC = () => {
           onSuccess={loadDashboardData}
         />
 
-        {/* Delete Confirmation Dialog */}
+        {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <Trash2 className="text-red-500" size={20} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
+                  <Trash2 className="text-red-500" size={16} />
                 </div>
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Delete Project?
-                </h3>
+                <h3 className="text-[15px] font-semibold text-neutral-900">Delete Project?</h3>
               </div>
-              <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-                This action cannot be undone. All questions, responses, and data associated with this project will be permanently deleted.
+              <p className="text-[13px] text-neutral-500 mb-5">
+                This cannot be undone. All questions, responses, and data will be permanently deleted.
               </p>
-              <div className="flex gap-3 justify-end">
+              <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowDeleteConfirm(null)}
-                  className="px-4 py-2 rounded-lg font-medium"
-                  style={{ border: '1px solid var(--border-light)', color: 'var(--text-secondary)' }}
+                  className="px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-neutral-600 border border-black/[0.08] hover:bg-neutral-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDeleteProject(showDeleteConfirm)}
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-lg font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50"
+                  className="px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50"
                 >
-                  {actionLoading ? 'Deleting...' : 'Delete Project'}
+                  {actionLoading ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </div>
