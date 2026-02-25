@@ -174,34 +174,34 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-xl border border-black/[0.04]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-xl border border-stone-100">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.04]">
-          <h2 className="text-[17px] font-semibold text-neutral-900">New Research Study</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-50 transition-colors">
-            <X size={18} className="text-neutral-400" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
+          <h2 className="text-[17px] font-semibold text-stone-800">New Research Study</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-stone-50 transition-colors">
+            <X size={18} className="text-stone-400" />
           </button>
         </div>
 
         {/* Step Indicator */}
-        <div className="px-6 py-3 border-b border-black/[0.04] bg-neutral-50/50">
+        <div className="px-6 py-3 border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.02)' }}>
           <div className="flex items-center gap-2">
             {steps.map((step, index) => (
               <React.Fragment key={step.id}>
                 <div className="flex items-center gap-1.5">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold ${
                     currentStep > step.id ? 'bg-emerald-500 text-white' :
-                    currentStep === step.id ? 'bg-emerald-600 text-white' : 'bg-neutral-200 text-neutral-500'
+                    currentStep === step.id ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm shadow-emerald-200' : 'bg-stone-200 text-stone-500'
                   }`}>
                     {currentStep > step.id ? <Check size={12} /> : step.id}
                   </div>
-                  <span className={`text-[12px] font-medium ${currentStep >= step.id ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                  <span className={`text-[12px] font-medium ${currentStep >= step.id ? 'text-stone-800' : 'text-stone-400'}`}>
                     {step.name}
                   </span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`flex-1 h-px ${currentStep > step.id ? 'bg-emerald-500' : 'bg-neutral-200'}`} />
+                  <div className={`flex-1 h-px ${currentStep > step.id ? 'bg-emerald-500' : 'bg-stone-200'}`} />
                 )}
               </React.Fragment>
             ))}
@@ -379,17 +379,17 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-black/[0.04] bg-neutral-50/50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.02)' }}>
           <button
             onClick={currentStep === 1 ? onClose : handleBack}
-            className="flex items-center gap-1 px-3.5 py-2 rounded-lg text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
+            className="flex items-center gap-1 px-3.5 py-2 rounded-xl text-[13px] font-medium text-stone-600 hover:bg-stone-100 transition-colors"
           >
             <ChevronLeft size={14} /> {currentStep === 1 ? 'Cancel' : 'Back'}
           </button>
           <button
             onClick={handleNext}
             disabled={loading}
-            className="flex items-center gap-1 px-5 py-2 rounded-lg text-[13px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1 px-5 py-2 rounded-xl text-[13px] font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 transition-all shadow-sm shadow-emerald-200"
           >
             {loading ? 'Creating...' : currentStep === 4 ? 'Create Study' : 'Continue'}
             {!loading && <ChevronRight size={14} />}

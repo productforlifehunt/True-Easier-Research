@@ -68,12 +68,12 @@ const SettingsPage: React.FC = () => {
   const Toggle = ({ enabled, onChange, label, description }: { enabled: boolean; onChange: (v: boolean) => void; label: string; description: string }) => (
     <div className="flex items-center justify-between py-3.5">
       <div>
-        <p className="text-[14px] font-medium text-slate-900">{label}</p>
-        <p className="text-[12px] text-slate-400 mt-0.5 font-light">{description}</p>
+        <p className="text-[14px] font-medium text-stone-800">{label}</p>
+        <p className="text-[12px] text-stone-400 mt-0.5 font-light">{description}</p>
       </div>
       <button
         onClick={() => onChange(!enabled)}
-        className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-indigo-500' : 'bg-slate-200'}`}
+        className={`relative w-10 h-5 rounded-full transition-colors ${enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}
       >
         <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform`}
           style={{ left: enabled ? '22px' : '2px' }}
@@ -85,11 +85,11 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Settings</h1>
         <button
           onClick={saveSettings}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 transition-all shadow-sm shadow-emerald-200"
         >
           {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           Save
@@ -98,41 +98,45 @@ const SettingsPage: React.FC = () => {
 
       <div className="space-y-4">
         {/* Organization */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100">
+        <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm">
           <div className="flex items-center gap-2.5 mb-5">
-            <Users size={16} className="text-indigo-500" strokeWidth={1.5} />
-            <h2 className="text-[15px] font-semibold text-slate-900">Organization</h2>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+              <Users size={16} className="text-emerald-600" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-[15px] font-semibold text-stone-800">Organization</h2>
           </div>
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-slate-400 mb-1.5">Organization Name</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Organization Name</label>
               <input
                 type="text"
                 value={settings.organization_name}
                 onChange={(e) => setSettings({ ...settings, organization_name: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
                 placeholder="Your organization"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-slate-400 mb-1.5">Account Email</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Account Email</label>
               <input
                 type="email"
                 value={user?.email || ''}
                 disabled
-                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-slate-100 bg-slate-50 text-slate-400"
+                className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-100 bg-stone-50 text-stone-400"
               />
             </div>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100">
+        <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm">
           <div className="flex items-center gap-2.5 mb-5">
-            <Bell size={16} className="text-indigo-500" strokeWidth={1.5} />
-            <h2 className="text-[15px] font-semibold text-slate-900">Notifications</h2>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+              <Bell size={16} className="text-amber-600" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-[15px] font-semibold text-stone-800">Notifications</h2>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-stone-100">
             <Toggle
               enabled={settings.email_notifications}
               onChange={(v) => setSettings({ ...settings, email_notifications: v })}

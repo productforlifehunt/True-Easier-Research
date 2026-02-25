@@ -11,7 +11,7 @@ const ResearcherLayout: React.FC<ResearcherLayoutProps> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen" style={{ backgroundColor: '#f9faf8' }}>
       <AppHeader />
       <AppSidebar
         collapsed={sidebarCollapsed}

@@ -63,44 +63,44 @@ const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-2xl font-semibold tracking-tight text-slate-900 mb-6">Analytics</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-stone-800 mb-6">Analytics</h1>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {[
-          { label: 'Surveys', value: stats.totalSurveys, icon: BarChart3 },
-          { label: 'Participants', value: stats.activeParticipants, icon: Users },
-          { label: 'Responses', value: stats.totalResponses, icon: TrendingUp },
-          { label: 'Completion', value: `${stats.completionRate}%`, icon: Activity },
+          { label: 'Surveys', value: stats.totalSurveys, icon: BarChart3, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
+          { label: 'Participants', value: stats.activeParticipants, icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
+          { label: 'Responses', value: stats.totalResponses, icon: TrendingUp, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
+          { label: 'Completion', value: `${stats.completionRate}%`, icon: Activity, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-2xl p-5 border border-slate-100">
-            <s.icon size={16} className="text-indigo-500 mb-3" strokeWidth={1.5} />
-            <p className="text-2xl font-semibold tracking-tight text-slate-900">{s.value}</p>
-            <p className="text-[12px] text-slate-400 mt-0.5">{s.label}</p>
+          <div key={s.label} className={`bg-gradient-to-br ${s.gradient} rounded-2xl p-5 border border-white/60`}>
+            <s.icon size={16} className={`${s.iconColor} mb-3`} strokeWidth={1.5} />
+            <p className="text-2xl font-semibold tracking-tight text-stone-800">{s.value}</p>
+            <p className="text-[12px] text-stone-400 mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h3 className="text-[15px] font-semibold text-slate-900">Recent Responses</h3>
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm">
+        <div className="px-5 py-4 border-b border-stone-100">
+          <h3 className="text-[15px] font-semibold text-stone-800">Recent Responses</h3>
         </div>
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-indigo-500 border-t-transparent mx-auto"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent mx-auto"></div>
           </div>
         ) : stats.recentResponses.length > 0 ? (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-stone-100">
             {stats.recentResponses.map((response: any) => (
-              <div key={response.id} className="px-5 py-3.5">
+              <div key={response.id} className="px-5 py-3.5 hover:bg-stone-50/50 transition-colors">
                 <div className="flex justify-between items-start mb-1">
-                  <p className="text-[13px] font-medium text-slate-900">
+                  <p className="text-[13px] font-medium text-stone-800">
                     {response.survey_question?.question_text || 'Question'}
                   </p>
-                  <span className="shrink-0 ml-3 px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-600">
+                  <span className="shrink-0 ml-3 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
                     {response.survey_question?.question_type || 'response'}
                   </span>
                 </div>
-                <p className="text-[13px] text-slate-500 mb-1 font-light">
+                <p className="text-[13px] text-stone-500 mb-1 font-light">
                   {(response.response_text && String(response.response_text).trim().length > 0)
                     ? response.response_text
                     : (response.response_value !== null && response.response_value !== undefined)
@@ -109,7 +109,7 @@ const AnalyticsPage: React.FC = () => {
                         : JSON.stringify(response.response_value))
                       : ''}
                 </p>
-                <div className="flex items-center gap-3 text-[11px] text-slate-300">
+                <div className="flex items-center gap-3 text-[11px] text-stone-300">
                   <span>{response.enrollment?.participant_email || 'Anonymous'}</span>
                   <span>·</span>
                   <span>{new Date(response.created_at).toLocaleString()}</span>
@@ -119,8 +119,10 @@ const AnalyticsPage: React.FC = () => {
           </div>
         ) : (
           <div className="p-12 text-center">
-            <BarChart3 className="mx-auto mb-3 text-slate-200" size={32} />
-            <p className="text-[13px] text-slate-400 font-light">No responses yet. Share your surveys to start collecting data.</p>
+            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+              <BarChart3 className="text-emerald-500" size={20} />
+            </div>
+            <p className="text-[13px] text-stone-400 font-light">No responses yet. Share your surveys to start collecting data.</p>
           </div>
         )}
       </div>

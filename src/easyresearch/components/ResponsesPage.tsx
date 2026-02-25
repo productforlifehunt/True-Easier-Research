@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { FileText, Download, Filter, Calendar, User } from 'lucide-react';
+import { FileText, Download, Filter } from 'lucide-react';
 
 interface Response {
   id: string;
@@ -92,7 +92,7 @@ const ResponsesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
       </div>
     );
   }
@@ -101,12 +101,12 @@ const ResponsesPage: React.FC = () => {
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Responses</h1>
-          <p className="text-[13px] text-slate-400 mt-1 font-light">View and export participant responses</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Responses</h1>
+          <p className="text-[13px] text-stone-400 mt-1 font-light">View and export participant responses</p>
         </div>
         <button
           onClick={exportResponses}
-          className="px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 flex items-center gap-1.5 transition-colors"
+          className="px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 flex items-center gap-1.5 transition-all shadow-sm shadow-emerald-200"
         >
           <Download size={14} /> Export CSV
         </button>
@@ -114,11 +114,11 @@ const ResponsesPage: React.FC = () => {
 
       {/* Filter */}
       <div className="flex items-center gap-3 mb-5">
-        <Filter size={14} className="text-slate-300" />
+        <Filter size={14} className="text-stone-300" />
         <select
           value={selectedProject}
           onChange={(e) => setSelectedProject(e.target.value)}
-          className="px-3 py-1.5 rounded-full text-[13px] border border-slate-100 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+          className="px-3 py-1.5 rounded-full text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
         >
           <option value="all">All Projects</option>
           {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
@@ -126,12 +126,14 @@ const ResponsesPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
         {responses.length === 0 ? (
           <div className="p-16 text-center">
-            <FileText className="mx-auto mb-3 text-slate-200" size={32} />
-            <h3 className="text-[15px] font-semibold text-slate-900 mb-1">No Responses Yet</h3>
-            <p className="text-[13px] text-slate-400 max-w-sm mx-auto font-light">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+              <FileText className="text-emerald-500" size={20} />
+            </div>
+            <h3 className="text-[15px] font-semibold text-stone-800 mb-1">No Responses Yet</h3>
+            <p className="text-[13px] text-stone-400 max-w-sm mx-auto font-light">
               Responses will appear here as participants complete your surveys.
             </p>
           </div>
@@ -139,30 +141,30 @@ const ResponsesPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-slate-400 uppercase tracking-wider">Time</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-slate-400 uppercase tracking-wider">Project</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-slate-400 uppercase tracking-wider">Participant</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-slate-400 uppercase tracking-wider">Question</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-slate-400 uppercase tracking-wider">Answer</th>
+                <tr className="border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
+                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Time</th>
+                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Project</th>
+                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Participant</th>
+                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Question</th>
+                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Answer</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-stone-100">
                 {responses.map((response) => (
-                  <tr key={response.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-4 py-3 text-[12px] text-slate-400 whitespace-nowrap">
+                  <tr key={response.id} className="hover:bg-emerald-50/30 transition-colors">
+                    <td className="px-4 py-3 text-[12px] text-stone-400 whitespace-nowrap">
                       {new Date(response.created_at).toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-slate-900">
+                    <td className="px-4 py-3 text-[13px] font-medium text-stone-800">
                       {response.project?.title || 'Unknown'}
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-slate-500">
+                    <td className="px-4 py-3 text-[13px] text-stone-500">
                       {response.enrollment?.participant_email || 'Anonymous'}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-[13px] text-slate-500 line-clamp-1">{response.question?.question_text || 'Unknown'}</p>
+                      <p className="text-[13px] text-stone-500 line-clamp-1">{response.question?.question_text || 'Unknown'}</p>
                     </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-slate-900 max-w-xs truncate">
+                    <td className="px-4 py-3 text-[13px] font-medium text-stone-800 max-w-xs truncate">
                       {(response.response_text && response.response_text.trim().length > 0)
                         ? response.response_text
                         : (response.response_value !== null && response.response_value !== undefined)
