@@ -236,6 +236,10 @@ function App() {
                     } />
                   </Route>
                   
+                  {/* EasyResearch catch-all — stay within platform */}
+                  <Route path="/easyresearch/*" element={<Navigate to="/easyresearch" replace />} />
+                  
+                  {/* Dementia Survey catch-all */}
                   <Route path="*" element={<Homepage />} />
                 </Routes>
               </Suspense>
