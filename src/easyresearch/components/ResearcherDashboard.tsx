@@ -129,15 +129,15 @@ const ResearcherDashboard: React.FC = () => {
     switch (status) {
       case 'published':
       case 'active':
-        return 'bg-emerald-50 text-emerald-600';
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'draft':
-        return 'bg-amber-50 text-amber-600';
+        return 'bg-amber-50 text-amber-600 border-amber-100';
       case 'completed':
-        return 'bg-slate-100 text-slate-500';
+        return 'bg-stone-100 text-stone-500 border-stone-200';
       case 'paused':
-        return 'bg-orange-50 text-orange-500';
+        return 'bg-orange-50 text-orange-500 border-orange-100';
       default:
-        return 'bg-slate-50 text-slate-400';
+        return 'bg-stone-50 text-stone-400 border-stone-100';
     }
   };
 
@@ -238,8 +238,8 @@ const ResearcherDashboard: React.FC = () => {
     return (
       <div className="flex items-center justify-center py-32">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mx-auto"></div>
-          <p className="mt-3 text-[13px] text-slate-400">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mx-auto"></div>
+          <p className="mt-3 text-[13px] text-stone-400">Loading...</p>
         </div>
       </div>
     );
@@ -252,14 +252,14 @@ const ResearcherDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Projects</h1>
-              <p className="text-[13px] text-slate-400 mt-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Projects</h1>
+              <p className="text-[13px] text-stone-400 mt-1">
                 {organization?.name}
               </p>
             </div>
             <button
               onClick={() => setShowCreateDialog(true)}
-              className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5"
             >
               <Plus size={16} /> New Project
             </button>
@@ -269,32 +269,32 @@ const ResearcherDashboard: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {[
-            { label: 'Projects', value: stats.totalProjects, sub: `${stats.activeProjects} active`, icon: FileText },
-            { label: 'Participants', value: stats.totalParticipants, sub: 'enrolled', icon: Users },
-            { label: 'Responses', value: stats.totalResponses, sub: 'collected', icon: BarChart3 },
-            { label: 'Completion', value: `${stats.avgCompletionRate}%`, sub: 'avg rate', icon: CheckCircle },
+            { label: 'Projects', value: stats.totalProjects, sub: `${stats.activeProjects} active`, icon: FileText, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
+            { label: 'Participants', value: stats.totalParticipants, sub: 'enrolled', icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
+            { label: 'Responses', value: stats.totalResponses, sub: 'collected', icon: BarChart3, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
+            { label: 'Completion', value: `${stats.avgCompletionRate}%`, sub: 'avg rate', icon: CheckCircle, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl p-5 border border-slate-100">
+            <div key={stat.label} className={`bg-gradient-to-br ${stat.gradient} rounded-2xl p-5 border border-white/60`}>
               <div className="flex items-center justify-between mb-3">
-                <stat.icon size={16} className="text-indigo-500" strokeWidth={1.5} />
+                <stat.icon size={16} className={stat.iconColor} strokeWidth={1.5} />
               </div>
-              <p className="text-2xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
-              <p className="text-[12px] text-slate-400 mt-0.5">{stat.label} · {stat.sub}</p>
+              <p className="text-2xl font-semibold tracking-tight text-stone-800">{stat.value}</p>
+              <p className="text-[12px] text-stone-400 mt-0.5">{stat.label} · {stat.sub}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs + Search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div className="flex gap-1 bg-slate-100 rounded-full p-0.5">
+          <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
             {(['all', 'active', 'draft', 'completed'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-1.5 rounded-full text-[13px] font-medium capitalize transition-all ${
                   activeTab === tab
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-600'
+                    ? 'bg-white text-stone-800 shadow-sm'
+                    : 'text-stone-400 hover:text-stone-600'
                 }`}
               >
                 {tab === 'all' ? 'All' : tab}
@@ -302,13 +302,13 @@ const ResearcherDashboard: React.FC = () => {
             ))}
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
             <input
               type="text"
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-1.5 rounded-full w-full sm:w-56 text-[13px] border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-white"
+              className="pl-9 pr-4 py-1.5 rounded-full w-full sm:w-56 text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
             />
           </div>
         </div>
@@ -316,17 +316,17 @@ const ResearcherDashboard: React.FC = () => {
         {/* Projects */}
         <div className="space-y-2">
           {filteredProjects.length === 0 ? (
-            <div className="bg-white rounded-2xl p-16 text-center border border-slate-100">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                <FileText className="text-indigo-500" size={24} />
+            <div className="bg-white rounded-2xl p-16 text-center border border-stone-100 shadow-sm">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                <FileText className="text-emerald-500" size={24} />
               </div>
-              <h3 className="text-[15px] font-semibold text-slate-900 mb-1.5">No projects yet</h3>
-              <p className="text-[13px] text-slate-400 mb-5 max-w-sm mx-auto font-light">
+              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">No projects yet</h3>
+              <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">
                 Create your first research project to start collecting insights.
               </p>
               <button
                 onClick={() => setShowCreateDialog(true)}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200"
               >
                 <Plus size={16} /> Create Project
               </button>
@@ -335,21 +335,21 @@ const ResearcherDashboard: React.FC = () => {
             filteredProjects.map(project => (
               <div
                 key={project.id}
-                className="bg-white rounded-2xl px-5 py-4 border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all cursor-pointer group"
+                className="bg-white rounded-2xl px-5 py-4 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all cursor-pointer group"
                 onClick={() => navigate(`/easyresearch/project/${project.id}`)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5 mb-1">
-                      <h3 className="text-[15px] font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+                      <h3 className="text-[15px] font-semibold text-stone-800 truncate group-hover:text-emerald-600 transition-colors">
                         {project.title}
                       </h3>
-                      <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium ${getStatusColor(project.status)}`}>
+                      <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium border ${getStatusColor(project.status)}`}>
                         {project.status}
                       </span>
                     </div>
-                    <p className="text-[13px] text-slate-400 line-clamp-1 mb-2 font-light">{project.description}</p>
-                    <div className="flex items-center gap-4 text-[12px] text-slate-300">
+                    <p className="text-[13px] text-stone-400 line-clamp-1 mb-2 font-light">{project.description}</p>
+                    <div className="flex items-center gap-4 text-[12px] text-stone-300">
                       <span className="flex items-center gap-1">
                         <Users size={12} />
                         {(project as any).current_participant || 0}
@@ -362,12 +362,12 @@ const ResearcherDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      className="p-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-stone-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); handleDuplicateProject(project); }}
                       title="Duplicate"
                       disabled={actionLoading}
                     >
-                      <Copy size={14} className="text-slate-400" />
+                      <Copy size={14} className="text-stone-400" />
                     </button>
                     <button
                       className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
@@ -392,20 +392,20 @@ const ResearcherDashboard: React.FC = () => {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl border border-slate-100">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl border border-stone-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
                 <Trash2 className="text-red-500" size={16} />
               </div>
-              <h3 className="text-[15px] font-semibold text-slate-900">Delete Project?</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800">Delete Project?</h3>
             </div>
-            <p className="text-[13px] text-slate-400 mb-5 font-light">
+            <p className="text-[13px] text-stone-400 mb-5 font-light">
               This cannot be undone. All questions, responses, and data will be permanently deleted.
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="px-4 py-1.5 rounded-full text-[13px] font-medium text-slate-600 border border-slate-200 hover:bg-slate-50"
+                className="px-4 py-1.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50"
               >
                 Cancel
               </button>

@@ -28,12 +28,14 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
   ];
 
   return (
-    <div className="min-h-screen md:flex" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen md:flex" style={{ backgroundColor: '#f9faf8' }}>
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b" style={{ borderColor: 'var(--border-light)' }}>
+      <div className="md:hidden flex items-center justify-between p-4 bg-white" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
         <div className="flex items-center gap-2">
-          <BarChart3 className="text-indigo-500" size={24} />
-          <span className="font-bold text-slate-900">Easier</span>
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
+            <span className="text-white text-[11px] font-bold">E</span>
+          </div>
+          <span className="font-bold text-stone-800">Easier</span>
         </div>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -42,7 +44,7 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
+        <div className="md:hidden fixed inset-0 z-50 bg-black/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
           <div className="w-64 h-full bg-white p-6" onClick={(e) => e.stopPropagation()}>
             <nav className="space-y-1">
               {navItems.map(item => {
@@ -53,8 +55,8 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
                     key={item.path}
                     to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg ${isActive ? 'bg-green-50' : ''}`}
-                    style={{ color: isActive ? 'var(--color-green)' : 'var(--text-secondary)' }}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl ${isActive ? 'bg-emerald-50' : ''}`}
+                    style={{ color: isActive ? '#059669' : '#78716c' }}
                   >
                     <Icon size={20} />
                     <span className="font-medium">{item.label}</span>
@@ -62,8 +64,8 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
                 );
               })}
             </nav>
-            <div className="mt-8 pt-4 border-t" style={{ borderColor: 'var(--border-light)' }}>
-              <button onClick={handleLogout} className="flex items-center gap-2 text-sm px-4 py-2" style={{ color: 'var(--text-secondary)' }}>
+            <div className="mt-8 pt-4 border-t border-stone-100">
+              <button onClick={handleLogout} className="flex items-center gap-2 text-sm px-4 py-2 text-stone-500">
                 <LogOut size={16} />
                 Sign Out
               </button>
@@ -72,18 +74,16 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
         </div>
       )}
 
-      {/* Desktop Sidebar - Show at md+ instead of lg+ */}
-      <div className="hidden md:flex w-64 bg-white shadow-sm flex-col" style={{ borderRight: '1px solid var(--border-light)' }}>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex w-64 bg-white shadow-sm flex-col" style={{ borderRight: '1px solid rgba(16,185,129,0.08)' }}>
         <div className="p-6 flex flex-col flex-1">
           <div className="flex items-center gap-3 mb-8">
-            <BarChart3 style={{ color: 'var(--color-green)' }} size={32} />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
+              <span className="text-white text-sm font-bold">E</span>
+            </div>
             <div>
-              <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-                EasierResearch
-              </h2>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                Research Platform
-              </p>
+              <h2 className="font-bold text-lg text-stone-800">Easier</h2>
+              <p className="text-xs text-stone-400">Research Platform</p>
             </div>
           </div>
 
@@ -97,13 +97,11 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive ? 'bg-green-50' : ''
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive ? 'bg-gradient-to-r from-emerald-50 to-teal-50' : 'hover:bg-stone-50'
                   }`}
-                  onMouseEnter={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'var(--bg-secondary)')}
-                  onMouseLeave={(e) => !isActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                   style={{
-                    color: isActive ? 'var(--color-green)' : 'var(--text-secondary)'
+                    color: isActive ? '#059669' : '#78716c'
                   }}
                 >
                   <Icon size={20} />
@@ -113,23 +111,20 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
             })}
           </nav>
 
-          <div className="mt-auto pt-6 border-t" style={{ borderColor: 'var(--border-light)' }}>
+          <div className="mt-auto pt-6 border-t border-stone-100">
             {user && (
               <div className="mb-4">
-                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm font-medium truncate text-stone-700">
                   {user.email}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-xs text-stone-400">
                   Researcher Account
                 </p>
               </div>
             )}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-sm hover:opacity-80 w-full px-4 py-2 rounded-lg transition-colors"
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              style={{ color: 'var(--text-secondary)' }}
+              className="flex items-center gap-2 text-sm hover:opacity-80 w-full px-4 py-2 rounded-xl transition-colors hover:bg-stone-50 text-stone-500"
             >
               <LogOut size={16} />
               Sign Out

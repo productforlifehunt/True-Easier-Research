@@ -54,7 +54,7 @@ const AppHeader: React.FC = () => {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
@@ -62,10 +62,10 @@ const AppHeader: React.FC = () => {
             to={user ? '/easyresearch/dashboard' : '/easyresearch'} 
             className="flex items-center gap-2.5 group"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
               <span className="text-white text-sm font-bold tracking-tight">E</span>
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-slate-900">
+            <span className="text-[15px] font-semibold tracking-tight text-stone-800">
               Easier
             </span>
           </Link>
@@ -80,8 +80,8 @@ const AppHeader: React.FC = () => {
                   to={item.path}
                   className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
                     active
-                      ? 'text-indigo-600 bg-indigo-50'
-                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
+                      ? 'text-emerald-700 bg-emerald-50'
+                      : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
                   }`}
                 >
                   {item.label}
@@ -96,39 +96,39 @@ const AppHeader: React.FC = () => {
               <div ref={userMenuRef} className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-stone-50 transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-violet-400 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm">
                     <span className="text-[11px] font-semibold text-white">
                       {(user.email?.[0] || 'U').toUpperCase()}
                     </span>
                   </div>
-                  <span className="hidden lg:block text-[13px] font-medium text-slate-500 max-w-[120px] truncate">
+                  <span className="hidden lg:block text-[13px] font-medium text-stone-500 max-w-[120px] truncate">
                     {user.email?.split('@')[0]}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-300" />
+                  <ChevronDown className="w-3.5 h-3.5 text-stone-300" />
                 </button>
                 {showUserMenu && (
-                  <div className="absolute top-full right-0 mt-1.5 w-52 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 py-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="px-3.5 py-2.5 border-b border-slate-100">
-                      <p className="text-[13px] font-medium text-slate-900 truncate">{user.email}</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Researcher</p>
+                  <div className="absolute top-full right-0 mt-1.5 w-52 bg-white rounded-xl shadow-lg shadow-stone-200/60 border border-stone-100 py-1.5">
+                    <div className="px-3.5 py-2.5 border-b border-stone-100">
+                      <p className="text-[13px] font-medium text-stone-800 truncate">{user.email}</p>
+                      <p className="text-[11px] text-stone-400 mt-0.5">Researcher</p>
                     </div>
                     <Link
                       to="/easyresearch/dashboard"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
                     >
                       Dashboard
                     </Link>
                     <Link
                       to="/easyresearch/settings"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors"
                     >
                       <Settings className="w-3.5 h-3.5" /> Settings
                     </Link>
-                    <div className="border-t border-slate-100 mt-1 pt-1">
+                    <div className="border-t border-stone-100 mt-1 pt-1">
                       <button
                         onClick={() => { handleLogout(); setShowUserMenu(false); }}
                         className="flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
@@ -143,13 +143,13 @@ const AppHeader: React.FC = () => {
               <div className="hidden sm:flex items-center gap-2">
                 <Link
                   to="/easyresearch/auth"
-                  className="px-3.5 py-1.5 text-[13px] font-medium text-slate-400 hover:text-slate-700 transition-colors"
+                  className="px-3.5 py-1.5 text-[13px] font-medium text-stone-400 hover:text-stone-600 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/easyresearch/auth"
-                  className="px-4 py-1.5 text-[13px] font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-full transition-colors"
+                  className="px-4 py-1.5 text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-full transition-all shadow-sm shadow-emerald-200"
                 >
                   Get Started
                 </Link>
@@ -159,9 +159,9 @@ const AppHeader: React.FC = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+              className="md:hidden p-1.5 rounded-lg hover:bg-stone-50 transition-colors"
             >
-              {isMenuOpen ? <X className="w-5 h-5 text-slate-500" /> : <Menu className="w-5 h-5 text-slate-500" />}
+              {isMenuOpen ? <X className="w-5 h-5 text-stone-500" /> : <Menu className="w-5 h-5 text-stone-500" />}
             </button>
           </div>
         </div>
@@ -169,7 +169,7 @@ const AppHeader: React.FC = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100">
+        <div className="md:hidden bg-white border-t border-stone-100">
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => {
               const active = isActive(item.path);
@@ -178,7 +178,7 @@ const AppHeader: React.FC = () => {
                   key={item.path}
                   to={item.path}
                   className={`block px-3.5 py-2.5 rounded-lg text-[14px] font-medium ${
-                    active ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'
+                    active ? 'text-emerald-700 bg-emerald-50' : 'text-stone-500'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -186,7 +186,7 @@ const AppHeader: React.FC = () => {
                 </Link>
               );
             })}
-            <div className="pt-3 border-t border-slate-100">
+            <div className="pt-3 border-t border-stone-100">
               {user ? (
                 <button
                   onClick={() => { handleLogout(); setIsMenuOpen(false); }}
@@ -197,7 +197,7 @@ const AppHeader: React.FC = () => {
               ) : (
                 <Link
                   to="/easyresearch/auth"
-                  className="block px-3.5 py-2.5 text-center rounded-full text-[14px] font-medium text-white bg-slate-900"
+                  className="block px-3.5 py-2.5 text-center rounded-full text-[14px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Get Started

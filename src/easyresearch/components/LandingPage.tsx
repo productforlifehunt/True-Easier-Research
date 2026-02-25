@@ -37,39 +37,40 @@ const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ backgroundColor: '#fafbf9' }}>
       {/* Hero */}
       <section className="pt-32 lg:pt-44 pb-24 lg:pb-36 relative overflow-hidden">
-        {/* Subtle gradient orb */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-indigo-50/80 via-violet-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+        {/* Gradient orbs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-emerald-50/80 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-emerald-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
         
         <div className="max-w-4xl mx-auto px-6 relative">
           <div className="text-center">
-            <h1 className="text-5xl sm:text-6xl lg:text-[72px] font-bold leading-[1.05] tracking-[-0.035em] text-slate-900 mb-6">
+            <h1 className="text-5xl sm:text-6xl lg:text-[72px] font-bold leading-[1.05] tracking-[-0.035em] text-stone-800 mb-6">
               Research made
               <br />
-              <span className="bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
                 easier
               </span>
             </h1>
-            <p className="text-lg lg:text-[19px] text-slate-400 max-w-md mx-auto mb-12 leading-relaxed font-light">
+            <p className="text-lg lg:text-[19px] text-stone-400 max-w-md mx-auto mb-12 leading-relaxed font-light">
               Create surveys, collect quality data, and analyze results — all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => navigate('/easyresearch/auth')}
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-slate-900 text-white text-[15px] font-medium rounded-full hover:bg-slate-800 transition-all hover:shadow-lg hover:shadow-slate-900/10"
+                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[15px] font-medium rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-200/50"
               >
                 Get started <ArrowRight size={16} strokeWidth={2} />
               </button>
               <button
                 onClick={() => navigate('/easyresearch/templates')}
-                className="inline-flex items-center justify-center px-7 py-3.5 text-[15px] font-medium text-slate-500 rounded-full border border-slate-200 hover:border-slate-300 hover:text-slate-700 transition-all"
+                className="inline-flex items-center justify-center px-7 py-3.5 text-[15px] font-medium text-stone-500 rounded-full border border-stone-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all"
               >
                 Browse templates
               </button>
             </div>
-            <p className="text-[13px] text-slate-300 mt-6 font-light">
+            <p className="text-[13px] text-stone-300 mt-6 font-light">
               Free forever · No credit card required
             </p>
           </div>
@@ -77,11 +78,11 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Trusted by */}
-      <section className="py-10 border-y border-slate-100">
+      <section className="py-10" style={{ borderTop: '1px solid rgba(16,185,129,0.06)', borderBottom: '1px solid rgba(16,185,129,0.06)' }}>
         <div className="max-w-4xl mx-auto px-6">
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-3">
             {['Universities', 'Healthcare', 'UX Teams', 'Market Research', 'HR', 'Startups'].map(cat => (
-              <span key={cat} className="text-[12px] font-medium text-slate-300 tracking-widest uppercase">{cat}</span>
+              <span key={cat} className="text-[12px] font-medium text-stone-300 tracking-widest uppercase">{cat}</span>
             ))}
           </div>
         </div>
@@ -91,21 +92,21 @@ const LandingPage: React.FC = () => {
       <section className="py-28 lg:py-36">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-slate-900 mb-4">
+            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
               Everything you need
             </h2>
-            <p className="text-[17px] text-slate-400 max-w-sm mx-auto font-light">
+            <p className="text-[17px] text-stone-400 max-w-sm mx-auto font-light">
               Powerful tools, zero complexity.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {features.map((f, i) => (
-              <div key={i} className="rounded-2xl p-6 hover:bg-slate-50/80 transition-all group cursor-default">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
-                  <f.icon size={18} className="text-indigo-500" strokeWidth={1.5} />
+              <div key={i} className="rounded-2xl p-6 bg-white/70 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all group cursor-default">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-4 group-hover:from-emerald-100 group-hover:to-teal-100 transition-colors">
+                  <f.icon size={18} className="text-emerald-600" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-[14px] font-semibold text-slate-900 mb-1.5">{f.title}</h3>
-                <p className="text-[13px] text-slate-400 leading-relaxed font-light">{f.desc}</p>
+                <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{f.title}</h3>
+                <p className="text-[13px] text-stone-400 leading-relaxed font-light">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -113,21 +114,21 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* How it works */}
-      <section className="py-28 bg-slate-50/60">
+      <section className="py-28" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-slate-900">
+            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800">
               Three steps
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {steps.map((s, i) => (
               <div key={i} className="text-center">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white text-[13px] font-semibold flex items-center justify-center mx-auto mb-5">
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[13px] font-semibold flex items-center justify-center mx-auto mb-5 shadow-md shadow-emerald-200/50">
                   {s.n}
                 </div>
-                <h3 className="text-[15px] font-semibold text-slate-900 mb-2">{s.title}</h3>
-                <p className="text-[13px] text-slate-400 leading-relaxed font-light">{s.desc}</p>
+                <h3 className="text-[15px] font-semibold text-stone-800 mb-2">{s.title}</h3>
+                <p className="text-[13px] text-stone-400 leading-relaxed font-light">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -138,7 +139,7 @@ const LandingPage: React.FC = () => {
       <section className="py-28 lg:py-36">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-slate-900 mb-4">
+            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
               Built for every field
             </h2>
           </div>
@@ -147,16 +148,16 @@ const LandingPage: React.FC = () => {
               <button
                 key={i}
                 onClick={() => navigate('/easyresearch/templates')}
-                className="rounded-2xl p-6 border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all text-left group bg-white"
+                className="rounded-2xl p-6 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all text-left group bg-white/70"
               >
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-4 group-hover:bg-indigo-100 transition-colors">
-                  <uc.icon size={18} className="text-indigo-500" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-4 group-hover:from-emerald-100 group-hover:to-teal-100 transition-colors">
+                  <uc.icon size={18} className="text-emerald-600" />
                 </div>
-                <h3 className="text-[14px] font-semibold text-slate-900 mb-0.5">
+                <h3 className="text-[14px] font-semibold text-stone-800 mb-0.5">
                   {uc.name}
                 </h3>
-                <p className="text-[12px] text-slate-400 font-light mb-2">{uc.desc}</p>
-                <span className="text-[12px] text-indigo-500 font-medium inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <p className="text-[12px] text-stone-400 font-light mb-2">{uc.desc}</p>
+                <span className="text-[12px] text-emerald-500 font-medium inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   Templates <ChevronRight size={12} />
                 </span>
               </button>
@@ -166,17 +167,17 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-28 bg-slate-50/60">
+      <section className="py-28" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-slate-900 mb-4">
+          <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
             Ready to start?
           </h2>
-          <p className="text-[17px] text-slate-400 mb-10 font-light">
+          <p className="text-[17px] text-stone-400 mb-10 font-light">
             Join researchers who trust Easier for their studies.
           </p>
           <button
             onClick={() => navigate('/easyresearch/auth')}
-            className="inline-flex items-center gap-2.5 px-8 py-4 bg-slate-900 text-white text-[15px] font-medium rounded-full hover:bg-slate-800 transition-all hover:shadow-lg hover:shadow-slate-900/10"
+            className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[15px] font-medium rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-200/50"
           >
             Create your first survey <ArrowRight size={16} />
           </button>
@@ -184,15 +185,15 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100 py-8">
+      <footer className="py-8" style={{ borderTop: '1px solid rgba(16,185,129,0.06)' }}>
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
               <span className="text-white text-[11px] font-bold">E</span>
             </div>
-            <span className="text-[14px] font-semibold text-slate-900">Easier</span>
+            <span className="text-[14px] font-semibold text-stone-800">Easier</span>
           </div>
-          <p className="text-[12px] text-slate-300">© 2025 Easier. All rights reserved.</p>
+          <p className="text-[12px] text-stone-300">© 2025 Easier. All rights reserved.</p>
         </div>
       </footer>
     </div>
