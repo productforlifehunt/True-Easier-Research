@@ -35,7 +35,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -48,48 +47,31 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="w-full flex items-center justify-between px-4 py-2 rounded-lg border transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{
-          borderColor: 'var(--border-light)',
-          backgroundColor: 'white',
-          color: 'var(--text-primary)',
-          ...buttonStyle
-        }}
+        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium border border-stone-200 bg-white hover:border-stone-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        style={buttonStyle}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 truncate">
           {selectedOption?.icon}
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDown 
-          size={16} 
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          style={{ color: 'var(--text-secondary)' }}
+          size={14} 
+          className={`transition-transform text-stone-400 shrink-0 ml-1 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
       {isOpen && (
-        <div 
-          className="absolute z-50 w-full mt-2 rounded-lg border shadow-lg overflow-hidden"
-          style={{
-            backgroundColor: 'white',
-            borderColor: 'var(--border-light)',
-            maxHeight: '300px',
-            overflowY: 'auto'
-          }}
-        >
+        <div className="absolute z-50 w-full mt-1 rounded-xl border border-stone-100 bg-white shadow-lg shadow-stone-200/50 overflow-hidden" style={{ maxHeight: '280px', overflowY: 'auto' }}>
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-green-50"
-              style={{
-                color: value === option.value ? 'var(--color-green)' : 'var(--text-primary)',
-                backgroundColor: value === option.value ? 'var(--bg-green-light)' : 'transparent'
-              }}
+              onClick={() => { onChange(option.value); setIsOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2.5 text-left text-[13px] transition-colors ${
+                value === option.value
+                  ? 'text-emerald-600 bg-emerald-50'
+                  : 'text-stone-600 hover:bg-stone-50'
+              }`}
             >
               {option.icon}
               <span>{option.label}</span>
