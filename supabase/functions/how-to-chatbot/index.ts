@@ -102,7 +102,7 @@ Behavior Rules:
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Failed to process chatbot request'
+        error: (error as Error).message || 'Failed to process chatbot request'
       }),
       {
         status: 500,

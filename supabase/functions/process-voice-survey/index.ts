@@ -119,7 +119,7 @@ serve(async (req) => {
             suggestions = [content]
           }
         } catch {
-          const lines = content.split('\n').filter(line => line.trim().length > 20)
+          const lines = content.split('\n').filter((line: string) => line.trim().length > 20)
           suggestions = lines.length > 0 ? lines.slice(0, 3) : [content]
         }
 
@@ -249,7 +249,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Failed to process voice input'
+        error: (error as Error).message || 'Failed to process voice input'
       }),
       {
         status: 500,
