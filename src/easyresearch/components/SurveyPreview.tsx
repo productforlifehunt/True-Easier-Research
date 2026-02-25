@@ -137,35 +137,39 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ questions, projectTitle, 
         );
 
       case 'likert_scale':
-        const likertOptions = [
-          { value: 1, label: 'Strongly Disagree' },
-          { value: 2, label: 'Disagree' },
-          { value: 3, label: 'Neutral' },
-          { value: 4, label: 'Agree' },
-          { value: 5, label: 'Strongly Agree' }
-        ];
+        const likertConfig = question.question_config || {};
+        const likertLabels = likertConfig.labels || {};
+        const likertScaleType = likertConfig.scale_type || '1-5';
+        const [likertMin, likertMax] = likertScaleType.split('-').map(Number);
+        const likertScaleOptions: number[] = [];
+        for (let i = likertMin; i <= likertMax; i++) {
+          likertScaleOptions.push(i);
+        }
         return (
-          <div className="space-y-2">
-            {likertOptions.map((option) => (
-              <label
-                key={option.value}
-                className="flex items-center p-3 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
-                style={{
-                  borderColor: value === option.value ? 'var(--color-green)' : 'var(--border-light)',
-                  backgroundColor: value === option.value ? '#f0fdf4' : 'white'
-                }}
-              >
-                <input
-                  type="radio"
-                  name={question.id}
-                  value={option.value}
-                  checked={value === option.value || false}
-                  onChange={() => handleResponse(question.id, option.value)}
-                  className="mr-3"
-                />
-                <span style={{ color: 'var(--text-primary)' }}>{option.label}</span>
-              </label>
-            ))}
+          <div className="space-y-4">
+            <div className="flex justify-between gap-2">
+              {likertScaleOptions.map((optionValue) => (
+                <div
+                  key={optionValue}
+                  onClick={() => handleResponse(question.id, optionValue)}
+                  className="flex-1 text-center cursor-pointer transition-all"
+                >
+                  <div
+                    className="w-full aspect-square flex items-center justify-center rounded-lg border-2 font-semibold text-lg mb-2 hover:scale-105"
+                    style={{
+                      borderColor: value === optionValue ? 'var(--color-green)' : 'var(--border-light)',
+                      backgroundColor: value === optionValue ? 'var(--color-green)' : 'white',
+                      color: value === optionValue ? 'white' : 'var(--text-primary)'
+                    }}
+                  >
+                    {optionValue}
+                  </div>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    {likertLabels[optionValue] || ''}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         );
 
