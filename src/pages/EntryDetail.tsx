@@ -69,9 +69,7 @@ const EntryDetail: React.FC = () => {
     }
   };
 
-  const handleEdit = () => {
-    navigate(`/edit-entry/${id}`);
-  };
+  const handleEdit = () => navigate(`/edit-entry/${id}`);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
@@ -100,8 +98,8 @@ const EntryDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--color-green)' }}></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent" style={{ borderColor: 'var(--color-green)', borderTopColor: 'transparent' }}></div>
       </div>
     );
   }
@@ -132,96 +130,117 @@ const EntryDetail: React.FC = () => {
   ].filter(f => f.value);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <DesktopHeader />
       <MobileHeader />
-      <div className="max-w-4xl mx-auto px-6 py-4 pb-24 md:pb-6">
+      <div className="max-w-2xl mx-auto px-5 py-5 pb-24 md:pb-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <button
             onClick={() => navigate('/timeline')}
-            className="p-2 rounded-lg transition-colors"
-            style={{ backgroundColor: 'var(--bg-secondary)' }}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+            style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
           >
-            <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-primary)' }} />
+            <ArrowLeft className="w-[18px] h-[18px]" style={{ color: 'var(--text-primary)' }} />
           </button>
           <div className="flex gap-2">
             <button
               onClick={handleEdit}
-              className="p-3 rounded-lg transition-colors min-w-[44px] min-h-[44px]"
-              style={{ backgroundColor: 'var(--bg-secondary)' }}
-              aria-label="Edit"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+              style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
             >
-              <Edit2 className="w-5 h-5" style={{ color: 'var(--color-green)' }} />
+              <Edit2 className="w-4 h-4" style={{ color: 'var(--color-green)' }} />
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="p-3 rounded-lg transition-colors min-w-[44px] min-h-[44px]"
-              style={{ backgroundColor: 'var(--bg-secondary)' }}
-              aria-label="Delete"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+              style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
             >
-              <Trash2 className="w-5 h-5" style={{ color: '#ef4444' }} />
+              <Trash2 className="w-4 h-4" style={{ color: '#ef4444' }} />
             </button>
           </div>
         </div>
 
         {/* Entry Type Badge + Timestamp */}
-        <div className="mb-6">
+        <div className="mb-5">
           <span
-            className="inline-block px-3 py-1 rounded-full text-white text-sm font-medium mb-2"
+            className="inline-block px-3 py-1 rounded-full text-white text-[11px] font-semibold tracking-wide uppercase mb-2"
             style={{ backgroundColor: getEntryTypeColor(entry.entry_type) }}
           >
             {getEntryTypeLabel(entry.entry_type)}
           </span>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-[13px]" style={{ color: 'var(--text-secondary)', letterSpacing: '-0.01em' }}>
             {formatDate(entry.entry_timestamp || entry.created_at)}
           </p>
         </div>
 
         {/* Fields */}
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {fields.map((field, i) => (
-            <div key={i} className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-              <div className="flex items-center gap-2 mb-1">
-                <field.icon className="w-4 h-4" style={{ color: 'var(--color-green)' }} />
-                <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{field.label}</span>
+            <div 
+              key={i} 
+              className="p-4 rounded-2xl"
+              style={{ 
+                backgroundColor: 'white',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+              }}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <field.icon className="w-3.5 h-3.5" style={{ color: 'var(--color-green)', opacity: 0.7 }} />
+                <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{field.label}</span>
               </div>
-              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{field.value}</p>
+              <p className="text-[14px] leading-relaxed" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{field.value}</p>
             </div>
           ))}
           {fields.length === 0 && (
-            <p className="text-center py-8" style={{ color: 'var(--text-secondary)' }}>
-              {language === 'zh' ? '此记录没有详细信息' : 'No details recorded for this entry'}
-            </p>
+            <div className="text-center py-12 rounded-2xl" style={{ backgroundColor: 'white' }}>
+              <p className="text-[14px]" style={{ color: 'var(--text-muted)' }}>
+                {language === 'zh' ? '此记录没有详细信息' : 'No details recorded for this entry'}
+              </p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="rounded-2xl p-6 max-w-sm w-full" style={{ backgroundColor: 'var(--bg-primary)' }}>
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              {language === 'zh' ? '确认删除' : 'Confirm Delete'}
-            </h3>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {language === 'zh' ? '确定要删除这条记录吗？此操作无法撤销。' : 'Are you sure you want to delete this entry? This action cannot be undone.'}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-3 rounded-xl font-medium border transition-colors"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
-              >
-                {language === 'zh' ? '取消' : 'Cancel'}
-              </button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <div 
+            className="w-full sm:max-w-sm mx-4 sm:mx-auto rounded-2xl overflow-hidden"
+            style={{ 
+              backgroundColor: 'white',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
+              marginBottom: 'env(safe-area-inset-bottom, 16px)'
+            }}
+          >
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#fef2f2' }}>
+                <Trash2 className="w-5 h-5" style={{ color: '#ef4444' }} />
+              </div>
+              <h3 className="text-[17px] font-semibold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                {language === 'zh' ? '确认删除' : 'Delete Entry'}
+              </h3>
+              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                {language === 'zh' ? '此操作无法撤销。' : 'This action cannot be undone.'}
+              </p>
+            </div>
+            <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.08)' }}>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 rounded-xl font-medium text-white transition-colors disabled:opacity-50"
-                style={{ backgroundColor: '#ef4444' }}
+                className="w-full py-3.5 text-[15px] font-semibold transition-colors disabled:opacity-50"
+                style={{ color: '#ef4444' }}
               >
                 {deleting ? (language === 'zh' ? '删除中...' : 'Deleting...') : (language === 'zh' ? '删除' : 'Delete')}
+              </button>
+            </div>
+            <div style={{ borderTop: '0.5px solid rgba(0,0,0,0.08)' }}>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-full py-3.5 text-[15px] font-medium transition-colors"
+                style={{ color: 'var(--color-green)' }}
+              >
+                {language === 'zh' ? '取消' : 'Cancel'}
               </button>
             </div>
           </div>

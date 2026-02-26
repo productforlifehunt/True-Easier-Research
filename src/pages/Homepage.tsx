@@ -206,16 +206,19 @@ const Homepage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen w-full" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <DesktopHeader />
       <MobileHeader />
 
       {/* Hero Section */}
-      <section className="px-6 sm:px-8 md:px-10 py-12 md:py-24 text-center pb-24 md:pb-32">
+      <section className="px-5 sm:px-8 md:px-10 py-10 md:py-20 text-center pb-20 md:pb-28">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-[28px] sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-[1.15] tracking-tight" style={{ color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
             {t.title}
           </h1>
+          <p className="text-[15px] md:text-lg max-w-xl mx-auto mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)', letterSpacing: '-0.01em' }}>
+            {t.heroDescription}
+          </p>
           
           {/* Survey Progress Cards - Only for logged-in users */}
           {user && (
@@ -225,15 +228,17 @@ const Homepage: React.FC = () => {
                 <style>{`
                   .overflow-x-auto::-webkit-scrollbar { display: none; }
                 `}</style>
-                <div className="flex gap-3" style={{ width: 'max-content', paddingLeft: '4px', paddingRight: '4px' }}>
+                <div className="flex gap-2.5" style={{ width: 'max-content', paddingLeft: '4px', paddingRight: '4px' }}>
                   {/* Card 1: Consent */}
                   <div 
-                    className="rounded-2xl p-5 shadow-md transition-all"
+                    className="rounded-2xl p-5 transition-all"
                     style={{ 
                       backgroundColor: 'white', 
-                      minWidth: '240px', 
-                      maxWidth: '240px', 
-                      border: enrollmentData?.consent_signed_at ? '2px solid var(--color-green)' : '2px solid var(--border-light)'
+                      minWidth: '220px', 
+                      maxWidth: '220px', 
+                      boxShadow: enrollmentData?.consent_signed_at 
+                        ? '0 0 0 1.5px var(--color-green), 0 4px 12px rgba(16, 185, 129, 0.1)' 
+                        : '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
                     }}
                   >
                     <div className="flex items-center gap-3 mb-3">
@@ -562,11 +567,15 @@ const Homepage: React.FC = () => {
           
           <button
             onClick={() => navigate('/survey')}
-            className="px-8 py-4 text-white text-lg md:text-xl rounded-2xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 min-h-[56px] mx-auto"
-            style={{ backgroundColor: 'var(--color-green)' }}
+            className="px-8 py-3.5 text-white text-[16px] md:text-lg rounded-full font-semibold transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mx-auto"
+            style={{ 
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+              letterSpacing: '-0.01em'
+            }}
           >
             {t.cta.primary}
-            <ArrowRight className="w-5 h-5" style={{ minWidth: '1.25rem', minHeight: '1.25rem' }} />
+            <ArrowRight className="w-4.5 h-4.5" />
           </button>
         </div>
       </section>

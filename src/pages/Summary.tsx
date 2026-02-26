@@ -202,26 +202,23 @@ const Summary: React.FC = () => {
   const timeStats = getStatsByTimeOfDay();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <DesktopHeader />
       <MobileHeader />
-      <div className="max-w-6xl mx-auto p-3 pb-20 md:pb-4">
+      <div className="max-w-3xl mx-auto px-5 py-4 pb-20 md:pb-4">
         {/* Week Selector */}
         <div className="mb-4 -mx-3 px-3 overflow-x-auto">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-[22px] font-semibold tracking-tight" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             {text.title}
           </h1>
         </div>
 
         {/* Statistics Overview */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-2.5 mb-4">
           <div 
-            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all min-h-[80px]"
-            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-            onClick={() => {
-              setSelectedCategory('timeBased');
-              setViewMode('category');
-            }}
+            className="p-4 rounded-2xl cursor-pointer transition-all"
+            style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+            onClick={() => { setSelectedCategory('timeBased'); setViewMode('category'); }}
           >
             <div className="text-2xl font-bold mb-1" style={{ color: 'var(--color-green)' }}>
               {stats.timeBased}
@@ -232,12 +229,9 @@ const Summary: React.FC = () => {
           </div>
           
           <div 
-            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all min-h-[80px]"
-            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-            onClick={() => {
-              setSelectedCategory('general');
-              setViewMode('category');
-            }}
+            className="p-4 rounded-2xl cursor-pointer transition-all"
+            style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+            onClick={() => { setSelectedCategory('general'); setViewMode('category'); }}
           >
             <div className="text-2xl font-bold mb-1" style={{ color: '#fb923c' }}>
               {stats.general}
@@ -249,7 +243,7 @@ const Summary: React.FC = () => {
         </div>
 
         {/* Time Distribution */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
+        <div className="rounded-2xl p-5 mb-5" style={{ backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
             {text.byTime}
           </h2>

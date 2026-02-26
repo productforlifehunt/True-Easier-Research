@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Info, Mail, Menu, X, BookOpen } from 'lucide-react';
+import { Info, Mail, BookOpen } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
@@ -10,7 +10,6 @@ const MobileHeader: React.FC = () => {
   const location = useLocation();
   const { language, changeLanguage } = useLanguage();
   const { user, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const getCurrentTab = () => {
@@ -28,30 +27,16 @@ const MobileHeader: React.FC = () => {
   const currentTab = getCurrentTab();
 
   const handleTabClick = (tab: string) => {
-    setIsMenuOpen(false);
     switch (tab) {
-      case 'home':
-        navigate('/');
-        break;
-      case 'about':
-        navigate('/about');
-        break;
-      case 'howto':
-        navigate('/how-to');
-        break;
-      case 'contact':
-        navigate('/contact');
-        break;
-      case 'join':
-        navigate('/join-survey');
-        break;
-      default:
-        break;
+      case 'home': navigate('/'); break;
+      case 'about': navigate('/about'); break;
+      case 'howto': navigate('/how-to'); break;
+      case 'contact': navigate('/contact'); break;
+      case 'join': navigate('/join-survey'); break;
     }
   };
 
   const handleLogout = async () => {
-    setIsMenuOpen(false);
     try {
       await logout();
       localStorage.clear();
@@ -63,47 +48,55 @@ const MobileHeader: React.FC = () => {
     }
   };
 
+  const navItems = [
+    { id: 'about', icon: Info, label: language === 'zh' ? '关于' : 'About' },
+    { id: 'howto', icon: BookOpen, label: language === 'zh' ? '指南' : 'Guide' },
+    { id: 'join', icon: null, label: language === 'zh' ? '加入' : 'Join' },
+    { id: 'contact', icon: Mail, label: language === 'zh' ? '联系' : 'Contact' },
+  ];
+
   return (
     <>
-    <header className="md:hidden sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)' }}>
-      {/* Top Row: Logo + Auth + Language */}
-      <div className="flex items-center justify-between px-4 py-3">
+    <header 
+      className="md:hidden sticky top-0 z-50"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'saturate(180%) blur(20px)',
+        WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+        borderBottom: '0.5px solid rgba(0, 0, 0, 0.08)'
+      }}
+    >
+      {/* Top Row */}
+      <div className="flex items-center justify-between px-4 py-2.5">
         <button
           onClick={() => handleTabClick('home')}
-          className="text-lg font-bold truncate"
-          style={{ color: 'var(--color-green)' }}
+          className="text-[15px] font-semibold tracking-tight"
+          style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}
         >
-          {language === 'zh' ? '痴呆症照护者研究' : 'Dementia Caregiver Study'}
+          {language === 'zh' ? '照护者研究' : 'Caregiver Study'}
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Language Toggle */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>EN</span>
-            <button
-              onClick={() => {
-                const newLang = language === 'en' ? 'zh' : 'en';
-                changeLanguage(newLang);
-              }}
-              className="relative inline-flex h-6 w-10 items-center rounded-full transition-colors duration-200"
-              style={{ backgroundColor: language === 'zh' ? 'var(--color-green)' : 'var(--toggle-inactive)' }}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  language === 'zh' ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>中</span>
-          </div>
+          {/* Language Toggle - Minimal */}
+          <button
+            onClick={() => changeLanguage(language === 'en' ? 'zh' : 'en')}
+            className="px-2 py-1 rounded-md text-[11px] font-medium"
+            style={{ 
+              backgroundColor: 'rgba(120, 120, 128, 0.08)',
+              color: 'var(--text-secondary)',
+              letterSpacing: '0.02em'
+            }}
+          >
+            {language === 'en' ? '中文' : 'EN'}
+          </button>
 
-          {/* Auth Widget */}
+          {/* Auth */}
           {user ? (
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-200"
+              className="px-2.5 py-1 text-[11px] font-medium rounded-md"
               style={{ 
-                borderColor: 'var(--border-light)',
+                backgroundColor: 'rgba(120, 120, 128, 0.08)',
                 color: 'var(--text-secondary)'
               }}
             >
@@ -112,9 +105,9 @@ const MobileHeader: React.FC = () => {
           ) : (
             <button
               onClick={() => setShowAuthModal(true)}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200"
+              className="px-3 py-1 text-[11px] font-semibold rounded-full"
               style={{ 
-                backgroundColor: 'var(--color-green)',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
                 color: 'white'
               }}
             >
@@ -124,55 +117,27 @@ const MobileHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Row: Horizontal Scrollable */}
-      <div className="overflow-x-auto px-4 pb-3">
-        <nav className="flex gap-2" style={{ minWidth: 'max-content' }}>
-          <button
-            onClick={() => handleTabClick('about')}
-            className="px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-1.5"
-            style={{ 
-              backgroundColor: currentTab === 'about' ? 'var(--color-green)' : 'var(--bg-secondary)',
-              color: currentTab === 'about' ? 'white' : 'var(--text-primary)'
-            }}
-          >
-            <Info className="w-3.5 h-3.5" />
-            {language === 'zh' ? '关于' : 'About'}
-          </button>
-
-          <button
-            onClick={() => handleTabClick('howto')}
-            className="px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-1.5"
-            style={{ 
-              backgroundColor: currentTab === 'howto' ? 'var(--color-green)' : 'var(--bg-secondary)',
-              color: currentTab === 'howto' ? 'white' : 'var(--text-primary)'
-            }}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            {language === 'zh' ? '如何参与 / 帮助' : 'How-to / Help'}
-          </button>
-
-          <button
-            onClick={() => handleTabClick('join')}
-            className="px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200"
-            style={{ 
-              backgroundColor: currentTab === 'join' ? 'var(--color-green)' : 'var(--bg-secondary)',
-              color: currentTab === 'join' ? 'white' : 'var(--text-primary)'
-            }}
-          >
-            {language === 'zh' ? '加入 / 邀请' : 'Join / Invite'}
-          </button>
-
-          <button
-            onClick={() => handleTabClick('contact')}
-            className="px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200 flex items-center gap-1.5"
-            style={{ 
-              backgroundColor: currentTab === 'contact' ? 'var(--color-green)' : 'var(--bg-secondary)',
-              color: currentTab === 'contact' ? 'white' : 'var(--text-primary)'
-            }}
-          >
-            <Mail className="w-3.5 h-3.5" />
-            {language === 'zh' ? '联系' : 'Contact'}
-          </button>
+      {/* Navigation Row */}
+      <div className="overflow-x-auto px-4 pb-2.5">
+        <nav className="flex gap-1.5" style={{ minWidth: 'max-content' }}>
+          {navItems.map(item => {
+            const active = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabClick(item.id)}
+                className="px-3 py-1.5 rounded-full font-medium text-[12px] whitespace-nowrap transition-all duration-200 flex items-center gap-1"
+                style={{ 
+                  backgroundColor: active ? 'var(--color-green)' : 'rgba(120, 120, 128, 0.08)',
+                  color: active ? 'white' : 'var(--text-secondary)',
+                  letterSpacing: '-0.01em'
+                }}
+              >
+                {item.icon && <item.icon className="w-3 h-3" />}
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
       </div>
     </header>

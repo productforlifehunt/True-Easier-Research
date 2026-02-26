@@ -10,33 +10,34 @@ const BottomNav: React.FC = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
 
-  // Only show bottom nav if user is logged in
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
   
   const tabs = [
     { id: 'home', path: '/', icon: Home, label: t('home') },
     { id: 'survey', path: '/timeline', icon: FileText, label: t('survey') },
-    { id: 'add', path: '/add-entry', icon: Plus, label: t('add'), special: true, action: 'add' },
+    { id: 'add', path: '/add-entry', icon: Plus, label: t('add'), special: true },
     { id: 'summary', path: '/summary', icon: BarChart3, label: t('summary') },
     { id: 'settings', path: '/settings', icon: Settings, label: t('settings') }
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/' || location.pathname === '/home';
-    }
+    if (path === '/') return location.pathname === '/' || location.pathname === '/home';
     return location.pathname === path;
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white" style={{ 
-      borderTop: '1px solid var(--border-light)',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.05)'
-    }}>
-      <div className="flex items-center justify-around relative" style={{ height: '64px' }}>
+    <nav 
+      className="fixed bottom-0 left-0 right-0 md:hidden"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'saturate(180%) blur(20px)',
+        WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+        borderTop: '0.5px solid rgba(0, 0, 0, 0.08)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        zIndex: 1000
+      }}
+    >
+      <div className="flex items-end justify-around" style={{ height: '56px' }}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.path);
@@ -45,33 +46,28 @@ const BottomNav: React.FC = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => {
-                  navigate(tab.path);
-                  if (tab.action === 'add') {
-                    setTimeout(() => {
-                      const addBtn = document.querySelector('[data-add-new-entry]');
-                      if (addBtn) (addBtn as HTMLElement).click();
-                    }, 100);
-                  }
-                }}
-                className="flex flex-col items-center justify-center flex-1"
+                onClick={() => navigate(tab.path)}
+                className="flex flex-col items-center justify-center flex-1 -mt-3"
               >
-                <div className="rounded-full flex items-center justify-center relative"
+                <div 
+                  className="rounded-full flex items-center justify-center mb-0.5"
                   style={{ 
-                    backgroundColor: '#FFFFFF',
-                    width: '60px',
-                    height: '60px',
-                    marginTop: '-30px',
-                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3), 0 4px 10px rgba(0, 0, 0, 0.15)',
-                    border: '3px solid #10b981',
-                    opacity: 1,
-                    position: 'relative',
-                    zIndex: 10
+                    width: '48px',
+                    height: '48px',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
                   }}
                 >
-                  <Plus style={{ width: '36px', height: '36px', color: '#10b981', stroke: '#10b981', strokeWidth: 4, fill: 'none' }} />
+                  <Plus style={{ width: '24px', height: '24px', color: 'white', strokeWidth: 2.5 }} />
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: '800', letterSpacing: '0.5px', color: 'var(--color-green)', marginTop: '6px' }}>{tab.label}</span>
+                <span style={{ 
+                  fontSize: '10px', 
+                  fontWeight: '500', 
+                  letterSpacing: '0.02em', 
+                  color: 'var(--color-green)',
+                }}>
+                  {tab.label}
+                </span>
               </button>
             );
           }
@@ -79,21 +75,25 @@ const BottomNav: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                navigate(tab.path);
-                if (tab.action === 'summary') {
-                  setTimeout(() => {
-                    window.scrollTo(0, 0);
-                  }, 100);
-                }
-              }}
-              className="flex flex-col items-center justify-center flex-1"
-              style={{
-                color: active ? 'var(--color-green)' : 'var(--text-secondary)'
-              }}
+              onClick={() => navigate(tab.path)}
+              className="flex flex-col items-center justify-center flex-1 pb-1"
+              style={{ opacity: active ? 1 : 0.45 }}
             >
-              <Icon style={{ width: '24px', height: '24px', marginBottom: '4px' }} />
-              <span style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '0.3px' }}>{tab.label}</span>
+              <Icon style={{ 
+                width: '22px', 
+                height: '22px', 
+                marginBottom: '2px',
+                color: active ? 'var(--color-green)' : 'var(--text-primary)',
+                strokeWidth: active ? 2 : 1.5
+              }} />
+              <span style={{ 
+                fontSize: '10px', 
+                fontWeight: active ? '600' : '400', 
+                letterSpacing: '0.02em',
+                color: active ? 'var(--color-green)' : 'var(--text-primary)'
+              }}>
+                {tab.label}
+              </span>
             </button>
           );
         })}
