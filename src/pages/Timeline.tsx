@@ -157,15 +157,28 @@ const Timeline: React.FC = () => {
   const getFilteredEntries = () => {
     let filtered = entries;
     
-    // Filter by day if selected
+    // Filter by day using enrollment start date
     if (selectedDay !== null) {
-      const sortedEntries = [...entries].sort((a, b) => 
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-      const entriesPerDay = Math.ceil(sortedEntries.length / 7);
-      const startIdx = (selectedDay - 1) * entriesPerDay;
-      const endIdx = selectedDay * entriesPerDay;
-      filtered = sortedEntries.slice(startIdx, endIdx);
+      const studyStart = enrollment?.study_start_date || enrollment?.consent_signed_at || enrollment?.created_at;
+      if (!studyStart) return entries; // Can't filter without a start date
+      const startDate = new Date(studyStart);
+      const dayStart = new Date(startDate);
+      dayStart.setDate(dayStart.getDate() + (selectedDay - 1));
+      dayStart.setHours(0, 0, 0, 0);
+      
+      // For Day 7 (or the last day), include all entries from that day onward
+      const isLastDay = selectedDay === 7;
+      const dayEnd = new Date(dayStart);
+      if (!isLastDay) {
+        dayEnd.setDate(dayEnd.getDate() + 1);
+      } else {
+        dayEnd.setFullYear(9999); // Include all future entries
+      }
+      
+      filtered = entries.filter(entry => {
+        const entryDate = new Date(entry.entry_timestamp);
+        return entryDate >= dayStart && entryDate < dayEnd;
+      });
     }
     
     // Filter by time slot if selected
