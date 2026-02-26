@@ -215,10 +215,11 @@ export const dataService = {
         .from('enrollment')
         .select('*')
         .eq('participant_id', userId)
-        .maybeSingle()
+        .order('created_at', { ascending: false })
+        .limit(1)
 
       if (error) throw error
-      return data
+      return data && data.length > 0 ? data[0] : null
     } catch (error) {
       console.error('Error fetching enrollment:', error)
       return null
@@ -251,13 +252,15 @@ export const dataService = {
     try {
       const { data, error } = await supabase
         .from('enrollment')
-        .select('study_start_date')
+        .select('study_start_date, consent_signed_at, created_at')
         .eq('participant_id', userId)
+        .order('created_at', { ascending: false })
         .limit(1)
 
-      if (error || !data || !data[0]?.study_start_date) return 0
+      const startDateStr = data?.[0]?.study_start_date || data?.[0]?.consent_signed_at || data?.[0]?.created_at
+      if (error || !data || !startDateStr) return 0
 
-      const startDate = new Date(data[0].study_start_date)
+      const startDate = new Date(startDateStr)
       const today = new Date()
       const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       const currentDay = daysDiff + 1
