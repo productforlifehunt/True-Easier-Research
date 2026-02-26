@@ -44,11 +44,14 @@ const AddEntry: React.FC = () => {
     const fetchNetworkMembers = async () => {
       if (!user?.id) return;
       try {
-        const { data } = await supabase
-          .from('user_profiles')
+        const { data, error } = await supabase
+          .from('profiles')
           .select('ecogram_data')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single();
+        
+        // Silently skip if column doesn't exist
+        if (error) return;
         
         if (data?.ecogram_data?.members) {
           setNetworkMembers(data.ecogram_data.members.map((m: any) => ({
@@ -59,7 +62,7 @@ const AddEntry: React.FC = () => {
           })));
         }
       } catch (error) {
-        console.error('Error fetching network members:', error);
+        // Non-critical: silently ignore ecogram errors
       }
     };
     fetchNetworkMembers();
@@ -311,7 +314,11 @@ const AddEntry: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user || !formData.description) return;
+    if (!user) return;
+    if (!formData.description && formData.activity_categories.length === 0) {
+      toast.error(language === 'zh' ? '请填写描述或选择活动类别' : 'Please fill in a description or select an activity category');
+      return;
+    }
     
     setIsSubmitting(true);
     try {
@@ -341,8 +348,9 @@ const AddEntry: React.FC = () => {
 
       if (error) throw error;
       navigate('/timeline');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving entry:', error);
+      toast.error(language === 'zh' ? '保存失败：' + (error?.message || '未知错误') : 'Save failed: ' + (error?.message || 'Unknown error'));
     } finally {
       setIsSubmitting(false);
     }
