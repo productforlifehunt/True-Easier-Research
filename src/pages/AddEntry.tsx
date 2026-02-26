@@ -1238,7 +1238,7 @@ const AddEntry: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3 pt-6 mt-6" style={{ borderTop: '1px solid var(--border-light)' }}>
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || !formData.description}
+              disabled={isSubmitting || (!formData.description && formData.activity_categories.length === 0)}
               className="flex-1 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 min-h-[48px]"
               style={{ backgroundColor: 'var(--color-green)' }}
             >
