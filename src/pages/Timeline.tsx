@@ -157,9 +157,9 @@ const Timeline: React.FC = () => {
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
-  const PillButton = ({ active, onClick, children, ref: buttonRef }: any) => (
+  const PillButton = React.forwardRef<HTMLButtonElement, any>(({ active, onClick, children }, ref) => (
     <button
-      ref={buttonRef}
+      ref={ref}
       onClick={onClick}
       className="rounded-full font-medium transition-all"
       style={{
@@ -174,7 +174,7 @@ const Timeline: React.FC = () => {
     >
       {children}
     </button>
-  );
+  ));
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
