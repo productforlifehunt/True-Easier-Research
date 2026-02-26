@@ -20,6 +20,7 @@ const Contact = lazy(() => import('./pages/Contact'));
 const JoinSurvey = lazy(() => import('./pages/JoinSurvey'));
 const Settings = lazy(() => import('./pages/Settings'));
 const StudyIntroduction = lazy(() => import('./pages/StudyIntroduction'));
+const EntryDetail = lazy(() => import('./pages/EntryDetail'));
 
 // EasyResearch Platform Components
 import EasyResearchAuth from './easyresearch/components/EasyResearchAuth';
@@ -181,6 +182,8 @@ function App() {
                   <Route path="/timeline" element={<Timeline />} />
                   <Route path="/dementia-caregiver-survey" element={<DementiaCaregiverSurvey />} />
                   <Route path="/add-entry" element={<AddEntry />} />
+                  <Route path="/entry/:id" element={<EntryDetail />} />
+                  <Route path="/edit-entry/:id" element={<AddEntry />} />
                   <Route path="/summary" element={<Summary />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/how-to" element={<HowTo />} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useStateManagement';
 import { Save, X, BarChart3, Users, MessageCircle, Package, Mic, Sparkles, Loader2, Copy, CheckCircle, Clock, Plus, UserPlus } from 'lucide-react';
@@ -18,6 +18,8 @@ interface NetworkMember {
 const AddEntry: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { id: editId } = useParams<{ id?: string }>();
+  const isEditMode = !!editId;
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'activity' | 'people' | 'challengesResources'>('activity');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +69,67 @@ const AddEntry: React.FC = () => {
     };
     fetchNetworkMembers();
   }, [user?.id]);
+
+  // Load existing entry data in edit mode
+  useEffect(() => {
+    const loadEntry = async () => {
+      if (!editId || !user) return;
+      try {
+        const { data, error } = await supabase
+          .from('survey_entries')
+          .select('*')
+          .eq('id', editId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (error) throw error;
+        if (!data) {
+          toast.error(language === 'zh' ? '记录未找到' : 'Entry not found');
+          navigate('/timeline');
+          return;
+        }
+        
+        setFormData({
+          entry_type: data.entry_type || 'care_activity',
+          activity_categories: data.activity_categories || [],
+          activity_other: data.activity_other || '',
+          description: data.description || '',
+          time_spent: data.time_spent || 0,
+          emotional_impact: data.emotional_impact || '',
+          your_mood: data.your_mood || '',
+          urgency_level: data.urgency_level || '',
+          people_with: data.people_with || '',
+          people_want_with: data.people_want_with || '',
+          people_challenges: data.people_challenges || '',
+          challenges_faced: data.challenges_faced || '',
+          challenge_types: data.challenge_types || [],
+          task_difficulty: data.task_difficulty || 3,
+          resources_using: data.resources_using || '',
+          resources_wanted: data.resources_wanted || '',
+          daily_soc_stressed: data.daily_soc_stressed || '',
+          daily_soc_privacy: data.daily_soc_privacy || '',
+          daily_soc_strained: data.daily_soc_strained || '',
+        });
+        
+        // Set time option based on existing data
+        if (data.entry_timestamp) {
+          setTimeOption('other');
+          const d = new Date(data.entry_timestamp);
+          setCustomDate(d.toISOString().split('T')[0]);
+          setCustomTime(d.toTimeString().slice(0, 5));
+        }
+        
+        // Set selected people
+        if (data.people_with) {
+          setSelectedPeople(data.people_with.split(', ').filter(Boolean));
+        }
+      } catch (error: any) {
+        console.error('Error loading entry for edit:', error);
+        toast.error(language === 'zh' ? '加载失败' : 'Failed to load entry');
+      }
+    };
+    loadEntry();
+  }, [editId, user]);
   
   // Add/remove person from selection
   const togglePerson = (name: string) => {
@@ -338,15 +401,31 @@ const AddEntry: React.FC = () => {
         timestamp = null;
       }
       
-      const { error } = await supabase
-        .from('survey_entries')
-        .insert([{
-          user_id: user.id,
-          entry_timestamp: timestamp,
-          ...formData
-        }]);
+      if (isEditMode && editId) {
+        // Update existing entry
+        const { error } = await supabase
+          .from('survey_entries')
+          .update({
+            entry_timestamp: timestamp,
+            ...formData
+          })
+          .eq('id', editId)
+          .eq('user_id', user.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success(language === 'zh' ? '记录已更新' : 'Entry updated');
+      } else {
+        // Create new entry
+        const { error } = await supabase
+          .from('survey_entries')
+          .insert([{
+            user_id: user.id,
+            entry_timestamp: timestamp,
+            ...formData
+          }]);
+
+        if (error) throw error;
+      }
       navigate('/timeline');
     } catch (error: any) {
       console.error('Error saving entry:', error);
@@ -362,7 +441,7 @@ const AddEntry: React.FC = () => {
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-            {text.title}
+            {isEditMode ? (language === 'zh' ? '编辑记录' : 'Edit Entry') : text.title}
           </h1>
           <button
             onClick={() => navigate('/timeline')}
