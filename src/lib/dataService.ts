@@ -212,12 +212,12 @@ export const dataService = {
   async getSurveyEnrollment(userId: string) {
     try {
       const { data, error } = await supabase
-        .from('survey_enrollments')
+        .from('enrollment')
         .select('*')
-        .eq('user_id', userId)
-        .single()
+        .eq('participant_id', userId)
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') throw error
+      if (error) throw error
       return data
     } catch (error) {
       console.error('Error fetching enrollment:', error)
@@ -231,12 +231,10 @@ export const dataService = {
       endDate.setDate(endDate.getDate() + 6)
 
       const { data, error } = await supabase
-        .from('survey_enrollments')
+        .from('enrollment')
         .insert([{
-          user_id: userId,
-          enrollment_date: new Date().toISOString().split('T')[0],
-          start_date: startDate.toISOString().split('T')[0],
-          end_date: endDate.toISOString().split('T')[0],
+          participant_id: userId,
+          study_start_date: startDate.toISOString().split('T')[0],
           status: 'active'
         }])
         .select()
@@ -276,9 +274,9 @@ export const dataService = {
   async updateSurveyEnrollmentStatus(userId: string, status: 'active' | 'completed' | 'paused') {
     try {
       const { data, error } = await supabase
-        .from('survey_enrollments')
+        .from('enrollment')
         .update({ status })
-        .eq('user_id', userId)
+        .eq('participant_id', userId)
         .select()
 
       if (error) throw error
