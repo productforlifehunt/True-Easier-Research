@@ -17912,6 +17912,7 @@ export type Database = {
           created_at: string | null
           data_sharing: boolean | null
           default_nrt_product_id: string | null
+          dementia_stage: string | null
           email: string
           email_reminders: boolean | null
           freshcoin_balance: number | null
@@ -17957,6 +17958,7 @@ export type Database = {
           created_at?: string | null
           data_sharing?: boolean | null
           default_nrt_product_id?: string | null
+          dementia_stage?: string | null
           email: string
           email_reminders?: boolean | null
           freshcoin_balance?: number | null
@@ -18002,6 +18004,7 @@ export type Database = {
           created_at?: string | null
           data_sharing?: boolean | null
           default_nrt_product_id?: string | null
+          dementia_stage?: string | null
           email?: string
           email_reminders?: boolean | null
           freshcoin_balance?: number | null
