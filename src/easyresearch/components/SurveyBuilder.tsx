@@ -159,6 +159,14 @@ const SurveyBuilder: React.FC = () => {
       consent_required: p.consent_required ?? s.consent_required,
       consent_form_url: p.consent_form_url ?? s.consent_form_url,
       consent_form_text: p.consent_form_text ?? s.consent_form_text,
+      screening_enabled: p.screening_enabled ?? s.screening_enabled,
+      screening_questions: p.screening_questions ?? s.screening_questions,
+      participant_numbering: p.participant_numbering ?? s.participant_numbering,
+      participant_number_prefix: p.participant_number_prefix ?? s.participant_number_prefix ?? 'PP',
+      participant_relation_enabled: p.participant_relation_enabled ?? s.participant_relation_enabled,
+      participant_relation_options: p.participant_relation_options ?? s.participant_relation_options,
+      ecogram_enabled: p.ecogram_enabled ?? s.ecogram_enabled,
+      ecogram_config: p.ecogram_config ?? s.ecogram_config,
     };
   };
 
@@ -174,6 +182,14 @@ const SurveyBuilder: React.FC = () => {
       consent_required: p?.consent_required,
       consent_form_url: p?.consent_form_url,
       consent_form_text: p?.consent_form_text,
+      screening_enabled: p?.screening_enabled,
+      screening_questions: p?.screening_questions,
+      participant_numbering: p?.participant_numbering,
+      participant_number_prefix: p?.participant_number_prefix,
+      participant_relation_enabled: p?.participant_relation_enabled,
+      participant_relation_options: p?.participant_relation_options,
+      ecogram_enabled: p?.ecogram_enabled,
+      ecogram_config: p?.ecogram_config,
     };
     return {
       organization_id: p?.organization_id,
