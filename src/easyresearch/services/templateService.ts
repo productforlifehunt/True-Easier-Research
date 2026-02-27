@@ -155,45 +155,47 @@ const templateQuestions: Record<string, Array<{text: string, type: string, requi
     { text: 'I needed to learn a lot of things before I could get going with this system.', type: 'likert_scale', required: true },
   ],
   '15': [ // Dementia Caregiver ESM Study
+    // === HOURLY ACTIVITY LOG (questionnaire_id: esm-hourly-log) ===
     // Section 1: Activity
-    { text: 'Activity Details', type: 'section_header', required: false, config: { section_icon: '📋', section_color: '#10b981' } },
-    { text: 'What caregiving activities did you do?', type: 'checkbox_group', required: true, options: ['ADL (bathing, dressing, eating, toileting, mobility)', 'IADL (medication, finances, shopping, cooking, housework)', 'Medical care (appointments, treatments)', 'Emotional support / companionship', 'Supervision / safety monitoring', 'Transportation', 'Communication with professionals', 'Administrative tasks', 'Other'] },
-    { text: 'Please describe what you were doing', type: 'text_long', required: false },
-    { text: 'How long did you spend on this activity (minutes)?', type: 'number', required: false },
-    { text: 'How pleasant/unpleasant was this event?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Unpleasant', max_label: 'Very Pleasant' } },
-    { text: 'Did the care recipient show memory problems?', type: 'yes_no', required: true },
-    { text: 'Did the care recipient show behavior problems?', type: 'yes_no', required: true },
-    { text: 'Did the care recipient show depressive symptoms?', type: 'yes_no', required: true },
-    { text: 'How much distress did these memory/behavior problems cause you?', type: 'likert_scale', required: false, config: { scale_type: '0-4', custom_labels: ['No distress', 'A little', 'Moderate', 'Quite a bit', 'Extreme distress'] } },
+    { text: 'Activity Details', type: 'section_header', required: false, config: { section_icon: '📋', section_color: '#10b981', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'What caregiving activities did you do?', type: 'checkbox_group', required: true, options: ['ADL (bathing, dressing, eating, toileting, mobility)', 'IADL (medication, finances, shopping, cooking, housework)', 'Medical care (appointments, treatments)', 'Emotional support / companionship', 'Supervision / safety monitoring', 'Transportation', 'Communication with professionals', 'Administrative tasks', 'Other'], config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Please describe what you were doing', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'How long did you spend on this activity (minutes)?', type: 'number', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'How pleasant/unpleasant was this event?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Unpleasant', max_label: 'Very Pleasant', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Did the care recipient show memory problems?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Did the care recipient show behavior problems?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Did the care recipient show depressive symptoms?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'How much distress did these memory/behavior problems cause you?', type: 'likert_scale', required: false, config: { scale_type: '0-4', custom_labels: ['No distress', 'A little', 'Moderate', 'Quite a bit', 'Extreme distress'], questionnaire_id: 'esm-hourly-log' } },
     // Section 2: Affect
-    { text: 'Your Wellbeing', type: 'section_header', required: false, config: { section_icon: '💛', section_color: '#eab308' } },
-    { text: 'Right now, I feel cheerful', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel relaxed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel enthusiastic', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel satisfied', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel insecure', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel lonely', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel anxious', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel irritated', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel down', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel desperate', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
-    { text: 'Right now, I feel tensed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Your Wellbeing', type: 'section_header', required: false, config: { section_icon: '💛', section_color: '#eab308', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel cheerful', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel relaxed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel enthusiastic', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel satisfied', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel insecure', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel lonely', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel anxious', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel irritated', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel down', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel desperate', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Right now, I feel tensed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     // Section 3: People & Challenges
-    { text: 'People & Challenges', type: 'section_header', required: false, config: { section_icon: '👥', section_color: '#3b82f6' } },
-    { text: 'Who was with you or helped you?', type: 'text_long', required: false },
-    { text: 'Who else do you wish could have helped?', type: 'text_long', required: false },
-    { text: 'What challenges did you face reaching the people you needed?', type: 'text_long', required: false },
-    { text: 'How challenging was this activity overall?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'No Challenges', max_label: 'Extreme Challenges' } },
-    { text: 'What types of challenges did you experience?', type: 'checkbox_group', required: false, options: ['Knowledge gaps', 'Patient condition changes', 'Coordination difficulties', 'Time constraints', 'Emotional stress', 'Physical demands', 'Communication issues', 'Safety/liability concerns', 'Privacy issues', 'Other'] },
-    { text: 'What resources or tools are you currently using?', type: 'text_long', required: false },
-    { text: 'What resources or tools do you wish you had?', type: 'text_long', required: false },
+    { text: 'People & Challenges', type: 'section_header', required: false, config: { section_icon: '👥', section_color: '#3b82f6', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Who was with you or helped you?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'Who else do you wish could have helped?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'What challenges did you face reaching the people you needed?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'How challenging was this activity overall?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'No Challenges', max_label: 'Extreme Challenges', questionnaire_id: 'esm-hourly-log' } },
+    { text: 'What types of challenges did you experience?', type: 'checkbox_group', required: false, options: ['Knowledge gaps', 'Patient condition changes', 'Coordination difficulties', 'Time constraints', 'Emotional stress', 'Physical demands', 'Communication issues', 'Safety/liability concerns', 'Privacy issues', 'Other'], config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'What resources or tools are you currently using?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    { text: 'What resources or tools do you wish you had?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
+    // === DAILY REFLECTION (questionnaire_id: esm-daily-log) ===
     // Section 4: Daily Sense of Competence
-    { text: 'Daily Reflection', type: 'section_header', required: false, config: { section_icon: '🧠', section_color: '#8b5cf6' } },
-    { text: 'I felt stressed by the caregiving demands', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
-    { text: 'I felt that caregiving affected my privacy', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
-    { text: 'I felt strained in my relationship with the care recipient', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
-    { text: 'Overall, how burdensome or manageable was caregiving today?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Burdensome', max_label: 'Very Manageable' } },
-    { text: 'How urgent was the care need?', type: 'single_choice', required: false, options: ['Low', 'Medium', 'High', 'Urgent'] },
+    { text: 'Daily Reflection', type: 'section_header', required: false, config: { section_icon: '🧠', section_color: '#8b5cf6', questionnaire_id: 'esm-daily-log' } },
+    { text: 'I felt stressed by the caregiving demands', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    { text: 'I felt that caregiving affected my privacy', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    { text: 'I felt strained in my relationship with the care recipient', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    { text: 'Overall, how burdensome or manageable was caregiving today?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Burdensome', max_label: 'Very Manageable', questionnaire_id: 'esm-daily-log' } },
+    { text: 'How urgent was the care need?', type: 'single_choice', required: false, options: ['Low', 'Medium', 'High', 'Urgent'], config: { questionnaire_id: 'esm-daily-log' } },
   ],
 };
 
@@ -414,6 +416,11 @@ const TEMPLATE_PROJECT_SETTINGS: Record<string, any> = {
 // Get template questions for local/demo mode
 export function getTemplateQuestions(templateId: string) {
   return templateQuestions[templateId] || [];
+}
+
+// Get template-specific project settings (questionnaire configs, participant types, layout, etc.)
+export function getTemplateSettings(templateId: string) {
+  return TEMPLATE_PROJECT_SETTINGS[templateId] || null;
 }
 
 export async function createSurveyFromTemplate(

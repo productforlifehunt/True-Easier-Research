@@ -13,7 +13,7 @@ import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeM
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
 import CustomDropdown from './CustomDropdown';
 import toast from 'react-hot-toast';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface Question {
   id: string;
@@ -352,7 +352,7 @@ const SurveyBuilder: React.FC = () => {
         title: templateData.name || 'Untitled Project',
         description: templateData.description || ''
       }));
-      import('../services/templateService').then(({ getTemplateQuestions }) => {
+      import('../services/templateService').then(({ getTemplateQuestions, getTemplateSettings }) => {
         const templateQuestions = getTemplateQuestions(templateData.id);
         if (templateQuestions && templateQuestions.length > 0) {
           setQuestions(templateQuestions.map((q: any, index: number) => ({
@@ -376,6 +376,17 @@ const SurveyBuilder: React.FC = () => {
               is_other: false
             })) || []
           })));
+        }
+        // Load template-specific multi-questionnaire configs
+        const settings = getTemplateSettings(templateData.id);
+        if (settings?.setting?.questionnaire_configs) {
+          setQuestionnaireConfigs(settings.setting.questionnaire_configs);
+        }
+        if (settings?.setting?.participant_types) {
+          setParticipantTypes(settings.setting.participant_types);
+        }
+        if (settings?.setting?.app_layout) {
+          setAppLayout(settings.setting.app_layout);
         }
       });
       setLoading(false);
