@@ -264,6 +264,8 @@ export function validateSurveyResponse(
   let totalErrors = 0;
 
   for (const question of questions) {
+    // Skip non-response types
+    if (['instruction', 'section_header'].includes(question.question_type)) continue;
     const response = responses[question.id];
     const validation = getQuestionValidation(question);
     const result = validateResponse(question.question_type, response, validation);

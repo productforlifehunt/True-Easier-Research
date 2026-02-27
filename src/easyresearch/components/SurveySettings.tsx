@@ -61,7 +61,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   const canShare = Boolean(project.id);
   const participantLink = canShare ? `${window.location.origin}/easyresearch/participant/${project.id}` : '';
-  const isLongitudinal = project.project_type === 'longitudinal' || project.project_type === 'esm';
+  const isLongitudinal = ['longitudinal', 'esm', 'diary'].includes(project.project_type);
 
   const copyToClipboard = () => {
     if (!canShare) return;
@@ -169,7 +169,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           </div>
           <div>
             <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Survey Type</label>
-            <CustomDropdown options={[{value:'survey',label:'One-time Survey'},{value:'longitudinal',label:'Longitudinal Study'},{value:'clinical_trial',label:'Clinical Trial'}]} value={project.project_type} onChange={(v) => onUpdateProject({ ...project, project_type: v })} placeholder="Select type" />
+            <CustomDropdown options={[{value:'survey',label:'One-time Survey'},{value:'longitudinal',label:'Longitudinal Study'},{value:'esm',label:'ESM (Experience Sampling)'},{value:'clinical_trial',label:'Clinical Trial'},{value:'diary',label:'Diary Study'}]} value={project.project_type} onChange={(v) => onUpdateProject({ ...project, project_type: v })} placeholder="Select type" />
           </div>
         </div>
       </SectionCard>
@@ -280,6 +280,33 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
               rows={5} 
               placeholder="Study protocol, FAQ, contact info... Shown to participants in the Help tab." 
             />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Completion Page */}
+      <SectionCard icon={Check} iconBg="from-emerald-50 to-green-50" iconColor="text-emerald-600" title="Completion Page">
+        <div className="space-y-3">
+          <div>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Thank You Title</label>
+            <input type="text" value={(project as any).completion_title || ''} 
+              onChange={(e) => onUpdateProject({ ...project, completion_title: e.target.value } as any)}
+              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+              placeholder="Thank you for participating!" />
+          </div>
+          <div>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Thank You Message</label>
+            <textarea value={(project as any).completion_message || ''} 
+              onChange={(e) => onUpdateProject({ ...project, completion_message: e.target.value } as any)}
+              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+              rows={3} placeholder="Your responses have been recorded. You may now close this page." />
+          </div>
+          <div>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Redirect URL (optional)</label>
+            <input type="url" value={(project as any).completion_redirect_url || ''} 
+              onChange={(e) => onUpdateProject({ ...project, completion_redirect_url: e.target.value } as any)}
+              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+              placeholder="https://example.com/next-steps" />
           </div>
         </div>
       </SectionCard>

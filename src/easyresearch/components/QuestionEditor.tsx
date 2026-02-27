@@ -167,12 +167,58 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
             ))}
           </div>
         );
-      case 'text_short': case 'text_long': case 'number': case 'email': case 'date': case 'time':
+      case 'text_short': case 'text_long': case 'number': case 'email': case 'date': case 'time': case 'phone':
         return <div className="h-8 rounded-lg border border-stone-200 bg-stone-50" />;
       case 'rating':
         return <div className="flex gap-1 text-amber-300">{Array.from({length: question.question_config?.max_value || 5}).map((_, i) => <span key={i} className="text-lg">★</span>)}</div>;
       case 'nps':
         return <div className="flex gap-0.5 flex-wrap">{Array.from({length: 11}, (_, i) => <div key={i} className="w-6 h-6 rounded border border-stone-200 flex items-center justify-center text-[10px] text-stone-400">{i}</div>)}</div>;
+      case 'yes_no':
+        return (
+          <div className="flex gap-2">
+            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{question.question_config?.yes_label || 'Yes'}</div>
+            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{question.question_config?.no_label || 'No'}</div>
+          </div>
+        );
+      case 'matrix':
+        const matrixCols = question.question_config?.columns || [];
+        return (
+          <div className="space-y-1">
+            <div className="flex gap-1 text-[9px] text-stone-400 pl-16">
+              {matrixCols.slice(0, 5).map((col: string, i: number) => <div key={i} className="flex-1 text-center truncate">{col}</div>)}
+            </div>
+            {(question.options || []).slice(0, 2).map((opt: any) => (
+              <div key={opt.id} className="flex items-center gap-1">
+                <span className="w-16 text-[10px] text-stone-500 truncate">{opt.option_text}</span>
+                {matrixCols.slice(0, 5).map((_: string, i: number) => <div key={i} className="flex-1 flex justify-center"><span className="w-3 h-3 rounded-full border border-stone-300" /></div>)}
+              </div>
+            ))}
+          </div>
+        );
+      case 'ranking':
+        if (!question.options || question.options.length === 0) return null;
+        return (
+          <div className="space-y-1">
+            {question.options.slice(0, 3).map((opt: any, i: number) => (
+              <div key={opt.id} className="flex items-center gap-1.5 text-[11px] text-stone-500 p-1 border border-dashed border-stone-200 rounded">
+                <span className="text-[10px] font-bold text-stone-400">{i+1}.</span>
+                <span className="truncate">{opt.option_text}</span>
+              </div>
+            ))}
+          </div>
+        );
+      case 'file_upload':
+        return <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">📎 Drop file here</div>;
+      case 'image_choice':
+        return (
+          <div className="flex gap-1">
+            {(question.options || []).slice(0, 3).map((opt: any) => (
+              <div key={opt.id} className="w-12 h-12 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center text-[16px]">{opt.option_text}</div>
+            ))}
+          </div>
+        );
+      case 'instruction':
+        return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">ℹ Instruction block</div>;
       default: return null;
     }
   };
@@ -268,7 +314,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
             value={localQuestion.question_type}
             onChange={(e) => {
               const newType = e.target.value;
-              const needsOptions = ['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group'];
+              const needsOptions = ['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group', 'matrix', 'ranking', 'image_choice'];
               const updates: any = { question_type: newType };
               if (newType === 'slider') { updates.question_config = { min_value: 0, max_value: 10, step: 1 }; updates.options = []; }
               else if (newType === 'bipolar_scale') { updates.question_config = { min_value: -3, max_value: 3, step: 1, min_label: 'Very Negative', max_label: 'Very Positive', show_value_labels: true }; updates.options = []; }
@@ -276,18 +322,32 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
               else if (newType === 'likert_scale') { updates.question_config = { scale_type: '1-5' }; updates.options = []; }
               else if (newType === 'nps') { updates.question_config = {}; updates.options = []; }
               else if (newType === 'section_header') { updates.question_config = { section_icon: '', section_color: '#10b981' }; updates.options = []; }
+              else if (newType === 'matrix') { 
+                updates.question_config = { columns: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'] }; 
+                if (!localQuestion.options || localQuestion.options.length === 0) {
+                  updates.options = [
+                    { id: crypto.randomUUID(), option_text: 'Item 1', option_value: '', order_index: 0, is_other: false },
+                    { id: crypto.randomUUID(), option_text: 'Item 2', option_value: '', order_index: 1, is_other: false },
+                    { id: crypto.randomUUID(), option_text: 'Item 3', option_value: '', order_index: 2, is_other: false }
+                  ];
+                }
+              }
+              else if (newType === 'yes_no') { updates.question_config = { yes_label: 'Yes', no_label: 'No' }; updates.options = []; }
+              else if (newType === 'instruction') { updates.question_config = { content_type: 'text' }; updates.options = []; }
+              else if (newType === 'file_upload') { updates.question_config = { max_files: 1, max_size_mb: 10, accepted_types: 'image/*,.pdf,.doc,.docx' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && newType !== 'slider' && newType !== 'bipolar_scale' && newType !== 'section_header') { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','file_upload'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
           >
             <optgroup label="Layout">
               <option value="section_header">Section / Tab</option>
+              <option value="instruction">Instruction Block</option>
             </optgroup>
             <optgroup label="Text">
               <option value="text_short">Short Text</option>
@@ -298,6 +358,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
               <option value="multiple_choice">Multiple Choice</option>
               <option value="checkbox_group">Checkbox Group</option>
               <option value="dropdown">Dropdown</option>
+              <option value="yes_no">Yes / No</option>
+              <option value="image_choice">Image Choice</option>
+              <option value="matrix">Matrix / Grid</option>
+              <option value="ranking">Ranking</option>
             </optgroup>
             <optgroup label="Scale">
               <option value="slider">Slider</option>
@@ -311,6 +375,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
               <option value="date">Date</option>
               <option value="time">Time</option>
               <option value="email">Email</option>
+              <option value="phone">Phone Number</option>
+              <option value="file_upload">File Upload</option>
             </optgroup>
           </select>
         </div>
@@ -369,7 +435,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
         )}
 
         {/* Options for choice questions */}
-        {['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group'].includes(localQuestion.question_type) && (
+        {['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group', 'ranking', 'matrix', 'image_choice'].includes(localQuestion.question_type) && (
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-[12px] font-medium text-stone-400">Options</label>
@@ -502,6 +568,136 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
               className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
               <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="7">7</option><option value="10">10</option>
             </select>
+          </div>
+        )}
+
+
+        {/* Matrix / Grid Configuration */}
+        {localQuestion.question_type === 'matrix' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Column Headers (one per line)</label>
+              <textarea
+                value={(localQuestion.question_config?.columns || []).join('\n')}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, columns: e.target.value.split('\n').filter(l => l.trim()) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+                rows={5}
+                placeholder="Strongly Disagree&#10;Disagree&#10;Neutral&#10;Agree&#10;Strongly Agree"
+              />
+            </div>
+            <p className="text-[11px] text-stone-400">Row items are defined in the Options section above. Each row will have the same column choices.</p>
+          </div>
+        )}
+
+        {/* Yes/No Configuration */}
+        {localQuestion.question_type === 'yes_no' && (
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Yes Label</label>
+              <input type="text" value={localQuestion.question_config?.yes_label || 'Yes'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, yes_label: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">No Label</label>
+              <input type="text" value={localQuestion.question_config?.no_label || 'No'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, no_label: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
+            </div>
+          </div>
+        )}
+
+        {/* Instruction Block Configuration */}
+        {localQuestion.question_type === 'instruction' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content Type</label>
+              <select value={localQuestion.question_config?.content_type || 'text'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content_type: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 bg-white">
+                <option value="text">Plain Text</option>
+                <option value="info">Info Notice</option>
+                <option value="warning">Warning Notice</option>
+                <option value="tip">Tip / Hint</option>
+              </select>
+            </div>
+            <p className="text-[11px] text-stone-400">The question text above will be displayed as instructional content. No response is collected.</p>
+          </div>
+        )}
+
+        {/* File Upload Configuration */}
+        {localQuestion.question_type === 'file_upload' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Files</label>
+                <input type="number" value={localQuestion.question_config?.max_files ?? 1} min={1} max={10}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_files: Number(e.target.value) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Size (MB)</label>
+                <input type="number" value={localQuestion.question_config?.max_size_mb ?? 10} min={1} max={100}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_size_mb: Number(e.target.value) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Accepted File Types</label>
+              <input type="text" value={localQuestion.question_config?.accepted_types || 'image/*,.pdf,.doc,.docx'}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, accepted_types: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
+                placeholder="image/*,.pdf,.doc,.docx" />
+            </div>
+          </div>
+        )}
+
+        {/* Image Choice Configuration */}
+        {localQuestion.question_type === 'image_choice' && (
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.allow_multiple || false}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_multiple: e.target.checked } })}
+                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Allow multiple selections
+            </label>
+            <p className="text-[11px] text-stone-400">Add options above with image URLs in the option value field, or use emoji/text labels as visual options.</p>
+          </div>
+        )}
+
+        {/* Validation Rules */}
+        {['text_short', 'text_long', 'number', 'email', 'phone'].includes(localQuestion.question_type) && (
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <label className="text-[12px] font-medium text-stone-400">Validation</label>
+            {['text_short', 'text_long'].includes(localQuestion.question_type) && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] text-stone-400 mb-1">Min Length</label>
+                  <input type="number" value={localQuestion.validation_rule?.min_length ?? ''} min={0}
+                    onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, min_length: e.target.value ? Number(e.target.value) : undefined } })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="0" />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-stone-400 mb-1">Max Length</label>
+                  <input type="number" value={localQuestion.validation_rule?.max_length ?? ''} min={1}
+                    onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_length: e.target.value ? Number(e.target.value) : undefined } })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="No limit" />
+                </div>
+              </div>
+            )}
+            {localQuestion.question_type === 'number' && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] text-stone-400 mb-1">Min Value</label>
+                  <input type="number" value={localQuestion.validation_rule?.min_value ?? ''}
+                    onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, min_value: e.target.value ? Number(e.target.value) : undefined } })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-stone-400 mb-1">Max Value</label>
+                  <input type="number" value={localQuestion.validation_rule?.max_value ?? ''}
+                    onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_value: e.target.value ? Number(e.target.value) : undefined } })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
