@@ -92,7 +92,7 @@ export interface SurveyProject {
   auto_advance?: boolean;
 }
 
-type TabId = 'questionnaires' | 'design' | 'participants' | 'logic' | 'layout' | 'settings' | 'preview';
+type TabId = 'questionnaires' | 'participants' | 'logic' | 'layout' | 'settings' | 'preview';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -136,6 +136,7 @@ const SurveyBuilder: React.FC = () => {
     recruitment_criteria: {},
     notification_settings: {}
   });
+  // Legacy global questions state - only used for loading/migration, all questions now live inside questionnaire configs
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>('questionnaires');
@@ -256,7 +257,7 @@ const SurveyBuilder: React.FC = () => {
   const updatePublishStatus = async (nextStatus: 'draft' | 'published') => {
     if (!projectId) return;
     if (nextStatus === 'published') {
-      if (questions.length === 0 && questionnaireConfigs.every(q => q.questions.length === 0)) {
+      if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => q.questions.length === 0)) {
         toast.error('Cannot publish: Please add at least one question first.');
         return;
       }
@@ -319,22 +320,38 @@ const SurveyBuilder: React.FC = () => {
             setLogicRules(normalized.settings.logic_rules);
           }
           // Load multi-questionnaire configs from settings
-          if (normalized.settings?.questionnaire_configs) {
-            setQuestionnaireConfigs(normalized.settings.questionnaire_configs);
-          }
+          let qConfigs: QuestionnaireConfig[] = normalized.settings?.questionnaire_configs || [];
           if (normalized.settings?.participant_types) {
             setParticipantTypes(normalized.settings.participant_types);
           }
           if (normalized.settings?.app_layout) {
             setAppLayout(normalized.settings.app_layout);
           }
+          // Load questions from DB and distribute into questionnaire configs
           const { data: questionsData } = await supabase
             .from('survey_question')
             .select('*, options:question_option(*)')
             .eq('project_id', projectId)
             .order('order_index');
           if (questionsData && mounted) {
-            setQuestions(questionsData);
+            // Distribute questions into their questionnaires based on questionnaire_id in config
+            if (qConfigs.length > 0) {
+              const qMap = new Map<string, any[]>();
+              qConfigs.forEach(qc => qMap.set(qc.id, []));
+              for (const q of questionsData) {
+                const qId = q.question_config?.questionnaire_id;
+                if (qId && qMap.has(qId)) {
+                  qMap.get(qId)!.push(q);
+                } else if (qConfigs.length > 0) {
+                  // Default to first questionnaire if no match
+                  qMap.get(qConfigs[0].id)!.push(q);
+                }
+              }
+              qConfigs = qConfigs.map(qc => ({ ...qc, questions: qMap.get(qc.id) || [] }));
+            }
+            setQuestionnaireConfigs(qConfigs);
+          } else {
+            setQuestionnaireConfigs(qConfigs);
           }
         }
         if (mounted) setLoading(false);
@@ -354,34 +371,74 @@ const SurveyBuilder: React.FC = () => {
       }));
       import('../services/templateService').then(({ getTemplateQuestions, getTemplateSettings }) => {
         const templateQuestions = getTemplateQuestions(templateData.id);
-        if (templateQuestions && templateQuestions.length > 0) {
-          setQuestions(templateQuestions.map((q: any, index: number) => ({
-            id: crypto.randomUUID(),
-            question_type: q.type || 'text_short',
-            question_text: q.text || 'Enter your question',
-            question_description: '',
-            question_config: q.config || {},
-            validation_rule: {},
-            logic_rule: {},
-            ai_config: {},
-            order_index: index,
-            required: q.required || false,
-            allow_voice: false,
-            allow_ai_assist: false,
-            options: q.options?.map((opt: any, i: number) => ({
-              id: crypto.randomUUID(),
-              option_text: opt.text || opt,
-              option_value: '',
-              order_index: i,
-              is_other: false
-            })) || []
-          })));
-        }
-        // Load template-specific multi-questionnaire configs
         const settings = getTemplateSettings(templateData.id);
-        if (settings?.setting?.questionnaire_configs) {
-          setQuestionnaireConfigs(settings.setting.questionnaire_configs);
+        
+        // Build question objects from template
+        const builtQuestions = (templateQuestions || []).map((q: any, index: number) => ({
+          id: crypto.randomUUID(),
+          question_type: q.type || 'text_short',
+          question_text: q.text || 'Enter your question',
+          question_description: '',
+          question_config: q.config || {},
+          validation_rule: {},
+          logic_rule: {},
+          ai_config: {},
+          order_index: index,
+          required: q.required || false,
+          allow_voice: false,
+          allow_ai_assist: false,
+          options: q.options?.map((opt: any, i: number) => ({
+            id: crypto.randomUUID(),
+            option_text: opt.text || opt,
+            option_value: '',
+            order_index: i,
+            is_other: false
+          })) || []
+        }));
+
+        // Load questionnaire configs and distribute questions into them
+        let qConfigs: QuestionnaireConfig[] = settings?.setting?.questionnaire_configs || [];
+        if (qConfigs.length > 0 && builtQuestions.length > 0) {
+          // Distribute questions by questionnaire_id tag in their config
+          const qMap = new Map<string, any[]>();
+          qConfigs.forEach(qc => qMap.set(qc.id, []));
+          for (const q of builtQuestions) {
+            const qId = q.question_config?.questionnaire_id;
+            if (qId && qMap.has(qId)) {
+              qMap.get(qId)!.push(q);
+            } else {
+              // Default to first questionnaire
+              qMap.get(qConfigs[0].id)!.push(q);
+            }
+          }
+          // Re-index within each questionnaire
+          qConfigs = qConfigs.map(qc => {
+            const qs = qMap.get(qc.id) || [];
+            qs.forEach((q, i) => q.order_index = i);
+            return { ...qc, questions: qs };
+          });
+          setQuestionnaireConfigs(qConfigs);
+        } else if (builtQuestions.length > 0) {
+          // No questionnaire configs from template - create a default one
+          const defaultQ: QuestionnaireConfig = {
+            id: crypto.randomUUID(),
+            title: 'Main Questionnaire',
+            description: '',
+            questions: builtQuestions,
+            estimated_duration: 5,
+            frequency: 'once',
+            time_windows: [{ start: '09:00', end: '21:00' }],
+            notification_enabled: false,
+            notification_minutes_before: 5,
+            dnd_allowed: false,
+            dnd_default_start: '22:00',
+            dnd_default_end: '08:00',
+            assigned_participant_types: [],
+            order_index: 0,
+          };
+          setQuestionnaireConfigs([defaultQ]);
         }
+
         if (settings?.setting?.participant_types) {
           setParticipantTypes(settings.setting.participant_types);
         }
@@ -393,13 +450,13 @@ const SurveyBuilder: React.FC = () => {
     }
   }, [templateData, projectId]);
 
-  // Get questions for active questionnaire or all questions
+  // All questions now live inside questionnaire configs
   const getActiveQuestions = (): Question[] => {
     if (activeQuestionnaireId) {
       const qConfig = questionnaireConfigs.find(q => q.id === activeQuestionnaireId);
       return qConfig?.questions || [];
     }
-    return questions;
+    return [];
   };
 
   const setActiveQuestions = (newQuestions: Question[]) => {
@@ -407,8 +464,6 @@ const SurveyBuilder: React.FC = () => {
       setQuestionnaireConfigs(prev => prev.map(q =>
         q.id === activeQuestionnaireId ? { ...q, questions: newQuestions } : q
       ));
-    } else {
-      setQuestions(newQuestions);
     }
   };
 
@@ -481,7 +536,7 @@ const SurveyBuilder: React.FC = () => {
   const handleEditQuestions = (questionnaireId: string) => {
     setActiveQuestionnaireId(questionnaireId);
     setSelectedQuestion(null);
-    setActiveTab('design');
+    // Stay on questionnaires tab - questions are shown inline
   };
 
   const saveProject = async () => {
@@ -500,11 +555,10 @@ const SurveyBuilder: React.FC = () => {
       if (!researcherData) throw new Error('Researcher not found');
 
       const syncQuestions = async (targetProjectId: string) => {
-        // Collect all questions: global + from each questionnaire
-        const allQuestions = [...questions];
+        // All questions now live inside questionnaire configs
+        const allQuestions: Question[] = [];
         for (const qConfig of questionnaireConfigs) {
           for (const q of qConfig.questions) {
-            // Tag questions with their questionnaire_id in the config
             allQuestions.push({
               ...q,
               question_config: { ...q.question_config, questionnaire_id: qConfig.id },
@@ -589,7 +643,6 @@ const SurveyBuilder: React.FC = () => {
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'questionnaires', label: 'Questionnaires' },
-    { id: 'design', label: 'Questions' },
     { id: 'participants', label: 'Participants' },
     { id: 'logic', label: 'Logic' },
     { id: 'layout', label: 'Layout' },
@@ -675,10 +728,6 @@ const SurveyBuilder: React.FC = () => {
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  // When switching away from design, clear active questionnaire context
-                  if (tab.id !== 'design' && tab.id !== 'logic') {
-                    // Keep activeQuestionnaireId for design/logic tabs
-                  }
                 }}
                 className={`pb-2.5 px-3 text-[13px] font-medium border-b-2 transition-all whitespace-nowrap ${
                   activeTab === tab.id
@@ -703,181 +752,17 @@ const SurveyBuilder: React.FC = () => {
             onUpdate={setQuestionnaireConfigs}
             onEditQuestions={handleEditQuestions}
             activeQuestionnaireId={activeQuestionnaireId}
+            selectedQuestion={selectedQuestion}
+            onSelectQuestion={setSelectedQuestion}
+            onAddQuestion={addQuestion}
+            onUpdateQuestion={updateQuestion}
+            onDeleteQuestion={deleteQuestion}
+            onMoveQuestion={moveQuestion}
+            onDuplicateQuestion={duplicateQuestion}
+            onQuestionDragEnd={handleQuestionDragEnd}
+            onCloseQuestionEditor={() => { setActiveQuestionnaireId(null); setSelectedQuestion(null); }}
+            project={project}
           />
-        )}
-
-        {/* Questions/Design Tab */}
-        {activeTab === 'design' && (
-          <div>
-            {/* Questionnaire context bar */}
-            {activeQuestionnaireId && (
-              <div className="mb-4 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-violet-50 border border-violet-200">
-                <span className="text-[13px] font-medium text-violet-700">
-                  Editing questions for: <strong>{activeQuestionnaireName}</strong>
-                </span>
-                <button
-                  onClick={() => { setActiveQuestionnaireId(null); setSelectedQuestion(null); }}
-                  className="text-[12px] text-violet-500 hover:text-violet-700 font-medium ml-auto"
-                >
-                  ← Back to all questions
-                </button>
-              </div>
-            )}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Questions Panel */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm">
-                  <div className="flex items-center justify-between p-5 border-b border-stone-100">
-                    <h2 className="text-[15px] font-semibold text-stone-800">Questions</h2>
-                    <CustomDropdown
-                      options={[
-                        { value: '', label: '+ Add Question' },
-                        ...QUESTION_TYPE_DEFINITIONS.map(def => ({
-                          value: def.type,
-                          label: def.label
-                        }))
-                      ]}
-                      value=""
-                      onChange={(value) => value && addQuestion(value)}
-                      placeholder="+ Add Question"
-                      buttonStyle={{ backgroundColor: '#10b981', color: 'white', borderRadius: '9999px', fontSize: '13px' }}
-                      className="w-full md:w-48"
-                    />
-                  </div>
-
-                  <div className="p-4">
-                    {activeQuestions.length === 0 ? (
-                      <div className="text-center py-16">
-                        <div className="w-16 h-16 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
-                          <FileText className="text-stone-300" size={28} />
-                        </div>
-                        <p className="text-[13px] text-stone-400 font-light">
-                          No questions yet. Add your first question to get started.
-                        </p>
-                      </div>
-                    ) : (
-                      <DragDropContext onDragEnd={handleQuestionDragEnd}>
-                        <Droppable droppableId="questions">
-                          {(provided) => (
-                            <div className="space-y-2" {...provided.droppableProps} ref={provided.innerRef}>
-                              {activeQuestions.map((question, index) => (
-                                <Draggable key={question.id} draggableId={question.id} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      className={`group p-4 rounded-xl border transition-all cursor-pointer ${
-                                        selectedQuestion?.id === question.id
-                                          ? 'border-emerald-300 bg-emerald-50/50 shadow-sm shadow-emerald-100'
-                                          : 'border-stone-100 hover:border-stone-200 hover:bg-stone-50/50'
-                                      } ${snapshot.isDragging ? 'shadow-lg' : ''}`}
-                                      style={provided.draggableProps.style}
-                                      onClick={() => setSelectedQuestion(question)}
-                                    >
-                                      <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-2 flex-1">
-                                          <div
-                                            {...provided.dragHandleProps}
-                                            className="cursor-grab active:cursor-grabbing p-1 -ml-1 rounded-lg hover:bg-stone-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={(e) => e.stopPropagation()}
-                                          >
-                                            <GripVertical size={14} className="text-stone-300" />
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                              <span className="text-[11px] font-semibold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
-                                                Q{index + 1}
-                                              </span>
-                                              {question.required && (
-                                                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-500">
-                                                  Required
-                                                </span>
-                                              )}
-                                              {question.allow_voice && (
-                                                <Mic size={11} className="text-blue-400" />
-                                              )}
-                                            </div>
-                                            <h3 className="text-[13px] font-medium text-stone-700 leading-snug">
-                                              {question.question_text}
-                                            </h3>
-                                            {/* Question type previews */}
-                                            {question.options && question.options.length > 0 && (
-                                              <div className="mt-2 space-y-0.5">
-                                                {question.options.slice(0, 2).map(option => (
-                                                  <div key={option.id} className="text-[12px] text-stone-400 flex items-center gap-1.5">
-                                                    <div className="w-3 h-3 rounded-full border border-stone-300" />
-                                                    {option.option_text}
-                                                  </div>
-                                                ))}
-                                                {question.options.length > 2 && (
-                                                  <div className="text-[11px] text-stone-300 ml-4">
-                                                    +{question.options.length - 2} more
-                                                  </div>
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                        {/* Actions */}
-                                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <button onClick={(e) => { e.stopPropagation(); moveQuestion(question.id, 'up'); }} disabled={index === 0}
-                                            className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
-                                            <ChevronUp size={14} className="text-stone-400" />
-                                          </button>
-                                          <button onClick={(e) => { e.stopPropagation(); moveQuestion(question.id, 'down'); }} disabled={index === activeQuestions.length - 1}
-                                            className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
-                                            <ChevronDown size={14} className="text-stone-400" />
-                                          </button>
-                                          <button onClick={(e) => { e.stopPropagation(); duplicateQuestion(question); }}
-                                            className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
-                                            <Copy size={14} className="text-stone-400" />
-                                          </button>
-                                          <button onClick={(e) => { e.stopPropagation(); deleteQuestion(question.id); }}
-                                            className="p-1.5 rounded-lg hover:bg-red-50 transition-colors">
-                                            <Trash2 size={14} className="text-red-400" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </DragDropContext>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Editor Panel */}
-              <div className="lg:col-span-1">
-                {selectedQuestion ? (
-                  <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm sticky top-24">
-                    <div className="p-5 border-b border-stone-100">
-                      <h3 className="text-[14px] font-semibold text-stone-800">Edit Question</h3>
-                    </div>
-                    <div className="p-5">
-                      <QuestionEditor
-                        question={selectedQuestion}
-                        project={project}
-                        onUpdateQuestion={updateQuestion}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-8 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-3">
-                      <Settings size={20} className="text-stone-300" />
-                    </div>
-                    <p className="text-[13px] text-stone-400 font-light">Select a question to edit its properties</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         )}
 
         {/* Participant Types Tab */}
@@ -890,7 +775,7 @@ const SurveyBuilder: React.FC = () => {
 
         {/* Logic Tab */}
         {activeTab === 'logic' && (
-          <SurveyLogic questions={activeQuestions} projectId={projectId} onUpdateLogic={(rules) => setLogicRules(rules)} />
+          <SurveyLogic questions={questionnaireConfigs.flatMap(q => q.questions)} projectId={projectId} onUpdateLogic={(rules) => setLogicRules(rules)} />
         )}
 
         {/* Layout Tab */}
@@ -911,7 +796,7 @@ const SurveyBuilder: React.FC = () => {
         {/* Preview Tab */}
         {activeTab === 'preview' && (
           <SurveyPreview
-            questions={activeQuestions}
+            questions={questionnaireConfigs.flatMap(q => q.questions)}
             projectTitle={project.title || ''}
             projectDescription={project.description || ''}
             appLayout={appLayout}
