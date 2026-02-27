@@ -3,23 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, Clock, Copy, Eye, X, Loader2,
   GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  Heart, Briefcase, Target, MessageSquare, ThumbsUp, Smile, Filter
+  Heart, Briefcase, Target, MessageSquare, ThumbsUp, Smile, Filter,
+  Layers, FileText, Package
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { createSurveyFromTemplate } from '../services/templateService';
+
+type TemplateType = 'research' | 'questionnaire';
 
 interface Template {
   id: string;
   name: string;
   description: string;
   category: string;
+  templateType: TemplateType;
   questionCount: number;
   estimatedTime: number;
   icon: any;
   color: string;
   tags: string[];
   preview?: string[];
+  questionnaireCount?: number;
 }
 
 const TemplateLibrary: React.FC = () => {
@@ -27,6 +32,7 @@ const TemplateLibrary: React.FC = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedType, setSelectedType] = useState<'all' | TemplateType>('all');
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -40,22 +46,31 @@ const TemplateLibrary: React.FC = () => {
     { id: 'customer', name: 'Customer', icon: MessageSquare },
   ];
 
+  const typeFilters: { id: 'all' | TemplateType; name: string; icon: any; description: string }[] = [
+    { id: 'all', name: 'All Types', icon: Layers, description: 'Show all templates' },
+    { id: 'research', name: 'Research Project', icon: Package, description: 'Complete project with questionnaires, settings & layout' },
+    { id: 'questionnaire', name: 'Questionnaire', icon: FileText, description: 'Single questionnaire to import into an existing project' },
+  ];
+
   const templates: Template[] = [
-    { id: '1', name: 'Customer Satisfaction (CSAT)', description: 'Measure customer satisfaction with your product or service.', category: 'customer', questionCount: 12, estimatedTime: 3, icon: ThumbsUp, color: 'from-sky-400 to-blue-500', tags: ['CSAT'], preview: ['How satisfied are you with our product?', 'How likely are you to recommend us?', 'What could we improve?'] },
-    { id: '2', name: 'Net Promoter Score (NPS)', description: 'Measure customer loyalty and predict business growth.', category: 'customer', questionCount: 5, estimatedTime: 2, icon: Target, color: 'from-emerald-400 to-teal-500', tags: ['NPS'], preview: ['How likely are you to recommend us to a friend?', 'What is the primary reason for your score?'] },
-    { id: '3', name: 'Employee Engagement', description: 'Measure employee satisfaction and workplace culture.', category: 'hr', questionCount: 25, estimatedTime: 10, icon: Smile, color: 'from-violet-400 to-purple-500', tags: ['HR'], preview: ['I feel valued at work', 'I have the resources I need', 'I see a path for growth here'] },
-    { id: '4', name: 'Website Usability', description: 'Evaluate UX and identify usability issues.', category: 'ux', questionCount: 18, estimatedTime: 8, icon: Palette, color: 'from-pink-400 to-rose-500', tags: ['UX'], preview: ['How easy was it to find what you were looking for?', 'Rate the overall design', 'What frustrated you?'] },
-    { id: '5', name: 'Patient Experience', description: 'Measure patient satisfaction in healthcare settings.', category: 'healthcare', questionCount: 20, estimatedTime: 7, icon: Heart, color: 'from-rose-400 to-red-500', tags: ['Patient'], preview: ['How would you rate your overall care?', 'Did staff explain things clearly?', 'Would you return?'] },
-    { id: '6', name: 'Academic Research', description: 'Template for behavioral research with consent and demographics.', category: 'academic', questionCount: 5, estimatedTime: 3, icon: GraduationCap, color: 'from-indigo-400 to-blue-500', tags: ['Research'], preview: ['Consent acknowledgment', 'Demographics section', 'Main study questions'] },
-    { id: '7', name: 'Product Feedback', description: 'Collect feedback on product features and usability.', category: 'customer', questionCount: 8, estimatedTime: 4, icon: MessageSquare, color: 'from-cyan-400 to-teal-500', tags: ['Product'], preview: ['Feature satisfaction', 'Missing features', 'Overall value'] },
-    { id: '8', name: 'Event Feedback', description: 'Collect feedback to improve future events.', category: 'customer', questionCount: 9, estimatedTime: 4, icon: ThumbsUp, color: 'from-sky-400 to-cyan-500', tags: ['Event'], preview: ['How would you rate the event overall?', 'What did you enjoy most?', 'What could be improved?'] },
-    { id: '9', name: 'Market Research', description: 'Understand consumer behavior and preferences.', category: 'market', questionCount: 7, estimatedTime: 3, icon: ShoppingBag, color: 'from-orange-400 to-amber-500', tags: ['Market'], preview: ['Age range', 'Purchase frequency', 'What factors influence decisions?'] },
-    { id: '10', name: 'Course Evaluation', description: 'Collect structured course feedback.', category: 'academic', questionCount: 9, estimatedTime: 4, icon: GraduationCap, color: 'from-amber-400 to-yellow-500', tags: ['Education'], preview: ['Rate the course overall', 'What was most valuable?', 'What could be improved?'] },
-    { id: '11', name: 'Big Five Personality', description: 'Likert-scale personality questionnaire for research.', category: 'academic', questionCount: 10, estimatedTime: 4, icon: Brain, color: 'from-teal-400 to-emerald-500', tags: ['Psychology'], preview: ['I see myself as someone who is talkative', 'I see myself as someone who does a thorough job'] },
-    { id: '12', name: 'Exit Interview', description: 'Gather insights from departing employees.', category: 'hr', questionCount: 9, estimatedTime: 4, icon: Briefcase, color: 'from-stone-400 to-stone-500', tags: ['HR'], preview: ['Reason for leaving', 'Management feedback', 'Would you return?'] },
-    { id: '13', name: 'Caregiver Wellbeing', description: 'Longitudinal template for tracking caregiver wellbeing.', category: 'healthcare', questionCount: 12, estimatedTime: 5, icon: Heart, color: 'from-rose-300 to-pink-500', tags: ['Caregiver'], preview: ['How is your mood today?', 'How stressed do you feel?', 'How many hours did you provide care?'] },
-    { id: '14', name: 'System Usability Scale', description: '10-item SUS questionnaire for usability.', category: 'ux', questionCount: 10, estimatedTime: 3, icon: Target, color: 'from-violet-300 to-purple-500', tags: ['SUS'], preview: ['I would use this system frequently', 'I found the system unnecessarily complex'] },
-    { id: '15', name: 'Dementia Caregiver ESM', description: '7-day Experience Sampling study for dementia caregivers — tracks activities, mood, challenges, and support networks hourly.', category: 'healthcare', questionCount: 35, estimatedTime: 5, icon: Brain, color: 'from-emerald-400 to-teal-600', tags: ['ESM', 'Caregiver', 'Longitudinal', 'Dementia'], preview: ['What caregiving activities did you do?', 'How pleasant/unpleasant was this event? (-3 to +3)', 'Right now, I feel cheerful (1-7)', 'How challenging was this activity overall?', 'Daily burden rating (-3 to +3)'] },
+    // === RESEARCH PROJECT TEMPLATES (full projects) ===
+    { id: '15', name: 'Dementia Caregiver ESM', description: '7-day Experience Sampling study for dementia caregivers — includes Hourly Activity Log & Daily Reflection questionnaires, participant roles, app layout, and screening.', category: 'healthcare', templateType: 'research', questionCount: 35, estimatedTime: 5, icon: Brain, color: 'from-emerald-400 to-teal-600', tags: ['ESM', 'Caregiver', 'Longitudinal', 'Dementia'], questionnaireCount: 2, preview: ['Hourly Activity Log (30 questions)', 'Daily Reflection (5 questions)', 'Screening, consent, participant roles included'] },
+
+    // === QUESTIONNAIRE TEMPLATES (single instruments) ===
+    { id: '1', name: 'Customer Satisfaction (CSAT)', description: 'Measure customer satisfaction with your product or service.', category: 'customer', templateType: 'questionnaire', questionCount: 10, estimatedTime: 3, icon: ThumbsUp, color: 'from-sky-400 to-blue-500', tags: ['CSAT'], preview: ['How satisfied are you with our product?', 'How likely are you to recommend us?', 'What could we improve?'] },
+    { id: '2', name: 'Net Promoter Score (NPS)', description: 'Measure customer loyalty and predict business growth.', category: 'customer', templateType: 'questionnaire', questionCount: 4, estimatedTime: 2, icon: Target, color: 'from-emerald-400 to-teal-500', tags: ['NPS'], preview: ['How likely are you to recommend us to a friend?', 'What is the primary reason for your score?'] },
+    { id: '3', name: 'Employee Engagement', description: 'Measure employee satisfaction and workplace culture.', category: 'hr', templateType: 'questionnaire', questionCount: 11, estimatedTime: 6, icon: Smile, color: 'from-violet-400 to-purple-500', tags: ['HR'], preview: ['I feel valued at work', 'I have the resources I need', 'I see a path for growth here'] },
+    { id: '4', name: 'Website Usability', description: 'Evaluate UX and identify usability issues.', category: 'ux', templateType: 'questionnaire', questionCount: 9, estimatedTime: 5, icon: Palette, color: 'from-pink-400 to-rose-500', tags: ['UX'], preview: ['How easy was it to find what you were looking for?', 'Rate the overall design', 'What frustrated you?'] },
+    { id: '5', name: 'Patient Experience', description: 'Measure patient satisfaction in healthcare settings.', category: 'healthcare', templateType: 'questionnaire', questionCount: 9, estimatedTime: 5, icon: Heart, color: 'from-rose-400 to-red-500', tags: ['Patient'], preview: ['How would you rate your overall care?', 'Did staff explain things clearly?', 'Would you return?'] },
+    { id: '6', name: 'Academic Research', description: 'Template for behavioral research with consent and demographics.', category: 'academic', templateType: 'questionnaire', questionCount: 5, estimatedTime: 3, icon: GraduationCap, color: 'from-indigo-400 to-blue-500', tags: ['Research'], preview: ['Consent acknowledgment', 'Demographics section', 'Main study questions'] },
+    { id: '7', name: 'Product Feedback', description: 'Collect feedback on product features and usability.', category: 'customer', templateType: 'questionnaire', questionCount: 8, estimatedTime: 4, icon: MessageSquare, color: 'from-cyan-400 to-teal-500', tags: ['Product'], preview: ['Feature satisfaction', 'Missing features', 'Overall value'] },
+    { id: '8', name: 'Event Feedback', description: 'Collect feedback to improve future events.', category: 'customer', templateType: 'questionnaire', questionCount: 9, estimatedTime: 4, icon: ThumbsUp, color: 'from-sky-400 to-cyan-500', tags: ['Event'], preview: ['How would you rate the event overall?', 'What did you enjoy most?', 'What could be improved?'] },
+    { id: '9', name: 'Market Research', description: 'Understand consumer behavior and preferences.', category: 'market', templateType: 'questionnaire', questionCount: 7, estimatedTime: 3, icon: ShoppingBag, color: 'from-orange-400 to-amber-500', tags: ['Market'], preview: ['Age range', 'Purchase frequency', 'What factors influence decisions?'] },
+    { id: '10', name: 'Course Evaluation', description: 'Collect structured course feedback.', category: 'academic', templateType: 'questionnaire', questionCount: 9, estimatedTime: 4, icon: GraduationCap, color: 'from-amber-400 to-yellow-500', tags: ['Education'], preview: ['Rate the course overall', 'What was most valuable?', 'What could be improved?'] },
+    { id: '11', name: 'Big Five Personality', description: 'Likert-scale personality questionnaire for research.', category: 'academic', templateType: 'questionnaire', questionCount: 10, estimatedTime: 4, icon: Brain, color: 'from-teal-400 to-emerald-500', tags: ['Psychology'], preview: ['I see myself as someone who is talkative', 'I see myself as someone who does a thorough job'] },
+    { id: '12', name: 'Exit Interview', description: 'Gather insights from departing employees.', category: 'hr', templateType: 'questionnaire', questionCount: 10, estimatedTime: 5, icon: Briefcase, color: 'from-stone-400 to-stone-500', tags: ['HR'], preview: ['Reason for leaving', 'Management feedback', 'Would you return?'] },
+    { id: '13', name: 'Caregiver Wellbeing', description: 'Longitudinal template for tracking caregiver wellbeing.', category: 'healthcare', templateType: 'questionnaire', questionCount: 12, estimatedTime: 5, icon: Heart, color: 'from-rose-300 to-pink-500', tags: ['Caregiver'], preview: ['How is your mood today?', 'How stressed do you feel?', 'How many hours did you provide care?'] },
+    { id: '14', name: 'System Usability Scale', description: '10-item SUS questionnaire for usability.', category: 'ux', templateType: 'questionnaire', questionCount: 10, estimatedTime: 3, icon: Target, color: 'from-violet-300 to-purple-500', tags: ['SUS'], preview: ['I would use this system frequently', 'I found the system unnecessarily complex'] },
   ];
 
   const filteredTemplates = templates.filter(t => {
@@ -63,7 +78,8 @@ const TemplateLibrary: React.FC = () => {
       t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesType = selectedType === 'all' || t.templateType === selectedType;
+    return matchesSearch && matchesCategory && matchesType;
   });
 
   const handleUseTemplate = async (template: Template) => {
@@ -82,6 +98,9 @@ const TemplateLibrary: React.FC = () => {
     } catch (error: any) { toast.error(error.message || 'Failed to create project'); }
     finally { setCreating(false); }
   };
+
+  const researchCount = filteredTemplates.filter(t => t.templateType === 'research').length;
+  const questionnaireCount = filteredTemplates.filter(t => t.templateType === 'questionnaire').length;
 
   return (
     <div className="min-h-screen pt-16" style={{ backgroundColor: '#f9faf8' }}>
@@ -106,6 +125,26 @@ const TemplateLibrary: React.FC = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Type filter pills */}
+        <div className="flex gap-2 mb-5">
+          {typeFilters.map(tf => (
+            <button
+              key={tf.id}
+              onClick={() => setSelectedType(tf.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all border ${
+                selectedType === tf.id
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
+                  : 'text-stone-400 hover:bg-stone-50 border-stone-100 hover:border-stone-200'
+              }`}
+            >
+              <tf.icon size={15} />
+              <span>{tf.name}</span>
+              {tf.id === 'research' && <span className="text-[11px] opacity-60 ml-0.5">({templates.filter(t => t.templateType === 'research').length})</span>}
+              {tf.id === 'questionnaire' && <span className="text-[11px] opacity-60 ml-0.5">({templates.filter(t => t.templateType === 'questionnaire').length})</span>}
+            </button>
+          ))}
+        </div>
+
         {/* Category pills */}
         <div className="flex gap-1.5 mb-8 overflow-x-auto pb-1">
           {categories.map(cat => (
@@ -124,45 +163,60 @@ const TemplateLibrary: React.FC = () => {
           ))}
         </div>
 
-        <p className="text-[13px] text-stone-300 mb-5">{filteredTemplates.length} templates</p>
+        <p className="text-[13px] text-stone-300 mb-5">
+          {filteredTemplates.length} templates
+          {selectedType === 'all' && filteredTemplates.length > 0 && (
+            <span className="ml-2">· {researchCount} research, {questionnaireCount} questionnaires</span>
+          )}
+        </p>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTemplates.map(template => (
-            <div key={template.id} className="bg-white rounded-2xl border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all overflow-hidden group">
-              <div className="p-5">
-                <div className={`w-10 h-10 bg-gradient-to-br ${template.color} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
-                  <template.icon size={18} className="text-white" />
-                </div>
-                <h3 className="text-[14px] font-semibold text-stone-800 mb-1 group-hover:text-emerald-600 transition-colors">
-                  {template.name}
-                </h3>
-                <p className="text-[13px] text-stone-400 mb-3 line-clamp-2 leading-relaxed font-light">{template.description}</p>
-                <div className="flex items-center gap-3 text-[12px] text-stone-300">
-                  <span>{template.questionCount} questions</span>
-                  <span>·</span>
-                  <span>{template.estimatedTime} min</span>
-                </div>
+        {/* Research Projects Section */}
+        {(selectedType === 'all' || selectedType === 'research') && filteredTemplates.filter(t => t.templateType === 'research').length > 0 && (
+          <>
+            {selectedType === 'all' && (
+              <div className="flex items-center gap-2 mb-4 mt-2">
+                <Package size={16} className="text-emerald-600" />
+                <h2 className="text-[14px] font-semibold text-stone-700">Research Projects</h2>
+                <span className="text-[12px] text-stone-400 ml-1">Complete project with multiple questionnaires, settings & layout</span>
               </div>
-              <div className="border-t border-stone-100 p-3 flex gap-2" style={{ backgroundColor: 'rgba(16,185,129,0.02)' }}>
-                <button
-                  onClick={() => setPreviewTemplate(template)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-stone-400 hover:bg-white hover:text-stone-600 transition-colors"
-                >
-                  <Eye size={13} /> Preview
-                </button>
-                <button
-                  onClick={() => handleUseTemplate(template)}
-                  disabled={creating}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm shadow-emerald-200"
-                >
-                  {creating ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
-                  {creating ? 'Creating...' : 'Use'}
-                </button>
-              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {filteredTemplates.filter(t => t.templateType === 'research').map(template => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onPreview={() => setPreviewTemplate(template)}
+                  onUse={() => handleUseTemplate(template)}
+                  creating={creating}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
+
+        {/* Questionnaire Templates Section */}
+        {(selectedType === 'all' || selectedType === 'questionnaire') && filteredTemplates.filter(t => t.templateType === 'questionnaire').length > 0 && (
+          <>
+            {selectedType === 'all' && (
+              <div className="flex items-center gap-2 mb-4 mt-2">
+                <FileText size={16} className="text-blue-600" />
+                <h2 className="text-[14px] font-semibold text-stone-700">Questionnaires</h2>
+                <span className="text-[12px] text-stone-400 ml-1">Single instruments to import into an existing project</span>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTemplates.filter(t => t.templateType === 'questionnaire').map(template => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onPreview={() => setPreviewTemplate(template)}
+                  onUse={() => handleUseTemplate(template)}
+                  creating={creating}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {filteredTemplates.length === 0 && (
           <div className="text-center py-16 bg-white rounded-2xl border border-stone-100">
@@ -183,8 +237,20 @@ const TemplateLibrary: React.FC = () => {
                   <previewTemplate.icon size={16} className="text-white" />
                 </div>
                 <div>
-                  <h2 className="text-[15px] font-semibold text-stone-800">{previewTemplate.name}</h2>
-                  <p className="text-[12px] text-stone-400">{previewTemplate.questionCount} questions · {previewTemplate.estimatedTime} min</p>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-[15px] font-semibold text-stone-800">{previewTemplate.name}</h2>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      previewTemplate.templateType === 'research'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {previewTemplate.templateType === 'research' ? 'Research Project' : 'Questionnaire'}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-stone-400">
+                    {previewTemplate.questionCount} questions · {previewTemplate.estimatedTime} min
+                    {previewTemplate.questionnaireCount && ` · ${previewTemplate.questionnaireCount} questionnaires`}
+                  </p>
                 </div>
               </div>
               <button onClick={() => setPreviewTemplate(null)} className="p-1.5 rounded-lg hover:bg-stone-50">
@@ -195,10 +261,14 @@ const TemplateLibrary: React.FC = () => {
               <p className="text-[13px] text-stone-500 mb-4 font-light">{previewTemplate.description}</p>
               {previewTemplate.preview && (
                 <div className="space-y-2.5">
-                  <p className="text-[12px] font-medium text-stone-500">Sample questions:</p>
+                  <p className="text-[12px] font-medium text-stone-500">
+                    {previewTemplate.templateType === 'research' ? 'Includes:' : 'Sample questions:'}
+                  </p>
                   {previewTemplate.preview.map((q, i) => (
                     <div key={i} className="flex items-start gap-2.5 p-3 rounded-xl bg-gradient-to-r from-emerald-50/50 to-teal-50/50">
-                      <span className="text-[11px] font-semibold text-emerald-600 mt-0.5">Q{i + 1}</span>
+                      <span className="text-[11px] font-semibold text-emerald-600 mt-0.5">
+                        {previewTemplate.templateType === 'research' ? '✓' : `Q${i + 1}`}
+                      </span>
                       <span className="text-[13px] text-stone-600">{q}</span>
                     </div>
                   ))}
@@ -214,7 +284,7 @@ const TemplateLibrary: React.FC = () => {
                 disabled={creating}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm shadow-emerald-200"
               >
-                Use Template
+                {previewTemplate.templateType === 'research' ? 'Create Project' : 'Use Questionnaire'}
               </button>
             </div>
           </div>
@@ -223,5 +293,61 @@ const TemplateLibrary: React.FC = () => {
     </div>
   );
 };
+
+// Extracted card component
+const TemplateCard: React.FC<{
+  template: Template;
+  onPreview: () => void;
+  onUse: () => void;
+  creating: boolean;
+}> = ({ template, onPreview, onUse, creating }) => (
+  <div className="bg-white rounded-2xl border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all overflow-hidden group">
+    <div className="p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-10 h-10 bg-gradient-to-br ${template.color} rounded-xl flex items-center justify-center shadow-sm`}>
+          <template.icon size={18} className="text-white" />
+        </div>
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+          template.templateType === 'research'
+            ? 'bg-emerald-100 text-emerald-700'
+            : 'bg-blue-100 text-blue-700'
+        }`}>
+          {template.templateType === 'research' ? 'Project' : 'Questionnaire'}
+        </span>
+      </div>
+      <h3 className="text-[14px] font-semibold text-stone-800 mb-1 group-hover:text-emerald-600 transition-colors">
+        {template.name}
+      </h3>
+      <p className="text-[13px] text-stone-400 mb-3 line-clamp-2 leading-relaxed font-light">{template.description}</p>
+      <div className="flex items-center gap-3 text-[12px] text-stone-300">
+        <span>{template.questionCount} questions</span>
+        <span>·</span>
+        <span>{template.estimatedTime} min</span>
+        {template.questionnaireCount && (
+          <>
+            <span>·</span>
+            <span>{template.questionnaireCount} instruments</span>
+          </>
+        )}
+      </div>
+    </div>
+    <div className="border-t border-stone-100 p-3 flex gap-2" style={{ backgroundColor: 'rgba(16,185,129,0.02)' }}>
+      <button
+        onClick={onPreview}
+        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-stone-400 hover:bg-white hover:text-stone-600 transition-colors"
+      >
+        <Eye size={13} /> Preview
+      </button>
+      <button
+        onClick={onUse}
+        disabled={creating}
+        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm shadow-emerald-200"
+      >
+        {creating ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
+        {creating ? 'Creating...' : template.templateType === 'research' ? 'Use' : 'Import'}
+      </button>
+    </div>
+  </div>
+);
 
 export default TemplateLibrary;
