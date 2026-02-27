@@ -49,6 +49,7 @@ interface LayoutBuilderProps {
   layout: AppLayout;
   questionnaires: QuestionnaireConfig[];
   participantTypes: ParticipantType[];
+  studyDuration?: number;
   onUpdate: (layout: AppLayout) => void;
 }
 
@@ -136,7 +137,7 @@ const ICON_MAP: Record<string, React.FC<any>> = {
   Home, FileText, BarChart3, HelpCircle, Settings, Layout,
 };
 
-const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, onUpdate }) => {
+const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
@@ -324,17 +325,66 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             </div>
           </div>
         );
-      case 'timeline':
+      case 'timeline': {
+        const days = Math.min(studyDuration, 7);
+        const sampleHours = [8, 10, 12, 14, 16, 18, 20];
+        const previewActiveDay = 2;
         return (
-          <div className="p-2.5 rounded-xl bg-white border border-stone-100">
-            <span className="text-[9px] font-semibold text-stone-600">📅 Timeline</span>
-            <div className="flex gap-1 mt-1.5">
-              {[1,2,3,4,5].map(d => (
-                <div key={d} className={`flex-1 h-1.5 rounded-full ${d <= 3 ? 'bg-emerald-300' : 'bg-stone-200'}`} />
+          <div className="p-2.5 rounded-xl bg-white border border-stone-100 space-y-2">
+            <span className="text-[9px] font-semibold text-stone-600">📅 Study Timeline</span>
+            {/* Day tabs */}
+            <div className="flex gap-0.5 overflow-hidden">
+              {Array.from({ length: days }, (_, i) => i + 1).map(d => (
+                <div
+                  key={d}
+                  className="flex-1 text-center py-0.5 rounded text-[7px] font-medium"
+                  style={{
+                    backgroundColor: d === previewActiveDay ? (layout.theme?.primary_color || '#10b981') : 'transparent',
+                    color: d === previewActiveDay ? 'white' : '#a8a29e',
+                    minWidth: 0,
+                  }}
+                >
+                  D{d}
+                </div>
               ))}
+            </div>
+            {/* Hourly slots */}
+            <div className="space-y-0.5">
+              {sampleHours.map(h => {
+                const hasQ = h === 10 || h === 14 || h === 20;
+                const isCompleted = h === 10;
+                const isMissed = h === 20;
+                return (
+                  <div key={h} className="flex items-center gap-1">
+                    <span className="text-[6px] text-stone-300 w-4 text-right">{h}:00</span>
+                    <div className="flex-1 h-3 rounded" style={{ backgroundColor: hasQ
+                      ? isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : '#f0fdf4'
+                      : 'transparent'
+                    }}>
+                      {hasQ && (
+                        <div className="flex items-center h-full px-1">
+                          <span className="text-[5px] font-semibold truncate" style={{
+                            color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e'
+                          }}>
+                            {questionnaires[0]?.title?.substring(0, 12) || 'Survey'} {isCompleted ? '✓' : isMissed ? '✗' : '○'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex gap-1.5">
+                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" /> Completed</span>
+                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
+                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-red-200 inline-block" /> Missed</span>
+              </div>
             </div>
           </div>
         );
+      }
       case 'text_block':
         return (
           <div className="p-2 rounded-xl bg-stone-50">
