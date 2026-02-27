@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mic, Bell, Calendar, DollarSign, Users, Shield, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download, Plus, Trash2, GripVertical, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mic, Bell, Calendar, DollarSign, Users, Shield, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download, Plus, Trash2, GripVertical, HelpCircle, ChevronDown, ChevronUp, ClipboardCheck, Hash, Network } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
+import EcogramBuilder from './EcogramBuilder';
 
 interface SurveyProject {
   id?: string;
@@ -27,6 +28,24 @@ interface SurveyProject {
   survey_frequency?: string;
   allow_participant_dnd?: boolean;
   participant_numbering?: boolean;
+  participant_number_prefix?: string;
+  participant_relation_enabled?: boolean;
+  participant_relation_options?: string[];
+  screening_enabled?: boolean;
+  screening_questions?: Array<{
+    id: string;
+    question: string;
+    type: 'yes_no' | 'text' | 'select';
+    options?: string[];
+    required: boolean;
+    disqualify_value?: string;
+  }>;
+  ecogram_enabled?: boolean;
+  ecogram_config?: {
+    relationship_options?: { value: string; label: string; color: string }[];
+    support_categories?: { value: string; label: string }[];
+    center_label?: string;
+  };
   onboarding_required?: boolean;
   onboarding_instructions?: string;
   profile_questions?: Array<{
@@ -198,7 +217,109 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Display & Behavior */}
+      {/* Screening Questions */}
+      <SectionCard icon={ClipboardCheck} iconBg="from-orange-50 to-red-50" iconColor="text-orange-600" title="Screening Questions">
+        <div className="space-y-3">
+          <Toggle enabled={project.screening_enabled || false} onChange={(v) => onUpdateProject({ ...project, screening_enabled: v })} label="Enable Screening" desc="Ask eligibility questions before enrollment" />
+          {project.screening_enabled && (
+            <div className="space-y-2 pl-3 border-l-2 border-orange-200">
+              {(project.screening_questions || []).map((sq, idx) => (
+                <div key={sq.id} className="p-3 rounded-xl border border-stone-200 bg-white space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={sq.question} onChange={e => {
+                      const newSQ = [...(project.screening_questions || [])];
+                      newSQ[idx] = { ...newSQ[idx], question: e.target.value };
+                      onUpdateProject({ ...project, screening_questions: newSQ });
+                    }} className="flex-1 px-3 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Screening question..." />
+                    <button onClick={() => onUpdateProject({ ...project, screening_questions: (project.screening_questions || []).filter((_, i) => i !== idx) })}
+                      className="p-1 hover:bg-red-50 rounded"><Trash2 size={12} className="text-red-400" /></button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select value={sq.type} onChange={e => {
+                      const newSQ = [...(project.screening_questions || [])];
+                      newSQ[idx] = { ...newSQ[idx], type: e.target.value as any };
+                      onUpdateProject({ ...project, screening_questions: newSQ });
+                    }} className="px-2 py-1 rounded-lg text-[12px] border border-stone-200 bg-white">
+                      <option value="yes_no">Yes/No</option>
+                      <option value="text">Text</option>
+                      <option value="select">Select</option>
+                    </select>
+                    {sq.type === 'yes_no' && (
+                      <select value={sq.disqualify_value || ''} onChange={e => {
+                        const newSQ = [...(project.screening_questions || [])];
+                        newSQ[idx] = { ...newSQ[idx], disqualify_value: e.target.value };
+                        onUpdateProject({ ...project, screening_questions: newSQ });
+                      }} className="px-2 py-1 rounded-lg text-[12px] border border-stone-200 bg-white">
+                        <option value="">No disqualification</option>
+                        <option value="yes">Disqualify if Yes</option>
+                        <option value="no">Disqualify if No</option>
+                      </select>
+                    )}
+                    <label className="flex items-center gap-1 text-[11px] text-stone-500">
+                      <input type="checkbox" checked={sq.required} onChange={e => {
+                        const newSQ = [...(project.screening_questions || [])];
+                        newSQ[idx] = { ...newSQ[idx], required: e.target.checked };
+                        onUpdateProject({ ...project, screening_questions: newSQ });
+                      }} /> Required
+                    </label>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => onUpdateProject({ ...project, screening_questions: [...(project.screening_questions || []), { id: crypto.randomUUID(), question: '', type: 'yes_no', required: true, disqualify_value: '' }] })}
+                className="text-[12px] text-orange-500 hover:text-orange-600 font-medium">+ Add Screening Question</button>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* Participant Numbering & Relations */}
+      <SectionCard icon={Hash} iconBg="from-indigo-50 to-violet-50" iconColor="text-indigo-600" title="Participant Configuration">
+        <div className="space-y-3">
+          <Toggle enabled={project.participant_numbering || false} onChange={(v) => onUpdateProject({ ...project, participant_numbering: v })} label="Auto-Number Participants" desc="Assign sequential IDs (e.g., PP001, PP002)" />
+          {project.participant_numbering && (
+            <div className="pl-3 border-l-2 border-indigo-200">
+              <InputField label="Number Prefix" type="text" value={project.participant_number_prefix || 'PP'} 
+                onChange={(e) => onUpdateProject({ ...project, participant_number_prefix: (e.target as HTMLInputElement).value })} placeholder="PP" />
+            </div>
+          )}
+          <Toggle enabled={project.participant_relation_enabled || false} onChange={(v) => onUpdateProject({ ...project, participant_relation_enabled: v })} label="Participant Relations" desc="Allow specifying relationships (e.g., primary/secondary caregiver)" />
+          {project.participant_relation_enabled && (
+            <div className="pl-3 border-l-2 border-indigo-200 space-y-2">
+              <p className="text-[11px] text-stone-400">Define available relationship roles:</p>
+              {(project.participant_relation_options || ['Primary Caregiver', 'Secondary Caregiver', 'Family Member', 'Professional']).map((opt, idx) => (
+                <div key={idx} className="flex items-center gap-1.5">
+                  <input type="text" value={opt} onChange={e => {
+                    const newOpts = [...(project.participant_relation_options || ['Primary Caregiver', 'Secondary Caregiver', 'Family Member', 'Professional'])];
+                    newOpts[idx] = e.target.value;
+                    onUpdateProject({ ...project, participant_relation_options: newOpts });
+                  }} className="flex-1 px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                  <button onClick={() => {
+                    const newOpts = (project.participant_relation_options || ['Primary Caregiver', 'Secondary Caregiver', 'Family Member', 'Professional']).filter((_, i) => i !== idx);
+                    onUpdateProject({ ...project, participant_relation_options: newOpts });
+                  }} className="p-0.5 hover:bg-red-50 rounded"><X size={10} className="text-red-400" /></button>
+                </div>
+              ))}
+              <button onClick={() => onUpdateProject({ ...project, participant_relation_options: [...(project.participant_relation_options || ['Primary Caregiver', 'Secondary Caregiver', 'Family Member', 'Professional']), 'New Role'] })}
+                className="text-[11px] text-indigo-500 hover:text-indigo-600">+ Add Role</button>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      {/* Ecogram / Network Diagram */}
+      <SectionCard icon={Network} iconBg="from-teal-50 to-cyan-50" iconColor="text-teal-600" title="Network Diagram (Ecogram)">
+        <div className="space-y-3">
+          <Toggle enabled={project.ecogram_enabled || false} onChange={(v) => onUpdateProject({ ...project, ecogram_enabled: v })} label="Enable Ecogram" desc="Let participants build a care network diagram" />
+          {project.ecogram_enabled && (
+            <div className="pl-3 border-l-2 border-teal-200 space-y-2">
+              <InputField label="Center Label" type="text" value={project.ecogram_config?.center_label || 'You'} 
+                onChange={(e) => onUpdateProject({ ...project, ecogram_config: { ...project.ecogram_config, center_label: (e.target as HTMLInputElement).value } })} placeholder="You / Patient" />
+              <p className="text-[11px] text-stone-400">The ecogram will be available in participant settings. Data is stored per-enrollment.</p>
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
       <SectionCard icon={Settings} iconBg="from-sky-50 to-blue-50" iconColor="text-sky-600" title="Display & Behavior">
         <div className="divide-y divide-stone-100">
           <Toggle enabled={project.show_progress_bar !== false} onChange={(v) => onUpdateProject({ ...project, show_progress_bar: v })} label="Progress Bar" desc="Show completion percentage" />

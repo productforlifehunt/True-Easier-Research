@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { ChevronRight, Calendar, Clock, ChevronLeft } from 'lucide-react';
+import { ChevronRight, Calendar, Clock, ChevronLeft, AlertCircle, ShieldCheck } from 'lucide-react';
 
 interface ProfileQuestion {
   id: string;
@@ -10,13 +10,16 @@ interface ProfileQuestion {
   type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
   options?: string[];
   required: boolean;
-  config?: {
-    min?: number;
-    max?: number;
-    min_label?: string;
-    max_label?: string;
-    placeholder?: string;
-  };
+  config?: { min?: number; max?: number; min_label?: string; max_label?: string; placeholder?: string; };
+}
+
+interface ScreeningQuestion {
+  id: string;
+  question: string;
+  type: 'yes_no' | 'text' | 'select';
+  options?: string[];
+  required: boolean;
+  disqualify_value?: string;
 }
 
 interface ParticipantOnboardingProps {
@@ -27,9 +30,13 @@ interface ParticipantOnboardingProps {
 const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId, onComplete }) => {
   const [project, setProject] = useState<any>(null);
   const [email, setEmail] = useState('');
+  const [participantNumber, setParticipantNumber] = useState('');
+  const [participantRelation, setParticipantRelation] = useState('');
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState<'info' | 'profile'>('info');
+  const [step, setStep] = useState<'screening' | 'info' | 'profile'>('info');
+  const [screeningResponses, setScreeningResponses] = useState<Record<string, any>>({});
   const [profileResponses, setProfileResponses] = useState<Record<string, any>>({});
+  const [disqualified, setDisqualified] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -42,14 +49,50 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
         const settings = (projectData as any).setting || {};
-        setProject({ ...projectData, profile_questions: (projectData as any).profile_question || settings.profile_questions });
+        setProject({
+          ...projectData,
+          profile_questions: (projectData as any).profile_question || settings.profile_questions,
+          screening_questions: settings.screening_questions,
+          screening_enabled: settings.screening_enabled,
+          participant_numbering: settings.participant_numbering || (projectData as any).participant_numbering,
+          participant_number_prefix: settings.participant_number_prefix || 'PP',
+          participant_relation_enabled: settings.participant_relation_enabled,
+          participant_relation_options: settings.participant_relation_options || [],
+        });
+        // Start with screening if enabled
+        if (settings.screening_enabled && settings.screening_questions?.length > 0) {
+          setStep('screening');
+        }
       }
     } catch (error) { console.error('Error loading project:', error); }
     finally { setLoading(false); }
   };
 
+  const screeningQuestions: ScreeningQuestion[] = project?.screening_questions || [];
   const profileQuestions: ProfileQuestion[] = project?.profile_questions || [];
   const hasProfileQuestions = profileQuestions.filter(q => q.type !== 'section').length > 0;
+  const hasScreening = project?.screening_enabled && screeningQuestions.length > 0;
+
+  const checkScreeningEligibility = (): boolean => {
+    for (const sq of screeningQuestions) {
+      if (sq.disqualify_value && screeningResponses[sq.id] === sq.disqualify_value) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleScreeningNext = () => {
+    // Check all required screening questions answered
+    for (const sq of screeningQuestions) {
+      if (sq.required && !screeningResponses[sq.id]) return;
+    }
+    if (!checkScreeningEligibility()) {
+      setDisqualified(true);
+      return;
+    }
+    setStep('info');
+  };
 
   const handleInfoNext = () => {
     if (!email) return;
@@ -63,11 +106,29 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
   const handleEnroll = async () => {
     if (!email) return;
     try {
+      // Generate participant number if numbering enabled
+      let assignedNumber = participantNumber;
+      if (project?.participant_numbering && !assignedNumber) {
+        const prefix = project.participant_number_prefix || 'PP';
+        const { count } = await supabase.from('enrollment').select('id', { count: 'exact', head: true }).eq('project_id', projectId);
+        assignedNumber = `${prefix}${String((count || 0) + 1).padStart(3, '0')}`;
+      }
+
       const { data: enrollment, error: enrollError } = await supabase.from('enrollment').insert({
-        project_id: projectId, participant_id: user?.id || null, participant_email: email,
-        status: 'active', consent_signed_at: new Date().toISOString(), study_start_date: new Date().toISOString().split('T')[0],
-        profile_data: Object.keys(profileResponses).length > 0 ? profileResponses : null
+        project_id: projectId,
+        participant_id: user?.id || null,
+        participant_email: email,
+        status: 'active',
+        consent_signed_at: new Date().toISOString(),
+        study_start_date: new Date().toISOString().split('T')[0],
+        profile_data: Object.keys(profileResponses).length > 0 ? profileResponses : null,
+        enrollment_data: {
+          screening_responses: Object.keys(screeningResponses).length > 0 ? screeningResponses : null,
+          participant_number: assignedNumber || null,
+          participant_relation: participantRelation || null,
+        }
       }).select().single();
+
       if (enrollError) { console.error('Enrollment error:', enrollError); return; }
       if (enrollment) {
         localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
@@ -90,6 +151,29 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
     return (
       <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (disqualified) {
+    return (
+      <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-7 text-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-orange-50 flex items-center justify-center">
+              <AlertCircle className="text-orange-500" size={24} />
+            </div>
+            <h2 className="text-lg font-bold text-stone-800 mb-2">Not Eligible</h2>
+            <p className="text-[13px] text-stone-500 font-light mb-4">
+              Based on your screening responses, you do not meet the eligibility criteria for this study.
+              Thank you for your interest.
+            </p>
+            <button onClick={() => navigate('/easyresearch')}
+              className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500">
+              Return Home
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -119,8 +203,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         )}
         {q.type === 'number' && (
           <input type="number" value={val || ''} onChange={(e) => update(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-            placeholder={q.config?.placeholder || ''} />
+            className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50" />
         )}
         {q.type === 'date' && (
           <input type="date" value={val || ''} onChange={(e) => update(e.target.value)}
@@ -160,19 +243,14 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 {points.map(v => (
                   <button key={v} onClick={() => update(v)}
                     className="w-10 h-10 rounded-xl border-2 text-[13px] font-semibold transition-all"
-                    style={{
-                      borderColor: val === v ? '#10b981' : '#e7e5e4',
-                      backgroundColor: val === v ? '#f0fdf4' : 'white',
-                      color: val === v ? '#10b981' : '#78716c'
-                    }}>
+                    style={{ borderColor: val === v ? '#10b981' : '#e7e5e4', backgroundColor: val === v ? '#f0fdf4' : 'white', color: val === v ? '#10b981' : '#78716c' }}>
                     {v}
                   </button>
                 ))}
               </div>
               {(q.config?.min_label || q.config?.max_label) && (
                 <div className="flex justify-between text-[11px] text-stone-400 px-1">
-                  <span>{q.config?.min_label}</span>
-                  <span>{q.config?.max_label}</span>
+                  <span>{q.config?.min_label}</span><span>{q.config?.max_label}</span>
                 </div>
               )}
             </div>
@@ -186,8 +264,79 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
     <div className="min-h-screen bg-stone-50/50">
       <div className="max-w-md mx-auto px-4 py-10">
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-7">
+          
+          {/* Step indicator */}
+          {(hasScreening || hasProfileQuestions) && (
+            <div className="flex items-center gap-2 mb-6">
+              {hasScreening && (
+                <div className={`flex-1 h-1 rounded-full ${step === 'screening' ? 'bg-emerald-500' : 'bg-emerald-200'}`} />
+              )}
+              <div className={`flex-1 h-1 rounded-full ${step === 'info' ? 'bg-emerald-500' : step === 'profile' ? 'bg-emerald-200' : 'bg-stone-200'}`} />
+              {hasProfileQuestions && (
+                <div className={`flex-1 h-1 rounded-full ${step === 'profile' ? 'bg-emerald-500' : 'bg-stone-200'}`} />
+              )}
+            </div>
+          )}
+
+          {/* Screening Step */}
+          {step === 'screening' && (
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">
+                  <ShieldCheck size={16} className="text-orange-500" />
+                </div>
+                <h2 className="text-lg font-bold text-stone-800">Eligibility Screening</h2>
+              </div>
+              <p className="text-[12px] text-stone-400 font-light mb-5">Please answer the following questions to check your eligibility.</p>
+              <div className="space-y-4">
+                {screeningQuestions.map(sq => (
+                  <div key={sq.id}>
+                    <label className="block text-[13px] font-medium text-stone-700 mb-2">
+                      {sq.question} {sq.required && <span className="text-red-500">*</span>}
+                    </label>
+                    {sq.type === 'yes_no' && (
+                      <div className="flex gap-2">
+                        {['yes', 'no'].map(v => (
+                          <button key={v} onClick={() => setScreeningResponses(prev => ({ ...prev, [sq.id]: v }))}
+                            className={`flex-1 py-3 rounded-xl text-[13px] font-medium border-2 transition-all capitalize ${
+                              screeningResponses[sq.id] === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-500'}`}>
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {sq.type === 'text' && (
+                      <input type="text" value={screeningResponses[sq.id] || ''}
+                        onChange={e => setScreeningResponses(prev => ({ ...prev, [sq.id]: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
+                    )}
+                    {sq.type === 'select' && (
+                      <select value={screeningResponses[sq.id] || ''}
+                        onChange={e => setScreeningResponses(prev => ({ ...prev, [sq.id]: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] bg-white">
+                        <option value="">Select...</option>
+                        {(sq.options || []).map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button onClick={handleScreeningNext}
+                className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40"
+                disabled={screeningQuestions.some(sq => sq.required && !screeningResponses[sq.id])}>
+                Continue <ChevronRight size={16} />
+              </button>
+            </>
+          )}
+
+          {/* Info Step */}
           {step === 'info' && (
             <>
+              {hasScreening && (
+                <button onClick={() => setStep('screening')} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors mb-2">
+                  <ChevronLeft size={16} className="text-stone-500" />
+                </button>
+              )}
               <h1 className="text-xl font-bold text-stone-800 mb-2">{project?.title}</h1>
               <p className="text-[13px] text-stone-400 font-light mb-6">{project?.description}</p>
 
@@ -198,11 +347,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                   </h3>
                   <div className="space-y-1.5 text-[12px] text-stone-500 font-light">
                     <p>This longitudinal study tracks your experiences over time.</p>
-                    <p className="flex items-center gap-1.5">
-                      <Clock size={11} className="text-stone-400" />
-                      Duration: {project?.study_duration || 7} days
-                    </p>
-                    <p>Each survey takes only 2-3 minutes.</p>
+                    <p className="flex items-center gap-1.5"><Clock size={11} className="text-stone-400" /> Duration: {project?.study_duration || 7} days</p>
                   </div>
                 </div>
               )}
@@ -216,12 +361,33 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               <div className="space-y-4">
                 <div>
                   <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Email Address</label>
-                  <input
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                    placeholder="Enter your email" required
-                  />
+                    placeholder="Enter your email" required />
                 </div>
+
+                {project?.participant_numbering && (
+                  <div>
+                    <label className="block text-[12px] font-medium text-stone-500 mb-1.5">
+                      Participant Number {project.participant_number_prefix && <span className="text-stone-400">(e.g., {project.participant_number_prefix}001)</span>}
+                    </label>
+                    <input type="text" value={participantNumber} onChange={(e) => setParticipantNumber(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
+                      placeholder={`${project.participant_number_prefix || 'PP'}### (leave blank for auto-assign)`} />
+                  </div>
+                )}
+
+                {project?.participant_relation_enabled && (project?.participant_relation_options?.length > 0) && (
+                  <div>
+                    <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Role/Relationship</label>
+                    <select value={participantRelation} onChange={(e) => setParticipantRelation(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white">
+                      <option value="">Select your role...</option>
+                      {project.participant_relation_options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                )}
+
                 <button onClick={handleInfoNext} disabled={!email}
                   className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
                   {hasProfileQuestions ? 'Continue to Profile' : (project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey')}
@@ -231,6 +397,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
             </>
           )}
 
+          {/* Profile Step */}
           {step === 'profile' && (
             <>
               <div className="flex items-center gap-2 mb-4">
@@ -240,11 +407,9 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 <h2 className="text-lg font-bold text-stone-800">Your Profile</h2>
               </div>
               <p className="text-[12px] text-stone-400 font-light mb-5">Please fill out the following information before starting.</p>
-
               <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                 {profileQuestions.map(q => renderProfileField(q))}
               </div>
-
               <button onClick={handleEnroll} disabled={!validateProfile()}
                 className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
                 {project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey'}
