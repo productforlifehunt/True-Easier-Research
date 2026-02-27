@@ -27,6 +27,8 @@ const SettingsPage: React.FC = () => {
     researchUpdates: true,
     pushNotifications: true
   });
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+  const [dailyReminderTime, setDailyReminderTime] = useState('22:00');
   
   // Hourly notification settings
   const [hourlyReminders, setHourlyReminders] = useState(false);
@@ -289,14 +291,28 @@ const SettingsPage: React.FC = () => {
           setHourlyReminders(prefs.hourly_reminders_enabled || false);
           setDndPeriods(prefs.dnd_periods || []);
           
-          // Start scheduler if enabled
-          if (prefs.hourly_reminders_enabled) {
-            notificationScheduler.start({
-              hourly_reminders_enabled: prefs.hourly_reminders_enabled,
-              dnd_periods: prefs.dnd_periods || [],
-              notification_permission_status: prefs.notification_permission_status || 'default'
-            }, language);
+          // Load the three notification toggles from DB
+          setNotifications({
+            dailyReminders: prefs.daily_reminders_enabled ?? true,
+            researchUpdates: prefs.research_updates_enabled ?? true,
+            pushNotifications: prefs.push_notifications_enabled ?? true
+          });
+          setNotificationsLoaded(true);
+          
+          // Load daily reminder time (DB stores as HH:MM:SS, UI uses HH:MM)
+          if (prefs.daily_reminder_time) {
+            setDailyReminderTime(prefs.daily_reminder_time.substring(0, 5));
           }
+          
+          // Start scheduler with full preferences
+          notificationScheduler.start({
+            hourly_reminders_enabled: prefs.hourly_reminders_enabled || false,
+            daily_reminders_enabled: prefs.daily_reminders_enabled ?? true,
+            daily_reminder_time: prefs.daily_reminder_time || '22:00:00',
+            push_notifications_enabled: prefs.push_notifications_enabled ?? true,
+            dnd_periods: prefs.dnd_periods || [],
+            notification_permission_status: prefs.notification_permission_status || 'default'
+          }, language);
         }
       } catch (error) {
         console.error('Error loading notification preferences:', error);
@@ -447,8 +463,10 @@ const SettingsPage: React.FC = () => {
         testingNotification: 'Sending...',
         dailyReminders: 'Daily Reminders',
         dailyRemindersDesc: 'Receive reminders to complete your daily survey',
-        researchUpdates: 'Research Updates',
-        researchUpdatesDesc: 'Receive notifications about research progress',
+        dailyReminderTime: 'Reminder Time',
+        dailyReminderTimeDesc: 'Choose when you want to receive your daily reminder',
+        researchUpdates: 'Research Notifications',
+        researchUpdatesDesc: 'Receive all research-related notifications (e.g., interview schedules, study updates, research milestones)',
         pushNotifications: 'Push Notifications',
         pushNotificationsDesc: 'Receive push notifications on your mobile device',
         accountSettings: 'Account Settings',
@@ -515,8 +533,10 @@ const SettingsPage: React.FC = () => {
         testingNotification: '发送中...',
         dailyReminders: '每日提醒',
         dailyRemindersDesc: '接收完成每日调查的提醒',
-        researchUpdates: '研究更新',
-        researchUpdatesDesc: '接收有关研究进展的通知',
+        dailyReminderTime: '提醒时间',
+        dailyReminderTimeDesc: '选择您希望收到每日提醒的时间',
+        researchUpdates: '研究通知',
+        researchUpdatesDesc: '接收所有研究相关通知（如访谈时间安排、研究进展、里程碑更新）',
         pushNotifications: '推送通知',
         pushNotificationsDesc: '在移动设备上接收推送通知',
         accountSettings: '账户设置',
@@ -582,11 +602,69 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleNotificationToggle = (type: keyof typeof notifications) => {
-    setNotifications(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
+  const handleNotificationToggle = async (type: keyof typeof notifications) => {
+    if (!user) return;
+    const newValue = !notifications[type];
+    const previous = notifications[type];
+    
+    // Optimistic update
+    setNotifications(prev => ({ ...prev, [type]: newValue }));
+    
+    // Map frontend keys to DB column names
+    const dbColumnMap: Record<string, string> = {
+      dailyReminders: 'daily_reminders_enabled',
+      researchUpdates: 'research_updates_enabled',
+      pushNotifications: 'push_notifications_enabled'
+    };
+    
+    try {
+      await dataService.updateNotificationPreferences(user.id, {
+        [dbColumnMap[type]]: newValue
+      });
+      
+      // Update scheduler when daily reminders or push notifications change
+      if (type === 'dailyReminders' || type === 'pushNotifications') {
+        const updatedNotifs = { ...notifications, [type]: newValue };
+        notificationScheduler.updatePreferences({
+          hourly_reminders_enabled: hourlyReminders,
+          daily_reminders_enabled: updatedNotifs.dailyReminders,
+          daily_reminder_time: dailyReminderTime + ':00',
+          push_notifications_enabled: updatedNotifs.pushNotifications,
+          dnd_periods: dndPeriods,
+          notification_permission_status: 'granted'
+        }, language);
+      }
+    } catch (error) {
+      console.error(`Error updating ${type}:`, error);
+      setNotifications(prev => ({ ...prev, [type]: previous }));
+      toast.error(language === 'zh' ? '更新失败，请重试' : 'Failed to update, please try again');
+    }
+  };
+
+  const handleDailyReminderTimeChange = async (newTime: string) => {
+    if (!user) return;
+    const previousTime = dailyReminderTime;
+    setDailyReminderTime(newTime);
+    
+    try {
+      await dataService.updateNotificationPreferences(user.id, {
+        daily_reminder_time: newTime + ':00'
+      });
+      
+      // Update scheduler with new time
+      notificationScheduler.updatePreferences({
+        hourly_reminders_enabled: hourlyReminders,
+        daily_reminders_enabled: notifications.dailyReminders,
+        daily_reminder_time: newTime + ':00',
+        push_notifications_enabled: notifications.pushNotifications,
+        dnd_periods: dndPeriods,
+        notification_permission_status: 'granted'
+      }, language);
+    } catch (error) {
+      console.error('Error updating daily reminder time:', error);
+      setDailyReminderTime(previousTime);
+      toast.error(language === 'zh' ? '更新失败，请重试' : 'Failed to update, please try again');
+    }
   };
 
   const requestNotificationPermission = async () => {
@@ -622,6 +700,9 @@ const SettingsPage: React.FC = () => {
         // Update scheduler
         notificationScheduler.updatePreferences({
           hourly_reminders_enabled: newValue,
+          daily_reminders_enabled: notifications.dailyReminders,
+          daily_reminder_time: dailyReminderTime + ':00',
+          push_notifications_enabled: notifications.pushNotifications,
           dnd_periods: dndPeriods,
           notification_permission_status: updated.notification_permission_status || 'default'
         }, language);
@@ -651,6 +732,9 @@ const SettingsPage: React.FC = () => {
         // Update scheduler
         notificationScheduler.updatePreferences({
           hourly_reminders_enabled: hourlyReminders,
+          daily_reminders_enabled: notifications.dailyReminders,
+          daily_reminder_time: dailyReminderTime + ':00',
+          push_notifications_enabled: notifications.pushNotifications,
           dnd_periods: updatedPeriods,
           notification_permission_status: 'granted'
         }, language);
@@ -671,6 +755,9 @@ const SettingsPage: React.FC = () => {
       // Update scheduler
       notificationScheduler.updatePreferences({
         hourly_reminders_enabled: hourlyReminders,
+        daily_reminders_enabled: notifications.dailyReminders,
+        daily_reminder_time: dailyReminderTime + ':00',
+        push_notifications_enabled: notifications.pushNotifications,
         dnd_periods: updatedPeriods,
         notification_permission_status: 'granted'
       }, language);
@@ -692,6 +779,9 @@ const SettingsPage: React.FC = () => {
       // Update scheduler
       notificationScheduler.updatePreferences({
         hourly_reminders_enabled: hourlyReminders,
+        daily_reminders_enabled: notifications.dailyReminders,
+        daily_reminder_time: dailyReminderTime + ':00',
+        push_notifications_enabled: notifications.pushNotifications,
         dnd_periods: updatedPeriods,
         notification_permission_status: 'granted'
       }, language);
@@ -716,19 +806,6 @@ const SettingsPage: React.FC = () => {
       toast.error(error.message || 'Failed to send test notification');
     } finally {
       setTimeout(() => setTestingNotification(false), 2000);
-    }
-  };
-
-  const scheduleNotification = (title: string, body: string, delayMs: number) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      setTimeout(() => {
-        new Notification(title, {
-          body,
-          icon: '/favicon.ico',
-          tag: 'survey-reminder',
-          requireInteraction: true
-        });
-      }, delayMs);
     }
   };
 
@@ -1914,14 +1991,22 @@ const SettingsPage: React.FC = () => {
                   <IOSToggle
                     checked={interviewAgreement}
                     onChange={async (checked) => {
+                      const previous = interviewAgreement;
+                      setInterviewAgreement(checked);
                       try {
-                        await supabase
+                        const { error } = await supabase
                           .from('enrollment')
                           .update({ interview_agreement: checked })
                           .eq('participant_id', user.id);
-                        setInterviewAgreement(checked);
+                        if (error) {
+                          console.error('Error updating interview agreement:', error);
+                          setInterviewAgreement(previous);
+                          toast.error(language === 'zh' ? '更新失败，请重试' : 'Failed to update, please try again');
+                        }
                       } catch (error) {
                         console.error('Error updating interview agreement:', error);
+                        setInterviewAgreement(previous);
+                        toast.error(language === 'zh' ? '更新失败，请重试' : 'Failed to update, please try again');
                       }
                     }}
                   />
@@ -2490,21 +2575,48 @@ const SettingsPage: React.FC = () => {
                 {/* Divider */}
                 <div className="h-px my-4" style={{ backgroundColor: 'var(--border-light)' }}></div>
 
-                <div className="flex items-center justify-between p-6 rounded-xl gap-4 border-2" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {settingsT.settings.dailyReminders}
-                    </h4>
-                    <p className="text-base md:text-lg" style={{ color: 'var(--text-secondary)' }}>
-                      {settingsT.settings.dailyRemindersDesc}
-                    </p>
+                <div className="p-6 rounded-xl border-2" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        {settingsT.settings.dailyReminders}
+                      </h4>
+                      <p className="text-base md:text-lg" style={{ color: 'var(--text-secondary)' }}>
+                        {settingsT.settings.dailyRemindersDesc}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <IOSToggle
+                        checked={notifications.dailyReminders}
+                        onChange={() => handleNotificationToggle('dailyReminders')}
+                      />
+                    </div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <IOSToggle
-                      checked={notifications.dailyReminders}
-                      onChange={() => handleNotificationToggle('dailyReminders')}
-                    />
-                  </div>
+                  {notifications.dailyReminders && (
+                    <div className="mt-5 pt-5 border-t" style={{ borderColor: 'var(--border-light)' }}>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-base md:text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+                            {settingsT.settings.dailyReminderTime}
+                          </h4>
+                          <p className="text-sm md:text-base" style={{ color: 'var(--text-secondary)' }}>
+                            {settingsT.settings.dailyReminderTimeDesc}
+                          </p>
+                        </div>
+                        <input
+                          type="time"
+                          value={dailyReminderTime}
+                          onChange={(e) => handleDailyReminderTimeChange(e.target.value)}
+                          className="px-4 py-3 rounded-xl border-2 transition-all focus:outline-none min-w-[130px] text-center font-semibold text-lg"
+                          style={{
+                            borderColor: 'var(--color-green)',
+                            backgroundColor: 'var(--bg-primary)',
+                            color: 'var(--text-primary)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-between p-6 rounded-xl gap-4 border-2" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>

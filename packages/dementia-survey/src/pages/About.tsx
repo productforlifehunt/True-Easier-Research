@@ -34,43 +34,43 @@ const About: React.FC = () => {
       <DesktopHeader />
       <MobileHeader />
       
-      <div className="max-w-4xl mx-auto px-6 py-8 pb-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-24">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-6 text-center">
+          <h1 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             {text.title}
           </h1>
         </div>
 
         {/* About Section */}
-        <div className="mb-6 p-6 rounded-2xl border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-6 h-6" style={{ color: 'var(--color-green)' }} />
-            <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-4 p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5" style={{ color: 'var(--color-green)' }} />
+            <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
               {text.about.title}
             </h2>
           </div>
         </div>
 
         {/* Contact */}
-        <div className="p-6 rounded-2xl border" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
-          <h2 className="text-xl font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
+          <h2 className="text-base font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
             {text.contact.title}
           </h2>
-          <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
             {text.contact.content}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => navigate('/join-survey')}
-              className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:opacity-90"
+              className="px-5 py-2.5 rounded-lg font-semibold text-sm text-white transition-all hover:opacity-90"
               style={{ backgroundColor: 'var(--color-green)' }}
             >
               {language === 'zh' ? '加入研究' : 'Join the Study'}
             </button>
             <button
               onClick={() => navigate('/contact')}
-              className="px-6 py-3 rounded-xl font-semibold border transition-all hover:shadow-sm"
+              className="px-5 py-2.5 rounded-lg font-semibold text-sm border transition-all hover:shadow-sm"
               style={{ borderColor: 'var(--color-green)', color: 'var(--color-green)', backgroundColor: 'white' }}
             >
               {language === 'zh' ? '联系我们' : 'Contact Us'}

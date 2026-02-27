@@ -18,6 +18,9 @@ const Contact = lazy(() => import('./pages/Contact'));
 const JoinSurvey = lazy(() => import('./pages/JoinSurvey'));
 const Settings = lazy(() => import('./pages/Settings'));
 const StudyIntroduction = lazy(() => import('./pages/StudyIntroduction'));
+const Interview = lazy(() => import('./pages/Interview'));
+const EndOfDaySurvey = lazy(() => import('./pages/EndOfDaySurvey'));
+const Consent = lazy(() => import('./pages/Consent'));
 
 import './index.css'
 
@@ -41,7 +44,7 @@ function App() {
       <Router>
         <AppStateProvider>
           <Toaster position="top-center" />
-          <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+          <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', width: '100%', overflowX: 'hidden' }}>
             <main>
               <Suspense fallback={
                 <div style={{
@@ -61,6 +64,7 @@ function App() {
                   <Route path="/timeline" element={<Timeline />} />
                   <Route path="/dementia-caregiver-survey" element={<DementiaCaregiverSurvey />} />
                   <Route path="/add-entry" element={<AddEntry />} />
+                  <Route path="/edit-entry/:id" element={<AddEntry />} />
                   <Route path="/summary" element={<Summary />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/how-to" element={<HowTo />} />
@@ -68,6 +72,9 @@ function App() {
                   <Route path="/join-survey" element={<JoinSurvey />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/study-introduction" element={<StudyIntroduction />} />
+                  <Route path="/interview" element={<Interview />} />
+                  <Route path="/end-of-day" element={<EndOfDaySurvey />} />
+                  <Route path="/consent" element={<Consent />} />
                   
                   <Route path="*" element={<Homepage />} />
                 </Routes>

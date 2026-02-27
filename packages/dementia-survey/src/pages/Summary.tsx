@@ -2,12 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useStateManagement';
-import { BarChart3, TrendingUp, Clock, Users, Calendar, Filter, ChevronRight, Heart, MessageCircle, Wrench, Trash2, Edit2, ArrowLeft } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Users, Calendar, Filter, ChevronRight, ChevronDown, ChevronUp, Heart, MessageCircle, Wrench, Trash2, Edit2, Pencil, ArrowLeft, Moon, Plus } from 'lucide-react';
 import { dataService } from '../lib/dataService';
 import { useLanguage } from '../hooks/useLanguage';
 import DesktopHeader from '../components/DesktopHeader';
 import MobileHeader from '../components/MobileHeader';
 import AuthModal from '../components/AuthModal';
+
+interface EndOfDaySurveyEntry {
+  id: number;
+  user_id: string;
+  survey_date: string;
+  entry_timestamp: string;
+  soc_stressed?: number;
+  soc_privacy?: number;
+  soc_strained?: number;
+  daily_burden_rating?: number;
+  supplement_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface SurveyEntry {
   id: number;
@@ -30,6 +44,13 @@ interface SurveyEntry {
   liability_concerns?: string;
   time_spent?: number;
   emotional_impact?: string;
+  event_stress_rating?: number;
+  mbp_memory?: string;
+  mbp_behavior?: string;
+  mbp_depression?: string;
+  mbp_distress?: string;
+  task_difficulty?: number;
+  daily_burden_rating?: number;
   urgency_level?: string;
   support_needed?: string;
   entry_timestamp: string;
@@ -39,12 +60,16 @@ const Summary: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<SurveyEntry[]>([]);
+  const [dailySurveys, setDailySurveys] = useState<EndOfDaySurveyEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [surveyTypeTab, setSurveyTypeTab] = useState<'all' | 'hourly' | 'daily'>('all');
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [selectedTimePeriod, setSelectedTimePeriod] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'week' | 'day' | 'category' | 'time'>('week');
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingDailyId, setDeletingDailyId] = useState<number | null>(null);
   
   const { language, t } = useLanguage();
   const text = language === 'zh' ? {
@@ -69,7 +94,22 @@ const Summary: React.FC = () => {
     patterns: '模式识别',
     careActivity: '护理活动',
     careNeed: '护理需求',
-    struggle: '困难'
+    struggle: '困难',
+    tabAll: '全部',
+    tabHourly: '活动记录',
+    tabDaily: '每日问卷',
+    dailySurveyDate: '日期',
+    burden: '负担评分',
+    stressed: '压力',
+    privacy: '隐私',
+    strained: '互动紧张',
+    supplement: '补充说明',
+    editDaily: '编辑',
+    deleteDaily: '删除',
+    confirmDelete: '确定删除？',
+    confirmDeleteCancel: '取消',
+    addEndOfDay: '填写今日问卷',
+    noDailyData: '暂无每日问卷数据'
   } : {
     title: 'Summary',
     week: 'Week',
@@ -92,7 +132,22 @@ const Summary: React.FC = () => {
     patterns: 'Pattern Recognition',
     careActivity: 'Care Activity',
     careNeed: 'Care Need',
-    struggle: 'Struggle'
+    struggle: 'Struggle',
+    tabAll: 'All',
+    tabHourly: 'Hourly Logs',
+    tabDaily: 'Daily Surveys',
+    dailySurveyDate: 'Date',
+    burden: 'Burden',
+    stressed: 'Stressed',
+    privacy: 'Privacy',
+    strained: 'Strained',
+    supplement: 'Notes',
+    editDaily: 'Edit',
+    deleteDaily: 'Delete',
+    confirmDelete: 'Delete this?',
+    confirmDeleteCancel: 'Cancel',
+    addEndOfDay: 'Complete Today\'s Survey',
+    noDailyData: 'No daily surveys yet'
   };
 
   useEffect(() => {
@@ -116,14 +171,31 @@ const Summary: React.FC = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // Load hourly survey entries
+      const { data: hourlyData, error: hourlyError } = await supabase
         .from('survey_entries')
         .select('*')
         .eq('user_id', user.id)
         .order('entry_timestamp', { ascending: false });
 
-      if (error) throw error;
-      setEntries(data || []);
+      if (hourlyError) throw hourlyError;
+      setEntries(hourlyData || []);
+
+      // Load end-of-day surveys
+      try {
+        const { data: dailyData, error: dailyError } = await supabase
+          .from('end_of_day_surveys')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('survey_date', { ascending: false });
+
+        if (!dailyError) {
+          setDailySurveys(dailyData || []);
+        }
+      } catch {
+        // Table may not exist yet - that's ok
+        console.log('end_of_day_surveys table not available yet');
+      }
     } catch (error) {
       console.error('Error loading entries:', error);
     } finally {
@@ -182,6 +254,103 @@ const Summary: React.FC = () => {
     }
   };
 
+  const getEntrySummary = (entry: SurveyEntry): string => {
+    const parts: string[] = [];
+    if ((entry as any).activity_categories?.length > 0) {
+      const categoryLabels: Record<string, string> = {
+        adl_clinical: language === 'zh' ? '临床护理' : 'Clinical Care',
+        adl_functional: language === 'zh' ? '功能护理' : 'Functional Care',
+        iadl_logistics: language === 'zh' ? '后勤支持' : 'Logistics',
+        iadl_household: language === 'zh' ? '家务' : 'Household',
+        emotional_support: language === 'zh' ? '情感支持' : 'Emotional Support',
+        supervision: language === 'zh' ? '监督' : 'Supervision',
+        social_activities: language === 'zh' ? '社交活动' : 'Social Activities',
+      };
+      const labels = (entry as any).activity_categories.map((c: string) => categoryLabels[c] || c).join(', ');
+      parts.push(labels);
+    }
+    if (entry.description) parts.push(entry.description);
+    const affects = [
+      (entry as any).affect_cheerful, (entry as any).affect_relaxed, (entry as any).affect_enthusiastic, (entry as any).affect_satisfied,
+      (entry as any).affect_insecure, (entry as any).affect_lonely, (entry as any).affect_anxious, (entry as any).affect_irritated,
+      (entry as any).affect_down, (entry as any).affect_desperate, (entry as any).affect_tensed
+    ].filter(a => a && a !== '');
+    if (affects.length > 0) parts.push(language === 'zh' ? `${affects.length}项情绪` : `${affects.length} affects`);
+    if (entry.mbp_memory || entry.mbp_behavior || entry.mbp_depression) parts.push(language === 'zh' ? 'MBP' : 'MBP');
+    if (entry.event_stress_rating && entry.event_stress_rating !== 0) parts.push(language === 'zh' ? `压力:${entry.event_stress_rating}` : `Stress:${entry.event_stress_rating}`);
+    if (parts.length === 0) return language === 'zh' ? '(已记录)' : '(recorded)';
+    return parts.join(' · ');
+  };
+
+  const handleDeleteEntry = async (entryId: number) => {
+    try {
+      const { error } = await supabase.from('survey_entries').delete().eq('id', entryId);
+      if (error) throw error;
+      setEntries(prev => prev.filter(e => e.id !== entryId));
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+    }
+  };
+
+  const handleDeleteDaily = async (dailyId: number) => {
+    try {
+      const { error } = await supabase.from('end_of_day_surveys').delete().eq('id', dailyId);
+      if (error) throw error;
+      setDailySurveys(prev => prev.filter(d => d.id !== dailyId));
+      setDeletingDailyId(null);
+    } catch (error) {
+      console.error('Error deleting daily survey:', error);
+    }
+  };
+
+  const renderEntryCard = (entry: SurveyEntry) => (
+    <div
+      key={entry.id}
+      className="p-3 rounded-lg transition-all"
+      style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
+    >
+      {deletingId === entry.id ? (
+        <div className="flex items-center justify-between">
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{text.confirmDelete}</p>
+          <div className="flex gap-2">
+            <button onClick={() => handleDeleteEntry(entry.id)} className="px-3 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: '#ef4444' }}>
+              {text.deleteDaily}
+            </button>
+            <button onClick={() => setDeletingId(null)} className="px-3 py-1 rounded text-xs font-medium" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
+              {text.confirmDeleteCancel}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 cursor-pointer" onClick={() => navigate(`/edit-entry/${entry.id}`)}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium px-2 py-0.5 rounded" style={{ backgroundColor: getCategoryColor(entry.entry_type), color: 'white' }}>
+                {entry.entry_type === 'care_activity' ? text.careActivity : entry.entry_type === 'care_need' ? text.careNeed : text.struggle}
+              </span>
+              {entry.time_spent && entry.time_spent > 0 && (
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{entry.time_spent} min</span>
+              )}
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {new Date(entry.entry_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <p className="text-sm mt-1.5 line-clamp-2" style={{ color: 'var(--text-primary)' }}>{getEntrySummary(entry)}</p>
+          </div>
+          <div className="flex gap-1 flex-shrink-0 pt-0.5">
+            <button onClick={(e) => { e.stopPropagation(); navigate(`/edit-entry/${entry.id}`); }} className="p-1.5 rounded-md hover:opacity-80" style={{ color: 'var(--text-muted)' }} title={text.editDaily}>
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setDeletingId(entry.id); }} className="p-1.5 rounded-md hover:opacity-80" style={{ color: '#ef4444' }} title={text.deleteDaily}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   const getTimeSlotEntries = (day: number, hour: number) => {
     return entries.filter(entry => {
       const entryDate = new Date(entry.entry_timestamp);
@@ -206,76 +375,93 @@ const Summary: React.FC = () => {
       <DesktopHeader />
       <MobileHeader />
       <div className="max-w-6xl mx-auto p-3 pb-20 md:pb-4">
-        {/* Week Selector */}
-        <div className="mb-4 -mx-3 px-3 overflow-x-auto">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            {text.title}
-          </h1>
+        {/* Header Card - matching Interview page style */}
+        <div className="rounded-2xl p-5 mb-4" style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: 'white' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <BarChart3 size={28} />
+              <div>
+                <h1 className="text-lg font-bold">{text.title}</h1>
+                <p className="text-sm opacity-90">
+                  {entries.length + dailySurveys.length} {language === 'zh' ? '条记录' : 'total entries'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/end-of-day')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+              style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}
+            >
+              <Moon className="w-3.5 h-3.5" />
+              {text.addEndOfDay}
+            </button>
+          </div>
         </div>
 
-        {/* Statistics Overview */}
+        {/* Survey Type Tabs */}
+        <div className="flex gap-1 p-1 rounded-lg mb-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+          {(['all', 'hourly', 'daily'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setSurveyTypeTab(tab)}
+              className="flex-1 px-3 py-2 rounded-md text-xs font-medium transition-all"
+              style={{
+                backgroundColor: surveyTypeTab === tab ? 'white' : 'transparent',
+                color: surveyTypeTab === tab ? 'var(--color-green)' : 'var(--text-secondary)',
+                boxShadow: surveyTypeTab === tab ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+              }}
+            >
+              {tab === 'all' ? `${text.tabAll} (${entries.length + dailySurveys.length})` :
+               tab === 'hourly' ? `${text.tabHourly} (${entries.length})` :
+               `${text.tabDaily} (${dailySurveys.length})`}
+            </button>
+          ))}
+        </div>
+
+        {/* Quick Stats - Clickable cards to switch tabs (always visible) */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div 
-            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all min-h-[80px]"
-            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-            onClick={() => {
-              setSelectedCategory('timeBased');
-              setViewMode('category');
+            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+            style={{ 
+              backgroundColor: surveyTypeTab === 'hourly' ? 'rgba(16,185,129,0.1)' : 'var(--bg-secondary)', 
+              border: surveyTypeTab === 'hourly' ? '2px solid var(--color-green)' : '1px solid var(--border-light)' 
             }}
+            onClick={() => setSurveyTypeTab('hourly')}
           >
-            <div className="text-2xl font-bold mb-1" style={{ color: 'var(--color-green)' }}>
-              {stats.timeBased}
+            <div className="flex items-center gap-2 mb-2">
+              <Clock size={18} style={{ color: 'var(--color-green)' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                {text.tabHourly}
+              </span>
             </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {text.activities}
+            <div className="text-2xl font-bold" style={{ color: 'var(--color-green)' }}>
+              {entries.length}
             </div>
           </div>
           
           <div 
-            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all min-h-[80px]"
-            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-            onClick={() => {
-              setSelectedCategory('general');
-              setViewMode('category');
+            className="p-4 rounded-xl cursor-pointer hover:shadow-sm transition-all"
+            style={{ 
+              backgroundColor: surveyTypeTab === 'daily' ? 'rgba(139,92,246,0.1)' : 'var(--bg-secondary)', 
+              border: surveyTypeTab === 'daily' ? '2px solid #8b5cf6' : '1px solid var(--border-light)' 
             }}
+            onClick={() => setSurveyTypeTab('daily')}
           >
-            <div className="text-2xl font-bold mb-1" style={{ color: '#fb923c' }}>
-              {stats.general}
+            <div className="flex items-center gap-2 mb-2">
+              <Moon size={18} style={{ color: '#8b5cf6' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                {text.tabDaily}
+              </span>
             </div>
-            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {text.general}
+            <div className="text-2xl font-bold" style={{ color: '#8b5cf6' }}>
+              {dailySurveys.length}
             </div>
           </div>
         </div>
 
-        {/* Time Distribution */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-          <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-            {text.byTime}
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Object.entries(timeStats).map(([period, count]) => (
-              <div 
-                key={period}
-                className="text-center p-3 rounded-lg cursor-pointer hover:shadow-sm transition-all"
-                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-                onClick={() => {
-                  setSelectedTimePeriod(period);
-                  setViewMode('time');
-                }}
-              >
-                <Clock className="mx-auto mb-2" style={{ color: 'var(--color-green)', width: 'clamp(1.25rem, 3vw, 1.5rem)', height: 'clamp(1.25rem, 3vw, 1.5rem)' }} />
-                <div className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {count}
-                </div>
-                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {text[period as keyof typeof text]}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        {/* Hourly entries section - hidden when daily tab is selected */}
+        {surveyTypeTab !== 'daily' && (
+          <>
         {/* View Mode Content */}
         {viewMode === 'week' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
@@ -338,34 +524,7 @@ const Summary: React.FC = () => {
                 entries
                   .filter(e => e.entry_type === selectedCategory)
                   .slice(0, 10)
-                  .map(entry => (
-                    <div 
-                      key={entry.id}
-                      className="p-4 rounded-lg cursor-pointer hover:shadow-sm transition-all"
-                      style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <span
-                            className="text-xs font-medium px-2 py-1 rounded"
-                            style={{
-                              backgroundColor: getCategoryColor(entry.entry_type),
-                              color: 'white'
-                            }}
-                          >
-                            {entry.entry_type === 'care_activity' ? text.careActivity :
-                             entry.entry_type === 'care_need' ? text.careNeed : text.struggle}
-                          </span>
-                          <p className="text-sm mt-2" style={{ color: 'var(--text-primary)' }}>
-                            {entry.description}
-                          </p>
-                          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                            {new Date(entry.entry_timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+                  .map(entry => renderEntryCard(entry))
               ) : (
                 <div className="text-center py-8" style={{ color: 'var(--text-secondary)' }}>
                   {t('selectCategoryToView')}
@@ -402,34 +561,7 @@ const Summary: React.FC = () => {
                   if (selectedTimePeriod === 'night') return hour >= 21 || hour < 6;
                   return false;
                 })
-                .map(entry => (
-                  <div 
-                    key={entry.id}
-                    className="p-4 rounded-lg cursor-pointer hover:shadow-sm transition-all"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <span
-                          className="text-xs font-medium px-2 py-1 rounded"
-                          style={{
-                            backgroundColor: getCategoryColor(entry.entry_type),
-                            color: 'white'
-                          }}
-                        >
-                          {entry.entry_type === 'care_activity' ? text.careActivity :
-                           entry.entry_type === 'care_need' ? text.careNeed : text.struggle}
-                        </span>
-                        <p className="text-sm mt-2" style={{ color: 'var(--text-primary)' }}>
-                          {entry.description}
-                        </p>
-                        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                          {new Date(entry.entry_timestamp).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                .map(entry => renderEntryCard(entry))}
             </div>
           </div>
         )}
@@ -492,36 +624,7 @@ const Summary: React.FC = () => {
                         {/* Entries */}
                         <div className="ml-10 space-y-2 min-h-[40px]">
                           {slotEntries.length > 0 ? (
-                            slotEntries.map(entry => (
-                              <div
-                                key={entry.id}
-                                className="p-3 rounded-lg cursor-pointer hover:shadow-sm transition-all"
-                                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <span
-                                      className="text-xs font-medium px-2 py-1 rounded"
-                                      style={{
-                                        backgroundColor: getCategoryColor(entry.entry_type),
-                                        color: 'white'
-                                      }}
-                                    >
-                                      {entry.entry_type === 'care_activity' ? text.careActivity :
-                                       entry.entry_type === 'care_need' ? text.careNeed : text.struggle}
-                                    </span>
-                                    <p className="text-sm mt-2" style={{ color: 'var(--text-primary)' }}>
-                                      {entry.description}
-                                    </p>
-                                    {entry.time_spent && (
-                                      <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                                        {entry.time_spent} min
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))
+                            slotEntries.map(entry => renderEntryCard(entry))
                           ) : (
                             <div className="py-2">
                               {/* Empty slot */}
@@ -535,6 +638,8 @@ const Summary: React.FC = () => {
               })}
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

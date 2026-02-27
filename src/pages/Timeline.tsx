@@ -55,13 +55,12 @@ const Timeline: React.FC = () => {
   const loadEntries = async () => {
     if (!user) return;
     try {
-      const { data, error } = await supabase
-        .from('survey_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('entry_timestamp', { ascending: true });
-      if (error) throw error;
-      setEntries(data || []);
+      const data = await dataService.getSurveyEntries(user.id);
+      // Sort by timestamp ascending (dataService returns descending by default)
+      const sortedData = [...data].sort((a, b) => 
+        new Date(a.entry_timestamp).getTime() - new Date(b.entry_timestamp).getTime()
+      );
+      setEntries(sortedData);
     } catch (error) {
       console.error('Error loading entries:', error);
     } finally {

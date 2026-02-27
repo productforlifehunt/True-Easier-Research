@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { dataService } from '../lib/dataService';
-import { Clock, Plus, Calendar, Globe } from 'lucide-react';
+import { Clock, Plus, Calendar, Globe, Moon, Pencil, Trash2 } from 'lucide-react';
 import type { CareLogEntry } from '../types/care-log';
 import { useLanguage } from '../hooks/useLanguage';
 import DesktopHeader from '../components/DesktopHeader';
@@ -15,13 +15,14 @@ const Timeline: React.FC = () => {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<CareLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<number | null>(6); // Default to Day 6 for instant load
+  const [selectedDay, setSelectedDay] = useState<number | null>(null); // null = show all
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-  const [currentDay, setCurrentDay] = useState<number>(0);
-  const [enrollment, setEnrollment] = useState<any>(null);
+  const [currentDay, setCurrentDay] = useState<number>(1);
+  const [enrollmentStartDate, setEnrollmentStartDate] = useState<string | null>(null);
   const dayButtonRefs = React.useRef<{ [key: number]: HTMLButtonElement | null }>({});
   const currentTimeRef = React.useRef<HTMLDivElement | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   
   const { language, t } = useLanguage();
   const text = language === 'zh' ? {
@@ -52,21 +53,24 @@ const Timeline: React.FC = () => {
     try {
       setLoading(true);
       
-      // Check enrollment status and get current day
+      // Check enrollment status and get start date for day calculation
       const enrollmentData = await dataService.getSurveyEnrollment(user.id);
       
-      if (enrollmentData) {
-        setEnrollment(enrollmentData);
+      if (enrollmentData?.start_date) {
+        setEnrollmentStartDate(enrollmentData.start_date);
         
-        // Get current survey day
-        const day = await dataService.getCurrentSurveyDay(user.id);
-        const displayDay = day > 0 ? day : 1;
-        setCurrentDay(displayDay);
-        
-        // Update selected day if different from current
-        if (displayDay !== selectedDay) {
-          setSelectedDay(displayDay);
-        }
+        // Calculate current day based on start_date
+        const startDate = new Date(enrollmentData.start_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        startDate.setHours(0, 0, 0, 0);
+        const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const day = Math.max(1, Math.min(7, daysDiff + 1));
+        setCurrentDay(day);
+        setSelectedDay(day);
+      } else {
+        // No enrollment — default to showing all entries (today)
+        setSelectedDay(null);
       }
       
       // Load entries
@@ -154,18 +158,36 @@ const Timeline: React.FC = () => {
     );
   }
 
+  // Get the calendar date for a given survey day number (1-7)
+  const getDateForDay = (dayNum: number): string | null => {
+    if (!enrollmentStartDate) return null;
+    const start = new Date(enrollmentStartDate);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() + (dayNum - 1));
+    return start.toISOString().split('T')[0];
+  };
+
   const getFilteredEntries = () => {
     let filtered = entries;
     
-    // Filter by day if selected
+    // Filter by day using actual calendar dates
     if (selectedDay !== null) {
-      const sortedEntries = [...entries].sort((a, b) => 
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-      const entriesPerDay = Math.ceil(sortedEntries.length / 7);
-      const startIdx = (selectedDay - 1) * entriesPerDay;
-      const endIdx = selectedDay * entriesPerDay;
-      filtered = sortedEntries.slice(startIdx, endIdx);
+      const targetDate = getDateForDay(selectedDay);
+      if (targetDate) {
+        filtered = filtered.filter(entry => {
+          if (!entry.entry_timestamp) return false;
+          const entryDate = new Date(entry.entry_timestamp).toISOString().split('T')[0];
+          return entryDate === targetDate;
+        });
+      } else {
+        // No enrollment start date — filter by "today" as fallback
+        const today = new Date().toISOString().split('T')[0];
+        filtered = filtered.filter(entry => {
+          if (!entry.entry_timestamp) return false;
+          const entryDate = new Date(entry.entry_timestamp).toISOString().split('T')[0];
+          return entryDate === today;
+        });
+      }
     }
     
     // Filter by time slot if selected
@@ -207,18 +229,89 @@ const Timeline: React.FC = () => {
     }
   };
 
+  // Build a meaningful summary for an entry
+  const getEntrySummary = (entry: CareLogEntry): string => {
+    const parts: string[] = [];
+    
+    // Activity categories
+    if (entry.activity_categories?.length > 0) {
+      const categoryLabels: Record<string, string> = {
+        adl_clinical: language === 'zh' ? '临床护理' : 'Clinical Care',
+        adl_functional: language === 'zh' ? '功能护理' : 'Functional Care',
+        iadl_logistics: language === 'zh' ? '后勤支持' : 'Logistics',
+        iadl_household: language === 'zh' ? '家务' : 'Household',
+        emotional_support: language === 'zh' ? '情感支持' : 'Emotional Support',
+        supervision: language === 'zh' ? '监督' : 'Supervision',
+        social_activities: language === 'zh' ? '社交活动' : 'Social Activities',
+      };
+      const labels = entry.activity_categories.map(c => categoryLabels[c] || c).join(', ');
+      parts.push(labels);
+    }
+    
+    if (entry.description) {
+      parts.push(entry.description);
+    }
+    
+    // Affect ratings summary
+    const affects = [
+      entry.affect_cheerful, entry.affect_relaxed, entry.affect_enthusiastic, entry.affect_satisfied,
+      entry.affect_insecure, entry.affect_lonely, entry.affect_anxious, entry.affect_irritated,
+      entry.affect_down, entry.affect_desperate, entry.affect_tensed
+    ].filter(a => a && a !== '');
+    if (affects.length > 0) {
+      parts.push(language === 'zh' ? `${affects.length}项情绪已记录` : `${affects.length} affect ratings`);
+    }
+    
+    // MBP
+    if (entry.mbp_memory || entry.mbp_behavior || entry.mbp_depression) {
+      parts.push(language === 'zh' ? 'MBP已记录' : 'MBP recorded');
+    }
+    
+    // Stress
+    if (entry.event_stress_rating && entry.event_stress_rating !== 0) {
+      parts.push(language === 'zh' ? `压力: ${entry.event_stress_rating}` : `Stress: ${entry.event_stress_rating}`);
+    }
+    
+    if (parts.length === 0) {
+      return language === 'zh' ? '(已记录)' : '(recorded)';
+    }
+    return parts.join(' · ');
+  };
+
+  const handleDelete = async (entryId: number) => {
+    try {
+      const { error } = await supabase
+        .from('survey_entries')
+        .delete()
+        .eq('id', entryId);
+      if (error) throw error;
+      setEntries(prev => prev.filter(e => e.id !== entryId));
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+    }
+  };
+
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <DesktopHeader />
       <MobileHeader />
-      <div className="max-w-6xl mx-auto px-6 py-4 pb-20 md:pb-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 pb-20 md:pb-6">
         {/* Header - Hidden on mobile */}
-        <div className="mb-4 hidden md:block">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-3 hidden md:flex md:items-center md:justify-between">
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
             {text.title}
           </h1>
+          <button
+            onClick={() => navigate('/end-of-day')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+            style={{ backgroundColor: '#8b5cf6', color: 'white' }}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            {language === 'zh' ? '每日问卷' : 'End-of-Day Survey'}
+          </button>
         </div>
 
         {/* Day Selector - Fixed Horizontal Scrollable */}
@@ -360,32 +453,85 @@ const Timeline: React.FC = () => {
                         slotEntries.map(entry => (
                           <div
                             key={entry.id}
-                            onClick={() => navigate(`/entry/${entry.id}`)}
-                            className="p-3 rounded-lg cursor-pointer hover:shadow-sm transition-all"
+                            className="p-3 rounded-lg transition-all"
                             style={{ backgroundColor: 'var(--bg-secondary)' }}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <span
-                                  className="text-xs font-medium px-2 py-1 rounded"
-                                  style={{
-                                    backgroundColor: getEntryTypeColor(entry.entry_type),
-                                    color: 'white'
-                                  }}
-                                >
-                                  {entry.entry_type === 'care_activity' ? 'Activity' :
-                                   entry.entry_type === 'care_need' ? 'Need' : 'Struggle'}
-                                </span>
-                                <p className="text-sm mt-2" style={{ color: 'var(--text-primary)' }}>
-                                  {entry.description}
+                            {/* Delete confirmation */}
+                            {deletingId === entry.id ? (
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                                  {language === 'zh' ? '确定删除？' : 'Delete this entry?'}
                                 </p>
-                                {entry.time_spent && (
-                                  <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                                    {entry.time_spent} min
-                                  </p>
-                                )}
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleDelete(entry.id)}
+                                    className="px-3 py-1 rounded text-xs font-medium text-white"
+                                    style={{ backgroundColor: '#ef4444' }}
+                                  >
+                                    {language === 'zh' ? '删除' : 'Delete'}
+                                  </button>
+                                  <button
+                                    onClick={() => setDeletingId(null)}
+                                    className="px-3 py-1 rounded text-xs font-medium"
+                                    style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-secondary)' }}
+                                  >
+                                    {language === 'zh' ? '取消' : 'Cancel'}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
+                            ) : (
+                              <div className="flex items-start justify-between gap-2">
+                                <div
+                                  className="flex-1 cursor-pointer"
+                                  onClick={() => navigate(`/edit-entry/${entry.id}`)}
+                                >
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span
+                                      className="text-xs font-medium px-2 py-0.5 rounded"
+                                      style={{
+                                        backgroundColor: getEntryTypeColor(entry.entry_type),
+                                        color: 'white'
+                                      }}
+                                    >
+                                      {entry.entry_type === 'care_activity'
+                                        ? (language === 'zh' ? '活动' : 'Activity')
+                                        : entry.entry_type === 'care_need'
+                                        ? (language === 'zh' ? '需求' : 'Need')
+                                        : (language === 'zh' ? '困难' : 'Struggle')}
+                                    </span>
+                                    {entry.time_spent > 0 && (
+                                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                        {entry.time_spent} min
+                                      </span>
+                                    )}
+                                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                      {new Date(entry.entry_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm mt-1.5 line-clamp-2" style={{ color: 'var(--text-primary)' }}>
+                                    {getEntrySummary(entry)}
+                                  </p>
+                                </div>
+                                <div className="flex gap-1 flex-shrink-0 pt-0.5">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); navigate(`/edit-entry/${entry.id}`); }}
+                                    className="p-1.5 rounded-md hover:opacity-80 transition-all"
+                                    style={{ color: 'var(--text-muted)' }}
+                                    title={language === 'zh' ? '编辑' : 'Edit'}
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setDeletingId(entry.id); }}
+                                    className="p-1.5 rounded-md hover:opacity-80 transition-all"
+                                    style={{ color: '#ef4444' }}
+                                    title={language === 'zh' ? '删除' : 'Delete'}
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))
                       ) : (

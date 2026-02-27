@@ -1,0 +1,620 @@
+================================================================================
+          SURVEY QUESTIONS 
+          A Week in the Life of Dementia Caregivers Study
+================================================================================
+
+================================================================================
+SECTION 1: PRIMARY CAREGIVER SCREENING QUESTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+1.1 CAREGIVER PERSONAL INFORMATION
+--------------------------------------------------------------------------------
+
+1.1.1  Full Name
+       (care_connector.profiles: full_name, text)
+
+1.1.2  Age
+       (care_connector.profiles: caregiver_age, text)
+
+1.1.3  Gender
+       Options: Male, Female
+       (care_connector.profiles: caregiver_gender, text, values: 'male', 'female')
+
+1.1.4  Education Level
+       Options: Elementary, Middle School, High School, Associate, Bachelor, Master, Doctorate
+       (care_connector.profiles: caregiver_education, text, values: 'elementary', 'middle', 'high', 'associate', 'bachelor', 'master', 'doctorate')
+
+1.1.5  Employment Status
+       Options: Employed full-time, Employed part-time, Self-employed, 
+       Unemployed, Retired, Student
+       (care_connector.profiles: employment_status, text, values: 'full_time', 'part_time', 'self_employed', 'unemployed', 'retired', 'student')
+
+1.1.6  Marital Status
+       Options: Single, Married, Divorced, Widowed
+       (care_connector.profiles: marital_status, text, values: 'single', 'married', 'divorced', 'widowed')
+
+1.1.7  Self-Rated Health
+       Scale: 1-5 (1=Poor, 5=Excellent)
+       (care_connector.profiles: health_status, text, values: '1' to '5')
+
+1.1.8  Relationship to Care Recipient
+       Options: Spouse/Partner, Parent, Child, Sibling, Other Relative, Friend/Neighbor, Professional Caregiver, Other
+       (care_connector.profiles: relationship_to_patient, text, values: 'spouse_partner', 'parent', 'child', 'sibling', 'other_relative', 'friend_neighbor', 'professional', 'other')
+       When 'other' is selected → (care_connector.profiles: relationship_to_patient_other, text) stores free-text description
+
+1.1.9  Duration of Caregiving
+       Options: Less than 6 months, 6 months - 1 year, 1-2 years, 2-5 years, 
+       More than 5 years, Other
+       (care_connector.profiles: caregiving_years, text, values: 'less_than_6_months', '6_months_to_1_year', '1_to_2_years', '2_to_5_years', 'more_than_5_years', 'other')
+       When 'other' is selected → (care_connector.profiles: caregiving_years_other, text) stores free-text description
+
+1.1.10 Hours of Care Per Week
+       Format: Numeric input
+       (care_connector.profiles: caregiving_hours_per_week, text)
+
+1.1.11 Distance from Care Recipient
+       Options: Same home, Same building, Same neighborhood, Same city, 
+       Different city, Different province/country, Other
+       (care_connector.profiles: living_with_recipient, text, values: 'same_home', 'same_building', 'same_neighborhood', 'same_city', 'diff_city', 'diff_province_country', 'other')
+       After selection → (care_connector.profiles: living_with_recipient_details, text) stores detailed distance description (e.g., "15 min drive", "5 min walk")
+
+--------------------------------------------------------------------------------
+1.2 CARE RECIPIENT INFORMATION
+--------------------------------------------------------------------------------
+
+1.2.1  Care Recipient Age
+       Format: Numeric input
+       (care_connector.profiles: recipient_age, text)
+
+1.2.2  Care Recipient Gender
+       Options: Male, Female
+       (care_connector.profiles: recipient_gender, text, values: 'male', 'female')
+
+1.2.3  Type of Dementia
+       Options: Alzheimer's Disease, Vascular Dementia, Lewy Body Dementia, 
+       Frontotemporal Dementia, Mixed Dementia, Unknown/Not Diagnosed, Other
+       (care_connector.profiles: dementia_type, text, values: 'alzheimer', 'vascular', 'lewy_body', 'frontotemporal', 'mixed', 'unknown', 'other')
+       When 'other' is selected → (care_connector.profiles: dementia_type_other, text) stores free-text description
+
+1.2.4  Years Since Diagnosis
+       Options: Numeric input
+       (care_connector.profiles: years_since_diagnosis, text)
+
+1.2.5  Dementia Stage (Clinical Dementia Rating)
+       Options: CDR 0 - Normal, CDR 0.5 - Very Mild Dementia, CDR 1 - Mild Dementia, 
+       CDR 2 - Moderate Dementia, CDR 3 - Severe Dementia
+       (care_connector.profiles: dementia_stage, text, values: 'cdr_0', 'cdr_0.5', 'cdr_1', 'cdr_2', 'cdr_3')
+
+1.2.6  Care Recipient Education Level
+       Options: Elementary, Middle School, High School, Associate, Bachelor, Master, Doctorate
+       (care_connector.profiles: recipient_education, text, values: 'elementary', 'middle', 'high', 'associate', 'bachelor', 'master', 'doctorate')
+
+--------------------------------------------------------------------------------
+1.2.7 ACTIVITIES OF DAILY LIVING (ADL) ASSESSMENT
+--------------------------------------------------------------------------------
+
+For each ADL item, rate the level of assistance needed:
+Scale: Independent, Needs help, Cannot do
+
+Items: Eating, Bathing, Dressing, Toileting, Moving around
+       (care_connector.profiles: recipient_adl_eating, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_adl_bathing, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_adl_dressing, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_adl_toileting, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_adl_mobility, text, values: 'independent', 'some_help', 'dependent')
+
+--------------------------------------------------------------------------------
+1.2.8 INSTRUMENTAL ACTIVITIES OF DAILY LIVING (IADL) ASSESSMENT
+--------------------------------------------------------------------------------
+
+For each IADL item, rate the level of assistance needed:
+Scale: Independent, Needs help, Cannot do
+
+Items: Managing medications, Handling finances, Shopping, Preparing meals, Housework
+       (care_connector.profiles: recipient_iadl_medication, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_iadl_finances, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_iadl_shopping, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_iadl_cooking, text, values: 'independent', 'some_help', 'dependent')
+       (care_connector.profiles: recipient_iadl_housework, text, values: 'independent', 'some_help', 'dependent')
+
+--------------------------------------------------------------------------------
+1.3 NEUROPSYCHIATRIC INVENTORY QUESTIONNAIRE (NPI-Q)
+--------------------------------------------------------------------------------
+
+Full 12-item NPI-Q administered.
+       (care_connector.profiles: recipient_bpsd_delusions, text, values: 'no', 'mild', 'moderate', 'severe') — Delusions
+       (care_connector.profiles: recipient_bpsd_hallucinations, text) — Hallucinations
+       (care_connector.profiles: recipient_bpsd_agitation, text) — Agitation/Aggression
+       (care_connector.profiles: recipient_bpsd_depression, text) — Depression/Dysphoria
+       (care_connector.profiles: recipient_bpsd_anxiety, text) — Anxiety
+       (care_connector.profiles: recipient_bpsd_elation, text) — Elation/Euphoria
+       (care_connector.profiles: recipient_bpsd_apathy, text) — Apathy/Indifference
+       (care_connector.profiles: recipient_bpsd_disinhibition, text) — Disinhibition
+       (care_connector.profiles: recipient_bpsd_irritability, text) — Irritability/Lability
+       (care_connector.profiles: recipient_bpsd_motor, text) — Aberrant Motor Behavior
+       (care_connector.profiles: recipient_bpsd_sleep, text) — Nighttime Behavior
+       (care_connector.profiles: recipient_bpsd_appetite, text) — Appetite/Eating Changes
+
+
+--------------------------------------------------------------------------------
+1.4 SHORT SENSE OF COMPETENCE QUESTIONNAIRE (SSCQ)
+--------------------------------------------------------------------------------
+
+Full 7-item SSCQ administered.
+       (care_connector.profiles: sscq_strained_interactions, text, scale '1' to '5') — Strained interactions
+       (care_connector.profiles: sscq_privacy, text) — Privacy concerns
+       (care_connector.profiles: sscq_useful, text) — Feeling useful
+       (care_connector.profiles: sscq_social_life, text) — Social life suffered
+       (care_connector.profiles: sscq_manipulation, text) — Manipulation
+       (care_connector.profiles: sscq_solutions, text) — Finding solutions
+       (care_connector.profiles: sscq_health, text) — Health suffered
+
+
+--------------------------------------------------------------------------------
+1.5 MULTIDIMENSIONAL SCALE OF PERCEIVED SOCIAL SUPPORT (MSPSS)
+--------------------------------------------------------------------------------
+
+Full 12-item MSPSS administered (4 items each for Significant Other, Family, 
+and Friends subscales).
+       Scale: 1-7 (1=Very Strongly Disagree, 7=Very Strongly Agree)
+
+       Significant Other subscale:
+       1. There is a special person who is around when I am in need.
+          (care_connector.profiles: mspss_so_1, text, values: '1' to '7')
+       2. There is a special person with whom I can share my joys and sorrows.
+          (care_connector.profiles: mspss_so_2, text, values: '1' to '7')
+       3. I have a special person who is a real source of comfort to me.
+          (care_connector.profiles: mspss_so_3, text, values: '1' to '7')
+       4. There is a special person in my life who cares about my feelings.
+          (care_connector.profiles: mspss_so_4, text, values: '1' to '7')
+
+       Family subscale:
+       5. My family really tries to help me.
+          (care_connector.profiles: mspss_fam_1, text, values: '1' to '7')
+       6. I get the emotional help and support I need from my family.
+          (care_connector.profiles: mspss_fam_2, text, values: '1' to '7')
+       7. I can talk about my problems with my family.
+          (care_connector.profiles: mspss_fam_3, text, values: '1' to '7')
+       8. My family is willing to help me make decisions.
+          (care_connector.profiles: mspss_fam_4, text, values: '1' to '7')
+
+       Friends subscale:
+       9. My friends really try to help me.
+          (care_connector.profiles: mspss_fri_1, text, values: '1' to '7')
+       10. I can count on my friends when things go wrong.
+           (care_connector.profiles: mspss_fri_2, text, values: '1' to '7')
+       11. I have friends with whom I can share my joys and sorrows.
+           (care_connector.profiles: mspss_fri_3, text, values: '1' to '7')
+       12. I can talk about my problems with my friends.
+           (care_connector.profiles: mspss_fri_4, text, values: '1' to '7')
+
+
+--------------------------------------------------------------------------------
+1.6 PERSEVERANCE TIME
+--------------------------------------------------------------------------------
+
+Question: "How much longer do you think you can continue providing care 
+          for your care recipient given the current situation?"
+
+Options:
+- Less than 1 week
+- More than 1 week but less than 1 month
+- More than 1 month but less than 6 months
+- More than 6 months but less than 1 year
+- More than 1 year but less than 2 years
+- More than 2 years
+       (care_connector.profiles: perseverance_time, text, values: 'less_than_week', 'week_to_month', 'month_to_six_months', 'six_months_to_year', 'year_to_two_years', 'more_than_two_years')
+
+--------------------------------------------------------------------------------
+1.7 DEMENTIA KNOWLEDGE AND ATTITUDES QUESTIONNAIRES
+--------------------------------------------------------------------------------
+
+1.7.1 ALZHEIMER'S DISEASE KNOWLEDGE SCALE (ADKS)
+      Full 30-item scale administered. Format: True/False.
+      (care_connector.profiles: adks_answers, jsonb — array of 30 'true'/'false' strings, index 0-29)
+      Collected in Settings page under "Your Understanding of Dementia" collapsible, questions 1-30
+
+1.7.2 DEMENTIA ATTITUDES SCALE (DAS)
+      Full 20-item scale administered. Scale.
+      (care_connector.profiles: das_answers, jsonb — array of 20 '1'-'7' strings, index 0-19)
+      Collected in Settings page under "Your Understanding of Dementia" collapsible, questions 31-50
+
+================================================================================
+SECTION 2: OTHER CAREGIVER SCREENING QUESTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+2.1 OTHER CAREGIVER PERSONAL INFORMATION
+--------------------------------------------------------------------------------
+
+2.1.1  Age
+       Format: Numeric input
+       (care_connector.profiles: caregiver_age, text — same column as 1.1.2)
+
+2.1.2  Gender
+       Options: Male, Female
+       (care_connector.profiles: caregiver_gender, text — same column as 1.1.3)
+
+2.1.3  Education Level
+       Options: Elementary, Middle School, High School, Associate, Bachelor, Master, Doctorate
+       (care_connector.profiles: caregiver_education, text — same column as 1.1.4)
+
+2.1.4  Employment Status
+       Options: Employed full-time, Employed part-time, Self-employed,
+       Unemployed, Retired, Student
+       (care_connector.profiles: employment_status, text — same column as 1.1.5)
+
+2.1.5  Marital Status
+       Options: Single, Married, Divorced, Widowed
+       (care_connector.profiles: marital_status, text — same column as 1.1.6)
+
+2.1.6  Self-Rated Health
+       Scale: 1-5 (1=Poor, 5=Excellent)
+       (care_connector.profiles: health_status, text — same column as 1.1.7)
+
+2.1.7  Relationship to Primary Caregiver
+       Options: Spouse/Partner, Child, Sibling, Other Relative, 
+       Friend/Neighbor, Professional Caregiver, Other
+       (care_connector.profiles: relationship_to_primary, text, values: 'spouse_partner', 'child', 'sibling', 'other_relative', 'friend_neighbor', 'professional', 'other')
+       When 'other' is selected → (care_connector.profiles: relationship_to_primary_other, text) stores free-text description
+
+2.1.8  Relationship to Care Recipient
+       Options: Spouse/Partner, Parent, Child, Sibling, Other Relative, Friend/Neighbor, Professional Caregiver, Other
+       (care_connector.profiles: relationship_to_patient, text — same column as 1.1.8)
+       When 'other' is selected → (care_connector.profiles: relationship_to_patient_other, text) stores free-text description
+
+2.1.9  Duration of Caregiving
+       Options: Less than 6 months, 6 months - 1 year, 1-2 years, 2-5 years, 
+       More than 5 years, Other
+       (care_connector.profiles: caregiving_years, text — same column as 1.1.9)
+       When 'other' is selected → (care_connector.profiles: caregiving_years_other, text) stores free-text description
+
+2.1.10 Hours of Care Per Week
+       Format: Numeric input
+       (care_connector.profiles: caregiving_hours_per_week, text — same column as 1.1.10)
+
+2.1.11 Distance from Care Recipient
+       Options: Same home, Same building, Same neighborhood, Same city, 
+       Different city, Different province/country, Other
+       (care_connector.profiles: distance_from_recipient, text, values: 'same_home', 'same_building', 'same_neighborhood', 'same_city', 'diff_city', 'diff_province_country', 'other')
+       When 'other' is selected → (care_connector.profiles: distance_from_recipient_other, text) stores free-text description
+       After selection → (care_connector.profiles: distance_from_recipient_details, text) stores detailed distance description (e.g., "15 min drive", "5 min walk")
+
+2.1.12 Contact Frequency
+       Options: Daily, Several times a week, Weekly, Several times a month, 
+       Monthly, Less than monthly, Other
+       (care_connector.profiles: contact_frequency, text, values: 'daily', 'several_times_week', 'weekly', 'several_times_month', 'monthly', 'less_than_monthly', 'other')
+       When 'other' is selected → (care_connector.profiles: contact_frequency_other, text) stores free-text description
+
+--------------------------------------------------------------------------------
+2.2 DEMENTIA KNOWLEDGE AND ATTITUDES QUESTIONNAIRES
+--------------------------------------------------------------------------------
+
+2.2.1 ALZHEIMER'S DISEASE KNOWLEDGE SCALE (ADKS)
+      Full 30-item scale administered. Format: True/False.
+      (care_connector.profiles: adks_answers, jsonb — same column as 1.7.1)
+
+2.2.2 DEMENTIA ATTITUDES SCALE (DAS)
+      Full 20-item scale administered. Scale.
+      (care_connector.profiles: das_answers, jsonb — same column as 1.7.2)
+
+================================================================================
+SECTION 3: HOURLY LOG QUESTIONS (Step 3.7.1)
+================================================================================
+
+Procedure: Participants receive reminders every hour from 8 AM to 10 PM to 
+record caregiving activities. Each entry contains three tabs.
+
+--------------------------------------------------------------------------------
+3.1 ACTIVITY TAB
+--------------------------------------------------------------------------------
+
+3.1.1  When did it happen?
+       Options:
+       - NOW: Record care activities happening now or just occurred
+       - OTHER TIME: Supplement activities not recorded during the day
+       - NOT TIED TO SPECIFIC TIME: Record challenges, needs, or ideas 
+         not tied to specific events
+       (care_connector.survey_entries: entry_timestamp, timestamptz — null when "not tied to specific time")
+
+3.1.2  Activity Category (Multi-select)
+       Options:
+       - ADL-Clinical: medication, medical tasks
+       - ADL-Functional: feeding, bathing, dressing, grooming, toileting, 
+         ambulation
+       - ADL-Cognitive: orientation, conversation, answering questions
+       - IADL-Decision: medical decisions, financial decisions, non-medical 
+         decisions
+       - IADL-Housekeeping: preparing meals, cleaning, shopping
+       - IADL-Info Management: coordinating care, communicating with care 
+         team, managing finances
+       - IADL-Logistics: scheduling appointments, reminding, ensuring 
+         delivery of necessities
+       - IADL-Transport: driving, arranging rides, accompanying to 
+         appointments
+       - Companionship: social interaction, conversation, games, music, 
+         walks, outings
+       - Caregiver Support: emotional support for other caregivers, respite
+       - Vigilance: supervision, safety monitoring, preventing wandering
+       - Pet Care: walking pets, feeding, vet visits
+       - Skill Development: attending classes, reading, learning about 
+         dementia
+       - Other (please describe)
+
+       The prefix "ADL" and "IADL" which not appear on the actual survey question handled to participants
+       (care_connector.survey_entries: activity_categories, text[])
+       When 'other' is in the array → (care_connector.survey_entries: activity_other, text) stores free-text description
+
+3.1.3  Event Stress Rating
+       Scale: -3 to +3 (Very Unpleasant to Very Pleasant)
+       (care_connector.survey_entries: event_stress_rating, integer)
+
+3.1.4  Activity Description
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: description, text)
+
+3.1.5  Patient Memory/Behavioral Problems (MBP Checklist)
+       3.1.5.a  Memory problems (e.g., repeating things, losing things, not completing a task, not remembering events or persons, concentration difficulties) (Yes/No)
+       3.1.5.b  Behavior problems (e.g., breaking things on purpose, verbal aggression, threats to harm others, night wandering, opposition or provocation) (Yes/No)
+       3.1.5.c  Depressive symptoms (e.g., sadness, hopelessness, threats of self-harm, speaking of dying, suffering from loneliness, uselessness or worthlessness) (Yes/No)
+       (care_connector.survey_entries: mbp_memory, text, values: 'yes', 'no')
+       (care_connector.survey_entries: mbp_behavior, text, values: 'yes', 'no')
+       (care_connector.survey_entries: mbp_depression, text, values: 'yes', 'no')
+
+3.1.6  Caregiver MBP-Related Distress 
+
+       During this event, how much did their memory/behavioral problems disturb or upset you?
+
+       Scale: 0-4 (Not at all to Extremely)
+       (care_connector.survey_entries: mbp_distress, text)
+
+3.1.7  Unfulfilled Care Needs (Optional)
+       Format: Free text with Voice Input and AI Support
+
+3.1.8  Ideas or Suggestions (Optional)
+       Format: Free text with Voice Input and AI Support
+
+3.1.9  Time Spent (minutes)
+       Format: Numeric input
+       (care_connector.survey_entries: time_spent, integer)
+
+3.1.10 Positive Affect
+       Scale: 1-7 for each item
+       Items: Cheerful, Relaxed, Enthusiastic, Satisfied
+       (care_connector.survey_entries: affect_cheerful, text)
+       (care_connector.survey_entries: affect_relaxed, text)
+       (care_connector.survey_entries: affect_enthusiastic, text)
+       (care_connector.survey_entries: affect_satisfied, text)
+
+3.1.11 Negative Affect
+       Scale: 1-7 for each item
+       Items: Insecure, Lonely, Anxious, Irritated, Down, Desperate, Tensed
+       (care_connector.survey_entries: affect_insecure, text)
+       (care_connector.survey_entries: affect_lonely, text)
+       (care_connector.survey_entries: affect_anxious, text)
+       (care_connector.survey_entries: affect_irritated, text)
+       (care_connector.survey_entries: affect_down, text)
+       (care_connector.survey_entries: affect_desperate, text)
+       (care_connector.survey_entries: affect_tensed, text)
+
+--------------------------------------------------------------------------------
+3.2 PEOPLE TAB
+--------------------------------------------------------------------------------
+
+3.2.1  Select from Care Network
+       Options: Pre-populated network members or "Just Me"
+       (care_connector.survey_entries: people_with, text)
+
+3.2.2  People Involved
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: people_with, text — same column, appended free text)
+
+3.2.3  Who Else Do You Wish Could Help
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: people_want_with, text)
+
+3.2.4  Challenges in Reaching People You Wish Could Help
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: people_challenges, text)
+
+--------------------------------------------------------------------------------
+3.3 CHALLENGES & RESOURCES TAB
+--------------------------------------------------------------------------------
+
+3.3.1  Challenges in Undertaking This Task
+       Scale: -3 to +3 (No challenges to Extreme challenges)
+       (care_connector.survey_entries: task_difficulty, integer)
+
+3.3.2  Challenge Types (Multi-select)
+       Options: Handle symptoms, Condition, Updates, Coordination, Time, 
+       Emotional, Physical, Communication, Safety, Privacy, Other
+
+       multiple select
+       (care_connector.survey_entries: challenge_types, text[])
+       When 'other' is in the array → (care_connector.survey_entries: challenge_type_other, text) stores free-text description
+
+3.3.3  Challenges Faced (Description)
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: challenges_faced, text)
+
+3.3.4  Resources Currently Using & Challenges
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: resources_using, text)
+
+3.3.5  Resources You Wish Existed or Improved
+       Format: Free text with Voice Input and AI Support
+       (care_connector.survey_entries: resources_wanted, text)
+
+================================================================================
+SECTION 4: DAILY LOG QUESTIONS (Step 3.7.2 - End-of-Day)
+================================================================================
+
+Procedure: At 10 PM each evening, participants complete end-of-day logging.
+
+--------------------------------------------------------------------------------
+4.1 SUPPLEMENT HOURLY LOGS NOT RECORDED
+--------------------------------------------------------------------------------
+
+Procedure: Review the day's caregiving activities and supplement any 
+activities not recorded during hourly reminders.
+       (care_connector.end_of_day_surveys: supplement_notes, text)
+
+--------------------------------------------------------------------------------
+4.2 SHORTENED DAILY SENSE OF COMPETENCE (ESM Items from SSCQ)
+--------------------------------------------------------------------------------
+
+Scale: 1-7 (Strongly Disagree to Strongly Agree)
+
+4.2.1  "Today I felt stressed due to my care responsibilities"
+       (care_connector.end_of_day_surveys: soc_stressed, integer)
+
+4.2.2  "Today I felt that the situation with my care recipient did not 
+       allow me as much privacy as I would have liked"
+       (care_connector.end_of_day_surveys: soc_privacy, integer)
+
+4.2.3  "Today I felt strained in the interactions with my care recipient"
+       (care_connector.end_of_day_surveys: soc_strained, integer)
+
+--------------------------------------------------------------------------------
+4.3 DAILY BURDEN RATING
+--------------------------------------------------------------------------------
+
+Question: "Looking back at today as a whole, how would you rate your 
+          overall caregiving burden today?"
+
+Scale: -3 to +3 (Very Light to Very Heavy)
+       (care_connector.end_of_day_surveys: daily_burden_rating, integer)
+
+================================================================================
+SECTION 5: PRIMARY CAREGIVER INTERVIEW QUESTIONS (22 total)
+================================================================================
+
+Procedure: ~60-minute semi-structured interview using Context Mapping 
+methodology. The participant's Care Network Graph and Caring Week Records 
+serve as sensitizing tools.
+
+5.1  What is your relationship to the patient, and how long have you 
+     been providing care?
+
+5.2  What is the patient's current condition and main care needs?
+
+5.3  What does a typical day of caregiving look like for you?
+
+5.4  What difficulties do you face in your daily caregiving?
+
+5.5  What support do you need from others to help care for the patient?
+
+5.6  Who else helps care for the patient? How close are you to these 
+     people, and what does each person do?
+
+5.7  Under what circumstances do you ask others for support?
+
+5.8  Do you experience difficulties asking for support? What are the 
+     difficulties?
+
+5.9  Is there anyone you could ask for help but haven't? What's 
+     stopping you?
+
+5.10 Has your care network changed over time?
+
+5.11 What would your ideal care network look like?
+
+5.12 Looking at your network, how satisfied are you overall, from 0 to 100?
+
+5.13 When someone else helps care for the patient, what information do 
+     they ask for? What do you think they need to know?
+
+5.14 How do you communicate with other caregivers? What methods or 
+     technology do you use?
+
+5.15 Are there barriers you face when sharing information about the 
+     patient with others?
+
+5.16 When the patient's condition changes, how do you keep others 
+     informed? Are there barriers?
+
+5.17 Has the patient ever wandered, been difficult to find, or refused 
+     to return home? Do you ask other caregivers for help when this 
+     happens? How do you coordinate, and what barriers do you face?
+
+5.18 How familiar are you with using a smartphone or computer?
+
+5.19 What current tools do you use to learn more about dementia and 
+     caregiving? When you face uncertain situations, where do you seek 
+     information or support? What barriers or concerns do you have with 
+     the current tools you use? What tools do you wish existed to better 
+     help with learning about dementia and caregiving? What features 
+     would be helpful?
+
+5.20 What current tools do you use to communicate or coordinate with 
+     other caregivers? What has worked well, what has not? What barriers 
+     or concerns do you have with the current tools you use? What tools 
+     do you wish existed to help coordinate? What features would be helpful?
+
+5.21 If you could design an ideal digital service to help with caregiving, 
+     what features would you want it to have? What features would you 
+     find useful? What concerns do you have about using digital tools?
+
+5.22 Is there anything else you'd like to share about your experience?
+
+================================================================================
+SECTION 6: OTHER CAREGIVER INTERVIEW QUESTIONS (16 total)
+================================================================================
+
+Procedure: ~60-minute semi-structured interview using Context Mapping 
+methodology. Same approach as primary caregiver interviews.
+
+6.1  What is your relationship to the patient and the primary caregiver?
+
+6.2  How did you become involved in providing care?
+
+6.3  What kind of support do you provide? How often?
+
+6.4  Is the support you provide accepted, needed, and appreciated?
+
+6.5  What information do you need to know about the patient before you 
+     can help? How is this information communicated to you? Are there 
+     any barriers in how you currently receive this information?
+
+6.6  Do you experience difficulties when providing support? What makes 
+     it difficult?
+
+6.7  Are there times you wanted to help but couldn't? If so, what 
+     stopped you?
+
+6.8  How do you communicate with the primary caregiver and other 
+     caregivers during caring for the patient? When the patient's 
+     condition changes, how do you find out? Are there barriers?
+
+6.9  Would you like to provide more or less support? If you would like 
+     to provide more, what is preventing you from doing so?
+
+6.10 Has the patient ever wandered, been difficult to find, or refused 
+     to return home? Have you ever helped in such a situation? How did 
+     you help? Were there any barriers?
+
+6.11 What would help you provide better support to the patient and the 
+     primary caregiver?
+
+6.12 How familiar are you with using a smartphone or computer?
+
+6.13 What current tools do you use to learn more about dementia and 
+     caregiving? When you face uncertain situations, where do you seek 
+     information or support? What barriers or concerns do you have with 
+     the current tools you use? What tools do you wish existed to better 
+     help with learning about dementia and caregiving? What features 
+     would be helpful?
+
+6.14 What current tools do you use to communicate or coordinate with 
+     other caregivers? What has worked well, what has not? What barriers 
+     or concerns do you have with the current tools you use? What tools 
+     do you wish existed to help coordinate? What features would be helpful?
+
+6.15 If you could design an ideal digital service to help with caregiving, 
+     what features would you want it to have? What features would you 
+     find useful? What concerns do you have about using digital tools?
+
+6.16 Is there anything else you'd like to share about your experience?
+
+

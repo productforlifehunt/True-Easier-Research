@@ -295,7 +295,7 @@ export const dataService = {
     try {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('hourly_reminders_enabled, notification_permission_status')
+        .select('hourly_reminders_enabled, notification_permission_status, daily_reminders_enabled, research_updates_enabled, push_notifications_enabled, daily_reminder_time')
         .eq('id', userId)
         .single()
 
@@ -322,13 +322,17 @@ export const dataService = {
   async updateNotificationPreferences(userId: string, preferences: {
     hourly_reminders_enabled?: boolean;
     notification_permission_status?: string;
+    daily_reminders_enabled?: boolean;
+    research_updates_enabled?: boolean;
+    push_notifications_enabled?: boolean;
+    daily_reminder_time?: string;
   }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .update(preferences)
         .eq('id', userId)
-        .select('hourly_reminders_enabled, notification_permission_status')
+        .select('hourly_reminders_enabled, notification_permission_status, daily_reminders_enabled, research_updates_enabled, push_notifications_enabled, daily_reminder_time')
         .single()
 
       if (error) throw error

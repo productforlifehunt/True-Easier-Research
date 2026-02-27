@@ -89,7 +89,7 @@ const Homepage: React.FC = () => {
       try {
         // Fetch enrollment data
         const { data: enrollmentData, error: enrollmentError } = await supabase
-          .from('enrollments')
+          .from('enrollment')
           .select('study_start_date, consent_signed_at, interview_agreement')
           .eq('participant_id', user.id)
           .limit(1);
@@ -206,33 +206,37 @@ const Homepage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <DesktopHeader />
       <MobileHeader />
 
       {/* Hero Section */}
-      <section className="px-6 sm:px-8 md:px-10 py-12 md:py-24 text-center pb-24 md:pb-32">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ color: 'var(--text-primary)' }}>
+      <section className="px-5 sm:px-8 py-8 md:py-16 text-center pb-20 md:pb-24">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: 'var(--text-primary)' }}>
             {t.title}
           </h1>
           
+          <p className="text-sm sm:text-base md:text-lg mb-8 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            {t.heroDescription}
+          </p>
+          
           {/* Survey Progress Cards - Only for logged-in users */}
           {user && (
-            <div className="mb-12">
+            <div className="mb-8">
               {/* Horizontally Scrollable Cards */}
-              <div ref={scrollContainerRef} className="overflow-x-auto -mx-4 px-4 pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div ref={scrollContainerRef} className="overflow-x-auto -mx-4 px-4 pb-3" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 <style>{`
                   .overflow-x-auto::-webkit-scrollbar { display: none; }
                 `}</style>
-                <div className="flex gap-3" style={{ width: 'max-content', paddingLeft: '4px', paddingRight: '4px' }}>
+                <div className="flex gap-2.5" style={{ width: 'max-content', paddingLeft: '4px', paddingRight: '4px' }}>
                   {/* Card 1: Consent */}
                   <div 
-                    className="rounded-2xl p-5 shadow-md transition-all"
+                    className="rounded-xl p-4 shadow-sm transition-all"
                     style={{ 
                       backgroundColor: 'white', 
-                      minWidth: '240px', 
-                      maxWidth: '240px', 
+                      minWidth: '200px', 
+                      maxWidth: '200px', 
                       border: enrollmentData?.consent_signed_at ? '2px solid var(--color-green)' : '2px solid var(--border-light)'
                     }}
                   >
@@ -427,7 +431,7 @@ const Homepage: React.FC = () => {
                             setIsUpdatingStartDate(true);
                             try {
                               await supabase
-                                .from('enrollments')
+                                .from('enrollment')
                                 .update({ study_start_date: selectedStartDate })
                                 .eq('participant_id', user.id);
                               setStudyStartDate(selectedStartDate);
@@ -505,11 +509,11 @@ const Homepage: React.FC = () => {
                   
                   {/* Card 5: Interview */}
                   <div 
-                    className="rounded-2xl p-5 shadow-md transition-all"
+                    className="rounded-xl p-4 shadow-sm transition-all"
                     style={{ 
                       backgroundColor: 'white', 
-                      minWidth: '240px', 
-                      maxWidth: '240px', 
+                      minWidth: '200px', 
+                      maxWidth: '200px', 
                       border: enrollmentData?.interview_agreement ? '2px solid var(--color-green)' : '2px solid var(--border-light)'
                     }}
                   >
@@ -562,7 +566,7 @@ const Homepage: React.FC = () => {
           
           <button
             onClick={() => navigate('/survey')}
-            className="px-8 py-4 text-white text-lg md:text-xl rounded-2xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2 min-h-[56px] mx-auto"
+            className="px-6 py-3 text-white text-base rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-md flex items-center justify-center gap-2 mx-auto"
             style={{ backgroundColor: 'var(--color-green)' }}
           >
             {t.cta.primary}

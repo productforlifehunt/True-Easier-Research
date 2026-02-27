@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import IOSDropdown from './ui/IOSDropdown';
 
@@ -32,6 +32,8 @@ interface Props {
   initialData?: { members: EcogramMember[]; lastUpdated: string | null };
   primaryCaregiverCode?: string | null; // PP### code of the primary caregiver whose network this is
   isPrimaryCaregiver?: boolean;
+  primaryCaregiverId?: string | null; // UUID of the primary caregiver (for network caregivers)
+  primaryCaregiverName?: string | null; // Display name for center node
 }
 
 const RELS = [
@@ -71,8 +73,26 @@ const MAINT_TASKS = [
   { v: 'maint_skill', en: 'Skill Development: attending classes, reading books, self-reflection, learning about dementia', zh: '技能发展: 参加课程、阅读书籍、自我反思、学习失智症知识' },
 ];
 
-export default function Ecogram({ userId, language, initialData, primaryCaregiverCode, isPrimaryCaregiver }: Props) {
-  const [members, setMembers] = useState<EcogramMember[]>(initialData?.members || []);
+export default function Ecogram({ userId, language, initialData, primaryCaregiverCode, isPrimaryCaregiver, primaryCaregiverId, primaryCaregiverName }: Props) {
+  const normalizeMember = (m: EcogramMember, i: number) => ({
+    ...m,
+    supportTypes: m.supportTypes || [],
+    x: m.x ?? (50 + 26 * Math.cos(i * 45 * Math.PI / 180)),
+    y: m.y ?? (50 + 26 * Math.sin(i * 45 * Math.PI / 180)),
+    circle: m.circle ?? 2,
+    importance: m.importance ?? 50,
+    lineStyle: m.lineStyle || 'solid',
+    arrowDirection: m.arrowDirection || 'both',
+    color: m.color || '#6B7280',
+  });
+
+  // Primary caregiver's members (read-only for network caregivers)
+  const [primaryMembers, setPrimaryMembers] = useState<EcogramMember[]>([]);
+  // Own members: for primary = all members; for network = their additions
+  const [members, setMembers] = useState<EcogramMember[]>(
+    (initialData?.members || []).map(normalizeMember)
+  );
+  const [loadingPrimary, setLoadingPrimary] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -88,8 +108,34 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
   const svgRef = useRef<SVGSVGElement>(null);
   const zh = language === 'zh';
 
+  // For network caregivers: load the primary caregiver's ecogram
+  useEffect(() => {
+    if (isPrimaryCaregiver || !primaryCaregiverId) return;
+    setLoadingPrimary(true);
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('ecogram_data')
+          .eq('id', primaryCaregiverId)
+          .single();
+        if (!error && data?.ecogram_data?.members) {
+          setPrimaryMembers(data.ecogram_data.members.map(normalizeMember));
+        }
+      } catch (e) { console.error('Error loading primary ecogram:', e); }
+      setLoadingPrimary(false);
+    })();
+  }, [isPrimaryCaregiver, primaryCaregiverId]);
+
+  // Combined members for display: primary's members + network's own additions
+  const allMembers = isPrimaryCaregiver ? members : [...primaryMembers, ...members];
+  // Which member IDs are from the primary (read-only for network caregivers)
+  const primaryMemberIds = new Set(primaryMembers.map(m => m.id));
+
   const drag = useCallback((e: MouseEvent | TouchEvent, id: string) => {
     if (!svgRef.current) return;
+    // Network caregivers cannot drag primary caregiver's members
+    if (!isPrimaryCaregiver && primaryMemberIds.has(id)) return;
     const r = svgRef.current.getBoundingClientRect();
     const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const cy = 'touches' in e ? e.touches[0].clientY : e.clientY;
@@ -98,7 +144,7 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
     const d = Math.sqrt((x-50)**2 + (y-50)**2);
     const circle: 1|2|3 = d < 18 ? 1 : d < 32 ? 2 : 3;
     setMembers(p => p.map(m => m.id === id ? {...m, x, y, circle} : m));
-  }, []);
+  }, [isPrimaryCaregiver, primaryMemberIds]);
 
   const save = async () => {
     if (!userId) return;
@@ -184,21 +230,29 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
   };
 
-  const sel = members.find(m => m.id === selected);
+  const sel = allMembers.find(m => m.id === selected);
+  const isSelReadOnly = sel ? primaryMemberIds.has(sel.id) : false;
 
   return (
     <div className="space-y-4">
       <div className="text-center">
         <h3 className="text-lg font-bold" style={{color:'var(--color-green)'}}>
-          {primaryCaregiverCode 
-            ? (zh ? `${primaryCaregiverCode} 的照护网络` : `Care Network of ${primaryCaregiverCode}`)
-            : (zh ? '我的照护网络' : 'My Care Network')}
+          {!isPrimaryCaregiver && primaryCaregiverName
+            ? (zh ? `${primaryCaregiverName} 的照护网络` : `${primaryCaregiverName}'s Care Network`)
+            : primaryCaregiverCode 
+              ? (zh ? `${primaryCaregiverCode} 的照护网络` : `Care Network of ${primaryCaregiverCode}`)
+              : (zh ? '我的照护网络' : 'My Care Network')}
         </h3>
         <p className="text-xs" style={{color:'var(--text-secondary)'}}>
-          {!isPrimaryCaregiver && primaryCaregiverCode
-            ? (zh ? '您正在查看主要照护者的照护网络' : 'Viewing the primary caregiver\'s care network')
+          {!isPrimaryCaregiver && primaryCaregiverId
+            ? (zh ? '您正在查看主要照护者的网络，可添加额外成员' : 'Viewing primary caregiver\'s network. You can add additional members.')
             : (zh ? '拖拽调整位置，点击编辑详情' : 'Drag to adjust position, click to edit details')}
         </p>
+        {loadingPrimary && (
+          <p className="text-xs mt-1" style={{color:'var(--text-muted)'}}>
+            {zh ? '加载主要照护者网络...' : 'Loading primary caregiver network...'}
+          </p>
+        )}
       </div>
 
       <div className="relative mx-auto" style={{maxWidth:'420px'}}>
@@ -209,18 +263,29 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
           <text x="200" y="28" textAnchor="middle" fontSize="9" fill="var(--text-secondary)">{zh?'远: 偶尔支持':'Distant: sporadic support'}</text>
           <text x="200" y="82" textAnchor="middle" fontSize="9" fill="var(--text-secondary)">{zh?'中: 定期支持':'Medium: regular support'}</text>
           <text x="200" y="138" textAnchor="middle" fontSize="9" fill="var(--text-secondary)">{zh?'近: 必要支持':'Close: essential support'}</text>
-          {members.map(renderLine)}
-          {members.map(renderArrow)}
+          {allMembers.map(renderLine)}
+          {allMembers.map(renderArrow)}
+          {/* Center node: primary caregiver is always at the center */}
           <circle cx="200" cy="200" r="22" fill="var(--color-green)"/>
-          <text x="200" y="205" textAnchor="middle" fontSize="13" fontWeight="bold" fill="white">{zh?'我':'You'}</text>
-          {members.map(m => {
+          <text x="200" y={isPrimaryCaregiver || !primaryCaregiverName ? 205 : 200} textAnchor="middle" fontSize="13" fontWeight="bold" fill="white">
+            {isPrimaryCaregiver ? (zh?'我':'You') : (primaryCaregiverName?.slice(0,4) || (zh?'主护':'Primary'))}
+          </text>
+          {!isPrimaryCaregiver && primaryCaregiverName && (
+            <text x="200" y="212" textAnchor="middle" fontSize="7" fill="white" opacity={0.8}>
+              {zh?'主要照护者':'Primary'}
+            </text>
+          )}
+          {allMembers.map(m => {
             const [mx, my] = [m.x*4, m.y*4];
             const isSel = selected === m.id;
+            const isFromPrimary = primaryMemberIds.has(m.id);
+            const canDrag = isPrimaryCaregiver || !isFromPrimary;
             return (
-              <g key={m.id} style={{cursor:'grab'}}
+              <g key={m.id} style={{cursor: canDrag ? 'grab' : 'default'}}
                 onMouseDown={e => {
                   e.preventDefault();
                   setSelected(m.id);
+                  if (!canDrag) return;
                   const mv = (ev: MouseEvent) => drag(ev, m.id);
                   const up = () => { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
                   document.addEventListener('mousemove',mv);
@@ -228,19 +293,24 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
                 }}
                 onTouchStart={() => {
                   setSelected(m.id);
+                  if (!canDrag) return;
                   const mv = (ev: TouchEvent) => drag(ev, m.id);
                   const up = () => { document.removeEventListener('touchmove',mv); document.removeEventListener('touchend',up); };
                   document.addEventListener('touchmove',mv);
                   document.addEventListener('touchend',up);
                 }}>
-                <circle cx={mx} cy={my} r={isSel?26:22} fill={m.color} stroke={isSel?'var(--color-green)':'white'} strokeWidth={isSel?3:2}/>
+                <circle cx={mx} cy={my} r={isSel?26:22} fill={m.color} stroke={isSel?'var(--color-green)':'white'} strokeWidth={isSel?3:2}
+                  opacity={isFromPrimary && !isPrimaryCaregiver ? 0.7 : 1}/>
                 <text x={mx} y={my-3} textAnchor="middle" fontSize="9" fontWeight="bold" fill="white">{m.name.slice(0,5)}</text>
                 <text x={mx} y={my+8} textAnchor="middle" fontSize="7" fill="white" opacity={0.9}>
                   {RELS.find(r=>r.v===m.relationship)?.[zh?'zh':'en']?.slice(0,4)}
                 </text>
-                {m.supportTypes.length > 0 && (
+                {isFromPrimary && !isPrimaryCaregiver && (
+                  <text x={mx} y={my+20} textAnchor="middle" fontSize="6" fill="var(--text-muted)">🔒</text>
+                )}
+                {(m.supportTypes || []).length > 0 && (
                   <text x={mx} y={my+32} textAnchor="middle" fontSize="8" fill="var(--text-secondary)">
-                    {m.supportTypes.length} {zh?'项支持':'supports'}
+                    {(m.supportTypes || []).length} {zh?'项支持':'supports'}
                   </text>
                 )}
               </g>
@@ -265,16 +335,28 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
               <div className="w-3 h-3 rounded-full" style={{background:sel.color}}/>
               <span className="font-medium" style={{color:'var(--text-primary)'}}>{sel.name}</span>
               {sel.age && <span className="text-xs" style={{color:'var(--text-secondary)'}}>({sel.age}{zh?'岁':' yrs'})</span>}
+              {isSelReadOnly && (
+                <span className="text-xs px-1.5 py-0.5 rounded" style={{background:'rgba(16,185,129,0.1)',color:'var(--color-green)'}}>
+                  🔒 {zh?'只读':'Read-only'}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <button onClick={()=>setSelected(null)} className="px-2 py-1 rounded text-xs" style={{background:'var(--bg-secondary)',color:'var(--text-secondary)'}}>
                 {zh?'隐藏':'Hide'} ▲
               </button>
-              <button onClick={()=>{setMembers(p=>p.filter(m=>m.id!==sel.id));setSelected(null);}} className="px-2 py-1 rounded text-xs bg-red-100 text-red-600">
-                {zh?'删除':'Delete'}
-              </button>
+              {!isSelReadOnly && (
+                <button onClick={()=>{setMembers(p=>p.filter(m=>m.id!==sel.id));setSelected(null);}} className="px-2 py-1 rounded text-xs bg-red-100 text-red-600">
+                  {zh?'删除':'Delete'}
+                </button>
+              )}
             </div>
           </div>
+          {isSelReadOnly && (
+            <div className="p-3 text-xs" style={{background:'rgba(16,185,129,0.05)',color:'var(--text-secondary)'}}>
+              {zh ? '此成员由主要照护者添加，您只能查看不能编辑。' : 'This member was added by the primary caregiver. View-only.'}
+            </div>
+          )}
           
           {/* Editable content */}
           <div className="p-4 space-y-3">
@@ -387,9 +469,9 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
               <span className="text-xs font-medium block mb-1" style={{color:'var(--color-green)'}}>ADL</span>
               <div className="flex flex-wrap gap-1 mb-1">
                 {ADL_TASKS.map(t=>(
-                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:m.supportTypes.includes(t.v)?m.supportTypes.filter(x=>x!==t.v):[...m.supportTypes,t.v]}:m))}
-                    className={`py-0.5 px-2 rounded text-xs border ${sel.supportTypes.includes(t.v)?'ring-1':''}`}
-                    style={{background:sel.supportTypes.includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:sel.supportTypes.includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
+                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:(m.supportTypes||[]).includes(t.v)?(m.supportTypes||[]).filter(x=>x!==t.v):[...(m.supportTypes||[]),t.v]}:m))}
+                    className={`py-0.5 px-2 rounded text-xs border ${(sel.supportTypes||[]).includes(t.v)?'ring-1':''}`}
+                    style={{background:(sel.supportTypes||[]).includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:(sel.supportTypes||[]).includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
                     {zh?t.zh:t.en}
                   </button>
                 ))}
@@ -404,9 +486,9 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
               <span className="text-xs font-medium block mb-1" style={{color:'var(--color-green)'}}>IADL</span>
               <div className="flex flex-wrap gap-1 mb-1">
                 {IADL_TASKS.map(t=>(
-                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:m.supportTypes.includes(t.v)?m.supportTypes.filter(x=>x!==t.v):[...m.supportTypes,t.v]}:m))}
-                    className={`py-0.5 px-2 rounded text-xs border ${sel.supportTypes.includes(t.v)?'ring-1':''}`}
-                    style={{background:sel.supportTypes.includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:sel.supportTypes.includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
+                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:(m.supportTypes||[]).includes(t.v)?(m.supportTypes||[]).filter(x=>x!==t.v):[...(m.supportTypes||[]),t.v]}:m))}
+                    className={`py-0.5 px-2 rounded text-xs border ${(sel.supportTypes||[]).includes(t.v)?'ring-1':''}`}
+                    style={{background:(sel.supportTypes||[]).includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:(sel.supportTypes||[]).includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
                     {zh?t.zh:t.en}
                   </button>
                 ))}
@@ -421,9 +503,9 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
               <span className="text-xs font-medium block mb-1" style={{color:'var(--color-green)'}}>{zh?'维护性支持':'Maintenance'}</span>
               <div className="flex flex-wrap gap-1 mb-1">
                 {MAINT_TASKS.map(t=>(
-                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:m.supportTypes.includes(t.v)?m.supportTypes.filter(x=>x!==t.v):[...m.supportTypes,t.v]}:m))}
-                    className={`py-0.5 px-2 rounded text-xs border ${sel.supportTypes.includes(t.v)?'ring-1':''}`}
-                    style={{background:sel.supportTypes.includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:sel.supportTypes.includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
+                  <button key={t.v} onClick={()=>setMembers(p=>p.map(m=>m.id===sel.id?{...m,supportTypes:(m.supportTypes||[]).includes(t.v)?(m.supportTypes||[]).filter(x=>x!==t.v):[...(m.supportTypes||[]),t.v]}:m))}
+                    className={`py-0.5 px-2 rounded text-xs border ${(sel.supportTypes||[]).includes(t.v)?'ring-1':''}`}
+                    style={{background:(sel.supportTypes||[]).includes(t.v)?'var(--color-green)':'var(--bg-primary)',color:(sel.supportTypes||[]).includes(t.v)?'white':'var(--text-primary)',borderColor:'var(--border-light)'}}>
                     {zh?t.zh:t.en}
                   </button>
                 ))}

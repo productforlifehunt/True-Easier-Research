@@ -77,11 +77,12 @@ Settings → Accept interview invitation → View interview URL & schedule
 ## 4. Features
 
 ### 4.1 Survey Entry CRUD
-- **Create:** 3-tab form — Activity (type, category, description, time spent, mood, emotional impact, urgency), People (who was involved, who else you wish could help, challenges reaching them), Challenges & Resources (challenge types checklist, resources using, resources wanted)
+- **Create:** 3-tab form — Activity (type, category, description, time spent, event stress rating [-3 to +3], MBP checklist [3 Yes/No], MBP distress [0-4], positive affect [4 items, 1-7], negative affect [7 items, 1-7], urgency), People (who was involved, who else you wish could help, challenges reaching them), Challenges & Resources (task difficulty [-3 to +3], challenge types checklist, resources using, resources wanted)
 - **Time options:** "Now" (auto-timestamp), "Other Time" (date+time picker), "Not Tied to Time" (null timestamp for general ideas)
 - **Activity categories:** Multi-select checkboxes (ADL, IADL, medical, emotional support, etc.)
 - **Challenge types:** Multi-select (knowledge gaps, patient condition, coordination, time, emotional stress, physical demands, communication, safety/liability, privacy, other)
-- **Daily Sense of Competence:** 3 ESM items from SSCQ (stressed, privacy, strained) — collected per entry
+- **Daily Sense of Competence:** 3 ESM items from SSCQ (stressed, privacy, strained) — 1-7 Likert scale, collected per entry
+- **Daily Burden Rating:** -3 to +3 scale, collected at end-of-day
 - **Read:** Timeline view (24h vertical, filterable by day 1-7 and time slot), Entry detail page
 - **Update:** Same AddEntry form pre-populated with existing data
 - **Delete:** iOS-style bottom-sheet confirmation modal
@@ -100,18 +101,19 @@ Settings → Accept interview invitation → View interview URL & schedule
 ### 4.4 Participant Profile & Baseline Assessments
 Collected in Settings page, stored in `profiles` table:
 
-**Caregiver demographics:** name, age, gender, education, employment, marital status, health status, caregiving years, hours/week, participant number (PP###)
+**Caregiver demographics:** name, age, gender (Male/Female), education, employment (full-time, part-time, self-employed, unemployed, retired, student), marital status (single, married, divorced, widowed), health status (1-5 scale), relationship to care recipient (dropdown: Spouse/Partner, Parent, Child, Sibling, Other Relative, Friend/Neighbor, Professional Caregiver, Other), caregiving duration (category: <6mo, 6mo-1yr, 1-2yr, 2-5yr, >5yr), hours/week, distance from recipient, participant number (PP###)
 
 **Care recipient info:** age, gender, education, dementia type, years since diagnosis, dementia stage, comorbidities
 
 **Functional assessments:**
 - ADLs (eating, bathing, dressing, toileting, mobility) — 3-point scale
 - IADLs (medication, finances, shopping, cooking, housework) — 3-point scale
-- BPSD symptoms (agitation, wandering, sleep, aggression, depression, anxiety, hallucinations) — frequency scale
+- NPI-Q (12-item Neuropsychiatric Inventory): delusions, hallucinations, agitation/aggression, depression/dysphoria, anxiety, elation/euphoria, apathy/indifference, disinhibition, irritability/lability, aberrant motor behavior, nighttime behavior disturbances, appetite/eating changes — severity scale (No/Mild/Moderate/Severe)
 - Communication ability
 
 **Validated instruments:**
-- SSCQ (Short Sense of Competence Questionnaire) — 7 items, 5-point Likert
+- SSCQ (Short Sense of Competence Questionnaire) — 7 items, 7-point Likert (1=Strongly Disagree to 7=Strongly Agree)
+- MSPSS (Multidimensional Scale of Perceived Social Support) — 12 items (4 each for Significant Other, Family, Friends)
 - Perseverance Time
 - Daily SoC (3 ESM items per entry)
 
@@ -169,10 +171,16 @@ Key columns:
 | description | text | Main free-text entry |
 | activity_categories | text[] | Multi-select activity types |
 | time_spent | int | Minutes |
-| emotional_impact | text | How it affected the caregiver |
-| your_mood | text | Current mood |
-| urgency_level | text | Low/medium/high/critical |
-| task_difficulty | int | 1-5 scale |
+| emotional_impact | text | Legacy: how it affected the caregiver (deprecated) |
+| event_stress_rating | int | Section 3.1.3: -3 (very unpleasant) to +3 (very pleasant) |
+| mbp_memory | text | Section 3.1.5.a: patient memory problems (yes/no) |
+| mbp_behavior | text | Section 3.1.5.b: patient behavior problems (yes/no) |
+| mbp_depression | text | Section 3.1.5.c: patient depressive symptoms (yes/no) |
+| mbp_distress | text | Section 3.1.6: MBP-related distress (0-4) |
+| affect_cheerful, affect_relaxed, affect_enthusiastic, affect_satisfied | text | Section 3.1.10: positive affect (1-7 each) |
+| affect_insecure, affect_lonely, affect_anxious, affect_irritated, affect_down, affect_desperate, affect_tensed | text | Section 3.1.11: negative affect (1-7 each) |
+| urgency_level | text | Low/medium/high/urgent |
+| task_difficulty | int | Section 3.3.1: -3 (no challenges) to +3 (extreme challenges) |
 | people_with | text | Who was involved |
 | people_want_with | text | Who they wish could help |
 | people_challenges | text | Challenges reaching desired helpers |
@@ -183,6 +191,7 @@ Key columns:
 | daily_soc_stressed | text | SSCQ ESM item |
 | daily_soc_privacy | text | SSCQ ESM item |
 | daily_soc_strained | text | SSCQ ESM item |
+| daily_burden_rating | int | Section 4.3: -3 (very burdensome) to +3 (very manageable) |
 | created_at | timestamptz | Auto |
 
 ### 5.2 `profiles` — Participant profile + baseline data
@@ -203,7 +212,7 @@ Key columns:
 | dementia_type, years_since_diagnosis, dementia_stage | text | Diagnosis info |
 | recipient_adl_* | text | 5 ADL items |
 | recipient_iadl_* | text | 5 IADL items |
-| recipient_bpsd_* | text | 7 BPSD items |
+| recipient_bpsd_* | text | 12 NPI-Q items (delusions, hallucinations, agitation, depression, anxiety, elation, apathy, disinhibition, irritability, motor, sleep, appetite) |
 | recipient_communication | text | |
 | sscq_* | text | 7 SSCQ items |
 | perseverance_time | text | |

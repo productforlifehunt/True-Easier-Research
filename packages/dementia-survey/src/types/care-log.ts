@@ -1,0 +1,38 @@
+export interface CareLogEntry {
+  id: number;
+  user_id: string;
+  entry_type: 'care_activity' | 'care_need' | 'struggle';
+  activity_categories: string[];
+  activity_other: string;
+  description: string;
+  time_spent: number;
+  event_stress_rating: number;
+  urgency_level: string;
+  mbp_memory: string;
+  mbp_behavior: string;
+  mbp_depression: string;
+  mbp_distress: string;
+  affect_cheerful: string;
+  affect_relaxed: string;
+  affect_enthusiastic: string;
+  affect_satisfied: string;
+  affect_insecure: string;
+  affect_lonely: string;
+  affect_anxious: string;
+  affect_irritated: string;
+  affect_down: string;
+  affect_desperate: string;
+  affect_tensed: string;
+  people_with: string;
+  people_want_with: string;
+  people_challenges: string;
+  challenges_faced: string;
+  challenge_types: string[];
+  challenge_type_other: string;
+  task_difficulty: number;
+  resources_using: string;
+  resources_wanted: string;
+  entry_timestamp: string;
+  created_at: string;
+  updated_at: string;
+}

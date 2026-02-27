@@ -67,16 +67,16 @@ const MobileHeader: React.FC = () => {
     <>
     <header className="md:hidden sticky top-0 z-50" style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)' }}>
       {/* Top Row: Logo + Auth + Language */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-3 py-2.5 gap-2">
         <button
           onClick={() => handleTabClick('home')}
-          className="text-lg font-bold truncate"
+          className="text-sm font-bold truncate min-w-0"
           style={{ color: 'var(--color-green)' }}
         >
           {language === 'zh' ? '痴呆症照护者研究' : 'Dementia Caregiver Study'}
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Language Toggle */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>EN</span>
@@ -85,14 +85,10 @@ const MobileHeader: React.FC = () => {
                 const newLang = language === 'en' ? 'zh' : 'en';
                 changeLanguage(newLang);
               }}
-              className="relative inline-flex h-6 w-10 items-center rounded-full transition-colors duration-200"
-              style={{ backgroundColor: language === 'zh' ? 'var(--color-green)' : 'var(--toggle-inactive)' }}
+              className={`ios-toggle ${language === 'zh' ? 'active' : ''}`}
+              style={{ width: 42, minWidth: 42, height: 26, minHeight: 26 }}
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  language === 'zh' ? 'translate-x-5' : 'translate-x-1'
-                }`}
-              />
+              <span className="ios-toggle-thumb" style={{ width: 22, height: 22 }} />
             </button>
             <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>中</span>
           </div>

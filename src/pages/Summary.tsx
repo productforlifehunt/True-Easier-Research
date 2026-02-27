@@ -116,13 +116,7 @@ const Summary: React.FC = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('survey_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('entry_timestamp', { ascending: false });
-
-      if (error) throw error;
+      const data = await dataService.getSurveyEntries(user.id);
       setEntries(data || []);
     } catch (error) {
       console.error('Error loading entries:', error);

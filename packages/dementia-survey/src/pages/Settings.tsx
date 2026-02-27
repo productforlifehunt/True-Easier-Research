@@ -45,10 +45,13 @@ const SettingsPage: React.FC = () => {
   const [testingNotification, setTestingNotification] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showLinkPopup, setShowLinkPopup] = useState(false);
+  const [linkCodeInput, setLinkCodeInput] = useState('');
   const [profileForm, setProfileForm] = useState({
     full_name: '',
     introduction: '',
     relationship_to_patient: '',
+    relationship_to_patient_other: '',
     is_primary_caregiver: false,
     participant_number: '',
     linked_primary_caregiver_id: '' as string | null,
@@ -61,12 +64,15 @@ const SettingsPage: React.FC = () => {
     marital_status: '',
     health_status: '',
     caregiving_years: '',
+    caregiving_years_other: '',
     caregiving_hours_per_week: '',
     living_with_recipient: '',
+    living_with_recipient_details: '',
     recipient_age: '',
     recipient_gender: '',
     recipient_education: '',
     dementia_type: '',
+    dementia_type_other: '',
     years_since_diagnosis: '',
     dementia_stage: '',
     // Functional Status
@@ -81,14 +87,19 @@ const SettingsPage: React.FC = () => {
     recipient_iadl_shopping: '',
     recipient_iadl_cooking: '',
     recipient_iadl_housework: '',
-    // BPSD - Behavioral symptoms
+    // NPI-Q - Neuropsychiatric Inventory (12 items)
+    recipient_bpsd_delusions: '',
+    recipient_bpsd_hallucinations: '',
     recipient_bpsd_agitation: '',
-    recipient_bpsd_wandering: '',
-    recipient_bpsd_sleep: '',
-    recipient_bpsd_aggression: '',
     recipient_bpsd_depression: '',
     recipient_bpsd_anxiety: '',
-    recipient_bpsd_hallucinations: '',
+    recipient_bpsd_elation: '',
+    recipient_bpsd_apathy: '',
+    recipient_bpsd_disinhibition: '',
+    recipient_bpsd_irritability: '',
+    recipient_bpsd_motor: '',
+    recipient_bpsd_sleep: '',
+    recipient_bpsd_appetite: '',
     // Communication & Other
     recipient_communication: '',
     // Short Sense of Competence Questionnaire (SSCQ) - 7 items
@@ -99,12 +110,32 @@ const SettingsPage: React.FC = () => {
     sscq_manipulation: '',
     sscq_solutions: '',
     sscq_health: '',
+    // MSPSS - Multidimensional Scale of Perceived Social Support (12 items)
+    mspss_so_1: '',
+    mspss_so_2: '',
+    mspss_so_3: '',
+    mspss_so_4: '',
+    mspss_fam_1: '',
+    mspss_fam_2: '',
+    mspss_fam_3: '',
+    mspss_fam_4: '',
+    mspss_fri_1: '',
+    mspss_fri_2: '',
+    mspss_fri_3: '',
+    mspss_fri_4: '',
+    // ADKS (30-item) and DAS (20-item) stored as JSON arrays
+    adks_answers: Array(30).fill('') as string[],
+    das_answers: Array(20).fill('') as string[],
     // Perseverance Time
     perseverance_time: '',
     recipient_comorbidities: '',
     relationship_to_primary: '',
+    relationship_to_primary_other: '',
     distance_from_recipient: '',
-    contact_frequency: ''
+    distance_from_recipient_details: '',
+    distance_from_recipient_other: '',
+    contact_frequency: '',
+    contact_frequency_other: ''
   });
   const [isSaving, setIsSaving] = useState(false);
   
@@ -145,6 +176,7 @@ const SettingsPage: React.FC = () => {
   const [showPatientCondition, setShowPatientCondition] = useState(false);
   const [showNetworkConfig, setShowNetworkConfig] = useState(false);
   const [showDementiaKnowledge, setShowDementiaKnowledge] = useState(false);
+  const [showMSPSS, setShowMSPSS] = useState(false);
   
   // AI feature states
   const [aiLoading, setAiLoading] = useState<string | null>(null);
@@ -160,6 +192,7 @@ const SettingsPage: React.FC = () => {
         full_name: profileData.full_name || '',
         introduction: profileData.introduction || '',
         relationship_to_patient: profileData.relationship_to_patient || '',
+        relationship_to_patient_other: profileData.relationship_to_patient_other || '',
         is_primary_caregiver: profileData.is_primary_caregiver || false,
         participant_number: profileData.participant_number || '',
         caregiver_age: profileData.caregiver_age || '',
@@ -169,12 +202,15 @@ const SettingsPage: React.FC = () => {
         marital_status: profileData.marital_status || '',
         health_status: profileData.health_status || '',
         caregiving_years: profileData.caregiving_years || '',
+        caregiving_years_other: profileData.caregiving_years_other || '',
         caregiving_hours_per_week: profileData.caregiving_hours_per_week || '',
         living_with_recipient: profileData.living_with_recipient || '',
+        living_with_recipient_details: profileData.living_with_recipient_details || '',
         recipient_age: profileData.recipient_age || '',
         recipient_gender: profileData.recipient_gender || '',
         recipient_education: profileData.recipient_education || '',
         dementia_type: profileData.dementia_type || '',
+        dementia_type_other: profileData.dementia_type_other || '',
         years_since_diagnosis: profileData.years_since_diagnosis || '',
         dementia_stage: profileData.dementia_stage || '',
         // Functional Status - ADLs
@@ -189,14 +225,19 @@ const SettingsPage: React.FC = () => {
         recipient_iadl_shopping: profileData.recipient_iadl_shopping || '',
         recipient_iadl_cooking: profileData.recipient_iadl_cooking || '',
         recipient_iadl_housework: profileData.recipient_iadl_housework || '',
-        // BPSD
+        // NPI-Q (12 items)
+        recipient_bpsd_delusions: profileData.recipient_bpsd_delusions || '',
+        recipient_bpsd_hallucinations: profileData.recipient_bpsd_hallucinations || '',
         recipient_bpsd_agitation: profileData.recipient_bpsd_agitation || '',
-        recipient_bpsd_wandering: profileData.recipient_bpsd_wandering || '',
-        recipient_bpsd_sleep: profileData.recipient_bpsd_sleep || '',
-        recipient_bpsd_aggression: profileData.recipient_bpsd_aggression || '',
         recipient_bpsd_depression: profileData.recipient_bpsd_depression || '',
         recipient_bpsd_anxiety: profileData.recipient_bpsd_anxiety || '',
-        recipient_bpsd_hallucinations: profileData.recipient_bpsd_hallucinations || '',
+        recipient_bpsd_elation: profileData.recipient_bpsd_elation || '',
+        recipient_bpsd_apathy: profileData.recipient_bpsd_apathy || '',
+        recipient_bpsd_disinhibition: profileData.recipient_bpsd_disinhibition || '',
+        recipient_bpsd_irritability: profileData.recipient_bpsd_irritability || '',
+        recipient_bpsd_motor: profileData.recipient_bpsd_motor || '',
+        recipient_bpsd_sleep: profileData.recipient_bpsd_sleep || '',
+        recipient_bpsd_appetite: profileData.recipient_bpsd_appetite || '',
         // Other
         recipient_communication: profileData.recipient_communication || '',
         // SSCQ
@@ -207,11 +248,29 @@ const SettingsPage: React.FC = () => {
         sscq_manipulation: profileData.sscq_manipulation || '',
         sscq_solutions: profileData.sscq_solutions || '',
         sscq_health: profileData.sscq_health || '',
+        mspss_so_1: profileData.mspss_so_1 || '',
+        mspss_so_2: profileData.mspss_so_2 || '',
+        mspss_so_3: profileData.mspss_so_3 || '',
+        mspss_so_4: profileData.mspss_so_4 || '',
+        mspss_fam_1: profileData.mspss_fam_1 || '',
+        mspss_fam_2: profileData.mspss_fam_2 || '',
+        mspss_fam_3: profileData.mspss_fam_3 || '',
+        mspss_fam_4: profileData.mspss_fam_4 || '',
+        mspss_fri_1: profileData.mspss_fri_1 || '',
+        mspss_fri_2: profileData.mspss_fri_2 || '',
+        mspss_fri_3: profileData.mspss_fri_3 || '',
+        mspss_fri_4: profileData.mspss_fri_4 || '',
+        adks_answers: profileData.adks_answers || Array(30).fill(''),
+        das_answers: profileData.das_answers || Array(20).fill(''),
         perseverance_time: profileData.perseverance_time || '',
         recipient_comorbidities: profileData.recipient_comorbidities || '',
         relationship_to_primary: profileData.relationship_to_primary || '',
+        relationship_to_primary_other: profileData.relationship_to_primary_other || '',
         distance_from_recipient: profileData.distance_from_recipient || '',
+        distance_from_recipient_details: profileData.distance_from_recipient_details || '',
+        distance_from_recipient_other: profileData.distance_from_recipient_other || '',
         contact_frequency: profileData.contact_frequency || '',
+        contact_frequency_other: profileData.contact_frequency_other || '',
         linked_primary_caregiver_id: profileData.linked_primary_caregiver_id || null,
         linked_primary_caregiver_code: profileData.linked_primary_caregiver_code || null
       });
@@ -242,7 +301,7 @@ const SettingsPage: React.FC = () => {
       try {
         // Get study start date and interview agreement from enrollments
         const { data: enrollmentData } = await supabase
-          .from('enrollments')
+          .from('enrollment')
           .select('study_start_date, interview_agreement')
           .eq('participant_id', user.id)
           .limit(1);
@@ -779,33 +838,33 @@ const SettingsPage: React.FC = () => {
       <DesktopHeader />
       <MobileHeader />
       <main className="flex-1" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="px-4 py-6">
-            <div className="text-center mb-12">
-              <Settings className="mx-auto mb-6" style={{ color: 'var(--color-green)', width: 'clamp(3rem, 8vw, 4rem)', height: 'clamp(3rem, 8vw, 4rem)' }} />
-              <h2 className="text-3xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-24">
+            <div className="text-center mb-6">
+              <Settings className="mx-auto mb-3" style={{ color: 'var(--color-green)', width: '2rem', height: '2rem' }} />
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                 {settingsT.settings.title}
               </h2>
-              <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 {settingsT.settings.subtitle}
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-5">
               {/* Survey Progress Section */}
               {studyStartDate && surveyProgress && (
-                <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
-                  <div className="mb-6">
-                    <h1 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                <div className="bg-white rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
+                  <div className="mb-4">
+                    <h1 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                       {settingsT.settings.surveyProgress}
                     </h1>
-                    <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {settingsT.settings.surveyProgressSubtitle}
                     </p>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
                     {/* Progress Circle */}
-                    <div className="relative flex items-center justify-center" style={{ width: 'clamp(6rem, 20vw, 8rem)', height: 'clamp(6rem, 20vw, 8rem)' }}>
+                    <div className="relative flex items-center justify-center" style={{ width: '5rem', height: '5rem' }}>
                       <svg className="transform -rotate-90" style={{ width: '100%', height: '100%' }}>
                         <circle
                           cx="50%"
@@ -828,10 +887,10 @@ const SettingsPage: React.FC = () => {
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-green)' }}>
+                        <span className="text-base font-bold" style={{ color: 'var(--color-green)' }}>
                           {language === 'zh' ? settingsT.settings.day : 'Day'} {surveyProgress.currentDay}
                         </span>
-                        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                           {language === 'zh' ? `${settingsT.settings.of} ${surveyProgress.totalDays}` : `of ${surveyProgress.totalDays}`}
                         </span>
                       </div>
@@ -841,11 +900,11 @@ const SettingsPage: React.FC = () => {
                     <div className="flex-1 w-full">
                       <div className="space-y-3">
                         {/* Start Date */}
-                        <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                          <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                          <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
                             {language === 'zh' ? '开始日期' : 'Start Date'}
                           </span>
-                          <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>
+                          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                             {new Date(studyStartDate).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', {
                               year: 'numeric',
                               month: 'long',
@@ -854,21 +913,21 @@ const SettingsPage: React.FC = () => {
                           </span>
                         </div>
                         
-                        <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                          <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                          <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
                             {language === 'zh' ? '当前天数' : 'Current Day'}
                           </span>
-                          <span className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                          <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                             {surveyProgress.currentDay} / {surveyProgress.totalDays}
                           </span>
                         </div>
                         
                         {surveyProgress.daysRemaining > 0 ? (
-                          <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                            <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                          <div className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
                               {language === 'zh' ? '剩余天数' : 'Days Remaining'}
                             </span>
-                            <span className="text-lg font-bold" style={{ color: 'var(--color-green)' }}>
+                            <span className="text-sm font-bold" style={{ color: 'var(--color-green)' }}>
                               {surveyProgress.daysRemaining} {settingsT.settings.daysRemaining}
                             </span>
                           </div>
@@ -915,7 +974,7 @@ const SettingsPage: React.FC = () => {
                         setIsUpdatingStartDate(true);
                         try {
                           await supabase
-                            .from('enrollments')
+                            .from('enrollment')
                             .update({ study_start_date: selectedStartDate })
                             .eq('participant_id', user.id);
                           
@@ -938,7 +997,7 @@ const SettingsPage: React.FC = () => {
               )}
               
               {/* Profile Information Section */}
-              <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm" style={{ border: '1px solid var(--border-light)' }}>
+              <div className="bg-white rounded-xl p-4 shadow-sm" style={{ border: '1px solid var(--border-light)', overflow: 'visible' }}>
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
                   <div>
                     <h1 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -1049,53 +1108,159 @@ const SettingsPage: React.FC = () => {
                     {settingsT.settings.relationshipToPatient}
                   </label>
                   {isEditingProfile ? (
-                    <input
-                      type="text"
-                      value={profileForm.relationship_to_patient}
-                      onChange={(e) => setProfileForm({ ...profileForm, relationship_to_patient: e.target.value })}
-                      placeholder={settingsT.settings.relationshipPlaceholder}
-                      className="w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none"
-                      style={{ 
-                        borderColor: 'var(--border-light)',
-                        backgroundColor: 'var(--bg-secondary)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
+                    <>
+                      <IOSDropdown
+                        value={profileForm.relationship_to_patient || ''}
+                        onChange={(value) => setProfileForm({ ...profileForm, relationship_to_patient: value })}
+                        placeholder={settingsT.settings.relationshipPlaceholder}
+                        options={[
+                          { value: 'spouse_partner', label: language === 'zh' ? '配偶/伴侣' : 'Spouse/Partner' },
+                          { value: 'parent', label: language === 'zh' ? '父母' : 'Parent' },
+                          { value: 'child', label: language === 'zh' ? '子女' : 'Child' },
+                          { value: 'sibling', label: language === 'zh' ? '兄弟姐妹' : 'Sibling' },
+                          { value: 'other_relative', label: language === 'zh' ? '其他亲属' : 'Other Relative' },
+                          { value: 'friend_neighbor', label: language === 'zh' ? '朋友/邻居' : 'Friend/Neighbor' },
+                          { value: 'professional', label: language === 'zh' ? '专业照护人员' : 'Professional Caregiver' },
+                          { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                        ]}
+                      />
+                      {profileForm.relationship_to_patient === 'other' && (
+                        <input
+                          type="text"
+                          value={profileForm.relationship_to_patient_other || ''}
+                          onChange={(e) => setProfileForm({ ...profileForm, relationship_to_patient_other: e.target.value })}
+                          className="w-full mt-2 px-4 py-2 rounded-lg border text-sm"
+                          style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                          placeholder={language === 'zh' ? '请描述您与患者的关系...' : 'Please describe your relationship...'}
+                        />
+                      )}
+                    </>
                   ) : (
                     <p className="text-lg px-4 py-3 rounded-xl" style={{ 
                       backgroundColor: 'var(--bg-secondary)',
                       color: profile?.relationship_to_patient ? 'var(--text-primary)' : 'var(--text-secondary)'
                     }}>
-                      {profile?.relationship_to_patient || 'Not set'}
+                      {profile?.relationship_to_patient === 'other' 
+                        ? `Other: ${profile?.relationship_to_patient_other || ''}` 
+                        : (profile?.relationship_to_patient || 'Not set')}
                     </p>
                   )}
                 </div>
 
-                {/* Participant Number - PP/PO System */}
+                {/* Participant Code — Editable */}
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                     {language === 'zh' ? '参与者编号' : 'Participant Code'}
+                    <span className="text-xs ml-2" style={{ opacity: 0.7 }}>
+                      ({profileForm.is_primary_caregiver 
+                        ? (language === 'zh' ? 'PP = 主要照护者' : 'PP = Primary Caregiver')
+                        : (language === 'zh' ? 'PO = 其他照护者' : 'PO = Other Caregiver')})
+                    </span>
                   </label>
-                  <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                    {/* Show PP code for primary caregivers, PO code for others */}
-                    <p className="text-lg font-bold" style={{ color: 'var(--color-green)' }}>
-                      {profile?.participant_number || (language === 'zh' ? '未设置' : 'Not assigned')}
-                    </p>
-                    {/* For non-primary caregivers, show linked primary caregiver */}
-                    {!profileForm.is_primary_caregiver && profile?.linked_primary_caregiver_code && (
-                      <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                        {language === 'zh' 
-                          ? `我是主要照护者 ${profile.linked_primary_caregiver_code} 的照护网络成员`
-                          : `I am a member of the care network of caregiver ${profile.linked_primary_caregiver_code}`}
-                      </p>
-                    )}
-                    {/* Explanation of the code system */}
-                    <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)', opacity: 0.7 }}>
-                      {profileForm.is_primary_caregiver 
-                        ? (language === 'zh' ? 'PP = 主要照护者参与者' : 'PP = Primary Caregiver Participant')
-                        : (language === 'zh' ? 'PO = 其他照护者参与者' : 'PO = Other Caregiver Participant')}
-                    </p>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={profileForm.participant_number}
+                      onChange={(e) => setProfileForm({ ...profileForm, participant_number: e.target.value.toUpperCase() })}
+                      placeholder={profileForm.is_primary_caregiver ? 'PP001' : 'PO001'}
+                      className="flex-1 px-3 py-2 rounded-lg border text-sm font-bold"
+                      style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--color-green)' }}
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!user?.id || !profileForm.participant_number) return;
+                        try {
+                          await supabase.from('profiles').update({ participant_number: profileForm.participant_number }).eq('id', user.id);
+                          await loadProfile();
+                        } catch (err) { console.error('Error saving code:', err); }
+                      }}
+                      className="px-3 py-2 rounded-lg text-xs font-medium text-white"
+                      style={{ backgroundColor: 'var(--color-green)' }}
+                    >
+                      {language === 'zh' ? '保存' : 'Save'}
+                    </button>
                   </div>
+
+                  {/* Link to Primary Caregiver — network caregivers only */}
+                  {!profileForm.is_primary_caregiver && (
+                    <div className="mt-3 relative">
+                      {profileForm.linked_primary_caregiver_id ? (
+                        /* Linked — green */
+                        <div className="p-2 rounded-lg" style={{ background: 'rgba(16,185,129,0.1)' }}>
+                          <p className="text-xs font-medium" style={{ color: 'var(--color-green)' }}>
+                            ✓ {language === 'zh' 
+                              ? `已链接: ${profileForm.linked_primary_caregiver_code || ''}` 
+                              : `Linked: ${profileForm.linked_primary_caregiver_code || ''}`}
+                          </p>
+                        </div>
+                      ) : (
+                        /* Unlinked — red button with inline popup */
+                        <>
+                          <button
+                            onClick={() => setShowLinkPopup(!showLinkPopup)}
+                            className="w-full p-2 rounded-lg text-xs font-medium cursor-pointer"
+                            style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: 'none' }}
+                          >
+                            ✗ {language === 'zh' ? '未链接，点击链接' : 'Not linked. Click to link.'}
+                          </button>
+                          {showLinkPopup && (
+                            <div className="absolute bottom-full left-0 mb-1 p-3 rounded-lg shadow-lg z-10" 
+                              style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-light)', width: '100%' }}>
+                              <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
+                                {language === 'zh' 
+                                  ? '请输入您所属的主要照护者的参与者编号（PP编号），不是您自己的编号' 
+                                  : 'Enter the primary caregiver\'s participant ID (PP code) you are linked to, not your own ID'}
+                              </p>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={linkCodeInput}
+                                  onChange={(e) => setLinkCodeInput(e.target.value.toUpperCase())}
+                                  placeholder="PP001"
+                                  className="flex-1 px-3 py-2 rounded-lg text-sm border"
+                                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={async () => {
+                                    if (!linkCodeInput || !user?.id) return;
+                                    try {
+                                      const { data: pcProfile, error } = await supabase
+                                        .from('profiles')
+                                        .select('id, full_name, participant_number')
+                                        .eq('participant_number', linkCodeInput)
+                                        .single();
+                                      if (error || !pcProfile) {
+                                        alert(language === 'zh' ? '未找到该编号' : 'Code not found');
+                                        return;
+                                      }
+                                      await supabase.from('profiles').update({
+                                        linked_primary_caregiver_id: pcProfile.id,
+                                        linked_primary_caregiver_code: pcProfile.participant_number,
+                                        primary_caregiver_id: pcProfile.id
+                                      }).eq('id', user.id);
+                                      setProfileForm({
+                                        ...profileForm,
+                                        linked_primary_caregiver_id: pcProfile.id,
+                                        linked_primary_caregiver_code: pcProfile.participant_number
+                                      });
+                                      setShowLinkPopup(false);
+                                      setLinkCodeInput('');
+                                      await loadProfile();
+                                    } catch (err) { console.error('Error linking:', err); }
+                                  }}
+                                  className="px-3 py-2 rounded-lg text-sm text-white font-medium"
+                                  style={{ backgroundColor: 'var(--color-green)' }}
+                                >
+                                  {language === 'zh' ? '链接' : 'Link'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Primary Caregiver Toggle - Always enabled, saves directly */}
@@ -1103,7 +1268,9 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <User style={{ color: 'var(--color-green)', width: 'clamp(1.25rem, 3vw, 1.5rem)', height: 'clamp(1.25rem, 3vw, 1.5rem)' }} />
                     <span className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {settingsT.settings.isPrimaryCaregiver}
+                      {profileForm.is_primary_caregiver 
+                        ? (language === 'zh' ? '我是主要照护者' : 'I am the primary caregiver')
+                        : (language === 'zh' ? '我是网络照护者' : "I'm a network caregiver")}
                     </span>
                   </div>
                   <IOSToggle
@@ -1123,7 +1290,7 @@ const SettingsPage: React.FC = () => {
                 </div>
 
                 {/* Collapsible Demographics Section */}
-                <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--border-light)' }}>
+                <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
                   <button
                     onClick={() => setShowDemographics(!showDemographics)}
                     className="w-full flex items-center justify-between p-4"
@@ -1146,7 +1313,7 @@ const SettingsPage: React.FC = () => {
                           {language === 'zh' ? 'A. 您的基本信息' : 'A. Your Basic Information'}
                         </h5>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {/* Age */}
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -1173,8 +1340,7 @@ const SettingsPage: React.FC = () => {
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
                                 { value: 'male', label: language === 'zh' ? '男' : 'Male' },
-                                { value: 'female', label: language === 'zh' ? '女' : 'Female' },
-                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                                { value: 'female', label: language === 'zh' ? '女' : 'Female' }
                               ]}
                             />
                           </div>
@@ -1201,7 +1367,7 @@ const SettingsPage: React.FC = () => {
                           />
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {/* Employment Status */}
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -1212,11 +1378,12 @@ const SettingsPage: React.FC = () => {
                               onChange={(value) => setProfileForm({ ...profileForm, employment_status: value })}
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
-                                { value: 'full_time', label: language === 'zh' ? '全职' : 'Full-time' },
-                                { value: 'part_time', label: language === 'zh' ? '兼职' : 'Part-time' },
-                                { value: 'retired', label: language === 'zh' ? '退休' : 'Retired' },
+                                { value: 'full_time', label: language === 'zh' ? '全职' : 'Employed full-time' },
+                                { value: 'part_time', label: language === 'zh' ? '兼职' : 'Employed part-time' },
+                                { value: 'self_employed', label: language === 'zh' ? '自雇' : 'Self-employed' },
                                 { value: 'unemployed', label: language === 'zh' ? '待业' : 'Unemployed' },
-                                { value: 'homemaker', label: language === 'zh' ? '全职照护' : 'Full-time Caregiver' }
+                                { value: 'retired', label: language === 'zh' ? '退休' : 'Retired' },
+                                { value: 'student', label: language === 'zh' ? '学生' : 'Student' }
                               ]}
                             />
                           </div>
@@ -1231,11 +1398,10 @@ const SettingsPage: React.FC = () => {
                               onChange={(value) => setProfileForm({ ...profileForm, marital_status: value })}
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
-                                { value: 'married', label: language === 'zh' ? '已婚' : 'Married' },
                                 { value: 'single', label: language === 'zh' ? '单身' : 'Single' },
+                                { value: 'married', label: language === 'zh' ? '已婚' : 'Married' },
                                 { value: 'divorced', label: language === 'zh' ? '离异' : 'Divorced' },
-                                { value: 'widowed', label: language === 'zh' ? '丧偶' : 'Widowed' },
-                                { value: 'partnered', label: language === 'zh' ? '同居' : 'Partnered' }
+                                { value: 'widowed', label: language === 'zh' ? '丧偶' : 'Widowed' }
                               ]}
                             />
                           </div>
@@ -1251,10 +1417,11 @@ const SettingsPage: React.FC = () => {
                             onChange={(value) => setProfileForm({ ...profileForm, health_status: value })}
                             placeholder={language === 'zh' ? '请选择' : 'Select'}
                             options={[
-                              { value: 'excellent', label: language === 'zh' ? '非常好' : 'Excellent' },
-                              { value: 'good', label: language === 'zh' ? '良好' : 'Good' },
-                              { value: 'fair', label: language === 'zh' ? '一般' : 'Fair' },
-                              { value: 'poor', label: language === 'zh' ? '较差' : 'Poor' }
+                              { value: '1', label: language === 'zh' ? '1 - 差' : '1 - Poor' },
+                              { value: '2', label: language === 'zh' ? '2 - 较差' : '2 - Fair' },
+                              { value: '3', label: language === 'zh' ? '3 - 一般' : '3 - Good' },
+                              { value: '4', label: language === 'zh' ? '4 - 良好' : '4 - Very Good' },
+                              { value: '5', label: language === 'zh' ? '5 - 非常好' : '5 - Excellent' }
                             ]}
                           />
                         </div>
@@ -1267,21 +1434,47 @@ const SettingsPage: React.FC = () => {
                             {language === 'zh' ? 'B. 照护情况' : 'B. Caregiving Details'}
                           </h5>
                           
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {/* Caregiving Duration */}
                             <div>
                               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                                {language === 'zh' ? '照护时长 (年)' : 'Caregiving Duration (years)'}
+                                {language === 'zh' ? '照护时长' : 'Duration of Caregiving'}
                               </label>
-                              <input
-                                type="number"
+                              <IOSDropdown
                                 value={profileForm.caregiving_years || ''}
-                                onChange={(e) => setProfileForm({ ...profileForm, caregiving_years: e.target.value })}
-                                className="w-full px-3 py-2 rounded-lg border text-sm"
-                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
-                                placeholder="--"
+                                onChange={(value) => setProfileForm({ ...profileForm, caregiving_years: value })}
+                                placeholder={language === 'zh' ? '请选择' : 'Select'}
+                                options={[
+                                  { value: 'less_than_6_months', label: language === 'zh' ? '少于6个月' : 'Less than 6 months' },
+                                  { value: '6_months_to_1_year', label: language === 'zh' ? '6个月-1年' : '6 months - 1 year' },
+                                  { value: '1_to_2_years', label: language === 'zh' ? '1-2年' : '1-2 years' },
+                                  { value: '2_to_5_years', label: language === 'zh' ? '2-5年' : '2-5 years' },
+                                  { value: 'more_than_5_years', label: language === 'zh' ? '5年以上' : 'More than 5 years' },
+                                  { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                                ]}
                               />
                             </div>
+                            
+                            {/* Caregiving Years Other - text input when "other" selected */}
+                            {profileForm.caregiving_years === 'other' && (
+                              <div>
+                                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                                  {language === 'zh' ? '请说明照护时长' : 'Please specify duration'}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={profileForm.caregiving_years_other || ''}
+                                  onChange={(e) => setProfileForm({ ...profileForm, caregiving_years_other: e.target.value })}
+                                  placeholder={language === 'zh' ? '请输入' : 'Enter duration'}
+                                  className="w-full px-3 py-2 rounded-lg text-sm"
+                                  style={{
+                                    backgroundColor: 'var(--bg-secondary)',
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-light)'
+                                  }}
+                                />
+                              </div>
+                            )}
                             
                             {/* Hours per Week */}
                             <div>
@@ -1309,15 +1502,37 @@ const SettingsPage: React.FC = () => {
                               onChange={(value) => setProfileForm({ ...profileForm, living_with_recipient: value })}
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
-                                { value: 'same_home', label: language === 'zh' ? '同住' : 'Same Home' },
-                                { value: 'same_community', label: language === 'zh' ? '同社区' : 'Same Community' },
-                                { value: 'same_district', label: language === 'zh' ? '同区' : 'Same District' },
-                                { value: 'same_city', label: language === 'zh' ? '同城' : 'Same City' },
-                                { value: 'diff_city', label: language === 'zh' ? '异地' : 'Different City' },
-                                { value: 'abroad', label: language === 'zh' ? '国外' : 'Abroad' }
+                                { value: 'same_home', label: language === 'zh' ? '同住' : 'Same home' },
+                                { value: 'same_building', label: language === 'zh' ? '同楼' : 'Same building' },
+                                { value: 'same_neighborhood', label: language === 'zh' ? '同小区' : 'Same neighborhood' },
+                                { value: 'same_city', label: language === 'zh' ? '同城' : 'Same city' },
+                                { value: 'diff_city', label: language === 'zh' ? '异地' : 'Different city' },
+                                { value: 'diff_province_country', label: language === 'zh' ? '不同省/国' : 'Different province/country' },
+                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
                               ]}
                             />
                           </div>
+                          
+                          {/* Distance Description - appears after any distance selection */}
+                          {profileForm.living_with_recipient && (
+                            <div>
+                              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                                {language === 'zh' ? '请详细描述距离' : 'Describe distance in detail'}
+                              </label>
+                              <input
+                                type="text"
+                                value={profileForm.living_with_recipient_details || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, living_with_recipient_details: e.target.value })}
+                                placeholder={language === 'zh' ? '例如：开车15分钟，步行5分钟等' : 'e.g., 15 min drive, 5 min walk, etc.'}
+                                className="w-full px-3 py-2 rounded-lg text-sm"
+                                style={{
+                                  backgroundColor: 'var(--bg-secondary)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-light)'
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                       
@@ -1327,7 +1542,7 @@ const SettingsPage: React.FC = () => {
 
                 {/* Separate Collapsible Patient Condition Section - Only for Primary Caregivers */}
                 {profileForm.is_primary_caregiver && (
-                  <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--border-light)' }}>
+                  <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
                     <button
                       onClick={() => setShowPatientCondition(!showPatientCondition)}
                       className="w-full flex items-center justify-between p-4"
@@ -1343,7 +1558,7 @@ const SettingsPage: React.FC = () => {
                       <div className="p-6 space-y-6" style={{ backgroundColor: 'var(--bg-primary)' }}>
                         <div className="space-y-4">
                           
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {/* Care Recipient Age */}
                             <div>
                               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -1391,12 +1606,23 @@ const SettingsPage: React.FC = () => {
                                 { value: 'lewy_body', label: language === 'zh' ? '路易体失智' : 'Lewy Body Dementia' },
                                 { value: 'frontotemporal', label: language === 'zh' ? '额颞叶失智' : 'Frontotemporal' },
                                 { value: 'mixed', label: language === 'zh' ? '混合型' : 'Mixed' },
-                                { value: 'unknown', label: language === 'zh' ? '不确定' : 'Unknown' }
+                                { value: 'unknown', label: language === 'zh' ? '不确定' : 'Unknown/Not Diagnosed' },
+                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
                               ]}
                             />
+                            {profileForm.dementia_type === 'other' && (
+                              <input
+                                type="text"
+                                value={profileForm.dementia_type_other || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, dementia_type_other: e.target.value })}
+                                className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder={language === 'zh' ? '请描述失智症类型...' : 'Please describe the type of dementia...'}
+                              />
+                            )}
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {/* Years Since Diagnosis */}
                             <div>
                               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
@@ -1442,13 +1668,13 @@ const SettingsPage: React.FC = () => {
                               onChange={(value) => setProfileForm({ ...profileForm, recipient_education: value })}
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
-                                { value: 'none', label: language === 'zh' ? '无正规教育' : 'No formal education' },
                                 { value: 'elementary', label: language === 'zh' ? '小学' : 'Elementary' },
                                 { value: 'middle', label: language === 'zh' ? '初中' : 'Middle School' },
                                 { value: 'high', label: language === 'zh' ? '高中' : 'High School' },
                                 { value: 'associate', label: language === 'zh' ? '专科' : 'Associate' },
                                 { value: 'bachelor', label: language === 'zh' ? '本科' : 'Bachelor' },
-                                { value: 'master_above', label: language === 'zh' ? '硕士及以上' : 'Master or above' }
+                                { value: 'master', label: language === 'zh' ? '硕士' : 'Master' },
+                                { value: 'doctorate', label: language === 'zh' ? '博士' : 'Doctorate' }
                               ]}
                             />
                           </div>
@@ -1520,23 +1746,28 @@ const SettingsPage: React.FC = () => {
                             </div>
                           </div>
                           
-                          {/* BPSD Section - Behavioral Symptoms */}
+                          {/* NPI-Q Section - Neuropsychiatric Inventory Questionnaire (12 items) */}
                           <div className="pt-3 border-t" style={{ borderColor: 'var(--border-light)' }}>
                             <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
-                              {language === 'zh' ? '行为与心理症状 (BPSD)' : 'Behavioral & Psychological Symptoms (BPSD)'}
+                              {language === 'zh' ? '神经精神问卷 (NPI-Q) - 12项' : 'Neuropsychiatric Inventory Questionnaire (NPI-Q) - 12 items'}
                             </label>
                             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>
-                              {language === 'zh' ? '被照护者是否出现以下症状？' : 'Does the care recipient show any of these symptoms?'}
+                              {language === 'zh' ? '被照护者在过去一个月内是否出现以下症状？' : 'Has the care recipient shown any of the following symptoms in the past month?'}
                             </p>
                             <div className="space-y-2">
                               {[
-                                { key: 'recipient_bpsd_agitation', en: 'Agitation/Restlessness', zh: '躁动/不安' },
-                                { key: 'recipient_bpsd_wandering', en: 'Wandering', zh: '游走' },
-                                { key: 'recipient_bpsd_sleep', en: 'Sleep disturbances', zh: '睡眠障碍' },
-                                { key: 'recipient_bpsd_aggression', en: 'Aggression', zh: '攻击性行为' },
-                                { key: 'recipient_bpsd_depression', en: 'Depression', zh: '抑郁' },
+                                { key: 'recipient_bpsd_delusions', en: 'Delusions', zh: '妄想' },
+                                { key: 'recipient_bpsd_hallucinations', en: 'Hallucinations', zh: '幻觉' },
+                                { key: 'recipient_bpsd_agitation', en: 'Agitation/Aggression', zh: '躁动/攻击' },
+                                { key: 'recipient_bpsd_depression', en: 'Depression/Dysphoria', zh: '抑郁/烦闷' },
                                 { key: 'recipient_bpsd_anxiety', en: 'Anxiety', zh: '焦虑' },
-                                { key: 'recipient_bpsd_hallucinations', en: 'Hallucinations/Delusions', zh: '幻觉/妄想' }
+                                { key: 'recipient_bpsd_elation', en: 'Elation/Euphoria', zh: '欣快/兴奋' },
+                                { key: 'recipient_bpsd_apathy', en: 'Apathy/Indifference', zh: '冷漠/淡漠' },
+                                { key: 'recipient_bpsd_disinhibition', en: 'Disinhibition', zh: '脱抑制' },
+                                { key: 'recipient_bpsd_irritability', en: 'Irritability/Lability', zh: '易怒/情绪不稳' },
+                                { key: 'recipient_bpsd_motor', en: 'Aberrant Motor Behavior', zh: '异常运动行为' },
+                                { key: 'recipient_bpsd_sleep', en: 'Nighttime Behavior Disturbances', zh: '夜间行为障碍' },
+                                { key: 'recipient_bpsd_appetite', en: 'Appetite/Eating Changes', zh: '食欲/进食变化' }
                               ].map(item => (
                                 <div key={item.key} className="flex items-center justify-between">
                                   <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{language === 'zh' ? item.zh : item.en}</span>
@@ -1546,10 +1777,10 @@ const SettingsPage: React.FC = () => {
                                       onChange={(value) => setProfileForm({ ...profileForm, [item.key]: value })}
                                       placeholder={language === 'zh' ? '请选择' : 'Select'}
                                       options={[
-                                        { value: 'never', label: language === 'zh' ? '从不' : 'Never' },
-                                        { value: 'sometimes', label: language === 'zh' ? '有时' : 'Sometimes' },
-                                        { value: 'often', label: language === 'zh' ? '经常' : 'Often' },
-                                        { value: 'always', label: language === 'zh' ? '总是' : 'Always' }
+                                        { value: 'no', label: language === 'zh' ? '无' : 'No' },
+                                        { value: 'mild', label: language === 'zh' ? '轻度' : 'Mild' },
+                                        { value: 'moderate', label: language === 'zh' ? '中度' : 'Moderate' },
+                                        { value: 'severe', label: language === 'zh' ? '重度' : 'Severe' }
                                       ]}
                                     />
                                   </div>
@@ -1633,6 +1864,131 @@ const SettingsPage: React.FC = () => {
                             </div>
                           </div>
                           
+                          {/* MSPSS - Multidimensional Scale of Perceived Social Support */}
+                          <div className="pt-3 border-t" style={{ borderColor: 'var(--border-light)' }}>
+                            <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--color-green)' }}>
+                              {language === 'zh' ? '感知社会支持量表 (MSPSS)' : 'Perceived Social Support (MSPSS)'}
+                            </label>
+                            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                              {language === 'zh' 
+                                ? '请根据您对以下陈述的感受进行评分（1=非常不同意，7=非常同意）' 
+                                : 'Please rate how you feel about each statement (1 = Very Strongly Disagree, 7 = Very Strongly Agree)'}
+                            </p>
+                            
+                            <div className="space-y-2">
+                              {/* Significant Other subscale */}
+                              <p className="text-xs font-semibold pt-2" style={{ color: 'var(--color-green)' }}>
+                                {language === 'zh' ? '— 重要他人 —' : '— Significant Other —'}
+                              </p>
+                              {[
+                                { key: 'mspss_so_1', en: "There is a special person who is around when I am in need.", zh: "当我需要时，有一个特别的人在我身边。" },
+                                { key: 'mspss_so_2', en: "There is a special person with whom I can share my joys and sorrows.", zh: "有一个特别的人，我可以与之分享喜悦和忧愁。" },
+                                { key: 'mspss_so_3', en: "I have a special person who is a real source of comfort to me.", zh: "我有一个特别的人，是我真正的安慰来源。" },
+                                { key: 'mspss_so_4', en: "There is a special person in my life who cares about my feelings.", zh: "我的生活中有一个特别的人关心我的感受。" },
+                              ].map((item, idx) => (
+                                <div key={item.key} className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                                  <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                                    <span className="font-medium" style={{ color: 'var(--text-muted)' }}>{idx + 1}. </span>
+                                    {language === 'zh' ? item.zh : item.en}
+                                  </p>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <span className="text-xs mr-2 w-20 text-right" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常不同意' : 'Disagree'}</span>
+                                    {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                                      <label key={n} className="cursor-pointer">
+                                        <input 
+                                          type="radio" 
+                                          name={`mspss_${item.key}`} 
+                                          value={n} 
+                                          checked={profileForm[item.key as keyof typeof profileForm] === String(n)}
+                                          onChange={() => setProfileForm({ ...profileForm, [item.key]: String(n) })}
+                                          className="sr-only peer" 
+                                        />
+                                        <span className="w-8 h-8 flex items-center justify-center rounded-full text-sm border-2 transition-all peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 hover:border-green-300" style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}>
+                                          {n}
+                                        </span>
+                                      </label>
+                                    ))}
+                                    <span className="text-xs ml-2 w-20" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常同意' : 'Agree'}</span>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Family subscale */}
+                              <p className="text-xs font-semibold pt-2" style={{ color: 'var(--color-green)' }}>
+                                {language === 'zh' ? '— 家人 —' : '— Family —'}
+                              </p>
+                              {[
+                                { key: 'mspss_fam_1', en: "My family really tries to help me.", zh: "我的家人真的很努力帮助我。" },
+                                { key: 'mspss_fam_2', en: "I get the emotional help and support I need from my family.", zh: "我从家人那里得到了我所需的情感帮助和支持。" },
+                                { key: 'mspss_fam_3', en: "I can talk about my problems with my family.", zh: "我可以和家人谈论我的问题。" },
+                                { key: 'mspss_fam_4', en: "My family is willing to help me make decisions.", zh: "我的家人愿意帮助我做决定。" },
+                              ].map((item, idx) => (
+                                <div key={item.key} className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                                  <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                                    <span className="font-medium" style={{ color: 'var(--text-muted)' }}>{idx + 5}. </span>
+                                    {language === 'zh' ? item.zh : item.en}
+                                  </p>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <span className="text-xs mr-2 w-20 text-right" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常不同意' : 'Disagree'}</span>
+                                    {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                                      <label key={n} className="cursor-pointer">
+                                        <input 
+                                          type="radio" 
+                                          name={`mspss_${item.key}`} 
+                                          value={n} 
+                                          checked={profileForm[item.key as keyof typeof profileForm] === String(n)}
+                                          onChange={() => setProfileForm({ ...profileForm, [item.key]: String(n) })}
+                                          className="sr-only peer" 
+                                        />
+                                        <span className="w-8 h-8 flex items-center justify-center rounded-full text-sm border-2 transition-all peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 hover:border-green-300" style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}>
+                                          {n}
+                                        </span>
+                                      </label>
+                                    ))}
+                                    <span className="text-xs ml-2 w-20" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常同意' : 'Agree'}</span>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {/* Friends subscale */}
+                              <p className="text-xs font-semibold pt-2" style={{ color: 'var(--color-green)' }}>
+                                {language === 'zh' ? '— 朋友 —' : '— Friends —'}
+                              </p>
+                              {[
+                                { key: 'mspss_fri_1', en: "My friends really try to help me.", zh: "我的朋友们真的很努力帮助我。" },
+                                { key: 'mspss_fri_2', en: "I can count on my friends when things go wrong.", zh: "当事情出了问题时，我可以依靠我的朋友。" },
+                                { key: 'mspss_fri_3', en: "I have friends with whom I can share my joys and sorrows.", zh: "我有朋友可以与之分享喜悦和忧愁。" },
+                                { key: 'mspss_fri_4', en: "I can talk about my problems with my friends.", zh: "我可以和朋友谈论我的问题。" },
+                              ].map((item, idx) => (
+                                <div key={item.key} className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                                  <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                                    <span className="font-medium" style={{ color: 'var(--text-muted)' }}>{idx + 9}. </span>
+                                    {language === 'zh' ? item.zh : item.en}
+                                  </p>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <span className="text-xs mr-2 w-20 text-right" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常不同意' : 'Disagree'}</span>
+                                    {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                                      <label key={n} className="cursor-pointer">
+                                        <input 
+                                          type="radio" 
+                                          name={`mspss_${item.key}`} 
+                                          value={n} 
+                                          checked={profileForm[item.key as keyof typeof profileForm] === String(n)}
+                                          onChange={() => setProfileForm({ ...profileForm, [item.key]: String(n) })}
+                                          className="sr-only peer" 
+                                        />
+                                        <span className="w-8 h-8 flex items-center justify-center rounded-full text-sm border-2 transition-all peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 hover:border-green-300" style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}>
+                                          {n}
+                                        </span>
+                                      </label>
+                                    ))}
+                                    <span className="text-xs ml-2 w-20" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '非常同意' : 'Agree'}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
                           {/* Perseverance Time - Forward-looking measure */}
                           <div className="pt-3 border-t" style={{ borderColor: 'var(--border-light)' }}>
                             <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--color-green)' }}>
@@ -1673,9 +2029,8 @@ const SettingsPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* My Care Network Section - For Primary Caregivers */}
-                {profileForm.is_primary_caregiver && (
-                  <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--border-light)' }}>
+                {/* My Care Network Section - For All Caregivers */}
+                <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
                     <button
                       onClick={() => setShowNetworkConfig(!showNetworkConfig)}
                       className="w-full flex items-center justify-between p-4"
@@ -1696,22 +2051,23 @@ const SettingsPage: React.FC = () => {
                           initialData={profile?.ecogram_data}
                           primaryCaregiverCode={profile?.primary_caregiver_code}
                           isPrimaryCaregiver={profileForm.is_primary_caregiver}
+                          primaryCaregiverId={profileForm.linked_primary_caregiver_id || null}
+                          primaryCaregiverName={profileForm.linked_primary_caregiver_code || null}
                         />
                       </div>
                     )}
                   </div>
-                )}
                       
-                {/* Section: Network Member Relationship (Non-Primary Only) */}
+                {/* Section B: Relationship to Primary Caregiver (Non-Primary Only) — doc 2.1.7 */}
                 {!profileForm.is_primary_caregiver && (
-                  <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--border-light)' }}>
+                  <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
                     <div className="p-6 space-y-6" style={{ backgroundColor: 'var(--bg-primary)' }}>
                         <div className="space-y-4">
                           <h5 className="text-sm font-semibold pb-2 border-b" style={{ color: 'var(--color-green)', borderColor: 'var(--border-light)' }}>
-                            {language === 'zh' ? 'B. 您与主要照护者/被照护者的关系' : 'B. Your Relationship to the Caregiver'}
+                            {language === 'zh' ? 'B. 您与主要照护者的关系' : 'B. Your Relationship to the Primary Caregiver'}
                           </h5>
                           
-                          {/* Relationship to Primary Caregiver */}
+                          {/* 2.1.7 Relationship to Primary Caregiver */}
                           <div>
                             <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                               {language === 'zh' ? '您与主要照护者的关系' : 'Relationship to Primary Caregiver'}
@@ -1721,56 +2077,200 @@ const SettingsPage: React.FC = () => {
                               onChange={(value) => setProfileForm({ ...profileForm, relationship_to_primary: value })}
                               placeholder={language === 'zh' ? '请选择' : 'Select'}
                               options={[
-                                { value: 'spouse', label: language === 'zh' ? '配偶' : 'Spouse' },
+                                { value: 'spouse_partner', label: language === 'zh' ? '配偶/伴侣' : 'Spouse/Partner' },
                                 { value: 'child', label: language === 'zh' ? '子女' : 'Child' },
                                 { value: 'sibling', label: language === 'zh' ? '兄弟姐妹' : 'Sibling' },
-                                { value: 'parent', label: language === 'zh' ? '父母' : 'Parent' },
-                                { value: 'friend', label: language === 'zh' ? '朋友' : 'Friend' },
-                                { value: 'neighbor', label: language === 'zh' ? '邻居' : 'Neighbor' },
-                                { value: 'professional', label: language === 'zh' ? '专业人员' : 'Professional' },
+                                { value: 'other_relative', label: language === 'zh' ? '其他亲属' : 'Other Relative' },
+                                { value: 'friend_neighbor', label: language === 'zh' ? '朋友/邻居' : 'Friend/Neighbor' },
+                                { value: 'professional', label: language === 'zh' ? '专业照护人员' : 'Professional Caregiver' },
                                 { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
                               ]}
                             />
+                            {profileForm.relationship_to_primary === 'other' && (
+                              <input
+                                type="text"
+                                value={profileForm.relationship_to_primary_other || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, relationship_to_primary_other: e.target.value })}
+                                className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder={language === 'zh' ? '请描述您与主要照护者的关系...' : 'Please describe your relationship...'}
+                              />
+                            )}
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Section C: Relationship to Care Recipient (Non-Primary Only) — doc 2.1.8-2.1.12 */}
+                {!profileForm.is_primary_caregiver && (
+                  <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
+                    <div className="p-6 space-y-6" style={{ backgroundColor: 'var(--bg-primary)' }}>
+                        <div className="space-y-4">
+                          <h5 className="text-sm font-semibold pb-2 border-b" style={{ color: 'var(--color-green)', borderColor: 'var(--border-light)' }}>
+                            {language === 'zh' ? 'C. 您与被照护者的关系' : 'C. Your Relationship to the Care Recipient'}
+                          </h5>
+                          
+                          {/* 2.1.8 Relationship to Care Recipient */}
+                          <div>
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                              {language === 'zh' ? '您与被照护者的关系' : 'Relationship to Care Recipient'}
+                            </label>
+                            <IOSDropdown
+                              value={profileForm.relationship_to_patient || ''}
+                              onChange={(value) => setProfileForm({ ...profileForm, relationship_to_patient: value })}
+                              placeholder={language === 'zh' ? '请选择' : 'Select'}
+                              options={[
+                                { value: 'spouse_partner', label: language === 'zh' ? '配偶/伴侣' : 'Spouse/Partner' },
+                                { value: 'parent', label: language === 'zh' ? '父母' : 'Parent' },
+                                { value: 'child', label: language === 'zh' ? '子女' : 'Child' },
+                                { value: 'sibling', label: language === 'zh' ? '兄弟姐妹' : 'Sibling' },
+                                { value: 'other_relative', label: language === 'zh' ? '其他亲属' : 'Other Relative' },
+                                { value: 'friend_neighbor', label: language === 'zh' ? '朋友/邻居' : 'Friend/Neighbor' },
+                                { value: 'professional', label: language === 'zh' ? '专业照护人员' : 'Professional Caregiver' },
+                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                              ]}
+                            />
+                            {profileForm.relationship_to_patient === 'other' && (
+                              <input
+                                type="text"
+                                value={profileForm.relationship_to_patient_other || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, relationship_to_patient_other: e.target.value })}
+                                className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder={language === 'zh' ? '请描述您与被照护者的关系...' : 'Please describe your relationship...'}
+                              />
+                            )}
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Distance from Care Recipient */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {/* 2.1.9 Duration of Caregiving */}
                             <div>
                               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                                {language === 'zh' ? '与被照护者的距离' : 'Distance from Care Recipient'}
+                                {language === 'zh' ? '照护时长' : 'Duration of Caregiving'}
                               </label>
                               <IOSDropdown
-                                value={profileForm.distance_from_recipient || ''}
-                                onChange={(value) => setProfileForm({ ...profileForm, distance_from_recipient: value })}
+                                value={profileForm.caregiving_years || ''}
+                                onChange={(value) => setProfileForm({ ...profileForm, caregiving_years: value })}
                                 placeholder={language === 'zh' ? '请选择' : 'Select'}
                                 options={[
-                                  { value: 'same_home', label: language === 'zh' ? '同住' : 'Same Home' },
-                                  { value: 'same_community', label: language === 'zh' ? '同社区' : 'Same Community' },
-                                  { value: 'same_district', label: language === 'zh' ? '同区' : 'Same District' },
-                                  { value: 'same_city', label: language === 'zh' ? '同城' : 'Same City' },
-                                  { value: 'diff_city', label: language === 'zh' ? '异地' : 'Different City' },
-                                  { value: 'abroad', label: language === 'zh' ? '国外' : 'Abroad' }
+                                  { value: 'less_than_6_months', label: language === 'zh' ? '少于6个月' : 'Less than 6 months' },
+                                  { value: '6_months_to_1_year', label: language === 'zh' ? '6个月-1年' : '6 months - 1 year' },
+                                  { value: '1_to_2_years', label: language === 'zh' ? '1-2年' : '1-2 years' },
+                                  { value: '2_to_5_years', label: language === 'zh' ? '2-5年' : '2-5 years' },
+                                  { value: 'more_than_5_years', label: language === 'zh' ? '5年以上' : 'More than 5 years' },
+                                  { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
                                 ]}
                               />
+                              {profileForm.caregiving_years === 'other' && (
+                                <input
+                                  type="text"
+                                  value={profileForm.caregiving_years_other || ''}
+                                  onChange={(e) => setProfileForm({ ...profileForm, caregiving_years_other: e.target.value })}
+                                  className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                  style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                  placeholder={language === 'zh' ? '请说明照护时长' : 'Please specify duration'}
+                                />
+                              )}
                             </div>
                             
-                            {/* Frequency of Contact */}
+                            {/* 2.1.10 Hours of Care Per Week */}
                             <div>
                               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                                {language === 'zh' ? '联系频率' : 'Contact Frequency'}
+                                {language === 'zh' ? '每周照护小时' : 'Hours of Care Per Week'}
                               </label>
-                              <IOSDropdown
-                                value={profileForm.contact_frequency || ''}
-                                onChange={(value) => setProfileForm({ ...profileForm, contact_frequency: value })}
-                                placeholder={language === 'zh' ? '请选择' : 'Select'}
-                                options={[
-                                  { value: 'daily', label: language === 'zh' ? '每天' : 'Daily' },
-                                  { value: 'weekly', label: language === 'zh' ? '每周' : 'Weekly' },
-                                  { value: 'monthly', label: language === 'zh' ? '每月' : 'Monthly' },
-                                  { value: 'rarely', label: language === 'zh' ? '偶尔' : 'Rarely' }
-                                ]}
+                              <input
+                                type="number"
+                                value={profileForm.caregiving_hours_per_week || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, caregiving_hours_per_week: e.target.value })}
+                                className="w-full px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder="--"
                               />
                             </div>
+                          </div>
+                          
+                          {/* 2.1.11 Distance from Care Recipient */}
+                          <div>
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                              {language === 'zh' ? '与被照护者的距离' : 'Distance from Care Recipient'}
+                            </label>
+                            <IOSDropdown
+                              value={profileForm.distance_from_recipient || ''}
+                              onChange={(value) => setProfileForm({ ...profileForm, distance_from_recipient: value })}
+                              placeholder={language === 'zh' ? '请选择' : 'Select'}
+                              options={[
+                                { value: 'same_home', label: language === 'zh' ? '同住' : 'Same home' },
+                                { value: 'same_building', label: language === 'zh' ? '同楼' : 'Same building' },
+                                { value: 'same_neighborhood', label: language === 'zh' ? '同小区' : 'Same neighborhood' },
+                                { value: 'same_city', label: language === 'zh' ? '同城' : 'Same city' },
+                                { value: 'diff_city', label: language === 'zh' ? '异地' : 'Different city' },
+                                { value: 'diff_province_country', label: language === 'zh' ? '不同省/国' : 'Different province/country' },
+                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                              ]}
+                            />
+                            {profileForm.distance_from_recipient === 'other' && (
+                              <input
+                                type="text"
+                                value={profileForm.distance_from_recipient_other || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, distance_from_recipient_other: e.target.value })}
+                                className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder={language === 'zh' ? '请说明距离' : 'Please specify distance'}
+                              />
+                            )}
+                          </div>
+                          
+                          {/* Distance Description */}
+                          {profileForm.distance_from_recipient && (
+                            <div>
+                              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                                {language === 'zh' ? '请详细描述距离' : 'Describe distance in detail'}
+                              </label>
+                              <input
+                                type="text"
+                                value={profileForm.distance_from_recipient_details || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, distance_from_recipient_details: e.target.value })}
+                                placeholder={language === 'zh' ? '例如：开车15分钟，步行5分钟等' : 'e.g., 15 min drive, 5 min walk, etc.'}
+                                className="w-full px-3 py-2 rounded-lg text-sm"
+                                style={{
+                                  backgroundColor: 'var(--bg-secondary)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-light)'
+                                }}
+                              />
+                            </div>
+                          )}
+                          
+                          {/* 2.1.12 Contact Frequency */}
+                          <div>
+                            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                              {language === 'zh' ? '联系频率' : 'Contact Frequency'}
+                            </label>
+                            <IOSDropdown
+                              value={profileForm.contact_frequency || ''}
+                              onChange={(value) => setProfileForm({ ...profileForm, contact_frequency: value })}
+                              placeholder={language === 'zh' ? '请选择' : 'Select'}
+                              options={[
+                                { value: 'daily', label: language === 'zh' ? '每天' : 'Daily' },
+                                { value: 'several_times_week', label: language === 'zh' ? '每周几次' : 'Several times a week' },
+                                { value: 'weekly', label: language === 'zh' ? '每周' : 'Weekly' },
+                                { value: 'several_times_month', label: language === 'zh' ? '每月几次' : 'Several times a month' },
+                                { value: 'monthly', label: language === 'zh' ? '每月' : 'Monthly' },
+                                { value: 'less_than_monthly', label: language === 'zh' ? '少于每月' : 'Less than monthly' },
+                                { value: 'other', label: language === 'zh' ? '其他' : 'Other' }
+                              ]}
+                            />
+                            {profileForm.contact_frequency === 'other' && (
+                              <input
+                                type="text"
+                                value={profileForm.contact_frequency_other || ''}
+                                onChange={(e) => setProfileForm({ ...profileForm, contact_frequency_other: e.target.value })}
+                                className="w-full mt-2 px-3 py-2 rounded-lg border text-sm"
+                                style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', color: 'var(--text-primary)' }}
+                                placeholder={language === 'zh' ? '请说明联系频率' : 'Please specify contact frequency'}
+                              />
+                            )}
                           </div>
                         </div>
                     </div>
@@ -1778,7 +2278,7 @@ const SettingsPage: React.FC = () => {
                 )}
 
                 {/* Understanding Dementia Section - Collapsible */}
-                <div className="rounded-xl border-2 overflow-hidden" style={{ borderColor: 'var(--border-light)' }}>
+                <div className="rounded-xl border-2" style={{ borderColor: 'var(--border-light)' }}>
                   <button
                     onClick={() => setShowDementiaKnowledge(!showDementiaKnowledge)}
                     className="w-full flex items-center justify-between p-4"
@@ -1841,11 +2341,35 @@ const SettingsPage: React.FC = () => {
                         <p className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>{language === 'zh' ? item.zh : item.en}</p>
                         <div className="flex gap-3 shrink-0">
                           <label className="flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name={`q_${idx}`} value="true" className="w-4 h-4" style={{ accentColor: 'var(--color-green)' }} />
+                            <input 
+                              type="radio" 
+                              name={`adks_${idx}`} 
+                              value="true" 
+                              checked={profileForm.adks_answers[idx] === 'true'}
+                              onChange={() => {
+                                const newAnswers = [...profileForm.adks_answers];
+                                newAnswers[idx] = 'true';
+                                setProfileForm({ ...profileForm, adks_answers: newAnswers });
+                              }}
+                              className="w-4 h-4" 
+                              style={{ accentColor: 'var(--color-green)' }} 
+                            />
                             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{language === 'zh' ? '对' : 'True'}</span>
                           </label>
                           <label className="flex items-center gap-1 cursor-pointer">
-                            <input type="radio" name={`q_${idx}`} value="false" className="w-4 h-4" style={{ accentColor: 'var(--color-green)' }} />
+                            <input 
+                              type="radio" 
+                              name={`adks_${idx}`} 
+                              value="false" 
+                              checked={profileForm.adks_answers[idx] === 'false'}
+                              onChange={() => {
+                                const newAnswers = [...profileForm.adks_answers];
+                                newAnswers[idx] = 'false';
+                                setProfileForm({ ...profileForm, adks_answers: newAnswers });
+                              }}
+                              className="w-4 h-4" 
+                              style={{ accentColor: 'var(--color-green)' }} 
+                            />
                             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{language === 'zh' ? '错' : 'False'}</span>
                           </label>
                         </div>
@@ -1890,7 +2414,18 @@ const SettingsPage: React.FC = () => {
                           <span className="text-xs mr-2 w-16 text-right" style={{ color: 'var(--text-muted)' }}>{language === 'zh' ? '不同意' : 'Disagree'}</span>
                           {[1, 2, 3, 4, 5, 6, 7].map(n => (
                             <label key={n} className="cursor-pointer">
-                              <input type="radio" name={`q_${idx + 30}`} value={n} className="sr-only peer" />
+                              <input 
+                                type="radio" 
+                                name={`das_${idx}`} 
+                                value={n} 
+                                checked={profileForm.das_answers[idx] === String(n)}
+                                onChange={() => {
+                                  const newAnswers = [...profileForm.das_answers];
+                                  newAnswers[idx] = String(n);
+                                  setProfileForm({ ...profileForm, das_answers: newAnswers });
+                                }}
+                                className="sr-only peer" 
+                              />
                               <span className="w-8 h-8 flex items-center justify-center rounded-full text-sm border-2 transition-all peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-500 hover:border-green-300" style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}>
                                 {n}
                               </span>
@@ -1920,16 +2455,18 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <IOSToggle
                     checked={interviewAgreement}
-                    onChange={async (checked) => {
-                      try {
-                        await supabase
-                          .from('enrollments')
-                          .update({ interview_agreement: checked })
-                          .eq('participant_id', user.id);
-                        setInterviewAgreement(checked);
-                      } catch (error) {
-                        console.error('Error updating interview agreement:', error);
-                      }
+                    onChange={(checked) => {
+                      setInterviewAgreement(checked);
+                      supabase
+                        .from('enrollment')
+                        .update({ interview_agreement: checked })
+                        .eq('participant_id', user.id)
+                        .then(({ error }) => {
+                          if (error) {
+                            console.error('Error updating interview agreement:', error);
+                            setInterviewAgreement(!checked);
+                          }
+                        });
                     }}
                   />
                 </div>
@@ -2062,171 +2599,6 @@ const SettingsPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Interview Questions Section - 3 Tabs (only shows if agreement is on) */}
-                {interviewAgreement && (
-                  <div className="p-6 rounded-xl border-2 space-y-6" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-                    <h4 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {language === 'zh' ? '访谈内容' : 'Interview Content'}
-                    </h4>
-                    
-                    {/* Tab Navigation */}
-                    <div className="flex border-b" style={{ borderColor: 'var(--border-light)' }}>
-                      <button
-                        onClick={() => setInterviewTab('questions')}
-                        className="flex-1 py-3 text-sm font-medium transition-colors"
-                        style={{ 
-                          color: interviewTab === 'questions' ? 'var(--color-green)' : 'var(--text-secondary)',
-                          borderBottom: interviewTab === 'questions' ? '2px solid var(--color-green)' : '2px solid transparent',
-                          marginBottom: '-1px',
-                          background: 'transparent',
-                          outline: 'none'
-                        }}
-                      >
-                        {language === 'zh' ? '问题' : 'Questions'}
-                      </button>
-                      <button
-                        onClick={() => setInterviewTab('graphs')}
-                        className="flex-1 py-3 text-sm font-medium transition-colors"
-                        style={{ 
-                          color: interviewTab === 'graphs' ? 'var(--color-green)' : 'var(--text-secondary)',
-                          borderBottom: interviewTab === 'graphs' ? '2px solid var(--color-green)' : '2px solid transparent',
-                          marginBottom: '-1px',
-                          background: 'transparent',
-                          outline: 'none'
-                        }}
-                      >
-                        {language === 'zh' ? '我的照护网络 & 照护周' : 'My Care Network & My Caring Week'}
-                      </button>
-                    </div>
-                    
-                    {/* Tab Content */}
-                    <div className="pt-4">
-                      {/* Questions Tab */}
-                      {interviewTab === 'questions' && (
-                        <div className="space-y-8">
-                          {/* Primary Caregiver Questions */}
-                          {profileForm.is_primary_caregiver && (
-                            <div className="space-y-4">
-                              <h5 className="text-base font-semibold" style={{ color: 'var(--color-green)' }}>
-                                {language === 'zh' ? '主要照护者访谈问题 (共22题)' : 'Primary Caregiver Interview Questions (22 total)'}
-                              </h5>
-                              <ol className="list-decimal list-inside space-y-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-                                <li>{language === 'zh' ? '您与患者是什么关系？您提供照护多长时间了？' : 'What is your relationship to the patient, and how long have you been providing care?'}</li>
-                                <li>{language === 'zh' ? '患者目前的状况和主要照护需求是什么？' : 'What is the patient\'s current condition and main care needs?'}</li>
-                                <li>
-                                  {language === 'zh' ? '您典型的一天照护是什么样的？' : 'What does a typical day of caregiving look like for you?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-green)' }}>
-                                    {language === 'zh' ? '"让我们一起看看您在「我的照护周」中记录的活动..."' : '"Let\'s look at your recorded activities in My Caring Week together..."'}
-                                  </span>
-                                </li>
-                                <li>
-                                  {language === 'zh' ? '您在日常照护中遇到什么困难？' : 'What difficulties do you face in your daily caregiving?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(239,68,68,0.1)', color: '#DC2626' }}>
-                                    {language === 'zh' ? '"您记录了一些挑战。能具体说说吗？"' : '"You\'ve noted some challenges. Could you tell me more?"'}
-                                  </span>
-                                </li>
-                                <li>{language === 'zh' ? '您需要他人提供什么支持来帮助照护患者？' : 'What support do you need from others to help care for the patient?'}</li>
-                                <li>
-                                  {language === 'zh' ? '还有谁帮助照护患者？您与这些人的关系有多亲近？每个人做什么？' : 'Who else helps care for the patient? How close are you to these people, and what does each person do?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-green)' }}>
-                                    {language === 'zh' ? '"让我们看看您绘制的照护网络图。您能介绍一下这些人吗？"' : '"Let\'s look at the care network you\'ve mapped out. Could you walk me through who these people are?"'}
-                                  </span>
-                                </li>
-                                <li>{language === 'zh' ? '在什么情况下您会向他人寻求支持？' : 'Under what circumstances do you ask others for support?'}</li>
-                                <li>{language === 'zh' ? '您在寻求支持时遇到困难吗？有什么困难？' : 'Do you experience difficulties asking for support? What are the difficulties?'}</li>
-                                <li>{language === 'zh' ? '有没有您可以请求帮助但还没有请求的人？是什么阻止了您？' : 'Is there anyone you could ask for help but haven\'t? What\'s stopping you?'}</li>
-                                <li>{language === 'zh' ? '您的照护网络随时间有变化吗？' : 'Has your care network changed over time?'}</li>
-                                <li>{language === 'zh' ? '您理想的照护网络会是什么样的？' : 'What would your ideal care network look like?'}</li>
-                                <li>{language === 'zh' ? '看看您的网络，您对整体的满意度是多少（0-100分）？' : 'Looking at your network, how satisfied are you overall, from 0 to 100?'}</li>
-                                <li>{language === 'zh' ? '当其他人帮助照护患者时，他们会问什么信息？您认为他们需要知道什么？' : 'When someone else helps care for the patient, what information do they ask for? What do you think they need to know?'}</li>
-                                <li>
-                                  {language === 'zh' ? '您如何与其他照护者沟通？使用什么方法或技术？' : 'How do you communicate with other caregivers? What methods or technology do you use?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(107,114,128,0.1)', color: '#4B5563' }}>
-                                    {language === 'zh' ? '"您提到使用了一些工具。这些沟通方式效果如何？"' : '"You mentioned using certain tools. How well do these communication methods work for you?"'}
-                                  </span>
-                                </li>
-                                <li>{language === 'zh' ? '您在与他人分享患者信息时是否遇到障碍？' : 'Are there barriers you face when sharing information about the patient with others?'}</li>
-                                <li>{language === 'zh' ? '当患者状况变化时，您如何让其他人知道？是否有障碍？' : 'When the patient\'s condition changes, how do you keep others informed? Are there barriers?'}</li>
-                                <li>{language === 'zh' ? '患者是否曾经走失、难以找到或拒绝回家？发生这种情况时您会向其他照护者求助吗？您如何协调，遇到什么障碍？' : 'Has the patient ever wandered, been difficult to find, or refused to return home? Do you ask other caregivers for help when this happens? How do you coordinate, and what barriers do you face?'}</li>
-                                <li>{language === 'zh' ? '您对使用智能手机或电脑的熟悉程度如何？' : 'How familiar are you with using a smartphone or computer?'}</li>
-                                <li>{language === 'zh' ? '您目前使用什么工具来了解更多关于失智症和照护的知识？当您面临不确定的情况时，您从哪里寻求信息或支持？您对目前使用的工具有什么障碍或顾虑？您希望有什么工具能更好地帮助您了解失智症和照护知识？什么功能会有帮助？' : 'What current tools do you use to learn more about dementia and caregiving? When you face uncertain situations, where do you seek information or support? What barriers or concerns do you have with the current tools you use? What tools do you wish existed to better help with learning about dementia and caregiving? What features would be helpful?'}</li>
-                                <li>{language === 'zh' ? '您目前使用什么工具与其他照护者沟通或协调？什么有效，什么无效？您对目前使用的工具有什么障碍或顾虑？您希望有什么工具来帮助协调？什么功能会有帮助？' : 'What current tools do you use to communicate or coordinate with other caregivers? What has worked well, what has not? What barriers or concerns do you have with the current tools you use? What tools do you wish existed to help coordinate? What features would be helpful?'}</li>
-                                <li>{language === 'zh' ? '如果您可以设计一个理想的数字服务来帮助照护工作，您希望它具备哪些功能？您会觉得哪些功能有用？您对使用数字工具有什么顾虑？' : 'If you could design an ideal digital service to help with caregiving, what features would you want it to have? What features would you find useful? What concerns do you have about using digital tools?'}</li>
-                                <li>{language === 'zh' ? '关于您的经历，还有什么想分享的吗？' : 'Is there anything else you\'d like to share about your experience?'}</li>
-                              </ol>
-                            </div>
-                          )}
-                          
-                          {/* Other Caregiver/Network Member Questions */}
-                          {!profileForm.is_primary_caregiver && (
-                            <div className="space-y-4">
-                              <h5 className="text-base font-semibold" style={{ color: 'var(--color-green)' }}>
-                                {language === 'zh' ? '网络成员访谈问题 (共16题)' : 'Network Member Interview Questions (16 total)'}
-                              </h5>
-                              <ol className="list-decimal list-inside space-y-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-                                <li>{language === 'zh' ? '您与患者和主要照护者是什么关系？' : 'What is your relationship to the patient and the primary caregiver?'}</li>
-                                <li>{language === 'zh' ? '您是如何开始参与照护的？' : 'How did you become involved in providing care?'}</li>
-                                <li>
-                                  {language === 'zh' ? '您提供什么样的支持？多久一次？' : 'What kind of support do you provide? How often?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-green)' }}>
-                                    {language === 'zh' ? '"让我们看看您记录的活动..."' : '"Let\'s look at the activities you\'ve logged..."'}
-                                  </span>
-                                </li>
-                                <li>{language === 'zh' ? '您提供的支持是否被接受、被需要、被感激？' : 'Is the support you provide accepted, needed, and appreciated?'}</li>
-                                <li>{language === 'zh' ? '在您能够帮助之前，您需要了解患者的哪些信息？这些信息是如何传达给您的？当前的沟通方式是否存在障碍？' : 'What information do you need to know about the patient before you can help? How is this information communicated to you? Are there any barriers in how you currently receive this information?'}</li>
-                                <li>
-                                  {language === 'zh' ? '您在提供支持时遇到困难吗？是什么让它变得困难？' : 'Do you experience difficulties when providing support? What makes it difficult?'}
-                                  <span className="block mt-1 text-xs px-2 py-1 rounded italic" style={{ background: 'rgba(239,68,68,0.1)', color: '#DC2626' }}>
-                                    {language === 'zh' ? '"您记录了一些挑战。能具体说说吗？"' : '"You\'ve noted some challenges. Could you tell me more?"'}
-                                  </span>
-                                </li>
-                                <li>{language === 'zh' ? '有没有您想帮忙但无法帮忙的时候？如果有，是什么阻止了您？' : 'Are there times you wanted to help but couldn\'t? If so, what stopped you?'}</li>
-                                <li>{language === 'zh' ? '在照护患者期间，您如何与主要照护者和其他照护者沟通？当患者状况变化时，您是如何得知的？是否存在障碍？' : 'How do you communicate with the primary caregiver and other caregivers during caring for the patient? When the patient\'s condition changes, how do you find out? Are there barriers?'}</li>
-                                <li>{language === 'zh' ? '您想提供更多还是更少的支持？如果您想提供更多，是什么阻止了您？' : 'Would you like to provide more or less support? If you would like to provide more, what is preventing you from doing so?'}</li>
-                                <li>{language === 'zh' ? '患者是否曾经走失、难以找到或拒绝回家？您是否曾在这种情况下帮忙？您是如何帮助的？是否遇到了障碍？' : 'Has the patient ever wandered, been difficult to find, or refused to return home? Have you ever helped in such a situation? How did you help? Were there any barriers?'}</li>
-                                <li>{language === 'zh' ? '什么能帮助您为患者和主要照护者提供更好的支持？' : 'What would help you provide better support to the patient and the primary caregiver?'}</li>
-                                <li>{language === 'zh' ? '您对使用智能手机或电脑的熟悉程度如何？' : 'How familiar are you with using a smartphone or computer?'}</li>
-                                <li>{language === 'zh' ? '您目前使用什么工具来了解更多关于失智症和照护的知识？当您面临不确定的情况时，您从哪里寻求信息或支持？您对目前使用的工具有什么障碍或顾虑？您希望有什么工具能更好地帮助您了解失智症和照护知识？什么功能会有帮助？' : 'What current tools do you use to learn more about dementia and caregiving? When you face uncertain situations, where do you seek information or support? What barriers or concerns do you have with the current tools you use? What tools do you wish existed to better help with learning about dementia and caregiving? What features would be helpful?'}</li>
-                                <li>{language === 'zh' ? '您目前使用什么工具与其他照护者沟通或协调？什么有效，什么无效？您对目前使用的工具有什么障碍或顾虑？您希望有什么工具来帮助协调？什么功能会有帮助？' : 'What current tools do you use to communicate or coordinate with other caregivers? What has worked well, what has not? What barriers or concerns do you have with the current tools you use? What tools do you wish existed to help coordinate? What features would be helpful?'}</li>
-                                <li>{language === 'zh' ? '如果您可以设计一个理想的数字服务来帮助照护工作，您希望它具备哪些功能？您会觉得哪些功能有用？您对使用数字工具有什么顾虑？' : 'If you could design an ideal digital service to help with caregiving, what features would you want it to have? What features would you find useful? What concerns do you have about using digital tools?'}</li>
-                                <li>{language === 'zh' ? '关于您的经历，还有什么想分享的吗？' : 'Is there anything else you\'d like to share about your experience?'}</li>
-                              </ol>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* My Care Network & My Caring Week Tab - 2 Column Layout */}
-                      {interviewTab === 'graphs' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          {/* Left: My Care Network - Ecogram */}
-                          <div className="border rounded-xl p-3" style={{ borderColor: 'var(--border-light)', background: 'white' }}>
-                            <Ecogram 
-                              userId={user?.id} 
-                              language={language}
-                              initialData={profile?.ecogram_data}
-                              primaryCaregiverCode={
-                                profileForm.is_primary_caregiver 
-                                  ? profile?.participant_number 
-                                  : profile?.linked_primary_caregiver_code
-                              }
-                              isPrimaryCaregiver={profileForm.is_primary_caregiver}
-                            />
-                          </div>
-                          
-                          {/* Right: My Caring Week */}
-                          <div className="border rounded-xl p-3" style={{ borderColor: 'var(--border-light)', background: 'white' }}>
-                            <MyCaringWeek 
-                              language={language}
-                              networkMembers={profile?.ecogram_data?.members?.map((m: any) => ({ id: m.id, name: m.name })) || []}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      
-                    </div>
-                  </div>
-                )}
 
 
                 {/* Save/Cancel Buttons */}
@@ -2248,6 +2620,7 @@ const SettingsPage: React.FC = () => {
                           full_name: profile?.full_name || '',
                           introduction: profile?.introduction || '',
                           relationship_to_patient: profile?.relationship_to_patient || '',
+                          relationship_to_patient_other: profile?.relationship_to_patient_other || '',
                           is_primary_caregiver: profile?.is_primary_caregiver || false,
                           participant_number: profile?.participant_number || '',
                           caregiver_age: profile?.caregiver_age || '',
@@ -2257,11 +2630,14 @@ const SettingsPage: React.FC = () => {
                           marital_status: profile?.marital_status || '',
                           health_status: profile?.health_status || '',
                           caregiving_years: profile?.caregiving_years || '',
+                          caregiving_years_other: profile?.caregiving_years_other || '',
                           caregiving_hours_per_week: profile?.caregiving_hours_per_week || '',
                           living_with_recipient: profile?.living_with_recipient || '',
+                          living_with_recipient_details: profile?.living_with_recipient_details || '',
                           recipient_age: profile?.recipient_age || '',
                           recipient_gender: profile?.recipient_gender || '',
                           dementia_type: profile?.dementia_type || '',
+                          dementia_type_other: profile?.dementia_type_other || '',
                           years_since_diagnosis: profile?.years_since_diagnosis || '',
                           dementia_stage: profile?.dementia_stage || '',
                           recipient_education: profile?.recipient_education || '',
@@ -2275,19 +2651,28 @@ const SettingsPage: React.FC = () => {
                           recipient_iadl_shopping: profile?.recipient_iadl_shopping || '',
                           recipient_iadl_cooking: profile?.recipient_iadl_cooking || '',
                           recipient_iadl_housework: profile?.recipient_iadl_housework || '',
+                          recipient_bpsd_delusions: profile?.recipient_bpsd_delusions || '',
+                          recipient_bpsd_hallucinations: profile?.recipient_bpsd_hallucinations || '',
                           recipient_bpsd_agitation: profile?.recipient_bpsd_agitation || '',
-                          recipient_bpsd_wandering: profile?.recipient_bpsd_wandering || '',
-                          recipient_bpsd_sleep: profile?.recipient_bpsd_sleep || '',
-                          recipient_bpsd_aggression: profile?.recipient_bpsd_aggression || '',
                           recipient_bpsd_depression: profile?.recipient_bpsd_depression || '',
                           recipient_bpsd_anxiety: profile?.recipient_bpsd_anxiety || '',
-                          recipient_bpsd_hallucinations: profile?.recipient_bpsd_hallucinations || '',
+                          recipient_bpsd_elation: profile?.recipient_bpsd_elation || '',
+                          recipient_bpsd_apathy: profile?.recipient_bpsd_apathy || '',
+                          recipient_bpsd_disinhibition: profile?.recipient_bpsd_disinhibition || '',
+                          recipient_bpsd_irritability: profile?.recipient_bpsd_irritability || '',
+                          recipient_bpsd_motor: profile?.recipient_bpsd_motor || '',
+                          recipient_bpsd_sleep: profile?.recipient_bpsd_sleep || '',
+                          recipient_bpsd_appetite: profile?.recipient_bpsd_appetite || '',
                           recipient_communication: profile?.recipient_communication || '',
                           perseverance_time: profile?.perseverance_time || '',
                           recipient_comorbidities: profile?.recipient_comorbidities || '',
                           relationship_to_primary: profile?.relationship_to_primary || '',
+                          relationship_to_primary_other: profile?.relationship_to_primary_other || '',
                           distance_from_recipient: profile?.distance_from_recipient || '',
+                          distance_from_recipient_details: profile?.distance_from_recipient_details || '',
+                          distance_from_recipient_other: profile?.distance_from_recipient_other || '',
                           contact_frequency: profile?.contact_frequency || '',
+                          contact_frequency_other: profile?.contact_frequency_other || '',
                           linked_primary_caregiver_id: profile?.linked_primary_caregiver_id || null,
                           linked_primary_caregiver_code: profile?.linked_primary_caregiver_code || null,
                           sscq_strained_interactions: profile?.sscq_strained_interactions || '',
@@ -2296,7 +2681,21 @@ const SettingsPage: React.FC = () => {
                           sscq_social_life: profile?.sscq_social_life || '',
                           sscq_manipulation: profile?.sscq_manipulation || '',
                           sscq_solutions: profile?.sscq_solutions || '',
-                          sscq_health: profile?.sscq_health || ''
+                          sscq_health: profile?.sscq_health || '',
+                          mspss_so_1: profile?.mspss_so_1 || '',
+                          mspss_so_2: profile?.mspss_so_2 || '',
+                          mspss_so_3: profile?.mspss_so_3 || '',
+                          mspss_so_4: profile?.mspss_so_4 || '',
+                          mspss_fam_1: profile?.mspss_fam_1 || '',
+                          mspss_fam_2: profile?.mspss_fam_2 || '',
+                          mspss_fam_3: profile?.mspss_fam_3 || '',
+                          mspss_fam_4: profile?.mspss_fam_4 || '',
+                          mspss_fri_1: profile?.mspss_fri_1 || '',
+                          mspss_fri_2: profile?.mspss_fri_2 || '',
+                          mspss_fri_3: profile?.mspss_fri_3 || '',
+                          mspss_fri_4: profile?.mspss_fri_4 || '',
+                          adks_answers: profile?.adks_answers || Array(30).fill(''),
+                          das_answers: profile?.das_answers || Array(20).fill('')
                         });
                       }}
                       disabled={isSaving}
@@ -2434,7 +2833,7 @@ const SettingsPage: React.FC = () => {
                               />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                                   {settingsT.settings.dndStart}

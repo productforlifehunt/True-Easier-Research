@@ -118,31 +118,31 @@ const Contact: React.FC = () => {
       <DesktopHeader />
       <MobileHeader />
       
-      <div className="max-w-6xl mx-auto px-6 py-8 pb-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-24">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+        <div className="mb-6 text-center">
+          <h1 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             {text.title}
           </h1>
-          <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             {text.subtitle}
           </p>
-          <p className="max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
             {text.description}
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           {/* Contact Form */}
           <div>
-            <div className="p-6 rounded-2xl border" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
-              <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--text-primary)' }}>
+            <div className="p-4 rounded-xl border" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
+              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
                 {text.formTitle}
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                     {text.name} <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <input
@@ -152,13 +152,13 @@ const Contact: React.FC = () => {
                     onChange={handleChange}
                     placeholder={text.namePlaceholder}
                     required
-                    className="w-full px-4 py-3 rounded-lg border"
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
                     style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                     {text.email}
                   </label>
                   <input
@@ -167,14 +167,14 @@ const Contact: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder={text.emailPlaceholder}
-                    className="w-full px-4 py-3 rounded-lg border"
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
                     style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                       {text.phone}
                     </label>
                     <input
@@ -183,13 +183,13 @@ const Contact: React.FC = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder={text.phonePlaceholder}
-                      className="w-full px-4 py-3 rounded-lg border"
+                      className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                       {text.wechat}
                     </label>
                     <input
@@ -198,14 +198,14 @@ const Contact: React.FC = () => {
                       value={formData.wechat}
                       onChange={handleChange}
                       placeholder={text.wechatPlaceholder}
-                      className="w-full px-4 py-3 rounded-lg border"
+                      className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                     {text.message} <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <textarea
@@ -214,8 +214,8 @@ const Contact: React.FC = () => {
                     onChange={handleChange}
                     placeholder={text.messagePlaceholder}
                     required
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-lg border resize-none"
+                    rows={4}
+                    className="w-full px-3 py-2 rounded-lg border resize-none text-sm"
                     style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                   />
                 </div>
@@ -223,7 +223,7 @@ const Contact: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 rounded-xl font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg font-semibold text-sm text-white transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ backgroundColor: 'var(--color-green)' }}
                 >
                   {isSubmitting ? (

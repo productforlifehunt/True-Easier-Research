@@ -22,7 +22,7 @@ body {
   font-weight: 400;
   line-height: 1.47059;
   letter-spacing: -0.022em;
-  width: 100vw;
+  width: 100%;
   overflow-x: hidden;
 }
 
@@ -131,8 +131,8 @@ body {
 
 /* Mobile touch interactions */
 @media (hover: none) and (pointer: coarse) {
-  /* Better touch targets for mobile */
-  button, .btn, .touch-target {
+  /* Touch targets - only for primary action buttons, NOT inline small UI */
+  .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
@@ -153,6 +153,14 @@ body {
 .mobile-scroll {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+}
+
+/* Hide scrollbar on nav overflow */
+nav::-webkit-scrollbar { display: none; }
+
+/* Prevent horizontal scroll without clipping sticky headers */
+body {
+  overflow-x: clip;
 }
 
 /* Custom utilities */
@@ -653,12 +661,12 @@ select.ios-select-hidden {
 
 .ios-dropdown-trigger {
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 12px;
   background-color: var(--bg-secondary);
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 10px;
   text-align: left;
-  font-size: 17px;
+  font-size: 14px;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s;
@@ -679,19 +687,19 @@ select.ios-select-hidden {
   right: 0;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 50;
-  max-height: 300px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  max-height: 240px;
   overflow-y: auto;
 }
 
 .ios-dropdown-option {
-  padding: 12px 16px;
+  padding: 10px 12px;
   color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.2s;
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .ios-dropdown-option:hover {

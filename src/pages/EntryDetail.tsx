@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { dataService } from '../lib/dataService';
 import { useAuth } from '../hooks/useAuth';
 import { ArrowLeft, Edit2, Trash2, Clock, BarChart3, Users, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -23,14 +23,9 @@ const EntryDetail: React.FC = () => {
     const fetchEntry = async () => {
       if (!id || !user) return;
       try {
-        const { data, error } = await supabase
-          .from('survey_entries')
-          .select('*')
-          .eq('id', id)
-          .eq('user_id', user.id)
-          .maybeSingle();
+        const entries = await dataService.getSurveyEntries(user.id);
+        const data = entries.find(entry => entry.id === parseInt(id));
 
-        if (error) throw error;
         if (!data) {
           toast.error(language === 'zh' ? '记录未找到' : 'Entry not found');
           navigate('/timeline');
@@ -52,13 +47,7 @@ const EntryDetail: React.FC = () => {
     if (!id || !user) return;
     setDeleting(true);
     try {
-      const { error } = await supabase
-        .from('survey_entries')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
+      await dataService.deleteSurveyEntry(parseInt(id));
       toast.success(language === 'zh' ? '记录已删除' : 'Entry deleted');
       navigate('/timeline');
     } catch (error: any) {

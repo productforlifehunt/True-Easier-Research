@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import AddEntry from '../pages/AddEntry';
 
 interface SurveyEntry {
   id: number;
@@ -17,6 +18,8 @@ interface SurveyEntry {
   time_spent?: number;
   emotional_impact?: string;
   your_mood?: string;
+  event_stress_rating?: number;
+  daily_burden_rating?: number;
   urgency_level?: string;
   people_with?: string;
   people_want_with?: string;
@@ -95,12 +98,14 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   
-  // All 5 filters
+  // All 6 filters (added day filter)
+  const [dayFilter, setDayFilter] = useState<string | null>(null);
   const [activityFilter, setActivityFilter] = useState<string | null>(null);
   const [peopleFilter, setPeopleFilter] = useState<string | null>(null);
   const [timeFilter, setTimeFilter] = useState<string | null>(null);
   const [challengeLevel, setChallengeLevel] = useState<number>(0);
   const [challengeTypeFilter, setChallengeTypeFilter] = useState<string | null>(null);
+  const [showAddEntry, setShowAddEntry] = useState(false);
   
   const zh = language === 'zh';
 
@@ -189,6 +194,29 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
     return counts;
   };
 
+  // Get day string from entry (YYYY-MM-DD)
+  const getDay = (entry: SurveyEntry): string | null => {
+    const timestamp = entry.entry_timestamp || entry.created_at;
+    if (!timestamp) return null;
+    return new Date(timestamp).toISOString().split('T')[0];
+  };
+
+  // Get unique days with counts
+  const getDayCounts = (): { day: string; label: string; count: number }[] => {
+    const counts: Record<string, number> = {};
+    entries.forEach(e => {
+      const day = getDay(e);
+      if (day) counts[day] = (counts[day] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([day, count]) => ({
+        day,
+        label: new Date(day).toLocaleDateString(zh ? 'zh-CN' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' }),
+        count
+      }))
+      .sort((a, b) => b.day.localeCompare(a.day)); // Most recent first
+  };
+
   const justMeCount = entries.filter(e => !hasContent(e.people_with)).length;
   const getTaskDifficulty = (entry: SurveyEntry): number => {
     if (entry.task_difficulty) return entry.task_difficulty;
@@ -198,6 +226,7 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
 
   // Apply all filters
   const filteredEntries = entries.filter(entry => {
+    if (dayFilter && getDay(entry) !== dayFilter) return false;
     if (activityFilter && !(entry.activity_categories || []).includes(activityFilter)) return false;
     if (peopleFilter === 'just_me' && hasContent(entry.people_with)) return false;
     if (peopleFilter && peopleFilter !== 'just_me') {
@@ -209,6 +238,8 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
     if (challengeTypeFilter && !(entry.challenge_types || []).includes(challengeTypeFilter)) return false;
     return true;
   });
+
+  const dayCounts = getDayCounts();
 
   const uniqueActivities = getUniqueActivities();
   const uniqueChallenges = getUniqueChallenges();
@@ -309,10 +340,14 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
                   {(hasContent(entry.resources_wanted) || hasContent(entry.tools_wanted)) && <p className="text-[10px]"><span className="font-medium" style={{ color: '#8B5CF6' }}>{zh ? '需要: ' : 'Needed: '}</span>{entry.resources_wanted || entry.tools_wanted}</p>}
                 </div>
               )}
-              {(hasContent(entry.emotional_impact) || hasContent(entry.your_mood)) && (
+              {(entry.event_stress_rating !== undefined || hasContent(entry.emotional_impact) || hasContent(entry.your_mood)) && (
                 <div className="flex items-center gap-2 text-[10px] p-2 rounded-lg" style={{ background: 'rgba(236,72,153,0.08)' }}>
                   <Heart size={12} style={{ color: '#EC4899' }} />
-                  <span style={{ color: '#EC4899' }}>{entry.emotional_impact || entry.your_mood}</span>
+                  <span style={{ color: '#EC4899' }}>
+                    {entry.event_stress_rating !== undefined 
+                      ? `${zh ? '压力' : 'Stress'}: ${entry.event_stress_rating > 0 ? '+' : ''}${entry.event_stress_rating}`
+                      : (entry.emotional_impact || entry.your_mood)}
+                  </span>
                 </div>
               )}
             </div>
@@ -324,11 +359,57 @@ export default function MyCaringWeek({ language, networkMembers = [] }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Header */}
-      <div className="text-center">
-        <h3 className="text-lg font-bold" style={{ color: 'var(--color-green)' }}>{zh ? '我的照护周' : 'My Caring Week'}</h3>
-        <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{filteredEntries.length}/{entries.length} {zh ? '条记录' : 'entries'}</p>
+      {/* Header with Add Entry button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold" style={{ color: 'var(--color-green)' }}>{zh ? '我的照护周' : 'My Caring Week'}</h3>
+          <p className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{filteredEntries.length}/{entries.length} {zh ? '条记录' : 'entries'}</p>
+        </div>
+        <button
+          onClick={() => setShowAddEntry(true)}
+          className="px-3 py-1.5 rounded-lg text-xs font-medium text-white flex items-center gap-1"
+          style={{ backgroundColor: 'var(--color-green)' }}
+        >
+          + {zh ? '添加记录' : 'Add Entry'}
+        </button>
       </div>
+
+      {/* Add Entry Popup Modal */}
+      {showAddEntry && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAddEntry(false); }}
+        >
+          <div className="w-full max-w-lg mx-4 rounded-xl shadow-xl overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)', maxHeight: 'calc(100vh - 96px)', marginTop: '48px', marginBottom: '48px' }}>
+            <AddEntry 
+              embedded 
+              onComplete={() => {
+                setShowAddEntry(false);
+                fetchEntries();
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* FILTER 0: Day - ALWAYS show first */}
+      {dayCounts.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1 mb-1">
+            <Calendar size={12} style={{ color: 'var(--color-green)' }} />
+            <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>{zh ? '日期' : 'Day'}</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            <TabButton active={dayFilter === null} onClick={() => setDayFilter(null)} count={entries.length}>{zh ? '全部' : 'All'}</TabButton>
+            {dayCounts.map(({ day, label, count }) => (
+              <TabButton key={day} active={dayFilter === day} onClick={() => setDayFilter(dayFilter === day ? null : day)} count={count} color="var(--color-green)">
+                {label}
+              </TabButton>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* FILTER 1: Activity - ALWAYS show */}
       <div>

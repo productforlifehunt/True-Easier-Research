@@ -5,6 +5,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 
+// Responsive header - v2
 const DesktopHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -47,138 +48,69 @@ const DesktopHeader: React.FC = () => {
     }
   };
 
+  const navItems = [
+    { id: 'home', label: language === 'zh' ? '首页' : 'Home', icon: null },
+    { id: 'survey', label: language === 'zh' ? '调查' : 'Survey', icon: null },
+    { id: 'about', label: language === 'zh' ? '关于' : 'About', icon: Info },
+    { id: 'howto', label: language === 'zh' ? '如何帮助' : 'How-to', icon: BookOpen },
+    { id: 'join', label: language === 'zh' ? '加入' : 'Join', icon: null },
+    { id: 'contact', label: language === 'zh' ? '联系' : 'Contact', icon: Mail },
+    { id: 'study-intro', label: language === 'zh' ? '协议' : 'Protocol', icon: FileText },
+  ];
+
   return (
     <>
-      <header className="hidden md:flex sticky top-0 z-50 py-4" style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)' }}>
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4 md:gap-8">
+      <header 
+        className="hidden md:block sticky top-0 z-50"
+        style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)', width: '100%', maxWidth: '100vw' }}
+      >
+        {/* Single row: logo | nav (scrollable) | controls — all within viewport */}
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0.625rem 1rem', boxSizing: 'border-box' }}>
+          {/* Logo - fixed width, won't shrink */}
           <button
             onClick={() => navigate('/')}
-            className="text-sm sm:text-base md:text-lg font-semibold tracking-tight truncate max-w-[200px] sm:max-w-[300px] md:max-w-none hover:opacity-80 transition-opacity cursor-pointer"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-sm font-semibold tracking-tight hover:opacity-80 transition-opacity cursor-pointer"
+            style={{ color: 'var(--text-primary)', flexShrink: 0, marginRight: '0.75rem', whiteSpace: 'nowrap' }}
           >
-            {language === 'zh' ? '痴呆症照护者的一周生活' : 'A Week in the Life of Dementia Caregivers'}
+            {language === 'zh' ? '照护者研究' : 'Caregiver Study'}
           </button>
           
-          {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-2">
-            <button
-              onClick={() => handleTabClick('home')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-                currentTab === 'home' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'home' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'home' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              {language === 'zh' ? '首页' : 'Home'}
-            </button>
-            <button
-              onClick={() => handleTabClick('survey')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-                currentTab === 'survey' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'survey' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'survey' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              {language === 'zh' ? '调查' : 'Survey'}
-            </button>
-            <button
-              onClick={() => handleTabClick('about')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1 ${
-                currentTab === 'about' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'about' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'about' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              <Info className="w-4 h-4" />
-              {language === 'zh' ? '关于' : 'About'}
-            </button>
-            <button
-              onClick={() => handleTabClick('howto')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
-                currentTab === 'howto' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'howto' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'howto' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              <BookOpen className="w-4 h-4" />
-              {language === 'zh' ? '如何参与 / 帮助' : 'How-to / Help'}
-            </button>
-            <button
-              onClick={() => handleTabClick('join')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-                currentTab === 'join' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'join' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'join' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              {language === 'zh' ? '加入 / 邀请' : 'Join / Invite'}
-            </button>
-            <button
-              onClick={() => handleTabClick('contact')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1 ${
-                currentTab === 'contact' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'contact' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'contact' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              <Mail className="w-4 h-4" />
-              {language === 'zh' ? '联系我们' : 'Contact'}
-            </button>
-            <button
-              onClick={() => handleTabClick('study-intro')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1 ${
-                currentTab === 'study-intro' ? 'text-white shadow-md' : 'hover:bg-white/50'
-              }`}
-              style={{ 
-                backgroundColor: currentTab === 'study-intro' ? 'var(--color-green)' : 'transparent',
-                color: currentTab === 'study-intro' ? 'white' : 'var(--text-secondary)'
-              }}
-            >
-              <FileText className="w-4 h-4" />
-              {language === 'zh' ? '研究介绍' : 'Protocol'}
-            </button>
+          {/* Navigation - fills remaining space, scrolls internally if needed */}
+          <nav 
+            style={{ display: 'flex', alignItems: 'center', gap: '2px', flex: '1 1 0%', minWidth: 0, overflowX: 'auto', marginRight: '0.75rem', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+          >
+            {navItems.map(item => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabClick(item.id)}
+                  className="px-2.5 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 flex items-center gap-1 whitespace-nowrap flex-shrink-0"
+                  style={{ 
+                    backgroundColor: isActive ? 'var(--color-green)' : 'transparent',
+                    color: isActive ? 'white' : 'var(--text-secondary)'
+                  }}
+                >
+                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
-        </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Language Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>EN</span>
+          {/* Right controls - fixed, won't shrink */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            {/* Language Toggle */}
             <button
-              onClick={() => {
-                const newLang = language === 'en' ? 'zh' : 'en';
-                changeLanguage(newLang);
-              }}
-              className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200"
-              style={{ backgroundColor: language === 'zh' ? 'var(--color-green)' : 'var(--toggle-inactive)' }}
+              onClick={() => changeLanguage(language === 'en' ? 'zh' : 'en')}
+              className="px-2 py-1 rounded-md text-xs font-medium border"
+              style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
             >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                  language === 'zh' ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+              {language === 'en' ? '中文' : 'EN'}
             </button>
-            <span className="hidden sm:inline text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>中</span>
-          </div>
-          
-          {user ? (
-            <div className="hidden md:flex items-center gap-3">
-              <span className="text-xs font-medium truncate max-w-[150px]" style={{ color: 'var(--text-secondary)' }}>
-                {user.email}
-              </span>
+            
+            {user ? (
               <button
                 onClick={async () => {
                   try {
@@ -192,32 +124,23 @@ const DesktopHeader: React.FC = () => {
                   }
                 }}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-200 hover:bg-gray-50"
-                style={{ 
-                  borderColor: 'var(--border-light)',
-                  color: 'var(--text-secondary)'
-                }}
+                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
               >
                 {language === 'zh' ? '退出' : 'Logout'}
               </button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center">
+            ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200"
-                style={{ 
-                  backgroundColor: 'var(--color-green)',
-                  color: 'white'
-                }}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap"
+                style={{ backgroundColor: 'var(--color-green)', color: 'white' }}
               >
-                {language === 'zh' ? '登录 / 注册' : 'Sign In / Sign Up'}
+                {language === 'zh' ? '登录' : 'Sign In'}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </header>
-    <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      </header>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </>
   );
 };

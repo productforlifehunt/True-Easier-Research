@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { dataService } from '../lib/dataService';
 import { useAuth } from '../hooks/useStateManagement';
 import { Save, X, BarChart3, Users, MessageCircle, Package, Mic, Sparkles, Loader2, Copy, CheckCircle, Clock, Plus, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -75,14 +76,9 @@ const AddEntry: React.FC = () => {
     const loadEntry = async () => {
       if (!editId || !user) return;
       try {
-        const { data, error } = await supabase
-          .from('survey_entries')
-          .select('*')
-          .eq('id', editId)
-          .eq('user_id', user.id)
-          .maybeSingle();
+        const entries = await dataService.getSurveyEntries(user.id);
+        const data = entries.find(entry => entry.id === parseInt(editId));
         
-        if (error) throw error;
         if (!data) {
           toast.error(language === 'zh' ? '记录未找到' : 'Entry not found');
           navigate('/timeline');
@@ -95,15 +91,14 @@ const AddEntry: React.FC = () => {
           activity_other: data.activity_other || '',
           description: data.description || '',
           time_spent: data.time_spent || 0,
-          emotional_impact: data.emotional_impact || '',
-          your_mood: data.your_mood || '',
+          event_stress_rating: data.event_stress_rating || 0,
           urgency_level: data.urgency_level || '',
           people_with: data.people_with || '',
           people_want_with: data.people_want_with || '',
           people_challenges: data.people_challenges || '',
           challenges_faced: data.challenges_faced || '',
           challenge_types: data.challenge_types || [],
-          task_difficulty: data.task_difficulty || 3,
+          task_difficulty: data.task_difficulty || 0,
           resources_using: data.resources_using || '',
           resources_wanted: data.resources_wanted || '',
           daily_soc_stressed: data.daily_soc_stressed || '',
@@ -149,15 +144,14 @@ const AddEntry: React.FC = () => {
     activity_other: '',
     description: '',
     time_spent: 0,
-    emotional_impact: '',
-    your_mood: '',
+    event_stress_rating: 0,
     urgency_level: '',
     people_with: '',
     people_want_with: '',
     people_challenges: '',
     challenges_faced: '',
     challenge_types: [] as string[],
-    task_difficulty: 3,
+    task_difficulty: 0,
     resources_using: '',
     resources_wanted: '',
     // Daily Sense of Competence (3 ESM items from SSCQ)
@@ -195,10 +189,10 @@ const AddEntry: React.FC = () => {
     description: '描述',
     timeSpent: '花费时间（分钟）',
     timeSpentHelper: '估算您在这项活动上花费的时间（以分钟为单位）',
-    emotionalImpact: '情绪影响',
-    emotionalImpactHelper: '这次经历对您的情绪有何影响？选择最贴近您感受的选项',
-    yourMood: '您的心情',
-    yourMoodHelper: '目前您的整体心情如何？',
+    eventStressRating: '事件压力评分',
+    eventStressRatingHelper: '这次经历给您带来的压力程度如何？',
+    stressUnpleasant: '非常不愉快',
+    stressPleasant: '非常愉快',
     urgencyLevel: '紧急程度',
     urgencyLevelHelper: '这个情况有多紧急？是否需要立即关注？',
     peopleWith: '参与人员',
@@ -257,10 +251,10 @@ const AddEntry: React.FC = () => {
     description: 'Description',
     timeSpent: 'Time Spent (minutes)',
     timeSpentHelper: 'Estimate how much time you spent on this activity (in minutes)',
-    emotionalImpact: 'Emotional Impact',
-    emotionalImpactHelper: 'How did this experience affect you emotionally? Choose the option that best matches your feelings',
-    yourMood: 'Your Mood',
-    yourMoodHelper: 'How are you feeling overall right now?',
+    eventStressRating: 'Event Stress Rating',
+    eventStressRatingHelper: 'How stressful was this experience for you?',
+    stressUnpleasant: 'Very Unpleasant',
+    stressPleasant: 'Very Pleasant',
     urgencyLevel: 'Urgency Level',
     urgencyLevelHelper: 'How urgent is this situation? Does it need immediate attention?',
     peopleWith: 'People Involved',
@@ -403,28 +397,18 @@ const AddEntry: React.FC = () => {
       
       if (isEditMode && editId) {
         // Update existing entry
-        const { error } = await supabase
-          .from('survey_entries')
-          .update({
-            entry_timestamp: timestamp,
-            ...formData
-          })
-          .eq('id', editId)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
+        await dataService.updateSurveyEntry(parseInt(editId), {
+          timestamp: timestamp,
+          ...formData
+        });
         toast.success(language === 'zh' ? '记录已更新' : 'Entry updated');
       } else {
         // Create new entry
-        const { error } = await supabase
-          .from('survey_entries')
-          .insert([{
-            user_id: user.id,
-            entry_timestamp: timestamp,
-            ...formData
-          }]);
-
-        if (error) throw error;
+        await dataService.createSurveyEntry({
+          user_id: user.id,
+          timestamp: timestamp,
+          ...formData
+        });
       }
       navigate('/timeline');
     } catch (error: any) {
@@ -831,48 +815,32 @@ const AddEntry: React.FC = () => {
                 />
               </div>
 
+              {/* Event Stress Rating */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                  {text.emotionalImpact}
+                  {text.eventStressRating}
                 </label>
                 <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  {text.emotionalImpactHelper}
+                  {text.eventStressRatingHelper}
                 </p>
-                <IOSDropdown
-                  value={formData.emotional_impact}
-                  options={[
-                    { value: '', label: language === 'zh' ? '选择...' : 'Select...' },
-                    { value: 'positive', label: language === 'zh' ? '积极' : 'Positive' },
-                    { value: 'neutral', label: language === 'zh' ? '中性' : 'Neutral' },
-                    { value: 'challenging', label: language === 'zh' ? '有挑战' : 'Challenging' },
-                    { value: 'stressful', label: language === 'zh' ? '压力大' : 'Stressful' }
-                  ]}
-                  onChange={(value) => setFormData({ ...formData, emotional_impact: value })}
-                />
-              </div>
-
-              {/* Your Mood */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                  {text.yourMood}
-                </label>
-                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  {text.yourMoodHelper}
-                </p>
-                <IOSDropdown
-                  value={formData.your_mood}
-                  options={[
-                    { value: '', label: language === 'zh' ? '选择...' : 'Select...' },
-                    { value: 'great', label: language === 'zh' ? '很好' : 'Great' },
-                    { value: 'good', label: language === 'zh' ? '好' : 'Good' },
-                    { value: 'okay', label: language === 'zh' ? '一般' : 'Okay' },
-                    { value: 'tired', label: language === 'zh' ? '疲惫' : 'Tired' },
-                    { value: 'stressed', label: language === 'zh' ? '压力大' : 'Stressed' },
-                    { value: 'anxious', label: language === 'zh' ? '焦虑' : 'Anxious' },
-                    { value: 'sad', label: language === 'zh' ? '难过' : 'Sad' }
-                  ]}
-                  onChange={(value) => setFormData({ ...formData, your_mood: value })}
-                />
+                <div className="px-1">
+                  <input
+                    type="range"
+                    min="-3"
+                    max="3"
+                    value={formData.event_stress_rating}
+                    onChange={(e) => setFormData({ ...formData, event_stress_rating: parseInt(e.target.value) })}
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{ background: 'linear-gradient(to right, #ef4444 0%, #fbbf24 50%, #10b981 100%)' }}
+                  />
+                  <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    <span>-3 {text.stressUnpleasant}</span>
+                    <span className="font-semibold" style={{ color: 'var(--color-green)' }}>
+                      {formData.event_stress_rating > 0 ? '+' : ''}{formData.event_stress_rating}
+                    </span>
+                    <span>+3 {text.stressPleasant}</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -29,6 +29,13 @@ interface SurveyEntry {
   liability_concerns?: string;
   time_spent?: number;
   emotional_impact?: string;
+  event_stress_rating?: number;
+  mbp_memory?: string;
+  mbp_behavior?: string;
+  mbp_depression?: string;
+  mbp_distress?: string;
+  task_difficulty?: number;
+  daily_burden_rating?: number;
   urgency_level?: string;
   support_needed?: string;
   entry_timestamp?: string;
@@ -254,12 +261,18 @@ export default function SurveyResultsSummary({ language, compact }: Props) {
                       </div>
                     )}
 
-                    {hasContent(entry.emotional_impact) && (
+                    {(entry.event_stress_rating !== undefined || hasContent(entry.emotional_impact)) && (
                       <div className="p-2 rounded" style={{ background: 'rgba(139,92,246,0.06)' }}>
                         <div className="font-semibold mb-1" style={{ color: '#7C3AED' }}>
-                          {zh ? '情感影响' : 'Emotional Impact'}
+                          {entry.event_stress_rating !== undefined 
+                            ? (zh ? '事件压力评分' : 'Event Stress Rating')
+                            : (zh ? '情感影响' : 'Emotional Impact')}
                         </div>
-                        <p style={{ color: 'var(--text-primary)' }}>{entry.emotional_impact}</p>
+                        <p style={{ color: 'var(--text-primary)' }}>
+                          {entry.event_stress_rating !== undefined 
+                            ? `${entry.event_stress_rating > 0 ? '+' : ''}${entry.event_stress_rating} (${entry.event_stress_rating <= -2 ? (zh ? '非常不愉快' : 'Very Unpleasant') : entry.event_stress_rating >= 2 ? (zh ? '非常愉快' : 'Very Pleasant') : (zh ? '中性' : 'Neutral')})`
+                            : entry.emotional_impact}
+                        </p>
                       </div>
                     )}
 

@@ -31,6 +31,7 @@ interface SurveyEntry {
   liability_concerns?: string;
   time_spent?: number;
   emotional_impact?: string;
+  event_stress_rating?: number;
   urgency_level?: string;
   support_needed?: string;
   entry_timestamp?: string;
@@ -93,7 +94,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
     knowledge_gaps: string;
     liability_concerns: string;
     time_spent: number;
-    emotional_impact: string;
+    event_stress_rating: number;
     urgency_level: string;
     support_needed: string;
   }>({
@@ -113,7 +114,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
     knowledge_gaps: '',
     liability_concerns: '',
     time_spent: 0,
-    emotional_impact: '',
+    event_stress_rating: 0,
     urgency_level: 'medium',
     support_needed: ''
   });
@@ -230,28 +231,30 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
         targetDate.setDate(startDate.getDate() + (currentDay - 1));
         
         filtered = filtered.filter(e => {
+          if (!e.entry_timestamp) return false;
           const entryDate = new Date(e.entry_timestamp);
           return entryDate.toDateString() === targetDate.toDateString();
         });
       } else {
         // Fallback to today's calendar date if no enrollment
         filtered = filtered.filter(e => {
+          if (!e.entry_timestamp) return false;
           const entryDate = new Date(e.entry_timestamp);
           return entryDate.toDateString() === now.toDateString();
         });
       }
     } else if (dateFilter === 'last7Days') {
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(e => new Date(e.entry_timestamp) >= sevenDaysAgo);
+      filtered = filtered.filter(e => e.entry_timestamp && new Date(e.entry_timestamp) >= sevenDaysAgo);
     } else if (dateFilter === 'last30Days') {
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(e => new Date(e.entry_timestamp) >= thirtyDaysAgo);
+      filtered = filtered.filter(e => e.entry_timestamp && new Date(e.entry_timestamp) >= thirtyDaysAgo);
     }
     
     // Sort
     filtered.sort((a, b) => {
-      const dateA = new Date(a.entry_timestamp).getTime();
-      const dateB = new Date(b.entry_timestamp).getTime();
+      const dateA = a.entry_timestamp ? new Date(a.entry_timestamp).getTime() : 0;
+      const dateB = b.entry_timestamp ? new Date(b.entry_timestamp).getTime() : 0;
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
     
@@ -263,11 +266,13 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
   const stats = {
     total: entries.length,
     thisWeek: entries.filter(e => {
+      if (!e.entry_timestamp) return false;
       const entryDate = new Date(e.entry_timestamp);
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       return entryDate >= weekAgo;
     }).length,
     thisMonth: entries.filter(e => {
+      if (!e.entry_timestamp) return false;
       const entryDate = new Date(e.entry_timestamp);
       const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       return entryDate >= monthAgo;
@@ -379,7 +384,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
           knowledge_gaps: '',
           liability_concerns: '',
           time_spent: 0,
-          emotional_impact: '',
+          event_stress_rating: 0,
           urgency_level: 'medium',
           support_needed: ''
         });
@@ -418,7 +423,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
           knowledge_gaps: '',
           liability_concerns: '',
           time_spent: 0,
-          emotional_impact: '',
+          event_stress_rating: 0,
           urgency_level: 'medium',
           support_needed: ''
         });
@@ -473,7 +478,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
       knowledge_gaps: entry.knowledge_gaps || '',
       liability_concerns: entry.liability_concerns || '',
       time_spent: entry.time_spent || 0,
-      emotional_impact: entry.emotional_impact || '',
+      event_stress_rating: entry.event_stress_rating || 0,
       urgency_level: entry.urgency_level || 'medium',
       support_needed: entry.support_needed || ''
     });
@@ -499,7 +504,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
       knowledge_gaps: '',
       liability_concerns: '',
       time_spent: 0,
-      emotional_impact: '',
+      event_stress_rating: 0,
       urgency_level: 'medium',
       support_needed: ''
     });
@@ -902,20 +907,24 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
                     <div className="sm:flex-1 sm:min-w-[150px]">
                       <label className="sf-callout font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
                         <Heart className="inline mr-1" style={{ width: 'clamp(1rem, 2.5vw, 1.25rem)', height: 'clamp(1rem, 2.5vw, 1.25rem)' }} />
-                        Emotional Impact
+                        Event Stress Rating
                       </label>
-                      <select
-                        value={formData.emotional_impact}
-                        onChange={(e) => setFormData({ ...formData, emotional_impact: e.target.value })}
-                        className="ios-text-field w-full"
-                      >
-                        <option value="">Select impact...</option>
-                        <option value="very_positive">Very Positive</option>
-                        <option value="positive">Positive</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="challenging">Challenging</option>
-                        <option value="very_challenging">Very Challenging</option>
-                      </select>
+                      <div className="px-1">
+                        <input
+                          type="range"
+                          min="-3"
+                          max="3"
+                          value={formData.event_stress_rating}
+                          onChange={(e) => setFormData({ ...formData, event_stress_rating: parseInt(e.target.value) })}
+                          className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                          style={{ background: 'linear-gradient(to right, #ef4444 0%, #fbbf24 50%, #10b981 100%)' }}
+                        />
+                        <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                          <span>-3 Unpleasant</span>
+                          <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{formData.event_stress_rating}</span>
+                          <span>+3 Pleasant</span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="sm:flex-1 sm:min-w-[150px]">
@@ -1495,19 +1504,24 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
                           </div>
                           <div className="sm:flex-1 sm:min-w-[150px]">
                             <label className="sf-callout font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
-                              Emotional Impact
+                              Event Stress Rating
                             </label>
-                            <select
-                              value={formData.emotional_impact}
-                              onChange={(e) => setFormData({ ...formData, emotional_impact: e.target.value })}
-                              className="ios-text-field"
-                            >
-                              <option value="">Select...</option>
-                              <option value="positive">Positive</option>
-                              <option value="neutral">Neutral</option>
-                              <option value="challenging">Challenging</option>
-                              <option value="overwhelming">Overwhelming</option>
-                            </select>
+                            <div className="px-1">
+                              <input
+                                type="range"
+                                min="-3"
+                                max="3"
+                                value={formData.event_stress_rating}
+                                onChange={(e) => setFormData({ ...formData, event_stress_rating: parseInt(e.target.value) })}
+                                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                                style={{ background: 'linear-gradient(to right, #ef4444 0%, #fbbf24 50%, #10b981 100%)' }}
+                              />
+                              <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                                <span>-3</span>
+                                <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{formData.event_stress_rating}</span>
+                                <span>+3</span>
+                              </div>
+                            </div>
                           </div>
                           <div className="sm:flex-1 sm:min-w-[150px]">
                             <label className="sf-callout font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
@@ -1947,7 +1961,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
                            entry.entry_type === 'care_need' ? text.careNeed : text.struggle}
                         </span>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          {new Date(entry.entry_timestamp).toLocaleString()}
+                          {entry.entry_timestamp ? new Date(entry.entry_timestamp).toLocaleString() : 'No timestamp'}
                         </p>
                       </div>
                       <div className="flex gap-1">
@@ -1979,7 +1993,7 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
                       </div>
 
                       {/* Activity Details */}
-                      {(entry.time_spent || entry.emotional_impact || entry.urgency_level) && (
+                      {(entry.time_spent || entry.event_stress_rating !== undefined || entry.emotional_impact || entry.urgency_level) && (
                         <div className="flex flex-wrap gap-3">
                           {entry.time_spent && (
                             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -1989,11 +2003,11 @@ const DementiaCaregiverSurvey: React.FC<DementiaCaregiverSurveyProps> = ({ langu
                               </span>
                             </div>
                           )}
-                          {entry.emotional_impact && (
+                          {(entry.event_stress_rating !== undefined || entry.emotional_impact) && (
                             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                               <Heart className="w-3.5 h-3.5" style={{ color: 'var(--text-secondary)' }} />
                               <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                                {entry.emotional_impact}
+                                {entry.event_stress_rating !== undefined ? `Stress: ${entry.event_stress_rating > 0 ? '+' : ''}${entry.event_stress_rating}` : entry.emotional_impact}
                               </span>
                             </div>
                           )}

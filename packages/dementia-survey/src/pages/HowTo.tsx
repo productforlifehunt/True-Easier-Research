@@ -279,28 +279,28 @@ const HowTo: React.FC = () => {
       <DesktopHeader />
       <MobileHeader />
       
-      <div className="max-w-7xl mx-auto px-6 py-8 pb-24">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-24">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             {text.title}
           </h1>
-          <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             {text.subtitle}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <div className="p-6 rounded-2xl border mb-6" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
-              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="p-4 rounded-xl border mb-4" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
+              <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
                 {text.steps.map((step) => {
                   const Icon = step.icon;
                   return (
                     <button
                       key={step.id}
                       onClick={() => setActiveStep(step.id)}
-                      className={`flex-1 min-w-[120px] p-3 rounded-xl border-2 transition-all ${
-                        activeStep === step.id ? 'shadow-md' : 'hover:shadow-sm'
+                      className={`flex-1 min-w-[80px] p-2 rounded-lg border transition-all ${
+                        activeStep === step.id ? 'shadow-sm' : 'hover:shadow-sm'
                       }`}
                       style={{
                         backgroundColor: activeStep === step.id ? 'var(--color-green)' : 'var(--bg-secondary)',
@@ -308,30 +308,30 @@ const HowTo: React.FC = () => {
                         color: activeStep === step.id ? 'white' : 'var(--text-primary)'
                       }}
                     >
-                      <div className="flex flex-col items-center gap-2">
-                        <Icon className="w-5 h-5" />
-                        <span className="font-semibold text-xs">{step.title}</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <Icon className="w-4 h-4" />
+                        <span className="font-medium text-[11px]">{step.title}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="min-h-[300px]">
-                <div className="flex items-center gap-3 mb-4">
-                  <StepIcon className="w-8 h-8" style={{ color: 'var(--color-green)' }} />
-                  <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <div className="min-h-[200px]">
+                <div className="flex items-center gap-2 mb-3">
+                  <StepIcon className="w-5 h-5" style={{ color: 'var(--color-green)' }} />
+                  <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                     {currentStep.title}
                   </h2>
                 </div>
-                <p className="whitespace-pre-line leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm whitespace-pre-line leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   {currentStep.fullContent}
                 </p>
               </div>
 
               <button
                 onClick={() => navigate('/join-survey')}
-                className="w-full mt-6 py-4 rounded-xl font-semibold text-white transition-all hover:opacity-90"
+                className="w-full mt-4 py-2.5 rounded-lg font-semibold text-sm text-white transition-all hover:opacity-90"
                 style={{ backgroundColor: 'var(--color-green)' }}
               >
                 {text.registerNow}
@@ -340,27 +340,27 @@ const HowTo: React.FC = () => {
           </div>
 
           <div>
-            <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
-              <div className="p-4 border-b flex items-center gap-3" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-                <MessageCircle className="w-6 h-6" style={{ color: 'var(--color-green)' }} />
+            <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
+              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
+                <MessageCircle className="w-4 h-4" style={{ color: 'var(--color-green)' }} />
                 <div>
-                  <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {text.chatTitle}
                   </h3>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                     {text.chatSubtitle}
                   </p>
                 </div>
               </div>
 
-              <div className="p-4 border-b" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
-                <p className="text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>{text.quickQuestions}</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="px-3 py-2 border-b" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)' }}>
+                <p className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>{text.quickQuestions}</p>
+                <div className="flex flex-wrap gap-1.5">
                   {[text.q1, text.q2, text.q3, text.q4].map((q, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleQuickQuestion(q)}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                      className="px-2.5 py-1 rounded-md text-xs font-medium transition-all hover:opacity-80"
                       style={{ backgroundColor: 'white', color: 'var(--text-secondary)', border: '1px solid var(--border-light)' }}
                     >
                       {q}
@@ -369,11 +369,11 @@ const HowTo: React.FC = () => {
                 </div>
               </div>
 
-              <div className="h-96 overflow-y-auto p-4 space-y-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
+              <div className="h-72 overflow-y-auto p-3 space-y-3" style={{ backgroundColor: 'var(--bg-primary)' }}>
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                      className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${
                         msg.role === 'user' ? 'rounded-tr-sm' : 'rounded-tl-sm'
                       }`}
                       style={{
@@ -388,7 +388,7 @@ const HowTo: React.FC = () => {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tl-sm" style={{ backgroundColor: 'white', border: '1px solid var(--border-light)' }}>
+                    <div className="max-w-[80%] px-3 py-2 rounded-xl rounded-tl-sm text-sm" style={{ backgroundColor: 'white', border: '1px solid var(--border-light)' }}>
                       <span style={{ color: 'var(--text-secondary)' }}>{text.typing}</span>
                     </div>
                   </div>
@@ -396,26 +396,26 @@ const HowTo: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-4 border-t" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
+              <div className="px-3 py-2.5 border-t" style={{ backgroundColor: 'white', borderColor: 'var(--border-light)' }}>
                 {isRecording && (
-                  <div className="mb-2 text-sm flex items-center gap-2" style={{ color: 'var(--color-green)' }}>
+                  <div className="mb-1.5 text-xs flex items-center gap-1.5" style={{ color: 'var(--color-green)' }}>
                     <span className="animate-pulse">●</span> {text.recording}
                   </div>
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <input
                     type="text"
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder={text.chatPlaceholder}
-                    className="flex-1 px-4 py-3 rounded-lg border"
+                    className="flex-1 px-3 py-2 rounded-lg border text-sm"
                     style={{ borderColor: 'var(--border-light)', backgroundColor: 'var(--bg-secondary)' }}
                     disabled={isLoading}
                   />
                   <button
                     onClick={handleVoiceInput}
-                    className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                    className={`px-3 py-2 rounded-lg font-medium transition-all ${
                       isRecording ? 'animate-pulse' : 'hover:opacity-90'
                     }`}
                     style={{ 
@@ -424,15 +424,15 @@ const HowTo: React.FC = () => {
                     }}
                     title={text.voiceHint}
                   >
-                    <Mic className="w-5 h-5" />
+                    <Mic className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleSendMessage()}
                     disabled={isLoading || !inputMessage.trim()}
-                    className="px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
+                    className="px-3 py-2 rounded-lg font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
                     style={{ backgroundColor: 'var(--color-green)' }}
                   >
-                    <Send className="w-5 h-5" />
+                    <Send className="w-4 h-4" />
                   </button>
                 </div>
               </div>
