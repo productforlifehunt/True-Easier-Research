@@ -568,17 +568,48 @@ const ESMParticipantDashboard: React.FC = () => {
                   <div className="flex-1 flex gap-2 flex-wrap">
                     {hourInstances.length > 0 ? (
                       hourInstances.map(instance => (
-                        <button
-                          key={instance.id}
-                          onClick={() => setActiveSurveyInstanceId(instance.id)}
-                          className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-80"
-                          style={getStatusStyles(instance.status)}
-                        >
-                          {new Date(instance.scheduled_time).toLocaleTimeString('en-US', { 
-                            hour: '2-digit', 
-                            minute: '2-digit'
-                          })}
-                        </button>
+                        <div key={instance.id} className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (instance.status === 'completed') {
+                                setActiveSurveyInstanceId(instance.id);
+                              } else if (instance.status === 'scheduled') {
+                                startSurvey(instance.id);
+                              }
+                            }}
+                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-80 flex items-center gap-2"
+                            style={getStatusStyles(instance.status)}
+                          >
+                            <span>
+                              {new Date(instance.scheduled_time).toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit'
+                              })}
+                            </span>
+                            <span className="text-xs font-normal opacity-70">
+                              {instance.status === 'completed' ? '✓' : instance.status === 'missed' ? '✗' : '○'}
+                            </span>
+                          </button>
+                          {/* Edit & Delete */}
+                          <div className="flex items-center gap-1">
+                            {instance.status === 'completed' && (
+                              <button
+                                onClick={() => setActiveSurveyInstanceId(instance.id)}
+                                className="p-1.5 rounded-lg hover:bg-gray-100 transition-all"
+                                title="View/Edit"
+                              >
+                                <Edit2 size={14} style={{ color: 'var(--text-secondary)' }} />
+                              </button>
+                            )}
+                            <button
+                              onClick={(e) => deleteInstance(instance.id, e)}
+                              className="p-1.5 rounded-lg hover:bg-red-50 transition-all"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} style={{ color: '#ef4444' }} />
+                            </button>
+                          </div>
+                        </div>
                       ))
                     ) : (
                       <div className="h-8" />
