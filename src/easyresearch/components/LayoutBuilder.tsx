@@ -202,6 +202,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     });
   };
 
+  const resolveTabId = (droppableId: string) => {
+    return droppableId.replace('elements-', '').replace('phone-elements-', '');
+  };
+
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const { source, destination } = result;
@@ -217,8 +221,8 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     }
 
     if (result.type === 'ELEMENT') {
-      const sourceTabId = source.droppableId.replace('elements-', '');
-      const destTabId = destination.droppableId.replace('elements-', '');
+      const sourceTabId = resolveTabId(source.droppableId);
+      const destTabId = resolveTabId(destination.droppableId);
       if (sourceTabId === destTabId) {
         const tab = layout.tabs.find(t => t.id === sourceTabId);
         if (!tab) return;
@@ -629,9 +633,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 onActiveTabChange={setActiveTabId}
                 highlightedElementId={editingElementId}
                 onElementClick={setEditingElementId}
-                frameHeight={620}
+                editable={true}
+                onRemoveElement={removeElement}
+                frameHeight={680}
               />
-              <p className="text-[11px] text-stone-400 text-center mt-3 font-light">Live Preview — identical to participant app</p>
+              <p className="text-[11px] text-stone-400 text-center mt-3 font-light">Live Preview — drag to reorder, click to edit</p>
             </div>
           </div>
         </div>
