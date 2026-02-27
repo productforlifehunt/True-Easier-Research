@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronUp, Copy, GripVertical, FileText, Edit2, Users } from 'lucide-react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronUp, Copy, GripVertical, FileText, Edit2, Users, Mic, Settings, X } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
+import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
+import QuestionEditor from './QuestionEditor';
 
 export interface QuestionnaireConfig {
   id: string;
@@ -26,10 +28,22 @@ interface QuestionnaireListProps {
   onUpdate: (questionnaires: QuestionnaireConfig[]) => void;
   onEditQuestions: (questionnaireId: string) => void;
   activeQuestionnaireId: string | null;
+  selectedQuestion: any | null;
+  onSelectQuestion: (q: any | null) => void;
+  onAddQuestion: (type: string) => void;
+  onUpdateQuestion: (id: string, updates: any) => void;
+  onDeleteQuestion: (id: string) => void;
+  onMoveQuestion: (id: string, dir: 'up' | 'down') => void;
+  onDuplicateQuestion: (q: any) => void;
+  onQuestionDragEnd: (result: DropResult) => void;
+  onCloseQuestionEditor: () => void;
+  project: any;
 }
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, onEditQuestions, activeQuestionnaireId,
+  selectedQuestion, onSelectQuestion, onAddQuestion, onUpdateQuestion, onDeleteQuestion,
+  onMoveQuestion, onDuplicateQuestion, onQuestionDragEnd, onCloseQuestionEditor, project,
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -62,6 +76,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   const removeQuestionnaire = (id: string) => {
     onUpdate(questionnaires.filter(q => q.id !== id));
     if (expandedId === id) setExpandedId(null);
+    if (activeQuestionnaireId === id) onCloseQuestionEditor();
   };
 
   const duplicateQuestionnaire = (q: QuestionnaireConfig) => {
@@ -69,6 +84,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       ...q,
       id: crypto.randomUUID(),
       title: `${q.title} (Copy)`,
+      questions: q.questions.map(qq => ({ ...qq, id: crypto.randomUUID() })),
       order_index: questionnaires.length,
     };
     onUpdate([...questionnaires, dup]);
@@ -76,6 +92,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+    // Delegate question drag to parent if it's a question drag
+    if (result.type === 'QUESTION') {
+      onQuestionDragEnd(result);
+      return;
+    }
     const items = Array.from(questionnaires);
     const [moved] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, moved);
@@ -93,6 +114,185 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     { value: 'weekly', label: 'Weekly' },
   ];
 
+  const activeQ = activeQuestionnaireId ? questionnaires.find(q => q.id === activeQuestionnaireId) : null;
+
+  // If editing a questionnaire's questions, show the question editor view
+  if (activeQuestionnaireId && activeQ) {
+    return (
+      <div className="space-y-4">
+        {/* Header bar */}
+        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-stone-200/60 shadow-sm">
+          <button
+            onClick={onCloseQuestionEditor}
+            className="flex items-center gap-1.5 text-[13px] text-stone-500 hover:text-stone-700 font-medium"
+          >
+            <ChevronDown size={14} className="rotate-90" /> Back
+          </button>
+          <div className="flex-1">
+            <h3 className="text-[15px] font-semibold text-stone-800">{activeQ.title}</h3>
+            <p className="text-[11px] text-stone-400">{activeQ.questions.length} questions · {activeQ.frequency} · ~{activeQ.estimated_duration} min</p>
+          </div>
+          <CustomDropdown
+            options={[
+              { value: '', label: '+ Add Question' },
+              ...QUESTION_TYPE_DEFINITIONS.map(def => ({
+                value: def.type,
+                label: def.label
+              }))
+            ]}
+            value=""
+            onChange={(value) => value && onAddQuestion(value)}
+            placeholder="+ Add Question"
+            buttonStyle={{ backgroundColor: '#10b981', color: 'white', borderRadius: '9999px', fontSize: '13px' }}
+            className="w-full md:w-48"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Questions Panel */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm">
+              <div className="p-4">
+                {activeQ.questions.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
+                      <FileText className="text-stone-300" size={28} />
+                    </div>
+                    <p className="text-[13px] text-stone-400 font-light">
+                      No questions yet. Add your first question above.
+                    </p>
+                  </div>
+                ) : (
+                  <DragDropContext onDragEnd={onQuestionDragEnd}>
+                    <Droppable droppableId="questions" type="QUESTION">
+                      {(provided) => (
+                        <div className="space-y-2" {...provided.droppableProps} ref={provided.innerRef}>
+                          {activeQ.questions.map((question: any, index: number) => (
+                            <Draggable key={question.id} draggableId={question.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`group p-4 rounded-xl border transition-all cursor-pointer ${
+                                    selectedQuestion?.id === question.id
+                                      ? 'border-emerald-300 bg-emerald-50/50 shadow-sm shadow-emerald-100'
+                                      : 'border-stone-100 hover:border-stone-200 hover:bg-stone-50/50'
+                                  } ${snapshot.isDragging ? 'shadow-lg' : ''}`}
+                                  style={provided.draggableProps.style}
+                                  onClick={() => onSelectQuestion(question)}
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-2 flex-1">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab active:cursor-grabbing p-1 -ml-1 rounded-lg hover:bg-stone-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <GripVertical size={14} className="text-stone-300" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="text-[11px] font-semibold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">
+                                            Q{index + 1}
+                                          </span>
+                                          {question.required && (
+                                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-500">
+                                              Required
+                                            </span>
+                                          )}
+                                          {question.allow_voice && (
+                                            <Mic size={11} className="text-blue-400" />
+                                          )}
+                                          <span className="text-[9px] uppercase font-bold text-stone-300 bg-stone-50 px-1.5 py-0.5 rounded">
+                                            {question.question_type?.replace(/_/g, ' ')}
+                                          </span>
+                                        </div>
+                                        <h3 className="text-[13px] font-medium text-stone-700 leading-snug">
+                                          {question.question_text}
+                                        </h3>
+                                        {question.options && question.options.length > 0 && (
+                                          <div className="mt-2 space-y-0.5">
+                                            {question.options.slice(0, 2).map((option: any) => (
+                                              <div key={option.id} className="text-[12px] text-stone-400 flex items-center gap-1.5">
+                                                <div className="w-3 h-3 rounded-full border border-stone-300" />
+                                                {option.option_text}
+                                              </div>
+                                            ))}
+                                            {question.options.length > 2 && (
+                                              <div className="text-[11px] text-stone-300 ml-4">
+                                                +{question.options.length - 2} more
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={(e) => { e.stopPropagation(); onMoveQuestion(question.id, 'up'); }} disabled={index === 0}
+                                        className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
+                                        <ChevronUp size={14} className="text-stone-400" />
+                                      </button>
+                                      <button onClick={(e) => { e.stopPropagation(); onMoveQuestion(question.id, 'down'); }} disabled={index === activeQ.questions.length - 1}
+                                        className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-30 transition-colors">
+                                        <ChevronDown size={14} className="text-stone-400" />
+                                      </button>
+                                      <button onClick={(e) => { e.stopPropagation(); onDuplicateQuestion(question); }}
+                                        className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
+                                        <Copy size={14} className="text-stone-400" />
+                                      </button>
+                                      <button onClick={(e) => { e.stopPropagation(); onDeleteQuestion(question.id); }}
+                                        className="p-1.5 rounded-lg hover:bg-red-50 transition-colors">
+                                        <Trash2 size={14} className="text-red-400" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Editor Panel */}
+          <div className="lg:col-span-1">
+            {selectedQuestion ? (
+              <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm sticky top-24">
+                <div className="p-5 border-b border-stone-100 flex items-center justify-between">
+                  <h3 className="text-[14px] font-semibold text-stone-800">Edit Question</h3>
+                  <button onClick={() => onSelectQuestion(null)} className="p-1 rounded-lg hover:bg-stone-100">
+                    <X size={14} className="text-stone-400" />
+                  </button>
+                </div>
+                <div className="p-5">
+                  <QuestionEditor
+                    question={selectedQuestion}
+                    project={project}
+                    onUpdateQuestion={onUpdateQuestion}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm p-8 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-3">
+                  <Settings size={20} className="text-stone-300" />
+                </div>
+                <p className="text-[13px] text-stone-400 font-light">Select a question to edit its properties</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default: show questionnaire list
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
@@ -117,7 +317,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           </div>
           <h2 className="text-[15px] font-semibold text-stone-700 mb-1">No Questionnaires</h2>
           <p className="text-[13px] text-stone-400 font-light">
-            Add questionnaires like "Hourly Log", "Daily Log", etc.
+            Add questionnaires like "Hourly Log", "Daily Log", "Screening", etc.
           </p>
         </div>
       ) : (
@@ -131,7 +331,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               >
                 {questionnaires.map((q, idx) => {
                   const isExpanded = expandedId === q.id;
-                  const isActive = activeQuestionnaireId === q.id;
                   return (
                     <Draggable key={q.id} draggableId={q.id} index={idx}>
                       {(provided, snapshot) => (
@@ -139,7 +338,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
-                            isActive ? 'border-emerald-300 ring-2 ring-emerald-100' : 'border-stone-100'
+                            'border-stone-100'
                           } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200' : ''}`}
                         >
                           {/* Header */}
@@ -185,8 +384,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               </div>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
-                              <button onClick={(e) => { e.stopPropagation(); onEditQuestions(q.id); }} className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors" title="Edit questions">
-                                <Edit2 size={13} className="text-emerald-500" />
+                              <button onClick={(e) => { e.stopPropagation(); onEditQuestions(q.id); }} className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors text-[12px] font-medium text-emerald-600 flex items-center gap-1" title="Edit questions">
+                                <Edit2 size={12} /> Questions
                               </button>
                               <button onClick={(e) => { e.stopPropagation(); duplicateQuestionnaire(q); }} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
                                 <Copy size={13} className="text-stone-400" />
