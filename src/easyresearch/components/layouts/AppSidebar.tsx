@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import {
-  BarChart3, LayoutDashboard, Plus, Users, Settings,
+  LayoutDashboard, Plus, Users, Settings,
   LogOut, FileText
 } from 'lucide-react';
 
@@ -21,7 +21,6 @@ const AppSidebar: React.FC = () => {
     { path: '/easyresearch/dashboard?create=true', label: 'New Project', icon: Plus },
     { path: '/easyresearch/participants', label: 'Participants', icon: Users },
     { path: '/easyresearch/responses', label: 'Responses', icon: FileText },
-    { path: '/easyresearch/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/easyresearch/settings', label: 'Settings', icon: Settings }
   ];
 

@@ -2,27 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { FileText, Download, Filter } from 'lucide-react';
-
-interface Response {
-  id: string;
-  enrollment_id: string;
-  question_id: string;
-  response_text: string | null;
-  response_value: any;
-  created_at: string;
-  project_id?: string;
-  enrollment?: { participant_email?: string };
-  project?: { id: string; title: string };
-  question?: { question_text?: string; question_type?: string };
-}
+import { FileText, Download, ChevronRight, Users, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 
 const ResponsesPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [responses, setResponses] = useState<Response[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,156 +15,147 @@ const ResponsesPage: React.FC = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) loadResponses();
-  }, [selectedProject, user]);
+    if (user) loadProjects();
+  }, [user]);
 
-  const loadResponses = async () => {
+  const loadProjects = async () => {
     try {
       setLoading(true);
-      const { data: researcherData } = await supabase.from('researcher').select('organization_id').eq('user_id', user?.id).maybeSingle();
-      if (!researcherData) throw new Error('Researcher not found');
-      const { data: projectData } = await supabase.from('research_project').select('*').eq('organization_id', researcherData.organization_id).order('created_at', { ascending: false });
-      if (projectData) setProjects(projectData);
-      const organizationProjectIds = projectData ? projectData.map(p => p.id) : [];
-      if (organizationProjectIds.length === 0) { setResponses([]); return; }
+      const { data: researcher } = await supabase.from('researcher').select('id, organization_id').eq('user_id', user?.id).maybeSingle();
+      if (!researcher) { setLoading(false); return; }
 
-      let query = supabase.from('survey_respons').select('id, project_id, enrollment_id, question_id, response_text, response_value, created_at')
-        .in('project_id', organizationProjectIds).order('created_at', { ascending: false }).limit(100);
-      if (selectedProject !== 'all') query = query.eq('project_id', selectedProject);
+      const { data: projectData } = await supabase.from('research_project').select('id, title, status, created_at, project_type')
+        .eq('organization_id', researcher.organization_id).order('created_at', { ascending: false });
 
-      const { data: responseData } = await query;
-      if (responseData) {
-        const rawResponses = responseData as any[];
-        const enrollmentIds = Array.from(new Set(rawResponses.map(r => r.enrollment_id).filter(Boolean)));
-        const questionIds = Array.from(new Set(rawResponses.map(r => r.question_id).filter(Boolean)));
-
-        const [{ data: enrollmentsData }, { data: questionsData }] = await Promise.all([
-          enrollmentIds.length ? supabase.from('enrollment').select('id, participant_email').in('id', enrollmentIds) : Promise.resolve({ data: [] as any[] } as any),
-          questionIds.length ? supabase.from('survey_question').select('id, question_text, question_type').in('id', questionIds) : Promise.resolve({ data: [] as any[] } as any)
-        ]);
-
-        const enrollmentById = new Map((enrollmentsData || []).map((e: any) => [e.id, e]));
-        const questionById = new Map((questionsData || []).map((q: any) => [q.id, q]));
-        const projectById = new Map((projectData || []).map((p: any) => [p.id, p]));
-
-        setResponses(rawResponses.map(r => ({
-          ...r, enrollment: enrollmentById.get(r.enrollment_id), question: questionById.get(r.question_id), project: projectById.get(r.project_id)
-        })) as any);
+      if (!projectData || projectData.length === 0) {
+        setProjects([]);
+        setLoading(false);
+        return;
       }
-    } catch (error) { console.error('Error loading responses:', error); }
-    finally { setLoading(false); }
+
+      const projectIds = projectData.map(p => p.id);
+
+      // Get response counts and enrollment counts per project
+      const [{ data: responseCounts }, { data: enrollmentCounts }] = await Promise.all([
+        supabase.from('survey_respons').select('project_id').in('project_id', projectIds),
+        supabase.from('enrollment').select('project_id, status').in('project_id', projectIds),
+      ]);
+
+      const responseByProject = new Map<string, number>();
+      (responseCounts || []).forEach(r => {
+        responseByProject.set(r.project_id, (responseByProject.get(r.project_id) || 0) + 1);
+      });
+
+      const enrollmentByProject = new Map<string, { total: number; completed: number }>();
+      (enrollmentCounts || []).forEach(e => {
+        const current = enrollmentByProject.get(e.project_id) || { total: 0, completed: 0 };
+        current.total++;
+        if (e.status === 'completed') current.completed++;
+        enrollmentByProject.set(e.project_id, current);
+      });
+
+      setProjects(projectData.map(p => ({
+        ...p,
+        responseCount: responseByProject.get(p.id) || 0,
+        participantCount: enrollmentByProject.get(p.id)?.total || 0,
+        completedCount: enrollmentByProject.get(p.id)?.completed || 0,
+      })));
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const exportResponses = () => {
-    const headers = ['Timestamp', 'Project', 'Participant', 'Question', 'Answer'];
-    const csvData = responses.map(r => [
-      new Date(r.created_at).toLocaleString(), r.project?.title || 'Unknown',
-      r.enrollment?.participant_email || 'Anonymous', r.question?.question_text || 'Unknown',
-      (r.response_text && r.response_text.trim().length > 0) ? r.response_text
-        : (r.response_value !== null && r.response_value !== undefined)
-          ? (typeof r.response_value === 'string' ? r.response_value : JSON.stringify(r.response_value))
-          : ''
-    ]);
-    const csv = [headers, ...csvData].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `responses_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-  };
+  const totalResponses = projects.reduce((sum, p) => sum + p.responseCount, 0);
+  const totalParticipants = projects.reduce((sum, p) => sum + p.participantCount, 0);
+  const totalCompleted = projects.reduce((sum, p) => sum + p.completedCount, 0);
+  const avgCompletion = totalParticipants > 0 ? Math.round((totalCompleted / totalParticipants) * 100) : 0;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Responses</h1>
-          <p className="text-[13px] text-stone-400 mt-1 font-light">View and export participant responses</p>
-        </div>
-        <button
-          onClick={exportResponses}
-          className="px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 flex items-center gap-1.5 transition-all shadow-sm shadow-emerald-200"
-        >
-          <Download size={14} /> Export CSV
-        </button>
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Responses</h1>
+        <p className="text-[13px] text-stone-400 mt-1 font-light">Overview of all responses across your projects</p>
       </div>
 
-      {/* Filter */}
-      <div className="flex items-center gap-3 mb-5">
-        <Filter size={14} className="text-stone-300" />
-        <select
-          value={selectedProject}
-          onChange={(e) => setSelectedProject(e.target.value)}
-          className="px-3 py-1.5 rounded-full text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-        >
-          <option value="all">All Projects</option>
-          {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
-        {responses.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
-              <FileText className="text-emerald-500" size={20} />
+      {/* Overview stats */}
+      <div className="grid grid-cols-4 gap-3 mb-8">
+        {[
+          { label: 'Projects', value: projects.length, icon: FileText },
+          { label: 'Total Responses', value: totalResponses, icon: MessageSquare },
+          { label: 'Participants', value: totalParticipants, icon: Users },
+          { label: 'Avg Completion', value: `${avgCompletion}%`, icon: TrendingUp },
+        ].map(s => (
+          <div key={s.label} className="bg-white rounded-xl border border-stone-100 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <s.icon size={15} className="text-emerald-500" strokeWidth={1.5} />
             </div>
-            <h3 className="text-[15px] font-semibold text-stone-800 mb-1">No Responses Yet</h3>
-            <p className="text-[13px] text-stone-400 max-w-sm mx-auto font-light">
-              Responses will appear here as participants complete your surveys.
-            </p>
+            <p className="text-xl font-semibold text-stone-800 tracking-tight">{s.value}</p>
+            <p className="text-[10px] text-stone-400 uppercase tracking-wider mt-0.5">{s.label}</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Time</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Project</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Participant</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Question</th>
-                  <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Answer</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100">
-                {responses.map((response) => (
-                  <tr key={response.id} className="hover:bg-emerald-50/30 transition-colors">
-                    <td className="px-4 py-3 text-[12px] text-stone-400 whitespace-nowrap">
-                      {new Date(response.created_at).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-stone-800">
-                      {response.project?.title || 'Unknown'}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-stone-500">
-                      {response.enrollment?.participant_email || 'Anonymous'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="text-[13px] text-stone-500 line-clamp-1">{response.question?.question_text || 'Unknown'}</p>
-                    </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-stone-800 max-w-xs truncate">
-                      {(response.response_text && response.response_text.trim().length > 0)
-                        ? response.response_text
-                        : (response.response_value !== null && response.response_value !== undefined)
-                          ? (typeof response.response_value === 'string' ? response.response_value
-                            : Array.isArray(response.response_value) ? response.response_value.join(', ')
-                            : JSON.stringify(response.response_value))
-                          : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        ))}
       </div>
+
+      {/* Project cards */}
+      {projects.length === 0 ? (
+        <div className="bg-white rounded-xl border border-stone-100 p-16 text-center">
+          <BarChart3 size={32} className="text-stone-200 mx-auto mb-3" />
+          <p className="text-[14px] font-medium text-stone-600 mb-1">No projects yet</p>
+          <p className="text-[12px] text-stone-400">Create a project to start collecting responses.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {projects.map(p => (
+            <button
+              key={p.id}
+              onClick={() => navigate(`/easyresearch/project/${p.id}`, { state: { activeTab: 'responses' } })}
+              className="w-full bg-white rounded-xl border border-stone-100 p-4 flex items-center justify-between hover:border-emerald-200 hover:shadow-sm transition-all text-left group"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[14px] font-semibold text-stone-800 truncate">{p.title || 'Untitled'}</p>
+                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+                    p.status === 'published' ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {p.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-[11px] text-stone-400">
+                  <span className="flex items-center gap-1"><MessageSquare size={11} /> {p.responseCount} responses</span>
+                  <span className="flex items-center gap-1"><Users size={11} /> {p.participantCount} participants</span>
+                  <span>{p.completedCount}/{p.participantCount} completed</span>
+                </div>
+              </div>
+              {/* Response bar */}
+              <div className="flex items-center gap-4 shrink-0 ml-4">
+                {p.participantCount > 0 && (
+                  <div className="w-24">
+                    <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-400 rounded-full transition-all"
+                        style={{ width: `${Math.round((p.completedCount / p.participantCount) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-[9px] text-stone-400 text-right mt-0.5">
+                      {Math.round((p.completedCount / p.participantCount) * 100)}%
+                    </p>
+                  </div>
+                )}
+                <ChevronRight size={14} className="text-stone-300 group-hover:text-emerald-500 transition-colors" />
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

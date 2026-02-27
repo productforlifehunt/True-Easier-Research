@@ -215,7 +215,7 @@ function App() {
                     <Route path="/easyresearch/mobile/edit/:projectId" element={<MobileSurveyEditor />} />
                     <Route path="/easyresearch/create" element={<ResearcherDashboard />} />
                     <Route path="/easyresearch/responses" element={<ResponsesPage />} />
-                    <Route path="/easyresearch/analytics" element={<AnalyticsPage />} />
+                    {/* Analytics merged into Responses */}
                     <Route path="/easyresearch/settings" element={<ResearcherSettings />} />
                     <Route path="/easyresearch/participants" element={<ParticipantsPage />} />
                   </Route>

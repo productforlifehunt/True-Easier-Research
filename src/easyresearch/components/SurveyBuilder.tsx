@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import SurveySettings from './SurveySettings';
 import SurveyLogic from './SurveyLogic';
 import SurveyPreview from './SurveyPreview';
+import ProjectResponsesTab from './ProjectResponsesTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
@@ -88,7 +89,7 @@ export interface SurveyProject {
   auto_advance?: boolean;
 }
 
-type TabId = 'questionnaires' | 'participants' | 'logic' | 'layout' | 'settings' | 'preview';
+type TabId = 'questionnaires' | 'participants' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -134,7 +135,8 @@ const SurveyBuilder: React.FC = () => {
   });
   // Legacy global questions state - only used for loading/migration, all questions now live inside questionnaire configs
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [activeTab, setActiveTab] = useState<TabId>('questionnaires');
+  const initialTab = (location.state as any)?.activeTab as TabId | undefined;
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'questionnaires');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [logicRules, setLogicRules] = useState<any[]>([]);
@@ -555,6 +557,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'layout', label: 'Layout' },
     { id: 'settings', label: 'Settings' },
     { id: 'preview', label: 'Preview' },
+    ...(projectId ? [{ id: 'responses' as TabId, label: 'Responses' }] : []),
   ];
 
 
@@ -693,6 +696,13 @@ const SurveyBuilder: React.FC = () => {
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
             studyDuration={project.study_duration || 7}
+          />
+        )}
+        {/* Responses Tab */}
+        {activeTab === 'responses' && projectId && (
+          <ProjectResponsesTab
+            projectId={projectId}
+            questionnaires={questionnaireConfigs}
           />
         )}
       </div>
