@@ -724,11 +724,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-[12px] text-stone-600">
-            <input type="checkbox" checked={localQuestion.required} onChange={(e) => updateLocal({ required: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-            Required (legacy)
-          </label>
-
           {['text_short', 'text_long'].includes(question.question_type) && (
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.allow_voice} onChange={(e) => updateLocal({ allow_voice: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />

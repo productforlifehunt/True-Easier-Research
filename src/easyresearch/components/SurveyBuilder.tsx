@@ -692,6 +692,7 @@ const SurveyBuilder: React.FC = () => {
             appLayout={appLayout}
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
+            studyDuration={project.study_duration || 7}
           />
         )}
       </div>

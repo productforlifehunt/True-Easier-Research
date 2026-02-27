@@ -9,10 +9,10 @@ interface SurveyPreviewProps {
   questions: any[];
   projectTitle: string;
   projectDescription: string;
-  // New layout-driven props
   appLayout?: AppLayout;
   questionnaires?: QuestionnaireConfig[];
   participantTypes?: ParticipantType[];
+  studyDuration?: number;
 }
 
 const ICON_MAP: Record<string, React.FC<any>> = {
@@ -21,7 +21,7 @@ const ICON_MAP: Record<string, React.FC<any>> = {
 
 const SurveyPreview: React.FC<SurveyPreviewProps> = ({
   questions, projectTitle, projectDescription,
-  appLayout, questionnaires, participantTypes,
+  appLayout, questionnaires, participantTypes, studyDuration = 7,
 }) => {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('mobile');
   const [responses, setResponses] = useState<{ [key: string]: any }>({});
@@ -225,16 +225,19 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
           </div>
         );
       case 'timeline':
+        const timelineDays = Math.min(studyDuration, 30);
+        const completedDays = Math.max(1, Math.floor(timelineDays * 0.4));
         return (
           <div key={el.id} className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
-            <h4 className="text-[13px] font-semibold text-stone-800 mb-3">📅 {el.config.title || 'Timeline'}</h4>
-            <div className="flex gap-1.5">
-              {Array.from({ length: 7 }, (_, i) => (
-                <div key={i} className="flex-1 text-center">
-                  <div className={`h-2 rounded-full mb-1 ${i < 3 ? '' : 'bg-stone-200'}`} style={i < 3 ? { backgroundColor: primaryColor } : {}} />
+            <h4 className="text-[13px] font-semibold text-stone-800 mb-3">📅 {el.config.title || 'Timeline'} ({studyDuration} days)</h4>
+            <div className="flex gap-1 flex-wrap">
+              {Array.from({ length: Math.min(timelineDays, 14) }, (_, i) => (
+                <div key={i} className="text-center" style={{ width: timelineDays <= 7 ? `${100/timelineDays}%` : '28px' }}>
+                  <div className={`h-2 rounded-full mb-1 ${i < completedDays ? '' : 'bg-stone-200'}`} style={i < completedDays ? { backgroundColor: primaryColor } : {}} />
                   <span className="text-[9px] text-stone-400">D{i + 1}</span>
                 </div>
               ))}
+              {timelineDays > 14 && <span className="text-[9px] text-stone-400 self-center ml-1">+{timelineDays - 14} more</span>}
             </div>
           </div>
         );
