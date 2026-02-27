@@ -496,16 +496,16 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Your Questionnaires</p>
                         <div className="space-y-1">
                           {questionnaires.map(q => {
-                            const alreadyPlaced = placedQuestionnaireIds.has(q.id);
+                            const countOnThisTab = activeTab?.elements.filter(e => e.type === 'questionnaire' && e.config.questionnaire_id === q.id).length || 0;
                             return (
-                              <button key={q.id} onClick={() => !alreadyPlaced && addQuestionnaire(q)} disabled={alreadyPlaced}
-                                className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border ${alreadyPlaced ? 'border-stone-100 bg-stone-50 opacity-50 cursor-not-allowed' : 'border-transparent hover:bg-white hover:border-stone-200'}`}>
+                              <button key={q.id} onClick={() => addQuestionnaire(q)}
+                                className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
                                 <span className="text-lg">📋</span>
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
                                   <span className="text-[9px] text-stone-400">{q.questions?.length || 0} questions · {q.estimated_duration || 5} min{q.frequency ? ` · ${q.frequency}` : ''}</span>
                                 </div>
-                                {alreadyPlaced && <span className="text-[9px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Added</span>}
+                                {countOnThisTab > 0 && <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">×{countOnThisTab}</span>}
                               </button>
                             );
                           })}

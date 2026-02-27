@@ -82,6 +82,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         return (<div className="flex flex-wrap gap-1 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n => (<button key={n} onClick={() => handleResponse(question.id, n)} className={`w-9 h-9 rounded-lg font-medium text-[12px] transition-all ${value === n ? 'bg-emerald-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>{n}</button>))}</div>);
       case 'yes_no':
         return (<div className="flex gap-3">{['Yes', 'No'].map(opt => (<button key={opt} onClick={() => handleResponse(question.id, opt)} className={`flex-1 py-3 rounded-xl border-2 text-[13px] font-medium transition-all ${value === opt ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>{opt}</button>))}</div>);
+      case 'section_header':
+        return null; // Section headers are rendered as titles, no input needed
+      case 'date':
+        return <input type="date" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />;
       default: return <p className="text-[12px] text-stone-400 italic">Preview not available for: {question.question_type}</p>;
     }
   };
@@ -111,11 +115,20 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </div>
           {currentQ && (
             <div className="space-y-3">
-              <h3 className="text-[14px] font-semibold text-stone-800">
-                {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
-              </h3>
-              {currentQ.question_description && <p className="text-[12px] text-stone-400">{currentQ.question_description}</p>}
-              {renderQuestionInput(currentQ)}
+              {normalizeLegacyQuestionType(currentQ.question_type) === 'section_header' ? (
+                <div className="py-2 border-b border-stone-200 mb-2">
+                  <h3 className="text-[15px] font-bold text-stone-800">{currentQ.question_text}</h3>
+                  {currentQ.question_description && <p className="text-[12px] text-stone-400 mt-1">{currentQ.question_description}</p>}
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-[14px] font-semibold text-stone-800">
+                    {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
+                  </h3>
+                  {currentQ.question_description && <p className="text-[12px] text-stone-400">{currentQ.question_description}</p>}
+                  {renderQuestionInput(currentQ)}
+                </>
+              )}
             </div>
           )}
           {qs.length === 0 && (
@@ -123,18 +136,30 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           )}
           {qs.length > 0 && (
             <div className="flex justify-between pt-3 border-t border-stone-100">
-              <button onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))} disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1)); }}
+                disabled={currentQuestionIndex === 0}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer"
+              >
                 <ChevronLeft size={12} /> Back
               </button>
               {currentQuestionIndex === qs.length - 1 ? (
-                <button onClick={() => { setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white" style={{ backgroundColor: primaryColor }}>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
+                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
+                  style={{ backgroundColor: primaryColor }}
+                >
                   Submit <Check size={12} />
                 </button>
               ) : (
-                <button onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white" style={{ backgroundColor: primaryColor }}>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(currentQuestionIndex + 1); }}
+                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
+                  style={{ backgroundColor: primaryColor }}
+                >
                   Next <ChevronRight size={12} />
                 </button>
               )}
