@@ -26,6 +26,15 @@ export const SUPPORTED_QUESTION_TYPES = {
   TIME: 'time',
   EMAIL: 'email',
 
+  // Advanced Types
+  MATRIX: 'matrix',
+  RANKING: 'ranking',
+  FILE_UPLOAD: 'file_upload',
+  PHONE: 'phone',
+  IMAGE_CHOICE: 'image_choice',
+  YES_NO: 'yes_no',
+  INSTRUCTION: 'instruction',
+
   // Layout Types
   SECTION_HEADER: 'section_header',
 } as const;
@@ -219,6 +228,85 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     defaultConfig: {}
   },
 
+  // Advanced Types
+  {
+    type: SUPPORTED_QUESTION_TYPES.MATRIX,
+    label: 'Matrix / Grid',
+    description: 'Grid of rows × columns for multi-item scales (e.g., satisfaction across categories)',
+    icon: '▦',
+    category: 'choice',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { columns: ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'] }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.RANKING,
+    label: 'Ranking',
+    description: 'Drag-to-rank items in order of preference',
+    icon: '↕',
+    category: 'choice',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: {}
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.FILE_UPLOAD,
+    label: 'File Upload',
+    description: 'Allow participants to upload images, documents, or other files',
+    icon: '📎',
+    category: 'data',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { max_files: 1, max_size_mb: 10, accepted_types: 'image/*,.pdf,.doc,.docx' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.PHONE,
+    label: 'Phone Number',
+    description: 'Phone number input with formatting',
+    icon: '📞',
+    category: 'data',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: {}
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.IMAGE_CHOICE,
+    label: 'Image Choice',
+    description: 'Select from image-based options (e.g., emoji mood, visual stimuli)',
+    icon: '🖼',
+    category: 'choice',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { allow_multiple: false }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.YES_NO,
+    label: 'Yes / No',
+    description: 'Simple binary yes/no toggle',
+    icon: '✓✗',
+    category: 'choice',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { yes_label: 'Yes', no_label: 'No' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.INSTRUCTION,
+    label: 'Instruction Block',
+    description: 'Display instructions, information, or media to participants (no response collected)',
+    icon: 'ℹ',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { content_type: 'text' }
+  },
+
   // Layout Types
   {
     type: SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
@@ -255,11 +343,17 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'scale': SUPPORTED_QUESTION_TYPES.SLIDER,
   'likert': SUPPORTED_QUESTION_TYPES.LIKERT_SCALE,
   'likert_scale': SUPPORTED_QUESTION_TYPES.LIKERT_SCALE,
-  'phone': SUPPORTED_QUESTION_TYPES.TEXT_SHORT,
+  'phone': SUPPORTED_QUESTION_TYPES.PHONE,
   'bipolar': SUPPORTED_QUESTION_TYPES.BIPOLAR_SCALE,
   'checkbox_group': SUPPORTED_QUESTION_TYPES.CHECKBOX_GROUP,
   'section': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
   'section_header': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
+  'matrix': SUPPORTED_QUESTION_TYPES.MATRIX,
+  'ranking': SUPPORTED_QUESTION_TYPES.RANKING,
+  'file_upload': SUPPORTED_QUESTION_TYPES.FILE_UPLOAD,
+  'image_choice': SUPPORTED_QUESTION_TYPES.IMAGE_CHOICE,
+  'yes_no': SUPPORTED_QUESTION_TYPES.YES_NO,
+  'instruction': SUPPORTED_QUESTION_TYPES.INSTRUCTION,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {

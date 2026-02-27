@@ -1186,7 +1186,189 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         );
 
       case 'section_header':
-        return null; // Section headers are handled by the section tab system, not rendered as questions
+        return null;
+
+      case 'yes_no':
+        const yesLabel = (question as any).question_config?.yes_label || 'Yes';
+        const noLabel = (question as any).question_config?.no_label || 'No';
+        return (
+          <div className="flex gap-3">
+            {[{ val: 'yes', label: yesLabel }, { val: 'no', label: noLabel }].map(opt => (
+              <button
+                key={opt.val}
+                onClick={() => handleResponseChange(question.id, opt.val)}
+                disabled={isCompleted && !editMode}
+                className="flex-1 py-4 rounded-xl border-2 text-lg font-semibold transition-all hover:scale-[1.02]"
+                style={{
+                  borderColor: value === opt.val ? 'var(--color-green)' : 'var(--border-light)',
+                  backgroundColor: value === opt.val ? '#f0fdf4' : 'white',
+                  color: value === opt.val ? 'var(--color-green)' : 'var(--text-primary)',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 'matrix':
+        const mxColumns = (question as any).question_config?.columns || [];
+        const mxRows = question.options || [];
+        const matrixValue = (typeof value === 'object' && value !== null && !Array.isArray(value)) ? value : {};
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead>
+                <tr>
+                  <th className="text-left p-2 text-stone-400 font-medium" style={{ minWidth: 120 }}></th>
+                  {mxColumns.map((col: string, i: number) => (
+                    <th key={i} className="text-center p-2 text-stone-500 font-medium text-[12px]" style={{ minWidth: 60 }}>{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {mxRows.map((row: any) => (
+                  <tr key={row.id} className="border-t border-stone-100">
+                    <td className="p-2 font-medium" style={{ color: 'var(--text-primary)' }}>{row.option_text || row.text}</td>
+                    {mxColumns.map((col: string, ci: number) => (
+                      <td key={ci} className="text-center p-2">
+                        <button
+                          onClick={() => handleResponseChange(question.id, { ...matrixValue, [row.id]: col })}
+                          disabled={isCompleted && !editMode}
+                          className="w-6 h-6 rounded-full border-2 transition-all mx-auto"
+                          style={{
+                            borderColor: matrixValue[row.id] === col ? 'var(--color-green)' : 'var(--border-light)',
+                            backgroundColor: matrixValue[row.id] === col ? 'var(--color-green)' : 'white',
+                          }}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'ranking':
+        const rankingOptions = question.options || [];
+        const rankingValue: string[] = Array.isArray(value) ? value : rankingOptions.map((o: any) => o.id);
+        const rankedItems = rankingValue.map(id => rankingOptions.find((o: any) => o.id === id)).filter(Boolean);
+        const moveRankItem = (fromIdx: number, toIdx: number) => {
+          const newRank = [...rankingValue];
+          const [moved] = newRank.splice(fromIdx, 1);
+          newRank.splice(toIdx, 0, moved);
+          handleResponseChange(question.id, newRank);
+        };
+        return (
+          <div className="space-y-2">
+            <p className="text-[12px] text-stone-400 mb-2">Drag or use arrows to rank in order of preference</p>
+            {rankedItems.map((item: any, idx: number) => (
+              <div key={item.id} className="flex items-center gap-2 p-3 rounded-lg border-2 bg-white" style={{ borderColor: 'var(--border-light)' }}>
+                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[13px] font-bold" style={{ backgroundColor: '#f0fdf4', color: 'var(--color-green)' }}>{idx + 1}</span>
+                <span className="flex-1" style={{ color: 'var(--text-primary)' }}>{item.option_text || item.text}</span>
+                <div className="flex flex-col gap-0.5">
+                  <button onClick={() => idx > 0 && moveRankItem(idx, idx - 1)} disabled={(isCompleted && !editMode) || idx === 0}
+                    className="p-0.5 rounded hover:bg-stone-100 disabled:opacity-30"><ChevronLeft size={14} className="rotate-90" /></button>
+                  <button onClick={() => idx < rankedItems.length - 1 && moveRankItem(idx, idx + 1)} disabled={(isCompleted && !editMode) || idx === rankedItems.length - 1}
+                    className="p-0.5 rounded hover:bg-stone-100 disabled:opacity-30"><ChevronRight size={14} className="rotate-90" /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'phone':
+        return (
+          <input
+            type="tel"
+            value={value || ''}
+            onChange={(e) => handleResponseChange(question.id, e.target.value)}
+            placeholder="+1 (555) 123-4567"
+            className="w-full p-3 rounded-lg border-2"
+            style={{ borderColor: 'var(--border-light)' }}
+            disabled={isCompleted && !editMode}
+          />
+        );
+
+      case 'file_upload':
+        return (
+          <div className="space-y-3">
+            <div className="border-2 border-dashed rounded-xl p-8 text-center" style={{ borderColor: 'var(--border-light)' }}>
+              <p className="text-stone-400 text-[13px] mb-2">📎 Click or drag to upload</p>
+              <p className="text-stone-300 text-[11px]">Max {(question as any).question_config?.max_size_mb || 10}MB • {(question as any).question_config?.accepted_types || 'All files'}</p>
+              <input
+                type="file"
+                accept={(question as any).question_config?.accepted_types || '*'}
+                multiple={((question as any).question_config?.max_files || 1) > 1}
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files) handleResponseChange(question.id, Array.from(files).map(f => f.name).join(', '));
+                }}
+                className="mt-3"
+                disabled={isCompleted && !editMode}
+              />
+            </div>
+            {value && <p className="text-[12px] text-stone-500">Uploaded: {value}</p>}
+          </div>
+        );
+
+      case 'image_choice':
+        const imgOptions = question.options || [];
+        const imgAllowMultiple = (question as any).question_config?.allow_multiple || false;
+        const imgValue = imgAllowMultiple ? (Array.isArray(value) ? value : []) : value;
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {imgOptions.map((opt: any) => {
+              const isSelected = imgAllowMultiple ? imgValue.includes(opt.id) : imgValue === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    if (imgAllowMultiple) {
+                      const arr = Array.isArray(imgValue) ? imgValue : [];
+                      handleResponseChange(question.id, isSelected ? arr.filter((v: string) => v !== opt.id) : [...arr, opt.id]);
+                    } else {
+                      handleResponseChange(question.id, opt.id);
+                    }
+                  }}
+                  disabled={isCompleted && !editMode}
+                  className="p-4 rounded-xl border-2 text-center transition-all hover:scale-[1.02]"
+                  style={{
+                    borderColor: isSelected ? 'var(--color-green)' : 'var(--border-light)',
+                    backgroundColor: isSelected ? '#f0fdf4' : 'white',
+                  }}
+                >
+                  {opt.option_value && opt.option_value.startsWith('http') ? (
+                    <img src={opt.option_value} alt={opt.option_text} className="w-full h-20 object-cover rounded-lg mb-2" />
+                  ) : (
+                    <div className="text-3xl mb-2">{opt.option_text}</div>
+                  )}
+                  <span className="text-[12px]" style={{ color: 'var(--text-primary)' }}>
+                    {opt.option_value && opt.option_value.startsWith('http') ? opt.option_text : ''}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        );
+
+      case 'instruction':
+        const contentType = (question as any).question_config?.content_type || 'text';
+        const bgColors: Record<string, string> = { text: '#f9fafb', info: '#eff6ff', warning: '#fffbeb', tip: '#f0fdf4' };
+        const borderColors: Record<string, string> = { text: '#e5e7eb', info: '#bfdbfe', warning: '#fcd34d', tip: '#86efac' };
+        const icons: Record<string, string> = { text: '📋', info: 'ℹ️', warning: '⚠️', tip: '💡' };
+        return (
+          <div className="rounded-xl p-4 border" style={{ backgroundColor: bgColors[contentType], borderColor: borderColors[contentType] }}>
+            <div className="flex items-start gap-2">
+              <span className="text-lg">{icons[contentType]}</span>
+              <div>
+                <p className="font-medium text-[14px] mb-1" style={{ color: 'var(--text-primary)' }}>{question.question_text}</p>
+                {question.question_description && <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{question.question_description}</p>}
+              </div>
+            </div>
+          </div>
+        );
 
       default:
         return (
