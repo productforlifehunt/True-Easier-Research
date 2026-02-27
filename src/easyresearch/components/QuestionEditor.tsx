@@ -461,13 +461,36 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
         )}
 
         {/* Likert Scale Configuration */}
-        {(localQuestion.question_type === 'likert' || question.question_type === 'likert_scale') && (
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Scale Type</label>
-            <select value={localQuestion.question_config?.scale_type || '1-5'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, scale_type: e.target.value } })}
-              className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
-              <option value="1-5">1-5</option><option value="1-7">1-7</option><option value="1-10">1-10</option><option value="0-10">0-10</option>
-            </select>
+        {(localQuestion.question_type === 'likert' || localQuestion.question_type === 'likert_scale') && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Scale Range</label>
+              <select value={localQuestion.question_config?.scale_type || '1-5'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, scale_type: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
+                <option value="1-5">1-5</option><option value="1-7">1-7</option><option value="1-10">1-10</option><option value="0-10">0-10</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Min Label</label>
+                <input type="text" value={localQuestion.question_config?.min_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, min_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Strongly Disagree" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Label</label>
+                <input type="text" value={localQuestion.question_config?.max_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Strongly Agree" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Custom Labels (one per line, overrides default)</label>
+              <textarea value={localQuestion.question_config?.custom_labels?.join('\n') || ''} onChange={(e) => {
+                const labels = e.target.value.split('\n').filter(l => l.trim());
+                updateLocal({ question_config: { ...localQuestion.question_config, custom_labels: labels.length > 0 ? labels : undefined } });
+              }}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+                rows={3} placeholder="Strongly Disagree&#10;Disagree&#10;Neutral&#10;Agree&#10;Strongly Agree" />
+            </div>
           </div>
         )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, Bell, Calendar, DollarSign, Users, Shield, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download } from 'lucide-react';
+import { Mic, Bell, Calendar, DollarSign, Users, Shield, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download, Plus, Trash2, GripVertical, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
 
@@ -32,9 +32,17 @@ interface SurveyProject {
   profile_questions?: Array<{
     id: string;
     question: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'multiselect';
+    type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
     options?: string[];
     required: boolean;
+    config?: {
+      min?: number;
+      max?: number;
+      min_label?: string;
+      max_label?: string;
+      scale_type?: string;
+      placeholder?: string;
+    };
   }>;
   allow_start_date_selection?: boolean;
   show_progress_bar?: boolean;
@@ -260,6 +268,33 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </SectionCard>
       )}
 
+      {/* Help & Study Information */}
+      <SectionCard icon={HelpCircle} iconBg="from-cyan-50 to-sky-50" iconColor="text-cyan-600" title="Help & Study Information">
+        <div className="space-y-3">
+          <div>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Help Information</label>
+            <textarea 
+              value={(project as any).help_information || ''} 
+              onChange={(e) => onUpdateProject({ ...project, help_information: e.target.value } as any)} 
+              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" 
+              rows={5} 
+              placeholder="Study protocol, FAQ, contact info... Shown to participants in the Help tab." 
+            />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* Profile Questions Builder */}
+      <SectionCard icon={Users} iconBg="from-pink-50 to-rose-50" iconColor="text-pink-600" title="Participant Profile Questions">
+        <p className="text-[12px] text-stone-400 font-light mb-4">
+          Define custom profile fields collected during participant onboarding (e.g., demographics, baseline assessments).
+        </p>
+        <ProfileQuestionsBuilder 
+          questions={project.profile_questions || []} 
+          onChange={(pq) => onUpdateProject({ ...project, profile_questions: pq })} 
+        />
+      </SectionCard>
+
       {/* Questionnaire Management */}
       {isLongitudinal && project.id && (
         <SectionCard icon={List} iconBg="from-emerald-50 to-teal-50" iconColor="text-emerald-600" title="Questionnaire Management">
@@ -283,6 +318,192 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           )}
         </SectionCard>
       )}
+    </div>
+  );
+};
+
+// ─── Profile Questions Builder ──────────────────────────────────
+interface ProfileQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
+  options?: string[];
+  required: boolean;
+  config?: {
+    min?: number;
+    max?: number;
+    min_label?: string;
+    max_label?: string;
+    scale_type?: string;
+    placeholder?: string;
+  };
+}
+
+const ProfileQuestionsBuilder: React.FC<{
+  questions: ProfileQuestion[];
+  onChange: (questions: ProfileQuestion[]) => void;
+}> = ({ questions, onChange }) => {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const addQuestion = (type: ProfileQuestion['type']) => {
+    const newQ: ProfileQuestion = {
+      id: crypto.randomUUID(),
+      question: type === 'section' ? 'Section Title' : '',
+      type,
+      options: ['select', 'multiselect'].includes(type) ? ['Option 1', 'Option 2'] : undefined,
+      required: false,
+      config: type === 'scale' ? { min: 1, max: 5, min_label: '', max_label: '' } : undefined,
+    };
+    onChange([...questions, newQ]);
+    setExpandedId(newQ.id);
+  };
+
+  const updateQuestion = (id: string, updates: Partial<ProfileQuestion>) => {
+    onChange(questions.map(q => q.id === id ? { ...q, ...updates } : q));
+  };
+
+  const removeQuestion = (id: string) => {
+    onChange(questions.filter(q => q.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
+
+  const moveQuestion = (id: string, dir: 'up' | 'down') => {
+    const idx = questions.findIndex(q => q.id === id);
+    if ((dir === 'up' && idx === 0) || (dir === 'down' && idx === questions.length - 1)) return;
+    const newQ = [...questions];
+    const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+    [newQ[idx], newQ[swapIdx]] = [newQ[swapIdx], newQ[idx]];
+    onChange(newQ);
+  };
+
+  const typeLabels: Record<string, string> = {
+    text: 'Text', number: 'Number', date: 'Date', select: 'Dropdown', multiselect: 'Multi-Select', scale: 'Scale', section: '§ Section'
+  };
+
+  return (
+    <div className="space-y-2">
+      {questions.map((q, idx) => (
+        <div key={q.id} className={`rounded-xl border ${q.type === 'section' ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-200 bg-white'}`}>
+          <div className="flex items-center gap-2 px-3 py-2 cursor-pointer" onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}>
+            <GripVertical size={12} className="text-stone-300 shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-stone-100 text-stone-500 shrink-0">
+              {typeLabels[q.type] || q.type}
+            </span>
+            <span className="flex-1 text-[13px] text-stone-700 truncate">{q.question || 'Untitled'}</span>
+            {q.required && <span className="text-red-500 text-[11px]">*</span>}
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={(e) => { e.stopPropagation(); moveQuestion(q.id, 'up'); }} className="p-0.5 hover:bg-stone-100 rounded" disabled={idx === 0}>
+                <ChevronUp size={12} className="text-stone-400" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); moveQuestion(q.id, 'down'); }} className="p-0.5 hover:bg-stone-100 rounded" disabled={idx === questions.length - 1}>
+                <ChevronDown size={12} className="text-stone-400" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); removeQuestion(q.id); }} className="p-0.5 hover:bg-red-50 rounded">
+                <Trash2 size={12} className="text-red-400" />
+              </button>
+            </div>
+          </div>
+          {expandedId === q.id && (
+            <div className="px-3 pb-3 space-y-2 border-t border-stone-100 pt-2">
+              <input
+                type="text"
+                value={q.question}
+                onChange={(e) => updateQuestion(q.id, { question: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                placeholder={q.type === 'section' ? 'Section heading' : 'Question text'}
+              />
+              {q.type !== 'section' && (
+                <div className="flex items-center gap-3">
+                  <select value={q.type} onChange={(e) => {
+                    const newType = e.target.value as ProfileQuestion['type'];
+                    const updates: Partial<ProfileQuestion> = { type: newType };
+                    if (['select', 'multiselect'].includes(newType) && !q.options?.length) updates.options = ['Option 1', 'Option 2'];
+                    if (newType === 'scale' && !q.config) updates.config = { min: 1, max: 5 };
+                    if (!['select', 'multiselect'].includes(newType)) updates.options = undefined;
+                    onChange(questions.map(qq => qq.id === q.id ? { ...qq, ...updates } : qq));
+                  }} className="px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Dropdown</option>
+                    <option value="multiselect">Multi-Select</option>
+                    <option value="scale">Scale</option>
+                  </select>
+                  <label className="flex items-center gap-1.5 text-[12px] text-stone-600">
+                    <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(q.id, { required: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                    Required
+                  </label>
+                </div>
+              )}
+              {q.config?.placeholder !== undefined || q.type === 'text' ? (
+                <input type="text" value={q.config?.placeholder || ''} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, placeholder: e.target.value } })}
+                  className="w-full px-3 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  placeholder="Placeholder text (optional)" />
+              ) : null}
+              {['select', 'multiselect'].includes(q.type) && (
+                <div className="space-y-1">
+                  {(q.options || []).map((opt, oi) => (
+                    <div key={oi} className="flex items-center gap-1.5">
+                      <input type="text" value={opt} onChange={(e) => {
+                        const newOpts = [...(q.options || [])];
+                        newOpts[oi] = e.target.value;
+                        updateQuestion(q.id, { options: newOpts });
+                      }} className="flex-1 px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                      <button onClick={() => updateQuestion(q.id, { options: (q.options || []).filter((_, i) => i !== oi) })} className="p-0.5 hover:bg-red-50 rounded">
+                        <X size={10} className="text-red-400" />
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={() => updateQuestion(q.id, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] })}
+                    className="text-[11px] text-emerald-500 hover:text-emerald-600">+ Add option</button>
+                </div>
+              )}
+              {q.type === 'scale' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[11px] text-stone-400">Min</label>
+                    <input type="number" value={q.config?.min ?? 1} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, min: Number(e.target.value) } })}
+                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-stone-400">Max</label>
+                    <input type="number" value={q.config?.max ?? 5} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, max: Number(e.target.value) } })}
+                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-stone-400">Min Label</label>
+                    <input type="text" value={q.config?.min_label || ''} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, min_label: e.target.value } })}
+                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" placeholder="e.g. Strongly Disagree" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-stone-400">Max Label</label>
+                    <input type="text" value={q.config?.max_label || ''} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, max_label: e.target.value } })}
+                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" placeholder="e.g. Strongly Agree" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Add Question Buttons */}
+      <div className="flex flex-wrap gap-1.5 pt-2">
+        {[
+          { type: 'section' as const, label: '§ Section', color: 'emerald' },
+          { type: 'text' as const, label: 'Text', color: 'stone' },
+          { type: 'number' as const, label: 'Number', color: 'stone' },
+          { type: 'date' as const, label: 'Date', color: 'stone' },
+          { type: 'select' as const, label: 'Dropdown', color: 'stone' },
+          { type: 'multiselect' as const, label: 'Multi-Select', color: 'stone' },
+          { type: 'scale' as const, label: 'Scale', color: 'stone' },
+        ].map(t => (
+          <button key={t.type} onClick={() => addQuestion(t.type)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-dashed border-stone-200 text-stone-500 hover:border-emerald-300 hover:text-emerald-600 transition-colors">
+            <Plus size={10} /> {t.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

@@ -939,16 +939,25 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         );
 
       case 'likert_scale':
-        const likertOptions = [
-          { value: 1, label: 'Strongly Disagree' },
-          { value: 2, label: 'Disagree' },
-          { value: 3, label: 'Neutral' },
-          { value: 4, label: 'Agree' },
-          { value: 5, label: 'Strongly Agree' }
-        ];
+        const likertScaleType = (question as any).question_config?.scale_type || '1-5';
+        const likertRange = likertScaleType.split('-').map(Number);
+        const likertMin = likertRange[0];
+        const likertMax = likertRange[1];
+        const likertCustomLabels: string[] | undefined = (question as any).question_config?.custom_labels;
+        const likertMinLabel = (question as any).question_config?.min_label || '';
+        const likertMaxLabel = (question as any).question_config?.max_label || '';
+        
+        // Build options: use custom labels if provided, else default numbered
+        const likertOptionsList: { value: number; label: string }[] = [];
+        for (let i = likertMin; i <= likertMax; i++) {
+          const idx = i - likertMin;
+          const label = likertCustomLabels?.[idx] || String(i);
+          likertOptionsList.push({ value: i, label });
+        }
+        
         return (
           <div className="space-y-2">
-            {likertOptions.map((option) => (
+            {likertOptionsList.map((option) => (
               <label
                 key={option.value}
                 className="flex items-center p-3 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
@@ -966,9 +975,16 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                   className="mr-3"
                   disabled={isCompleted && !editMode}
                 />
-                <span style={{ color: 'var(--text-primary)' }}>{option.label}</span>
+                <span className="flex-1" style={{ color: 'var(--text-primary)' }}>{option.label}</span>
+                {!likertCustomLabels && <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>({option.value})</span>}
               </label>
             ))}
+            {(likertMinLabel || likertMaxLabel) && (
+              <div className="flex justify-between text-[11px] px-1" style={{ color: 'var(--text-secondary)' }}>
+                <span>{likertMinLabel}</span>
+                <span>{likertMaxLabel}</span>
+              </div>
+            )}
           </div>
         );
 

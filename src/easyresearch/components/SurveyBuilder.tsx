@@ -70,9 +70,17 @@ export interface SurveyProject {
   profile_questions?: Array<{
     id: string;
     question: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'multiselect';
+    type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
     options?: string[];
     required: boolean;
+    config?: {
+      min?: number;
+      max?: number;
+      min_label?: string;
+      max_label?: string;
+      scale_type?: string;
+      placeholder?: string;
+    };
   }>;
   allow_start_date_selection?: boolean;
   show_progress_bar?: boolean;
