@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X } from 'lucide-react';
+import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ChevronRight, Hash, Network } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -12,12 +12,12 @@ interface Enrollment {
   participant_email: string;
   status: 'invited' | 'active' | 'completed' | 'withdrawn';
   created_at: string;
+  profile_data?: any;
+  enrollment_data?: any;
+  study_start_date?: string;
 }
 
-interface Project {
-  id: string;
-  title: string;
-}
+interface Project { id: string; title: string; }
 
 const ParticipantsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,21 +35,15 @@ const ParticipantsPage: React.FC = () => {
   const [researcher, setResearcher] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
+  const [enrollmentResponses, setEnrollmentResponses] = useState<any[]>([]);
+  const [responsesLoading, setResponsesLoading] = useState(false);
 
+  useEffect(() => { if (!authLoading && !user) navigate('/easyresearch/auth'); }, [user, authLoading, navigate]);
+  useEffect(() => { if (user) loadProjects(); }, [user]);
   useEffect(() => {
-    if (!authLoading && !user) navigate('/easyresearch/auth');
-  }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (user) loadProjects();
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedProject) {
-      loadEnrollments();
-    } else if (projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0].id);
-    }
+    if (selectedProject) loadEnrollments();
+    else if (projects.length > 0 && !selectedProject) setSelectedProject(projects[0].id);
   }, [selectedProject, projects]);
 
   const loadProjects = async () => {
@@ -69,7 +63,8 @@ const ParticipantsPage: React.FC = () => {
   const loadEnrollments = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('enrollment').select('id, project_id, participant_id, participant_email, status, created_at')
+      const { data, error } = await supabase.from('enrollment')
+        .select('id, project_id, participant_id, participant_email, status, created_at, profile_data, enrollment_data, study_start_date')
         .eq('project_id', selectedProject).order('created_at', { ascending: false });
       if (error) throw error;
       setEnrollments((data || []) as Enrollment[]);
@@ -77,14 +72,32 @@ const ParticipantsPage: React.FC = () => {
     finally { setLoading(false); }
   };
 
+  const loadEnrollmentResponses = async (enrollmentId: string) => {
+    setResponsesLoading(true);
+    try {
+      const { data: responsesData } = await supabase.from('survey_respons')
+        .select('id, question_id, response_text, response_value, created_at, instance_id')
+        .eq('enrollment_id', enrollmentId).order('created_at', { ascending: false });
+      
+      const questionIds = Array.from(new Set((responsesData || []).map((r: any) => r.question_id).filter(Boolean)));
+      let questionsMap = new Map();
+      if (questionIds.length > 0) {
+        const { data: questionsData } = await supabase.from('survey_question').select('id, question_text, question_type, order_index').in('id', questionIds);
+        questionsMap = new Map((questionsData || []).map((q: any) => [q.id, q]));
+      }
+      
+      setEnrollmentResponses((responsesData || []).map((r: any) => ({ ...r, survey_question: questionsMap.get(r.question_id) })));
+    } catch (error) { console.error('Error loading responses:', error); }
+    finally { setResponsesLoading(false); }
+  };
+
   const sendInvitation = async () => {
     if (!inviteEmail.trim() || !selectedProject) { toast.error('Please enter a valid email and select a project'); return; }
-    if (!researcher?.id || !researcher?.organization_id) { toast.error('Researcher information not found'); return; }
     setSendingInvite(true);
     try {
       const emailLower = inviteEmail.trim().toLowerCase();
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', selectedProject).eq('participant_email', emailLower).maybeSingle();
-      if (existing) { toast.error('This participant is already enrolled'); return; }
+      if (existing) { toast.error('This participant is already enrolled'); setSendingInvite(false); return; }
       const { error: enrollError } = await supabase.from('enrollment').insert({ project_id: selectedProject, participant_email: emailLower, status: 'invited' });
       if (enrollError) throw enrollError;
       toast.success(`Participant ${emailLower} added`);
@@ -101,24 +114,23 @@ const ParticipantsPage: React.FC = () => {
       withdrawn: { bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-100', icon: <XCircle size={12} /> }
     };
     const c = config[status] || config.invited;
-    return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${c.bg} ${c.text} ${c.border}`}>
-        {c.icon}
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
+    return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${c.bg} ${c.text} ${c.border}`}>{c.icon}{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
   };
 
   const filteredEnrollments = enrollments.filter(e => {
-    const matchesSearch = !searchQuery || e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !searchQuery || e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.enrollment_data?.participant_number?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const exportToCSV = () => {
     if (filteredEnrollments.length === 0) return;
-    const headers = ['Email', 'Status', 'Enrolled At'];
-    const csvData = filteredEnrollments.map(e => [e.participant_email, e.status, new Date(e.created_at).toLocaleString()]);
+    const headers = ['Email', 'Participant #', 'Role', 'Status', 'Enrolled At', 'Study Start'];
+    const csvData = filteredEnrollments.map(e => [
+      e.participant_email, e.enrollment_data?.participant_number || '', e.enrollment_data?.participant_relation || '',
+      e.status, new Date(e.created_at).toLocaleString(), e.study_start_date || ''
+    ]);
     const csv = [headers.join(','), ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -133,11 +145,8 @@ const ParticipantsPage: React.FC = () => {
             <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Participants</h1>
             <p className="text-[13px] text-stone-400 mt-1 font-light">Manage and invite participants to your studies</p>
           </div>
-          <button
-            onClick={() => setShowInviteModal(true)}
-            disabled={!selectedProject}
-            className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5 disabled:opacity-50"
-          >
+          <button onClick={() => setShowInviteModal(true)} disabled={!selectedProject}
+            className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5 disabled:opacity-50">
             <UserPlus size={16} /> Invite
           </button>
         </div>
@@ -161,24 +170,15 @@ const ParticipantsPage: React.FC = () => {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-2">
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              disabled={projects.length === 0}
-              className="px-3 py-1.5 rounded-full text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 disabled:opacity-50"
-            >
+            <select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} disabled={projects.length === 0}
+              className="px-3 py-1.5 rounded-full text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 disabled:opacity-50">
               {projects.length === 0 && <option value="" disabled>No projects</option>}
               {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
             <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
               {['all', 'invited', 'active', 'completed'].map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setStatusFilter(tab)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium capitalize transition-all ${
-                    statusFilter === tab ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
-                  }`}
-                >
+                <button key={tab} onClick={() => setStatusFilter(tab)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium capitalize transition-all ${statusFilter === tab ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>
                   {tab === 'all' ? 'All' : tab}
                 </button>
               ))}
@@ -187,17 +187,11 @@ const ParticipantsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-300" />
-              <input
-                type="text" placeholder="Search email..." value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-full w-48 text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
-              />
+              <input type="text" placeholder="Search email or ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1.5 rounded-full w-48 text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white" />
             </div>
-            <button
-              onClick={exportToCSV} disabled={filteredEnrollments.length === 0}
-              className="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition-colors"
-              title="Export CSV"
-            >
+            <button onClick={exportToCSV} disabled={filteredEnrollments.length === 0}
+              className="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition-colors" title="Export CSV">
               <Download size={16} className="text-stone-400" />
             </button>
           </div>
@@ -206,31 +200,19 @@ const ParticipantsPage: React.FC = () => {
         {/* Table */}
         <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden shadow-sm">
           {loading ? (
-            <div className="p-12 text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent mx-auto"></div>
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
-                <Users className="text-emerald-500" size={24} />
-              </div>
-              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">No Projects Yet</h3>
-              <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">Create a research project first, then invite participants.</p>
-              <button onClick={() => navigate('/easyresearch/dashboard?create=true')}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200">
-                Create Project
-              </button>
-            </div>
+            <div className="p-12 text-center"><div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent mx-auto"></div></div>
           ) : filteredEnrollments.length === 0 ? (
             <div className="p-16 text-center">
               <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
                 <Users className="text-emerald-500" size={24} />
               </div>
-              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">No Participants</h3>
-              <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">Invite participants to start collecting responses.</p>
-              <button onClick={() => setShowInviteModal(true)}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200">
-                <UserPlus size={14} /> Invite
+              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">{projects.length === 0 ? 'No Projects Yet' : 'No Participants'}</h3>
+              <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">
+                {projects.length === 0 ? 'Create a project first.' : 'Invite participants to start collecting responses.'}
+              </p>
+              <button onClick={() => projects.length === 0 ? navigate('/easyresearch/dashboard?create=true') : setShowInviteModal(true)}
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">
+                {projects.length === 0 ? 'Create Project' : <><UserPlus size={14} /> Invite</>}
               </button>
             </div>
           ) : (
@@ -238,17 +220,35 @@ const ParticipantsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
-                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Email</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Participant</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">ID / Role</th>
                     <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Status</th>
                     <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Enrolled</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
                   {filteredEnrollments.map(enrollment => (
-                    <tr key={enrollment.id} className="hover:bg-emerald-50/30 transition-colors">
+                    <tr key={enrollment.id} className="hover:bg-emerald-50/30 transition-colors cursor-pointer"
+                      onClick={() => { setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }}>
                       <td className="px-4 py-3 text-[13px] font-medium text-stone-800">{enrollment.participant_email}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          {enrollment.enrollment_data?.participant_number && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                              {enrollment.enrollment_data.participant_number}
+                            </span>
+                          )}
+                          {enrollment.enrollment_data?.participant_relation && (
+                            <span className="text-[11px] text-stone-400">{enrollment.enrollment_data.participant_relation}</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
                       <td className="px-4 py-3 text-[12px] text-stone-400">{new Date(enrollment.created_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        <Eye size={14} className="text-stone-300 hover:text-emerald-500 transition-colors" />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -264,29 +264,127 @@ const ParticipantsPage: React.FC = () => {
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
               <h2 className="text-[15px] font-semibold text-stone-800">Invite Participant</h2>
-              <button onClick={() => setShowInviteModal(false)} className="p-1 rounded-lg hover:bg-stone-50">
-                <X size={16} className="text-stone-400" />
-              </button>
+              <button onClick={() => setShowInviteModal(false)} className="p-1 rounded-lg hover:bg-stone-50"><X size={16} className="text-stone-400" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Email Address</label>
-                <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="participant@example.com"
+                <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="participant@example.com"
                   className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-                  onKeyDown={(e) => e.key === 'Enter' && sendInvitation()}
-                />
+                  onKeyDown={(e) => e.key === 'Enter' && sendInvitation()} />
               </div>
               <div className="flex gap-2">
                 <button onClick={() => setShowInviteModal(false)}
-                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors">
-                  Cancel
-                </button>
+                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50">Cancel</button>
                 <button onClick={sendInvitation} disabled={sendingInvite || !inviteEmail.trim()}
-                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 transition-all shadow-sm shadow-emerald-200">
+                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 disabled:opacity-50 shadow-sm shadow-emerald-200">
                   {sendingInvite ? 'Adding...' : 'Add'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Participant Detail Modal */}
+      {selectedEnrollment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={() => setSelectedEnrollment(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 sticky top-0 bg-white z-10">
+              <div>
+                <h2 className="text-[15px] font-semibold text-stone-800">Participant Details</h2>
+                <p className="text-[12px] text-stone-400">{selectedEnrollment.participant_email}</p>
+              </div>
+              <button onClick={() => setSelectedEnrollment(null)} className="p-1.5 rounded-lg hover:bg-stone-50">
+                <X size={16} className="text-stone-400" />
+              </button>
+            </div>
+            <div className="p-5 space-y-5">
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-stone-50">
+                  <p className="text-[11px] text-stone-400">Status</p>
+                  <div className="mt-1">{getStatusBadge(selectedEnrollment.status)}</div>
+                </div>
+                <div className="p-3 rounded-xl bg-stone-50">
+                  <p className="text-[11px] text-stone-400">Enrolled</p>
+                  <p className="text-[13px] font-medium text-stone-700 mt-1">{new Date(selectedEnrollment.created_at).toLocaleDateString()}</p>
+                </div>
+                {selectedEnrollment.enrollment_data?.participant_number && (
+                  <div className="p-3 rounded-xl bg-indigo-50">
+                    <p className="text-[11px] text-indigo-400">Participant #</p>
+                    <p className="text-[14px] font-bold text-indigo-600 mt-1">{selectedEnrollment.enrollment_data.participant_number}</p>
+                  </div>
+                )}
+                {selectedEnrollment.enrollment_data?.participant_relation && (
+                  <div className="p-3 rounded-xl bg-stone-50">
+                    <p className="text-[11px] text-stone-400">Role</p>
+                    <p className="text-[13px] font-medium text-stone-700 mt-1">{selectedEnrollment.enrollment_data.participant_relation}</p>
+                  </div>
+                )}
+                {selectedEnrollment.study_start_date && (
+                  <div className="p-3 rounded-xl bg-stone-50">
+                    <p className="text-[11px] text-stone-400">Study Start</p>
+                    <p className="text-[13px] font-medium text-stone-700 mt-1">{selectedEnrollment.study_start_date}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Screening Responses */}
+              {selectedEnrollment.enrollment_data?.screening_responses && Object.keys(selectedEnrollment.enrollment_data.screening_responses).length > 0 && (
+                <div>
+                  <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Screening Responses</h3>
+                  <div className="space-y-1.5">
+                    {Object.entries(selectedEnrollment.enrollment_data.screening_responses).map(([key, value]) => (
+                      <div key={key} className="p-2.5 rounded-lg bg-orange-50/50 border border-orange-100">
+                        <p className="text-[11px] text-stone-400">{key}</p>
+                        <p className="text-[13px] text-stone-700">{String(value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Profile Data */}
+              {selectedEnrollment.profile_data && Object.keys(selectedEnrollment.profile_data).length > 0 && (
+                <div>
+                  <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Profile Data</h3>
+                  <div className="space-y-1.5">
+                    {Object.entries(selectedEnrollment.profile_data).map(([key, value]) => (
+                      <div key={key} className="p-2.5 rounded-lg bg-stone-50">
+                        <p className="text-[11px] text-stone-400">{key}</p>
+                        <p className="text-[13px] text-stone-700">{Array.isArray(value) ? (value as string[]).join(', ') : String(value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Survey Responses */}
+              <div>
+                <h3 className="text-[13px] font-semibold text-stone-700 mb-2">
+                  Survey Responses ({enrollmentResponses.length})
+                </h3>
+                {responsesLoading ? (
+                  <div className="py-6 text-center"><div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent mx-auto"></div></div>
+                ) : enrollmentResponses.length === 0 ? (
+                  <p className="text-[12px] text-stone-400 py-4 text-center">No responses yet</p>
+                ) : (
+                  <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                    {enrollmentResponses.slice(0, 50).map(r => (
+                      <div key={r.id} className="p-2.5 rounded-lg bg-stone-50 text-[12px]">
+                        <span className="font-medium text-stone-600">{r.survey_question?.question_text?.substring(0, 50) || 'Q'}:</span>{' '}
+                        <span className="text-stone-500">{r.response_text?.substring(0, 100) || JSON.stringify(r.response_value)?.substring(0, 100) || '-'}</span>
+                      </div>
+                    ))}
+                    {enrollmentResponses.length > 50 && <p className="text-[11px] text-stone-400 text-center">+{enrollmentResponses.length - 50} more</p>}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="px-5 pb-5">
+              <button onClick={() => setSelectedEnrollment(null)}
+                className="w-full py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">Close</button>
             </div>
           </div>
         </div>
