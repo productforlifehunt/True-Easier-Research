@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
+import AppPhonePreview from './AppPhonePreview';
 
 export interface LayoutTab {
   id: string;
@@ -61,15 +62,14 @@ interface LayoutBuilderProps {
 }
 
 const ICON_OPTIONS = [
-  { value: 'Home', label: '🏠 Home', icon: Home },
-  { value: 'FileText', label: '📄 Survey', icon: FileText },
-  { value: 'BarChart3', label: '📊 Progress', icon: BarChart3 },
-  { value: 'HelpCircle', label: '❓ Help', icon: HelpCircle },
-  { value: 'Settings', label: '⚙️ Settings', icon: Settings },
-  { value: 'Layout', label: '📐 Layout', icon: Layout },
+  { value: 'Home', label: '🏠 Home' },
+  { value: 'FileText', label: '📄 Survey' },
+  { value: 'BarChart3', label: '📊 Progress' },
+  { value: 'HelpCircle', label: '❓ Help' },
+  { value: 'Settings', label: '⚙️ Settings' },
+  { value: 'Layout', label: '📐 Layout' },
 ];
 
-// Non-questionnaire content elements
 const STATIC_CONTENT_ELEMENTS = [
   { type: 'consent', label: 'Consent Form', icon: '🛡️', desc: 'Display consent agreement' },
   { type: 'screening', label: 'Screening', icon: '📝', desc: 'Eligibility screening questions' },
@@ -133,10 +133,6 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
   };
 };
 
-const ICON_MAP: Record<string, React.FC<any>> = {
-  Home, FileText, BarChart3, HelpCircle, Settings, Layout,
-};
-
 const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
@@ -181,11 +177,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     const newElement: LayoutElement = {
       id: crypto.randomUUID(),
       type: type as LayoutElement['type'],
-      config: {
-        visible: true,
-        title: config?.title || type.replace('_', ' '),
-        ...config,
-      },
+      config: { visible: true, title: config?.title || type.replace('_', ' '), ...config },
       order_index: activeTab.elements.length,
     };
     updateTab(activeTab.id, { elements: [...activeTab.elements, newElement] });
@@ -194,12 +186,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   };
 
   const addQuestionnaire = (q: QuestionnaireConfig) => {
-    addElement('questionnaire', {
-      questionnaire_id: q.id,
-      title: q.title,
-      show_question_count: true,
-      show_estimated_time: true,
-    });
+    addElement('questionnaire', { questionnaire_id: q.id, title: q.title, show_question_count: true, show_estimated_time: true });
   };
 
   const removeElement = (elementId: string) => {
@@ -211,9 +198,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const updateElement = (elementId: string, config: Partial<LayoutElement['config']>) => {
     if (!activeTab) return;
     updateTab(activeTab.id, {
-      elements: activeTab.elements.map(e =>
-        e.id === elementId ? { ...e, config: { ...e.config, ...config } } : e
-      ),
+      elements: activeTab.elements.map(e => e.id === elementId ? { ...e, config: { ...e.config, ...config } } : e),
     });
   };
 
@@ -234,7 +219,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     if (result.type === 'ELEMENT') {
       const sourceTabId = source.droppableId.replace('elements-', '');
       const destTabId = destination.droppableId.replace('elements-', '');
-
       if (sourceTabId === destTabId) {
         const tab = layout.tabs.find(t => t.id === sourceTabId);
         if (!tab) return;
@@ -277,171 +261,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     return el.config.title || el.type.replace('_', ' ');
   };
 
-  // Check which questionnaires are already placed in any tab
   const placedQuestionnaireIds = new Set(
     layout.tabs.flatMap(t => t.elements)
       .filter(e => e.type === 'questionnaire' && e.config.questionnaire_id)
       .map(e => e.config.questionnaire_id!)
   );
-
-  const unplacedQuestionnaires = questionnaires.filter(q => !placedQuestionnaireIds.has(q.id));
-
-  // ── Phone preview renderer ──
-  const renderPhoneElement = (el: LayoutElement) => {
-    if (el.config.visible === false) return null;
-    const primary = layout.theme?.primary_color || '#10b981';
-
-    switch (el.type) {
-      case 'progress':
-        return (
-          <div className="p-2.5 rounded-xl" style={{ backgroundColor: primary + '15' }}>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[9px] font-semibold" style={{ color: primary }}>Study Progress</span>
-              <span className="text-[8px] text-stone-400">Day 3/{studyDuration}</span>
-            </div>
-            {el.config.progress_style === 'ring' ? (
-              <div className="flex justify-center">
-                <div className="w-10 h-10 rounded-full border-[3px]" style={{ borderColor: primary + '30', borderTopColor: primary }} />
-              </div>
-            ) : (
-              <div className="h-1.5 bg-white/50 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: '43%', backgroundColor: primary }} />
-              </div>
-            )}
-          </div>
-        );
-      case 'questionnaire': {
-        const q = questionnaires.find(qc => qc.id === el.config.questionnaire_id);
-        return (
-          <div className="p-2.5 rounded-xl bg-white border border-stone-100 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-semibold text-stone-700 truncate block">{q?.title || el.config.title || 'Questionnaire'}</span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {el.config.show_question_count !== false && (
-                    <span className="text-[8px] text-stone-400">{q?.questions?.length || 0} questions</span>
-                  )}
-                  {el.config.show_estimated_time !== false && (
-                    <span className="text-[8px] text-stone-400">· {q?.estimated_duration || 5} min</span>
-                  )}
-                </div>
-              </div>
-              <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: primary }}>
-                <span className="text-white text-[8px]">▶</span>
-              </div>
-            </div>
-          </div>
-        );
-      }
-      case 'consent':
-        return (
-          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
-            <span className="text-[9px] font-semibold text-amber-700">🛡️ {el.config.title || 'Consent Form'}</span>
-            <p className="text-[7px] text-amber-500 mt-0.5">{el.config.consent_text || 'Tap to review and sign'}</p>
-          </div>
-        );
-      case 'screening':
-        return (
-          <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-100">
-            <span className="text-[9px] font-semibold text-orange-700">📝 {el.config.title || 'Screening'}</span>
-            <p className="text-[7px] text-orange-500 mt-0.5">{el.config.screening_criteria || 'Eligibility screening'}</p>
-          </div>
-        );
-      case 'profile':
-        return (
-          <div className="p-2.5 rounded-xl bg-white border border-stone-100">
-            <span className="text-[9px] font-semibold text-stone-600">👤 {el.config.title || 'Profile'}</span>
-          </div>
-        );
-      case 'ecogram':
-        return (
-          <div className="p-2.5 rounded-xl bg-violet-50 border border-violet-100">
-            <span className="text-[9px] font-semibold text-violet-700">🔗 {el.config.title || 'Ecogram'}</span>
-            <div className="flex justify-center mt-1.5">
-              <div className="w-5 h-5 rounded-full bg-violet-200 border-2 border-violet-300" />
-            </div>
-          </div>
-        );
-      case 'timeline': {
-        const days = Math.min(studyDuration, 7);
-        const sampleHours = [8, 10, 12, 14, 16, 18, 20];
-        const previewActiveDay = 2;
-        return (
-          <div className="p-2.5 rounded-xl bg-white border border-stone-100 space-y-2">
-            <span className="text-[9px] font-semibold text-stone-600">📅 {el.config.title || 'Study Timeline'}</span>
-            <div className="flex gap-0.5 overflow-hidden">
-              {Array.from({ length: days }, (_, i) => i + 1).map(d => (
-                <div key={d} className="flex-1 text-center py-0.5 rounded text-[7px] font-medium"
-                  style={{ backgroundColor: d === previewActiveDay ? primary : 'transparent', color: d === previewActiveDay ? 'white' : '#a8a29e', minWidth: 0 }}>
-                  D{d}
-                </div>
-              ))}
-            </div>
-            <div className="space-y-0.5">
-              {sampleHours.map(h => {
-                const hasQ = h === 10 || h === 14 || h === 20;
-                const isCompleted = h === 10;
-                const isMissed = h === 20;
-                return (
-                  <div key={h} className="flex items-center gap-1">
-                    <span className="text-[6px] text-stone-300 w-4 text-right">{h}:00</span>
-                    <div className="flex-1 h-3 rounded" style={{ backgroundColor: hasQ ? isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : '#f0fdf4' : 'transparent' }}>
-                      {hasQ && (
-                        <div className="flex items-center h-full px-1">
-                          <span className="text-[5px] font-semibold truncate" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                            {questionnaires[0]?.title?.substring(0, 12) || 'Survey'} {isCompleted ? '✓' : isMissed ? '✗' : '○'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-1.5">
-              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" /> Done</span>
-              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
-              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-red-200 inline-block" /> Missed</span>
-            </div>
-          </div>
-        );
-      }
-      case 'text_block':
-        return (
-          <div className="p-2 rounded-xl bg-stone-50">
-            <p className="text-[8px] text-stone-500">{el.config.content || el.config.title || 'Text content...'}</p>
-          </div>
-        );
-      case 'spacer':
-        return <div style={{ height: el.config.style?.height || '16px' }} />;
-      case 'divider':
-        return <div className="border-t border-stone-200 my-1" />;
-      case 'help':
-        return (
-          <div className="p-2.5 rounded-xl bg-white border border-stone-100">
-            <span className="text-[9px] font-semibold text-stone-600">❓ {el.config.title || 'Help & FAQ'}</span>
-          </div>
-        );
-      case 'button':
-        return (
-          <button className="w-full py-2 rounded-xl text-[9px] font-semibold text-white" style={{ backgroundColor: primary }}>
-            {el.config.button_label || el.config.title || 'Button'}
-          </button>
-        );
-      case 'image':
-        return (
-          <div className="rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center" style={{ height: '60px' }}>
-            <span className="text-[8px] text-stone-400">{el.config.image_url ? '🖼️ Image' : '🖼️ No image set'}</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="p-2 rounded-xl bg-stone-50 border border-stone-100">
-            <span className="text-[8px] text-stone-400">{el.type}</span>
-          </div>
-        );
-    }
-  };
 
   // ── Element Config Panel ──
   const renderElementConfig = (el: LayoutElement) => {
@@ -458,117 +282,72 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </button>
         </div>
 
-        {/* Common: Title */}
         {el.type !== 'spacer' && el.type !== 'divider' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Title</label>
-            <input
-              type="text"
-              value={el.config.title || ''}
-              onChange={(e) => updateElement(el.id, { title: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            />
+            <input type="text" value={el.config.title || ''} onChange={(e) => updateElement(el.id, { title: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
           </div>
         )}
 
-        {/* Questionnaire-specific */}
         {el.type === 'questionnaire' && (
           <>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Questionnaire</label>
-              <select
-                value={el.config.questionnaire_id || ''}
-                onChange={(e) => {
-                  const selected = questionnaires.find(q => q.id === e.target.value);
-                  updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || 'Questionnaire' });
-                }}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-              >
+              <select value={el.config.questionnaire_id || ''} onChange={(e) => {
+                const selected = questionnaires.find(q => q.id === e.target.value);
+                updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || 'Questionnaire' });
+              }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                 <option value="">Select questionnaire...</option>
-                {questionnaires.map(qc => (
-                  <option key={qc.id} value={qc.id}>{qc.title}</option>
-                ))}
+                {questionnaires.map(qc => <option key={qc.id} value={qc.id}>{qc.title}</option>)}
               </select>
             </div>
             {q && (
               <div className="text-[11px] text-stone-500 bg-white rounded-lg p-2 border border-stone-100">
-                <p><strong>{q.questions?.length || 0}</strong> questions · <strong>{q.estimated_duration || 5}</strong> min estimated</p>
+                <p><strong>{q.questions?.length || 0}</strong> questions · <strong>{q.estimated_duration || 5}</strong> min</p>
                 {q.frequency && <p className="mt-1">Frequency: <strong>{q.frequency}</strong></p>}
               </div>
             )}
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={el.config.show_question_count !== false}
-                  onChange={(e) => updateElement(el.id, { show_question_count: e.target.checked })}
-                  className="rounded border-stone-300"
-                />
-                <span className="text-[11px] text-stone-600">Show question count</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={el.config.show_estimated_time !== false}
-                  onChange={(e) => updateElement(el.id, { show_estimated_time: e.target.checked })}
-                  className="rounded border-stone-300"
-                />
-                <span className="text-[11px] text-stone-600">Show estimated time</span>
-              </label>
-            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={el.config.show_question_count !== false} onChange={(e) => updateElement(el.id, { show_question_count: e.target.checked })} className="rounded border-stone-300" />
+              <span className="text-[11px] text-stone-600">Show question count</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={el.config.show_estimated_time !== false} onChange={(e) => updateElement(el.id, { show_estimated_time: e.target.checked })} className="rounded border-stone-300" />
+              <span className="text-[11px] text-stone-600">Show estimated time</span>
+            </label>
           </>
         )}
 
-        {/* Consent */}
         {el.type === 'consent' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Description</label>
-            <textarea
-              value={el.config.consent_text || ''}
-              onChange={(e) => updateElement(el.id, { consent_text: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              rows={3}
-              placeholder="Brief description of what participants are consenting to..."
-            />
+            <textarea value={el.config.consent_text || ''} onChange={(e) => updateElement(el.id, { consent_text: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={3} placeholder="Brief description..." />
           </div>
         )}
 
-        {/* Screening */}
         {el.type === 'screening' && (
           <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Screening Criteria Summary</label>
-            <textarea
-              value={el.config.screening_criteria || ''}
-              onChange={(e) => updateElement(el.id, { screening_criteria: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              rows={2}
-              placeholder="Eligibility criteria description..."
-            />
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Screening Criteria</label>
+            <textarea value={el.config.screening_criteria || ''} onChange={(e) => updateElement(el.id, { screening_criteria: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={2} placeholder="Eligibility criteria..." />
           </div>
         )}
 
-        {/* Text block */}
         {el.type === 'text_block' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Content</label>
-            <textarea
-              value={el.config.content || ''}
-              onChange={(e) => updateElement(el.id, { content: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              rows={3}
-            />
+            <textarea value={el.config.content || ''} onChange={(e) => updateElement(el.id, { content: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={3} />
           </div>
         )}
 
-        {/* Progress */}
         {el.type === 'progress' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Progress Style</label>
-            <select
-              value={el.config.progress_style || 'bar'}
-              onChange={(e) => updateElement(el.id, { progress_style: e.target.value as any })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-            >
+            <select value={el.config.progress_style || 'bar'} onChange={(e) => updateElement(el.id, { progress_style: e.target.value as any })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
               <option value="bar">Progress Bar</option>
               <option value="ring">Ring / Circle</option>
               <option value="steps">Steps</option>
@@ -576,81 +355,54 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
         )}
 
-        {/* Spacer */}
         {el.type === 'spacer' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Height (px)</label>
-            <input
-              type="number"
-              value={parseInt(el.config.style?.height || '16')}
-              onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: `${e.target.value}px` } })}
-              className="w-24 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
-            />
+            <input type="number" value={parseInt(el.config.style?.height || '16')} onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: `${e.target.value}px` } })}
+              className="w-24 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
           </div>
         )}
 
-        {/* Button */}
         {el.type === 'button' && (
           <>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
-              <input
-                type="text"
-                value={el.config.button_label || el.config.title || ''}
-                onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
-              />
+              <input type="text" value={el.config.button_label || el.config.title || ''} onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
             </div>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Action</label>
-              <select
-                value={el.config.button_action || ''}
-                onChange={(e) => updateElement(el.id, { button_action: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-              >
+              <select value={el.config.button_action || ''} onChange={(e) => updateElement(el.id, { button_action: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                 <option value="">None</option>
                 <option value="start_survey">Start Survey</option>
                 <option value="view_progress">View Progress</option>
                 <option value="contact_help">Contact Help</option>
-                <option value="open_url">Open URL</option>
               </select>
             </div>
           </>
         )}
 
-        {/* Image */}
         {el.type === 'image' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Image URL</label>
-            <input
-              type="text"
-              value={el.config.image_url || ''}
-              onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
-              placeholder="https://..."
-            />
+            <input type="text" value={el.config.image_url || ''} onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://..." />
           </div>
         )}
 
-        {/* Participant type visibility — common to all */}
         {participantTypes.length > 0 && (
           <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to participant types</label>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to</label>
             <div className="flex flex-wrap gap-1">
               {participantTypes.map(pt => {
                 const visible = !el.config.participant_types || el.config.participant_types.includes(pt.id);
                 return (
-                  <button
-                    key={pt.id}
-                    onClick={() => {
-                      const current = el.config.participant_types || participantTypes.map(p => p.id);
-                      const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
-                      updateElement(el.id, { participant_types: next });
-                    }}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}
-                  >
+                  <button key={pt.id} onClick={() => {
+                    const current = el.config.participant_types || participantTypes.map(p => p.id);
+                    const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
+                    updateElement(el.id, { participant_types: next });
+                  }} className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'}`}>
                     {pt.name}
                   </button>
                 );
@@ -668,14 +420,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-[15px] font-semibold text-stone-800">Layout Builder</h3>
-            <p className="text-[12px] text-stone-400 font-light mt-0.5">
-              Drag and drop to design how participants see your study
-            </p>
+            <p className="text-[12px] text-stone-400 font-light mt-0.5">Design how participants see your study — preview is live and identical to the actual app</p>
           </div>
-          <button
-            onClick={() => onUpdate(getDefaultLayout(questionnaires))}
-            className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300"
-          >
+          <button onClick={() => onUpdate(getDefaultLayout(questionnaires))}
+            className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300">
             Reset Default
           </button>
         </div>
@@ -683,27 +431,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left: Tab & Element Editor */}
           <div className="flex-1 space-y-3">
-            {/* Draggable Tab Bar */}
             <Droppable droppableId="tabs" direction="horizontal" type="TAB">
               {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="flex items-center gap-1 bg-stone-100 rounded-xl p-1 overflow-x-auto"
-                  style={{ scrollbarWidth: 'none' }}
-                >
+                <div ref={provided.innerRef} {...provided.droppableProps}
+                  className="flex items-center gap-1 bg-stone-100 rounded-xl p-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
                   {layout.tabs.map((tab, index) => (
                     <Draggable key={tab.id} draggableId={`tab-${tab.id}`} index={index}>
                       {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
+                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}
                           onClick={() => setActiveTabId(tab.id)}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-all cursor-grab active:cursor-grabbing ${
                             activeTabId === tab.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
-                          } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200' : ''}`}
-                        >
+                          } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200' : ''}`}>
                           <GripVertical size={10} className="text-stone-300" />
                           {tab.label}
                         </div>
@@ -718,27 +457,19 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               )}
             </Droppable>
 
-            {/* Active Tab Config */}
             {activeTab && (
               <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <div>
                       <label className="block text-[11px] font-medium text-stone-400 mb-1">Tab Label</label>
-                      <input
-                        type="text"
-                        value={activeTab.label}
-                        onChange={(e) => updateTab(activeTab.id, { label: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      />
+                      <input type="text" value={activeTab.label} onChange={(e) => updateTab(activeTab.id, { label: e.target.value })}
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-stone-400 mb-1">Icon</label>
-                      <select
-                        value={activeTab.icon}
-                        onChange={(e) => updateTab(activeTab.id, { icon: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-                      >
+                      <select value={activeTab.icon} onChange={(e) => updateTab(activeTab.id, { icon: e.target.value })}
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                         {ICON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
@@ -750,20 +481,16 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   )}
                 </div>
 
-                {/* Add Element */}
                 <div className="flex items-center justify-between">
                   <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
-                  <button
-                    onClick={() => setShowAddElement(!showAddElement)}
-                    className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium"
-                  >
+                  <button onClick={() => setShowAddElement(!showAddElement)}
+                    className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium">
                     <Plus size={12} /> Add Element
                   </button>
                 </div>
 
                 {showAddElement && (
                   <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
-                    {/* YOUR QUESTIONNAIRES — the real ones */}
                     {questionnaires.length > 0 && (
                       <>
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Your Questionnaires</p>
@@ -771,43 +498,25 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                           {questionnaires.map(q => {
                             const alreadyPlaced = placedQuestionnaireIds.has(q.id);
                             return (
-                              <button
-                                key={q.id}
-                                onClick={() => !alreadyPlaced && addQuestionnaire(q)}
-                                disabled={alreadyPlaced}
-                                className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border ${
-                                  alreadyPlaced
-                                    ? 'border-stone-100 bg-stone-50 opacity-50 cursor-not-allowed'
-                                    : 'border-transparent hover:bg-white hover:border-stone-200'
-                                }`}
-                              >
+                              <button key={q.id} onClick={() => !alreadyPlaced && addQuestionnaire(q)} disabled={alreadyPlaced}
+                                className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border ${alreadyPlaced ? 'border-stone-100 bg-stone-50 opacity-50 cursor-not-allowed' : 'border-transparent hover:bg-white hover:border-stone-200'}`}>
                                 <span className="text-lg">📋</span>
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
-                                  <span className="text-[9px] text-stone-400">
-                                    {q.questions?.length || 0} questions · {q.estimated_duration || 5} min
-                                    {q.frequency ? ` · ${q.frequency}` : ''}
-                                  </span>
+                                  <span className="text-[9px] text-stone-400">{q.questions?.length || 0} questions · {q.estimated_duration || 5} min{q.frequency ? ` · ${q.frequency}` : ''}</span>
                                 </div>
-                                {alreadyPlaced && (
-                                  <span className="text-[9px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Added</span>
-                                )}
+                                {alreadyPlaced && <span className="text-[9px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Added</span>}
                               </button>
                             );
                           })}
                         </div>
                       </>
                     )}
-
-                    {/* Other content elements */}
                     <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content Elements</p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {STATIC_CONTENT_ELEMENTS.map(et => (
-                        <button
-                          key={et.type}
-                          onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200"
-                        >
+                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                          className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200">
                           <span>{et.icon}</span>
                           <div>
                             <span className="text-stone-600 font-medium">{et.label}</span>
@@ -816,16 +525,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         </button>
                       ))}
                     </div>
-
-                    {/* Layout elements */}
                     <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
                     <div className="grid grid-cols-3 gap-1.5">
                       {LAYOUT_ELEMENTS.map(et => (
-                        <button
-                          key={et.type}
-                          onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200"
-                        >
+                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
                           <span className="text-lg">{et.icon}</span>
                           <span className="text-stone-500 font-medium">{et.label}</span>
                         </button>
@@ -834,14 +538,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   </div>
                 )}
 
-                {/* Draggable Elements */}
                 <Droppable droppableId={`elements-${activeTab.id}`} type="ELEMENT">
                   {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`space-y-1 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}
-                    >
+                    <div ref={provided.innerRef} {...provided.droppableProps}
+                      className={`space-y-1 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}>
                       {activeTab.elements.length === 0 ? (
                         <div className="py-8 text-center text-[12px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
                           Drag elements here or click "Add Element" above
@@ -850,49 +550,29 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         activeTab.elements.map((el, elIdx) => (
                           <Draggable key={el.id} draggableId={`el-${el.id}`} index={elIdx}>
                             {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
+                              <div ref={provided.innerRef} {...provided.draggableProps}
                                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border bg-white group transition-all ${
                                   snapshot.isDragging ? 'shadow-lg border-emerald-300 ring-2 ring-emerald-100' : 'border-stone-100 hover:border-stone-200'
                                 } ${editingElementId === el.id ? 'border-emerald-300 bg-emerald-50/30' : ''}`}
-                                onClick={() => setEditingElementId(editingElementId === el.id ? null : el.id)}
-                              >
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
+                                onClick={() => setEditingElementId(editingElementId === el.id ? null : el.id)}>
+                                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100" onClick={(e) => e.stopPropagation()}>
                                   <GripVertical size={14} className="text-stone-300" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm">{getElementIcon(el.type)}</span>
-                                    <span className="text-[12px] font-medium text-stone-700 truncate">
-                                      {getElementLabel(el)}
-                                    </span>
-                                    <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">
-                                      {el.type.replace('_', ' ')}
-                                    </span>
+                                    <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
+                                    <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }}
-                                    className="p-1 hover:bg-stone-100 rounded"
-                                  >
+                                  <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-1 hover:bg-stone-100 rounded">
                                     {el.config.visible !== false ? <Eye size={12} className="text-emerald-500" /> : <EyeOff size={12} className="text-stone-300" />}
                                   </button>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }}
-                                    className="p-1 hover:bg-stone-100 rounded"
-                                  >
+                                  <button onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }} className="p-1 hover:bg-stone-100 rounded">
                                     <Edit3 size={12} className="text-stone-400" />
                                   </button>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); removeElement(el.id); }}
-                                    className="p-1 hover:bg-red-50 rounded"
-                                  >
+                                  <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="p-1 hover:bg-red-50 rounded">
                                     <Trash2 size={12} className="text-red-400" />
                                   </button>
                                 </div>
@@ -906,40 +586,28 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   )}
                 </Droppable>
 
-                {/* Element Config Panel */}
                 {editingElement && renderElementConfig(editingElement)}
               </div>
             )}
 
-            {/* Theme Settings */}
+            {/* Theme */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
               <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Theme</h5>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
-                  <input
-                    type="color"
-                    value={layout.theme?.primary_color || '#10b981'}
-                    onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
-                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer"
-                  />
+                  <input type="color" value={layout.theme?.primary_color || '#10b981'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
+                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium text-stone-400 mb-1">Background</label>
-                  <input
-                    type="color"
-                    value={layout.theme?.background_color || '#f5f5f4'}
-                    onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
-                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer"
-                  />
+                  <input type="color" value={layout.theme?.background_color || '#f5f5f4'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
+                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
-                  <select
-                    value={layout.theme?.card_style || 'elevated'}
-                    onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
-                    className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-                  >
+                  <select value={layout.theme?.card_style || 'elevated'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
+                    className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                     <option value="flat">Flat</option>
                     <option value="elevated">Elevated</option>
                     <option value="outlined">Outlined</option>
@@ -949,64 +617,21 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             </div>
           </div>
 
-          {/* Right: Phone Preview */}
-          <div className="lg:w-[300px] shrink-0">
+          {/* Right: Live Phone Preview — uses the SAME renderer as Preview tab */}
+          <div className="lg:w-[380px] shrink-0">
             <div className="sticky top-24">
-              <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl">
-                <div className="rounded-[2rem] overflow-hidden" style={{ backgroundColor: layout.theme?.background_color || '#f5f5f4', height: '560px' }}>
-                  {/* Notch */}
-                  <div className="h-7 flex items-center justify-center relative">
-                    <div className="w-20 h-4 bg-stone-900 rounded-b-2xl absolute top-0" />
-                  </div>
-                  {/* Header */}
-                  {layout.show_header && (
-                    <div className="px-4 py-2">
-                      <h4 className="text-[12px] font-bold text-stone-800">
-                        {layout.header_title || activeTab?.label || 'Home'}
-                      </h4>
-                    </div>
-                  )}
-                  {/* Content */}
-                  <div className="px-3 overflow-y-auto" style={{ height: layout.show_header ? '440px' : '470px' }}>
-                    <div className="space-y-2 pb-4">
-                      {activeTab?.elements.filter(e => e.config.visible !== false).map(el => (
-                        <div
-                          key={el.id}
-                          className={`transition-all cursor-pointer ${editingElementId === el.id ? 'ring-2 ring-emerald-400 rounded-xl' : ''}`}
-                          onClick={() => setEditingElementId(el.id)}
-                        >
-                          {renderPhoneElement(el)}
-                        </div>
-                      ))}
-                      {(!activeTab || activeTab.elements.filter(e => e.config.visible !== false).length === 0) && (
-                        <div className="py-12 text-center">
-                          <p className="text-[10px] text-stone-400">No elements</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {/* Bottom Nav */}
-                  <div className="h-16 border-t border-stone-200/50 flex items-center justify-around px-3" style={{ backgroundColor: 'white' }}>
-                    {layout.bottom_nav.map(nav => {
-                      const IconComp = ICON_MAP[nav.icon] || Home;
-                      const isActive = activeTabId === nav.tab_id;
-                      return (
-                        <button
-                          key={nav.tab_id}
-                          onClick={() => setActiveTabId(nav.tab_id)}
-                          className="flex flex-col items-center gap-0.5"
-                        >
-                          <IconComp size={16} style={{ color: isActive ? (layout.theme?.primary_color || '#10b981') : '#a8a29e' }} />
-                          <span className="text-[8px] font-medium" style={{ color: isActive ? (layout.theme?.primary_color || '#10b981') : '#a8a29e' }}>
-                            {nav.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <p className="text-[11px] text-stone-400 text-center mt-3 font-light">Live Preview — Click elements to edit</p>
+              <AppPhonePreview
+                layout={layout}
+                questionnaires={questionnaires}
+                participantTypes={participantTypes}
+                studyDuration={studyDuration}
+                activeTabId={activeTabId}
+                onActiveTabChange={setActiveTabId}
+                highlightedElementId={editingElementId}
+                onElementClick={setEditingElementId}
+                frameHeight={620}
+              />
+              <p className="text-[11px] text-stone-400 text-center mt-3 font-light">Live Preview — identical to participant app</p>
             </div>
           </div>
         </div>
