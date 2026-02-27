@@ -1,21 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import {
   BarChart3, LayoutDashboard, Plus, Users, Settings,
-  LogOut, FileText, Menu, X, ChevronLeft, ChevronRight
+  LogOut, FileText
 } from 'lucide-react';
 
-interface AppSidebarProps {
-  collapsed?: boolean;
-  onToggle?: () => void;
-}
-
-const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) => {
+const AppSidebar: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -38,111 +32,53 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed = false, onToggle }) 
     return location.pathname === path || location.pathname.startsWith(path.split('?')[0]);
   };
 
-  const NavContent = () => (
-    <>
-      <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(item => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
-                active
-                  ? 'text-emerald-700 bg-gradient-to-r from-emerald-50 to-teal-50'
-                  : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
-              }`}
-              title={collapsed ? item.label : undefined}
-            >
-              <Icon size={18} strokeWidth={active ? 2 : 1.5} className={active ? 'text-emerald-600' : ''} />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="px-3 py-3 border-t border-stone-100">
-        {user && !collapsed && (
-          <div className="mb-3 px-3">
-            <p className="text-[12px] font-medium text-stone-700 truncate">
-              {user.email}
-            </p>
-            <p className="text-[11px] text-stone-400">Researcher</p>
-          </div>
-        )}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-[13px] font-medium text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors"
-          title={collapsed ? 'Sign Out' : undefined}
-        >
-          <LogOut size={18} strokeWidth={1.5} />
-          {!collapsed && <span>Sign Out</span>}
-        </button>
-      </div>
-    </>
-  );
-
   return (
-    <>
-      {/* Mobile Menu Toggle */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-[60px] left-3 z-[60] p-2 bg-white rounded-xl shadow-sm border border-stone-100"
-      >
-        <Menu size={20} className="text-stone-500" />
-      </button>
+    <aside
+      className="hidden md:flex flex-col bg-white/80 backdrop-blur-sm fixed left-0 top-14 bottom-0 w-56 z-40"
+      style={{ borderRight: '1px solid rgba(16,185,129,0.08)' }}
+    >
+      <div className="flex-1 flex flex-col py-2 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-0.5">
+          {navItems.map(item => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
 
-      {/* Mobile Overlay */}
-      {mobileOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-        >
-          <div
-            className="w-60 h-full bg-white flex flex-col pt-3 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-4 pb-3 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-                  <span className="text-white text-[11px] font-bold">E</span>
-                </div>
-                <span className="text-[14px] font-semibold text-stone-800">Easier</span>
-              </div>
-              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-stone-50">
-                <X size={18} className="text-stone-400" />
-              </button>
-            </div>
-            <div className="flex-1 flex flex-col py-2">
-              <NavContent />
-            </div>
-          </div>
-        </div>
-      )}
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                  active
+                    ? 'text-emerald-700 bg-gradient-to-r from-emerald-50 to-teal-50'
+                    : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
+                }`}
+              >
+                <Icon size={18} strokeWidth={active ? 2 : 1.5} className={active ? 'text-emerald-600' : ''} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
-      {/* Desktop Sidebar */}
-      <aside
-        className={`hidden lg:flex flex-col bg-white/80 backdrop-blur-sm fixed left-0 top-14 bottom-0 transition-all duration-200 z-40 ${
-          collapsed ? 'w-16' : 'w-56'
-        }`}
-        style={{ borderRight: '1px solid rgba(16,185,129,0.08)' }}
-      >
-        {onToggle && (
+        <div className="px-3 py-3 border-t border-stone-100">
+          {user && (
+            <div className="mb-3 px-3">
+              <p className="text-[12px] font-medium text-stone-700 truncate">
+                {user.email}
+              </p>
+              <p className="text-[11px] text-stone-400">Researcher</p>
+            </div>
+          )}
           <button
-            onClick={onToggle}
-            className="absolute -right-3 top-5 w-6 h-6 bg-white rounded-full shadow-sm border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition-colors"
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-[13px] font-medium text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors"
           >
-            {collapsed ? <ChevronRight size={12} className="text-stone-400" /> : <ChevronLeft size={12} className="text-stone-400" />}
+            <LogOut size={18} strokeWidth={1.5} />
+            <span>Sign Out</span>
           </button>
-        )}
-        <div className="flex-1 flex flex-col py-2 overflow-y-auto">
-          <NavContent />
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
 
