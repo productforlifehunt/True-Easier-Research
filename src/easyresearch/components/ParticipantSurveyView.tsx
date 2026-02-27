@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Mic, X, ChevronRight, ChevronLeft, Check, Clock, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { validateSurveyResponse } from '../services/validationService';
-import { normalizeLegacyQuestionType } from '../constants/questionTypes';
+import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import ParticipantOnboarding from './ParticipantOnboarding';
@@ -1068,6 +1068,109 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             )}
           </div>
         );
+
+      case 'bipolar_scale':
+        const bipolarMin = (question as any).question_config?.min_value ?? -3;
+        const bipolarMax = (question as any).question_config?.max_value ?? 3;
+        const bipolarStep = (question as any).question_config?.step ?? 1;
+        const bipolarMinLabel = (question as any).question_config?.min_label || '';
+        const bipolarMaxLabel = (question as any).question_config?.max_label || '';
+        const bipolarShowLabels = (question as any).question_config?.show_value_labels !== false;
+        const bipolarPoints: number[] = [];
+        for (let i = bipolarMin; i <= bipolarMax; i += bipolarStep) bipolarPoints.push(i);
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-center gap-1.5 flex-wrap">
+              {bipolarPoints.map(v => (
+                <button
+                  key={v}
+                  onClick={() => handleResponseChange(question.id, v)}
+                  disabled={isCompleted && !editMode}
+                  className="w-12 h-12 rounded-xl border-2 font-semibold text-[14px] transition-all hover:scale-105"
+                  style={{
+                    borderColor: value === v ? (v < 0 ? '#ef4444' : v > 0 ? '#10b981' : '#6b7280') : 'var(--border-light)',
+                    backgroundColor: value === v ? (v < 0 ? '#fef2f2' : v > 0 ? '#f0fdf4' : '#f9fafb') : 'white',
+                    color: v < 0 ? '#ef4444' : v > 0 ? '#10b981' : '#6b7280',
+                  }}
+                >
+                  {v > 0 ? `+${v}` : v}
+                </button>
+              ))}
+            </div>
+            {(bipolarMinLabel || bipolarMaxLabel) && (
+              <div className="flex justify-between text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                <span>{bipolarMinLabel}</span>
+                <span>{bipolarMaxLabel}</span>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'checkbox_group':
+        const checkboxOptions = question.options || (question as any).question_config?.options || [];
+        const checkboxValue = Array.isArray(value) ? value : [];
+        const cbColumns = (question as any).question_config?.columns || 1;
+        return (
+          <div className="space-y-3">
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cbColumns}, 1fr)`, gap: '8px' }}>
+              {checkboxOptions.map((option: any) => {
+                const selected = checkboxValue.includes(option.id || option.option_text);
+                return (
+                  <label
+                    key={option.id}
+                    className="flex items-center p-3 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
+                    style={{
+                      borderColor: selected ? 'var(--color-green)' : 'var(--border-light)',
+                      backgroundColor: selected ? '#f0fdf4' : 'white'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      value={option.id || option.option_text}
+                      checked={selected}
+                      onChange={(e) => {
+                        const val = option.id || option.option_text;
+                        if (e.target.checked) {
+                          handleResponseChange(question.id, [...checkboxValue, val]);
+                        } else {
+                          handleResponseChange(question.id, checkboxValue.filter((v: string) => v !== val));
+                        }
+                      }}
+                      className="mr-3"
+                      disabled={isCompleted && !editMode}
+                    />
+                    <span style={{ color: 'var(--text-primary)' }} className="text-[13px]">{option.text || option.option_text}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {question.allow_other && (
+              <div className="space-y-2">
+                <label className="flex items-center p-3 rounded-lg border-2 cursor-pointer hover:bg-green-50 transition-all"
+                  style={{
+                    borderColor: checkboxValue.includes('other') ? 'var(--color-green)' : 'var(--border-light)',
+                    backgroundColor: checkboxValue.includes('other') ? '#f0fdf4' : 'white'
+                  }}>
+                  <input type="checkbox" value="other" checked={checkboxValue.includes('other')}
+                    onChange={(e) => {
+                      if (e.target.checked) handleResponseChange(question.id, [...checkboxValue, 'other']);
+                      else handleResponseChange(question.id, checkboxValue.filter((v: string) => v !== 'other'));
+                    }} className="mr-3" disabled={isCompleted && !editMode} />
+                  <span style={{ color: 'var(--text-primary)' }} className="text-[13px]">Other</span>
+                </label>
+                {checkboxValue.includes('other') && (
+                  <input type="text" placeholder="Please specify..." className="w-full px-4 py-2 rounded-lg border-2 ml-8 text-[13px]"
+                    style={{ borderColor: 'var(--border-light)' }}
+                    onChange={(e) => handleResponseChange(question.id + '_other_text', e.target.value)}
+                    disabled={isCompleted && !editMode} />
+                )}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'section_header':
+        return null; // Section headers are handled by the section tab system, not rendered as questions
 
       default:
         return (
