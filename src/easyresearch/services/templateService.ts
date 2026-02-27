@@ -254,6 +254,130 @@ const TEMPLATE_PROJECT_SETTINGS: Record<string, any> = {
       show_progress_bar: true,
       enable_timeline_view: true,
       show_progress_tracker: true,
+      // Multi-questionnaire configs for the ESM template
+      questionnaire_configs: [
+        {
+          id: 'esm-hourly-log',
+          title: 'Hourly Activity Log',
+          description: 'Log your caregiving activities, mood, and challenges every hour.',
+          questions: [],
+          estimated_duration: 3,
+          frequency: 'hourly',
+          time_windows: [{ start: '09:00', end: '21:00' }],
+          notification_enabled: true,
+          notification_minutes_before: 0,
+          dnd_allowed: true,
+          dnd_default_start: '22:00',
+          dnd_default_end: '08:00',
+          assigned_participant_types: ['pt-primary', 'pt-family'],
+          order_index: 0,
+        },
+        {
+          id: 'esm-daily-log',
+          title: 'Daily Reflection',
+          description: 'End-of-day summary of caregiving burden, wellbeing, and support received.',
+          questions: [],
+          estimated_duration: 5,
+          frequency: 'daily',
+          time_windows: [{ start: '20:00', end: '23:00' }],
+          notification_enabled: true,
+          notification_minutes_before: 10,
+          dnd_allowed: true,
+          dnd_default_start: '23:00',
+          dnd_default_end: '08:00',
+          assigned_participant_types: ['pt-primary', 'pt-family'],
+          order_index: 1,
+        },
+      ],
+      // Participant types
+      participant_types: [
+        {
+          id: 'pt-primary',
+          name: 'Primary Caregiver',
+          description: 'The main person providing daily care for the person with dementia.',
+          relations: ['Spouse/Partner', 'Adult Child', 'Parent', 'Sibling', 'Other Relative', 'Professional'],
+          consent_forms: [
+            { id: 'cf-primary', title: 'Primary Caregiver Consent', text: 'I agree to participate in this 7-day experience sampling study. I understand I will receive hourly prompts between 9am-9pm and a daily reflection prompt.', required: true },
+          ],
+          screening_questions: [
+            { id: 'sq-p-1', question: 'Do you provide at least 4 hours of direct care per week?', type: 'yes_no' as const, required: true, disqualify_value: 'no' },
+            { id: 'sq-p-2', question: 'Do you live with or regularly visit the care recipient?', type: 'yes_no' as const, required: true, disqualify_value: 'no' },
+          ],
+          color: '#10b981',
+          order_index: 0,
+        },
+        {
+          id: 'pt-family',
+          name: 'Family Member',
+          description: 'A family member involved in care coordination but not providing daily hands-on care.',
+          relations: ['Spouse/Partner', 'Adult Child', 'Sibling', 'In-law', 'Other'],
+          consent_forms: [
+            { id: 'cf-family', title: 'Family Member Consent', text: 'I agree to participate in this study by completing the daily reflection questionnaire each evening.', required: true },
+          ],
+          screening_questions: [
+            { id: 'sq-f-1', question: 'Are you a family member of someone with dementia?', type: 'yes_no' as const, required: true, disqualify_value: 'no' },
+          ],
+          color: '#3b82f6',
+          order_index: 1,
+        },
+      ],
+      // Default app layout
+      app_layout: {
+        tabs: [
+          {
+            id: 'tab-home',
+            label: 'Home',
+            icon: 'Home',
+            elements: [
+              { id: 'el-progress', type: 'progress', config: { title: 'Study Progress', visible: true }, order_index: 0 },
+              { id: 'el-hourly', type: 'questionnaire', config: { questionnaire_id: 'esm-hourly-log', title: 'Hourly Activity Log', visible: true }, order_index: 1 },
+              { id: 'el-daily', type: 'questionnaire', config: { questionnaire_id: 'esm-daily-log', title: 'Daily Reflection', visible: true }, order_index: 2 },
+            ],
+            order_index: 0,
+          },
+          {
+            id: 'tab-timeline',
+            label: 'Timeline',
+            icon: 'FileText',
+            elements: [
+              { id: 'el-timeline', type: 'timeline', config: { title: 'Study Timeline', visible: true }, order_index: 0 },
+            ],
+            order_index: 1,
+          },
+          {
+            id: 'tab-network',
+            label: 'Network',
+            icon: 'Layout',
+            elements: [
+              { id: 'el-ecogram', type: 'ecogram', config: { title: 'Care Network', visible: true }, order_index: 0 },
+            ],
+            order_index: 2,
+          },
+          {
+            id: 'tab-settings',
+            label: 'Settings',
+            icon: 'Settings',
+            elements: [
+              { id: 'el-profile', type: 'profile', config: { title: 'My Profile', visible: true }, order_index: 0 },
+              { id: 'el-help', type: 'help', config: { title: 'Help & FAQ', visible: true }, order_index: 1 },
+            ],
+            order_index: 3,
+          },
+        ],
+        bottom_nav: [
+          { icon: 'Home', label: 'Home', tab_id: 'tab-home' },
+          { icon: 'FileText', label: 'Timeline', tab_id: 'tab-timeline' },
+          { icon: 'Layout', label: 'Network', tab_id: 'tab-network' },
+          { icon: 'Settings', label: 'Settings', tab_id: 'tab-settings' },
+        ],
+        show_header: true,
+        header_title: '',
+        theme: {
+          primary_color: '#10b981',
+          background_color: '#f5f5f4',
+          card_style: 'elevated',
+        },
+      },
     },
     profile_questions: [
       { id: 'pq_demographics', question: 'Caregiver Demographics', type: 'section' as const, required: false },
@@ -385,6 +509,10 @@ export async function createSurveyFromTemplate(
           participant_relation_options: templateSettings?.participant_relation_options || [],
           ecogram_enabled: templateSettings?.ecogram_enabled || false,
           ecogram_config: templateSettings?.ecogram_config || null,
+          // Persist multi-questionnaire configs if present
+          questionnaire_configs: templateSettings?.setting?.questionnaire_configs || undefined,
+          participant_types: templateSettings?.setting?.participant_types || undefined,
+          app_layout: templateSettings?.setting?.app_layout || undefined,
         },
         notification_setting: templateSettings?.notification_setting,
         consent_form: templateSettings?.consent_required ? {

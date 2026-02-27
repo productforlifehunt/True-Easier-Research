@@ -489,12 +489,24 @@ const SurveyBuilder: React.FC = () => {
       if (!researcherData) throw new Error('Researcher not found');
 
       const syncQuestions = async (targetProjectId: string) => {
+        // Collect all questions: global + from each questionnaire
+        const allQuestions = [...questions];
+        for (const qConfig of questionnaireConfigs) {
+          for (const q of qConfig.questions) {
+            // Tag questions with their questionnaire_id in the config
+            allQuestions.push({
+              ...q,
+              question_config: { ...q.question_config, questionnaire_id: qConfig.id },
+            });
+          }
+        }
+
         const { data: existingQuestions } = await supabase
           .from('survey_question').select('id').eq('project_id', targetProjectId);
         const existingIds = new Set((existingQuestions || []).map((q: any) => q.id));
-        const currentIds = new Set(questions.map(q => q.id));
+        const currentIds = new Set(allQuestions.map(q => q.id));
         const removedIds = [...existingIds].filter(id => !currentIds.has(id));
-        const questionPayload = questions.map((question) => {
+        const questionPayload = allQuestions.map((question) => {
           const { options, ...questionData } = question;
           const dbQuestionData: any = {
             ...questionData,
@@ -514,7 +526,7 @@ const SurveyBuilder: React.FC = () => {
           await supabase.from('question_option').delete().in('question_id', removedIds);
           await supabase.from('survey_question').delete().in('id', removedIds);
         }
-        for (const question of questions) {
+        for (const question of allQuestions) {
           const options = question.options || [];
           if (options.length > 0) {
             const { error: optionUpsertError } = await supabase.from('question_option').upsert(
