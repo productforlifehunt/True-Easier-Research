@@ -5,7 +5,7 @@ import { LoadingDisplay } from './components/ui'
 import AppStateProvider from './store/AppStateProvider'
 import BottomNav from './components/BottomNav'
 import ErrorBoundary from './components/ErrorBoundary'
-import { useAuth } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 
 // Dementia Survey Pages
@@ -159,6 +159,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <AuthProvider>
       <Router>
         <AppStateProvider>
           <Toaster position="top-center" />
@@ -251,6 +252,7 @@ function App() {
           </div>
         </AppStateProvider>
       </Router>
+      </AuthProvider>
     </ErrorBoundary>
   )
 }

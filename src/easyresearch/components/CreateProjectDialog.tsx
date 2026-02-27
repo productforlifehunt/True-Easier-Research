@@ -212,8 +212,8 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
         <div className="px-6 py-6 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 180px)' }}>
           {currentStep === 1 && (
             <div>
-              <h3 className="text-[15px] font-semibold text-neutral-900 mb-1.5">Research Methodology</h3>
-              <p className="text-[13px] text-neutral-500 mb-5">Choose the type of study that fits your needs.</p>
+              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">Research Methodology</h3>
+              <p className="text-[13px] text-stone-400 mb-5">Choose the type of study that fits your needs.</p>
               <SurveyMethodologySelector
                 selected={projectData.methodology}
                 onSelect={(methodology) => setProjectData(prev => ({ ...prev, methodology }))}
@@ -224,21 +224,21 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
           {currentStep === 2 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Study Title</label>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Study Title</label>
                 <input
                   type="text"
                   value={projectData.title}
                   onChange={(e) => setProjectData({ ...projectData, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                   placeholder="e.g., Daily Mood Tracking Study"
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Description</label>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Description</label>
                 <textarea
                   value={projectData.description}
                   onChange={(e) => setProjectData({ ...projectData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
                   rows={3}
                   placeholder="Describe your study objectives..."
                 />
@@ -249,18 +249,18 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
           {currentStep === 3 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Duration (Days)</label>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Duration (Days)</label>
                 <input
                   type="number" min="1" max="365"
                   value={projectData.duration_days}
                   onChange={(e) => setProjectData({ ...projectData, duration_days: parseInt(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                 />
               </div>
               {(projectData.methodology === 'esm' || projectData.methodology === 'ema') && (
                 <>
                   <div>
-                    <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Sampling Strategy</label>
+                    <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Sampling Strategy</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
                         { value: 'fixed_schedule', label: 'Fixed Schedule', desc: 'Notifications at set times' },
@@ -269,47 +269,47 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
                         <button
                           key={opt.value}
                           onClick={() => setProjectData({ ...projectData, sampling_strategy: opt.value })}
-                          className={`p-3.5 rounded-lg border-2 text-left transition-all ${
+                          className={`p-3.5 rounded-xl border-2 text-left transition-all ${
                             projectData.sampling_strategy === opt.value
                               ? 'border-emerald-500 bg-emerald-50'
-                              : 'border-black/[0.06] hover:border-black/[0.12]'
+                              : 'border-stone-100 hover:border-stone-200'
                           }`}
                         >
-                          <p className="text-[13px] font-medium text-neutral-900">{opt.label}</p>
-                          <p className="text-[11px] text-neutral-400">{opt.desc}</p>
+                          <p className="text-[13px] font-medium text-stone-800">{opt.label}</p>
+                          <p className="text-[11px] text-stone-400">{opt.desc}</p>
                         </button>
                       ))}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Prompts/Day</label>
+                      <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Prompts/Day</label>
                       <input type="number" min="1" max="20" value={projectData.prompts_per_day}
                         onChange={(e) => setProjectData({ ...projectData, prompts_per_day: parseInt(e.target.value) })}
-                        className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Response Window (min)</label>
+                      <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Response Window (min)</label>
                       <input type="number" min="15" max="360" value={projectData.time_window_minutes}
                         onChange={(e) => setProjectData({ ...projectData, time_window_minutes: parseInt(e.target.value) })}
-                        className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Start Hour</label>
+                      <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Start Hour</label>
                       <input type="number" min="0" max="23" value={projectData.start_hour}
                         onChange={(e) => setProjectData({ ...projectData, start_hour: parseInt(e.target.value) })}
-                        className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">End Hour</label>
+                      <label className="block text-[12px] font-medium text-stone-400 mb-1.5">End Hour</label>
                       <input type="number" min="0" max="23" value={projectData.end_hour}
                         onChange={(e) => setProjectData({ ...projectData, end_hour: parseInt(e.target.value) })}
-                        className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                       />
                     </div>
                   </div>
@@ -317,18 +317,18 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
               )}
               {projectData.methodology === 'longitudinal' && (
                 <div>
-                  <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Days Between Surveys</label>
+                  <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Days Between Surveys</label>
                   <input type="number" min="1" max="90" value={projectData.prompts_per_day}
                     onChange={(e) => setProjectData({ ...projectData, prompts_per_day: parseInt(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Max Participants</label>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Max Participants</label>
                 <input type="number" min="1" value={projectData.max_participants}
                   onChange={(e) => setProjectData({ ...projectData, max_participants: parseInt(e.target.value) })}
-                  className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                 />
               </div>
             </div>
@@ -336,27 +336,27 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
 
           {currentStep === 4 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-black/[0.04]">
+              <div className="flex items-center justify-between py-3 border-b border-stone-100">
                 <div>
-                  <p className="text-[14px] font-medium text-neutral-900">Voice Input</p>
-                  <p className="text-[12px] text-neutral-400">Allow participants to record voice answers</p>
+                  <p className="text-[14px] font-medium text-stone-800">Voice Input</p>
+                  <p className="text-[12px] text-stone-400 font-light">Allow participants to record voice answers</p>
                 </div>
                 <button
                   onClick={() => setProjectData({ ...projectData, voice_enabled: !projectData.voice_enabled })}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${projectData.voice_enabled ? 'bg-emerald-500' : 'bg-neutral-200'}`}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${projectData.voice_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}
                 >
                   <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"
                     style={{ left: projectData.voice_enabled ? '22px' : '2px' }} />
                 </button>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-black/[0.04]">
+              <div className="flex items-center justify-between py-3 border-b border-stone-100">
                 <div>
-                  <p className="text-[14px] font-medium text-neutral-900">Consent Form</p>
-                  <p className="text-[12px] text-neutral-400">Require consent before participation</p>
+                  <p className="text-[14px] font-medium text-stone-800">Consent Form</p>
+                  <p className="text-[12px] text-stone-400 font-light">Require consent before participation</p>
                 </div>
                 <button
                   onClick={() => setProjectData({ ...projectData, requires_consent: !projectData.requires_consent })}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${projectData.requires_consent ? 'bg-emerald-500' : 'bg-neutral-200'}`}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${projectData.requires_consent ? 'bg-emerald-500' : 'bg-stone-200'}`}
                 >
                   <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"
                     style={{ left: projectData.requires_consent ? '22px' : '2px' }} />
@@ -364,11 +364,11 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
               </div>
               {projectData.requires_consent && (
                 <div>
-                  <label className="block text-[12px] font-medium text-neutral-500 mb-1.5">Consent Text</label>
+                  <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Consent Text</label>
                   <textarea
                     value={projectData.consent_text}
                     onChange={(e) => setProjectData({ ...projectData, consent_text: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-lg text-[14px] border border-black/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
                     rows={3}
                     placeholder="By participating in this study, you agree to..."
                   />
