@@ -84,6 +84,46 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
   const renderPreview = () => {
     const normalizedType = normalizeLegacyQuestionType(question.question_type);
     switch (normalizedType) {
+      case 'section_header':
+        return (
+          <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: (question.question_config?.section_color || '#10b981') + '15' }}>
+            {question.question_config?.section_icon && <span className="text-lg">{question.question_config.section_icon}</span>}
+            <span className="text-[12px] font-semibold" style={{ color: question.question_config?.section_color || '#10b981' }}>Section Tab</span>
+          </div>
+        );
+      case 'bipolar_scale':
+        const bMin = question.question_config?.min_value ?? -3;
+        const bMax = question.question_config?.max_value ?? 3;
+        const bMid = 0;
+        return (
+          <div className="space-y-2">
+            <div className="flex justify-between gap-0.5">
+              {Array.from({ length: bMax - bMin + 1 }, (_, i) => bMin + i).map(v => (
+                <div key={v} className={`flex-1 text-center py-1 rounded text-[10px] font-medium border ${v === bMid ? 'border-stone-300 bg-stone-50' : 'border-stone-200'}`}
+                  style={{ color: v < 0 ? '#ef4444' : v > 0 ? '#10b981' : '#6b7280' }}>
+                  {v > 0 ? `+${v}` : v}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between text-[10px] text-stone-400">
+              <span>{question.question_config?.min_label || 'Negative'}</span>
+              <span>{question.question_config?.max_label || 'Positive'}</span>
+            </div>
+          </div>
+        );
+      case 'checkbox_group':
+        if (!question.options || question.options.length === 0) return null;
+        return (
+          <div className="grid grid-cols-2 gap-1">
+            {question.options.slice(0, 4).map((opt) => (
+              <div key={opt.id} className="flex items-center gap-1.5 text-[11px] text-stone-500">
+                <span className="w-3 h-3 border border-stone-300 rounded shrink-0" />
+                <span className="truncate">{opt.option_text}</span>
+              </div>
+            ))}
+            {question.options.length > 4 && <p className="text-[10px] text-stone-400 col-span-2">+{question.options.length - 4} more</p>}
+          </div>
+        );
       case 'slider':
         const minVal = question.question_config?.min_value ?? question.question_config?.min ?? 0;
         const maxVal = question.question_config?.max_value ?? question.question_config?.max ?? 10;
@@ -228,40 +268,108 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
             value={localQuestion.question_type}
             onChange={(e) => {
               const newType = e.target.value;
-              const needsOptions = ['single_choice', 'multiple_choice', 'dropdown'];
+              const needsOptions = ['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group'];
               const updates: any = { question_type: newType };
               if (newType === 'slider') { updates.question_config = { min_value: 0, max_value: 10, step: 1 }; updates.options = []; }
+              else if (newType === 'bipolar_scale') { updates.question_config = { min_value: -3, max_value: 3, step: 1, min_label: 'Very Negative', max_label: 'Very Positive', show_value_labels: true }; updates.options = []; }
               else if (newType === 'rating') { updates.question_config = { max_value: 5 }; updates.options = []; }
               else if (newType === 'likert_scale') { updates.question_config = { scale_type: '1-5' }; updates.options = []; }
               else if (newType === 'nps') { updates.question_config = {}; updates.options = []; }
+              else if (newType === 'section_header') { updates.question_config = { section_icon: '', section_color: '#10b981' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && newType !== 'slider') { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && newType !== 'slider' && newType !== 'bipolar_scale' && newType !== 'section_header') { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
           >
-            <option value="text_short">Short Text</option>
-            <option value="text_long">Long Text</option>
-            <option value="single_choice">Single Choice</option>
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="dropdown">Dropdown</option>
-            <option value="slider">Slider</option>
-            <option value="rating">Rating</option>
-            <option value="likert_scale">Likert Scale</option>
-            <option value="nps">NPS (0-10)</option>
-            <option value="number">Number</option>
-            <option value="date">Date</option>
-            <option value="time">Time</option>
-            <option value="email">Email</option>
+            <optgroup label="Layout">
+              <option value="section_header">Section / Tab</option>
+            </optgroup>
+            <optgroup label="Text">
+              <option value="text_short">Short Text</option>
+              <option value="text_long">Long Text</option>
+            </optgroup>
+            <optgroup label="Choice">
+              <option value="single_choice">Single Choice</option>
+              <option value="multiple_choice">Multiple Choice</option>
+              <option value="checkbox_group">Checkbox Group</option>
+              <option value="dropdown">Dropdown</option>
+            </optgroup>
+            <optgroup label="Scale">
+              <option value="slider">Slider</option>
+              <option value="bipolar_scale">Bipolar Scale (-/+)</option>
+              <option value="rating">Rating</option>
+              <option value="likert_scale">Likert Scale</option>
+              <option value="nps">NPS (0-10)</option>
+            </optgroup>
+            <optgroup label="Data">
+              <option value="number">Number</option>
+              <option value="date">Date</option>
+              <option value="time">Time</option>
+              <option value="email">Email</option>
+            </optgroup>
           </select>
         </div>
 
+        {/* Section Header Configuration */}
+        {localQuestion.question_type === 'section_header' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Color</label>
+              <input type="color" value={localQuestion.question_config?.section_color || '#10b981'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_color: e.target.value } })}
+                className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Icon (emoji)</label>
+              <input type="text" value={localQuestion.question_config?.section_icon || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_icon: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                placeholder="e.g., 📋 🏥 👥" maxLength={4} />
+            </div>
+            <p className="text-[11px] text-stone-400">All questions after this section header (until the next one) will be grouped into this tab.</p>
+          </div>
+        )}
+
+        {/* Bipolar Scale Configuration */}
+        {localQuestion.question_type === 'bipolar_scale' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'Min', key: 'min_value', default: -3 },
+                { label: 'Max', key: 'max_value', default: 3 },
+                { label: 'Step', key: 'step', default: 1 },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{f.label}</label>
+                  <input type="number" value={localQuestion.question_config?.[f.key] ?? f.default} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, [f.key]: Number(e.target.value) } })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Min Label</label>
+                <input type="text" value={localQuestion.question_config?.min_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, min_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Very Negative" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Label</label>
+                <input type="text" value={localQuestion.question_config?.max_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Very Positive" />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.show_value_labels !== false} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, show_value_labels: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Show value labels on each point
+            </label>
+          </div>
+        )}
+
         {/* Options for choice questions */}
-        {['single_choice', 'multiple_choice', 'dropdown'].includes(localQuestion.question_type) && (
+        {['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group'].includes(localQuestion.question_type) && (
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-[12px] font-medium text-stone-400">Options</label>

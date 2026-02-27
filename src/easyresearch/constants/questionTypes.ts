@@ -11,9 +11,11 @@ export const SUPPORTED_QUESTION_TYPES = {
   SINGLE_CHOICE: 'single_choice',
   MULTIPLE_CHOICE: 'multiple_choice',
   DROPDOWN: 'dropdown',
+  CHECKBOX_GROUP: 'checkbox_group',
   
   // Scale Types
   SLIDER: 'slider',
+  BIPOLAR_SCALE: 'bipolar_scale',
   RATING: 'rating',
   LIKERT_SCALE: 'likert_scale',
   NPS: 'nps',
@@ -23,6 +25,9 @@ export const SUPPORTED_QUESTION_TYPES = {
   DATE: 'date',
   TIME: 'time',
   EMAIL: 'email',
+
+  // Layout Types
+  SECTION_HEADER: 'section_header',
 } as const;
 
 export type SupportedQuestionType = typeof SUPPORTED_QUESTION_TYPES[keyof typeof SUPPORTED_QUESTION_TYPES];
@@ -33,7 +38,7 @@ export interface QuestionTypeDefinition {
   label: string;
   description: string;
   icon: string;
-  category: 'text' | 'choice' | 'scale' | 'data';
+  category: 'text' | 'choice' | 'scale' | 'data' | 'layout';
   requiresOptions: boolean;
   supportsOther: boolean;
   supportsNone: boolean;
@@ -99,6 +104,17 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: {}
   },
+  {
+    type: SUPPORTED_QUESTION_TYPES.CHECKBOX_GROUP,
+    label: 'Checkbox Group',
+    description: 'Categorized multi-select checkboxes (e.g., activity types, challenge types)',
+    icon: '☑',
+    category: 'choice',
+    requiresOptions: true,
+    supportsOther: true,
+    supportsNone: false,
+    defaultConfig: { layout: 'vertical', columns: 1 }
+  },
   
   // Scale Types
   {
@@ -111,6 +127,17 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsOther: false,
     supportsNone: false,
     defaultConfig: { min_value: 0, max_value: 10, step: 1 }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.BIPOLAR_SCALE,
+    label: 'Bipolar Scale',
+    description: 'Negative-to-positive scale (e.g., -3 to +3) with labeled endpoints',
+    icon: '⊖⊕',
+    category: 'scale',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { min_value: -3, max_value: 3, step: 1, min_label: 'Very Negative', max_label: 'Very Positive', show_value_labels: true }
   },
   {
     type: SUPPORTED_QUESTION_TYPES.RATING,
@@ -190,7 +217,20 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsOther: false,
     supportsNone: false,
     defaultConfig: {}
-  }
+  },
+
+  // Layout Types
+  {
+    type: SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
+    label: 'Section / Tab',
+    description: 'Group questions into tabs or sections. All questions until the next section header belong to this section.',
+    icon: '§',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { section_icon: '', section_color: '#10b981' }
+  },
 ];
 
 // Helper functions
@@ -202,7 +242,7 @@ export const isValidQuestionType = (type: string): type is SupportedQuestionType
   return Object.values(SUPPORTED_QUESTION_TYPES).includes(type as SupportedQuestionType);
 };
 
-export const getQuestionTypesByCategory = (category: 'text' | 'choice' | 'scale' | 'data') => {
+export const getQuestionTypesByCategory = (category: 'text' | 'choice' | 'scale' | 'data' | 'layout') => {
   return QUESTION_TYPE_DEFINITIONS.filter(def => def.category === category);
 };
 
@@ -216,7 +256,10 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'likert': SUPPORTED_QUESTION_TYPES.LIKERT_SCALE,
   'likert_scale': SUPPORTED_QUESTION_TYPES.LIKERT_SCALE,
   'phone': SUPPORTED_QUESTION_TYPES.TEXT_SHORT,
-  // Add more mappings as needed for existing data
+  'bipolar': SUPPORTED_QUESTION_TYPES.BIPOLAR_SCALE,
+  'checkbox_group': SUPPORTED_QUESTION_TYPES.CHECKBOX_GROUP,
+  'section': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
+  'section_header': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {
@@ -224,4 +267,58 @@ export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType
     return type;
   }
   return LEGACY_TYPE_MAPPING[type] || SUPPORTED_QUESTION_TYPES.TEXT_SHORT;
+};
+
+// Utility: group questions by sections
+export interface QuestionSection {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  questions: any[];
+}
+
+export const groupQuestionsBySections = (questions: any[]): QuestionSection[] => {
+  const sections: QuestionSection[] = [];
+  let currentSection: QuestionSection = {
+    id: 'default',
+    title: 'Questions',
+    questions: [],
+  };
+
+  for (const q of questions) {
+    const normalizedType = normalizeLegacyQuestionType(q.question_type);
+    if (normalizedType === 'section_header') {
+      // Save previous section if it has questions
+      if (currentSection.questions.length > 0 || sections.length === 0) {
+        if (currentSection.questions.length > 0) {
+          sections.push(currentSection);
+        }
+      }
+      // Start new section
+      currentSection = {
+        id: q.id,
+        title: q.question_text || 'Section',
+        description: q.question_description,
+        icon: q.question_config?.section_icon,
+        color: q.question_config?.section_color,
+        questions: [],
+      };
+    } else {
+      currentSection.questions.push(q);
+    }
+  }
+
+  // Push last section
+  if (currentSection.questions.length > 0) {
+    sections.push(currentSection);
+  }
+
+  // If no sections were created, return all questions in a default section
+  if (sections.length === 0 && questions.length > 0) {
+    return [{ id: 'default', title: 'Questions', questions }];
+  }
+
+  return sections;
 };
