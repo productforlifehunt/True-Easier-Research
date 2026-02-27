@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
-import { Bell, Moon, User, LogOut, LogIn, FileText } from 'lucide-react';
+import { Bell, Moon, User, LogOut, LogIn, FileText, Network } from 'lucide-react';
 import toast from 'react-hot-toast';
+import EcogramBuilder, { EcogramMember } from './EcogramBuilder';
+import { scheduleStudyNotifications, requestNotificationPermission } from '../services/notificationService';
 
 interface ProfileQuestion { id: string; question_text: string; question_type: string; required: boolean; options?: any[]; }
 interface EnrollmentQuestion { id: string; project_id: string; question_text: string; question_type: string; options: any[] | null; required: boolean; order_index: number; }
@@ -21,6 +23,7 @@ const ParticipantSettings: React.FC = () => {
   const [enrollmentQuestions, setEnrollmentQuestions] = useState<EnrollmentQuestion[]>([]);
   const [enrollmentResponses, setEnrollmentResponses] = useState<any>({});
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [ecogramData, setEcogramData] = useState<{ members: EcogramMember[]; lastUpdated: string | null }>({ members: [], lastUpdated: null });
 
   useEffect(() => { loadSettings(); checkAuth(); }, [projectId]);
 
@@ -30,7 +33,16 @@ const ParticipantSettings: React.FC = () => {
     try {
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
-        setProject({ ...(projectData as any), profile_questions: (projectData as any).profile_questions ?? (projectData as any).profile_question });
+        const settings = (projectData as any).setting || {};
+        setProject({ 
+          ...(projectData as any), 
+          profile_questions: (projectData as any).profile_questions ?? (projectData as any).profile_question,
+          ecogram_enabled: settings.ecogram_enabled || false,
+          ecogram_config: settings.ecogram_config || {},
+          notification_enabled: (projectData as any).notification_enabled,
+          study_duration: (projectData as any).study_duration,
+          survey_frequency: (projectData as any).survey_frequency,
+        });
         if ((projectData as any).profile_question) setProfileQuestions((projectData as any).profile_question);
       }
       const { data: questionsData } = await supabase.from('enrollment_question').select('*').eq('project_id', projectId).order('order_index');
@@ -38,7 +50,13 @@ const ParticipantSettings: React.FC = () => {
       const enrollmentId = localStorage.getItem(`enrollment_${projectId}`);
       if (enrollmentId) {
         const { data: enrollmentData } = await supabase.from('enrollment').select('*').eq('id', enrollmentId).maybeSingle();
-        if (enrollmentData) { setEnrollment(enrollmentData); setProfileData(enrollmentData.profile_data || {}); setEnrollmentResponses(enrollmentData.enrollment_data || {}); setDndSettings(enrollmentData.dnd_setting || { periods: [] }); }
+        if (enrollmentData) { 
+          setEnrollment(enrollmentData); 
+          setProfileData(enrollmentData.profile_data || {}); 
+          setEnrollmentResponses(enrollmentData.enrollment_data || {}); 
+          setDndSettings(enrollmentData.dnd_setting || { periods: [] }); 
+          setEcogramData(enrollmentData.ecogram_data || { members: [], lastUpdated: null });
+        }
       }
     } catch (error) { console.error('Error loading settings:', error); }
     finally { setLoading(false); }
@@ -48,7 +66,29 @@ const ParticipantSettings: React.FC = () => {
     if (!enrollment) return;
     setSaving(true);
     try {
-      await supabase.from('enrollment').update({ profile_data: profileData, enrollment_data: enrollmentResponses, dnd_setting: dndSettings }).eq('id', enrollment.id);
+      await supabase.from('enrollment').update({ 
+        profile_data: profileData, 
+        enrollment_data: enrollmentResponses, 
+        dnd_setting: dndSettings,
+        ecogram_data: ecogramData 
+      }).eq('id', enrollment.id);
+
+      // Re-schedule notifications with updated DND if project has notifications enabled
+      if (notificationEnabled && project?.notification_enabled && project?.project_type !== 'survey') {
+        const dndPeriods = (dndSettings.periods || []).map((p: any) => ({
+          start_time: p.start_time,
+          end_time: p.end_time,
+        }));
+        await requestNotificationPermission();
+        await scheduleStudyNotifications({
+          studyDuration: project.study_duration || 7,
+          frequency: project.survey_frequency || 'daily',
+          dndPeriods,
+          projectTitle: project.title || 'Study',
+          projectId: project.id,
+        }, new Date(enrollment.study_start_date || enrollment.created_at));
+      }
+
       toast.success('Settings saved!');
     } catch (error) { console.error('Error saving settings:', error); toast.error('Failed to save'); }
     finally { setSaving(false); }
@@ -207,6 +247,21 @@ const ParticipantSettings: React.FC = () => {
             </button>
           </div>
         </SectionCard>
+
+        {project?.ecogram_enabled && (
+          <SectionCard icon={Network} title="Care Network (Ecogram)">
+            <EcogramBuilder
+              initialData={ecogramData}
+              onSave={(data) => {
+                setEcogramData(data);
+                toast.success('Ecogram updated — press Save Settings to persist');
+              }}
+              centerLabel={project?.ecogram_config?.center_label || 'You'}
+              relationshipOptions={project?.ecogram_config?.relationship_options}
+              supportCategories={project?.ecogram_config?.support_categories}
+            />
+          </SectionCard>
+        )}
 
         {enrollment && (
           <button onClick={saveSettings} disabled={saving}
