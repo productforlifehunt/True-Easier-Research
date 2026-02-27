@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, Smartphone, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
@@ -28,7 +28,14 @@ export interface LayoutElement {
       height?: string;
     };
     button_action?: string;
+    button_label?: string;
     image_url?: string;
+    show_question_count?: boolean;
+    show_estimated_time?: boolean;
+    consent_text?: string;
+    screening_criteria?: string;
+    help_sections?: { title: string; content: string }[];
+    progress_style?: 'bar' | 'ring' | 'steps';
   };
   order_index: number;
 }
@@ -62,55 +69,52 @@ const ICON_OPTIONS = [
   { value: 'Layout', label: '📐 Layout', icon: Layout },
 ];
 
-const ELEMENT_TYPES = [
-  { type: 'questionnaire', label: '📋 Questionnaire', desc: 'A survey/questionnaire form', category: 'content' },
-  { type: 'consent', label: '🛡️ Consent Form', desc: 'Display consent agreement', category: 'content' },
-  { type: 'screening', label: '📝 Screening', desc: 'Eligibility screening questions', category: 'content' },
-  { type: 'profile', label: '👤 Profile', desc: 'Participant profile collection', category: 'content' },
-  { type: 'ecogram', label: '🔗 Ecogram', desc: 'Care network diagram', category: 'content' },
-  { type: 'progress', label: '📊 Progress', desc: 'Study progress overview', category: 'content' },
-  { type: 'timeline', label: '📅 Timeline', desc: 'Study timeline view', category: 'content' },
-  { type: 'help', label: '❓ Help', desc: 'Help and FAQ section', category: 'content' },
-  { type: 'text_block', label: '📄 Text Block', desc: 'Custom text or instructions', category: 'layout' },
-  { type: 'spacer', label: '↕️ Spacer', desc: 'Add vertical space', category: 'layout' },
-  { type: 'divider', label: '➖ Divider', desc: 'Horizontal divider line', category: 'layout' },
-  { type: 'button', label: '🔘 Button', desc: 'Action button', category: 'layout' },
-  { type: 'image', label: '🖼️ Image', desc: 'Image block', category: 'layout' },
+// Non-questionnaire content elements
+const STATIC_CONTENT_ELEMENTS = [
+  { type: 'consent', label: 'Consent Form', icon: '🛡️', desc: 'Display consent agreement' },
+  { type: 'screening', label: 'Screening', icon: '📝', desc: 'Eligibility screening questions' },
+  { type: 'profile', label: 'Profile', icon: '👤', desc: 'Participant profile collection' },
+  { type: 'ecogram', label: 'Ecogram', icon: '🔗', desc: 'Care network diagram' },
+  { type: 'progress', label: 'Progress', icon: '📊', desc: 'Study progress overview' },
+  { type: 'timeline', label: 'Timeline', icon: '📅', desc: 'Study timeline view' },
+  { type: 'help', label: 'Help', icon: '❓', desc: 'Help and FAQ section' },
+];
+
+const LAYOUT_ELEMENTS = [
+  { type: 'text_block', label: 'Text Block', icon: '📄', desc: 'Custom text or instructions' },
+  { type: 'spacer', label: 'Spacer', icon: '↕️', desc: 'Add vertical space' },
+  { type: 'divider', label: 'Divider', icon: '➖', desc: 'Horizontal divider line' },
+  { type: 'button', label: 'Button', icon: '🔘', desc: 'Action button' },
+  { type: 'image', label: 'Image', icon: '🖼️', desc: 'Image block' },
 ];
 
 const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
   const tabElements: LayoutElement[] = questionnaires.map((q, i) => ({
     id: crypto.randomUUID(),
     type: 'questionnaire' as const,
-    config: { questionnaire_id: q.id, title: q.title, visible: true },
+    config: { questionnaire_id: q.id, title: q.title, visible: true, show_question_count: true, show_estimated_time: true },
     order_index: i,
   }));
 
   return {
     tabs: [
       {
-        id: 'tab-home',
-        label: 'Home',
-        icon: 'Home',
+        id: 'tab-home', label: 'Home', icon: 'Home',
         elements: [
-          { id: crypto.randomUUID(), type: 'progress', config: { title: 'Your Progress', visible: true }, order_index: 0 },
+          { id: crypto.randomUUID(), type: 'progress', config: { title: 'Your Progress', visible: true, progress_style: 'bar' }, order_index: 0 },
           ...tabElements,
         ],
         order_index: 0,
       },
       {
-        id: 'tab-timeline',
-        label: 'Timeline',
-        icon: 'FileText',
+        id: 'tab-timeline', label: 'Timeline', icon: 'FileText',
         elements: [
           { id: crypto.randomUUID(), type: 'timeline', config: { title: 'Study Timeline', visible: true }, order_index: 0 },
         ],
         order_index: 1,
       },
       {
-        id: 'tab-settings',
-        label: 'Settings',
-        icon: 'Settings',
+        id: 'tab-settings', label: 'Settings', icon: 'Settings',
         elements: [
           { id: crypto.randomUUID(), type: 'profile', config: { title: 'Profile', visible: true }, order_index: 0 },
           { id: crypto.randomUUID(), type: 'help', config: { title: 'Help & FAQ', visible: true }, order_index: 1 },
@@ -125,11 +129,7 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
     ],
     show_header: true,
     header_title: '',
-    theme: {
-      primary_color: '#10b981',
-      background_color: '#f5f5f4',
-      card_style: 'elevated',
-    },
+    theme: { primary_color: '#10b981', background_color: '#f5f5f4', card_style: 'elevated' },
   };
 };
 
@@ -176,20 +176,30 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     onUpdate({ ...layout, tabs: newTabs, bottom_nav: newNav });
   };
 
-  const addElement = (type: string) => {
+  const addElement = (type: string, config?: Partial<LayoutElement['config']>) => {
     if (!activeTab) return;
     const newElement: LayoutElement = {
       id: crypto.randomUUID(),
       type: type as LayoutElement['type'],
       config: {
         visible: true,
-        title: ELEMENT_TYPES.find(e => e.type === type)?.label.split(' ').slice(1).join(' ') || type,
+        title: config?.title || type.replace('_', ' '),
+        ...config,
       },
       order_index: activeTab.elements.length,
     };
     updateTab(activeTab.id, { elements: [...activeTab.elements, newElement] });
     setShowAddElement(false);
     setEditingElementId(newElement.id);
+  };
+
+  const addQuestionnaire = (q: QuestionnaireConfig) => {
+    addElement('questionnaire', {
+      questionnaire_id: q.id,
+      title: q.title,
+      show_question_count: true,
+      show_estimated_time: true,
+    });
   };
 
   const removeElement = (elementId: string) => {
@@ -207,13 +217,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     });
   };
 
-  // DnD handler for elements within and across tabs
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-
     const { source, destination } = result;
 
-    // Tab reordering
     if (result.type === 'TAB') {
       const newTabs = Array.from(layout.tabs);
       const [moved] = newTabs.splice(source.index, 1);
@@ -224,13 +231,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       return;
     }
 
-    // Element reordering — supports cross-tab dragging
     if (result.type === 'ELEMENT') {
       const sourceTabId = source.droppableId.replace('elements-', '');
       const destTabId = destination.droppableId.replace('elements-', '');
 
       if (sourceTabId === destTabId) {
-        // Same tab reorder
         const tab = layout.tabs.find(t => t.id === sourceTabId);
         if (!tab) return;
         const newElements = Array.from(tab.elements);
@@ -239,7 +244,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         newElements.forEach((e, i) => e.order_index = i);
         updateTab(sourceTabId, { elements: newElements });
       } else {
-        // Cross-tab move
         const srcTab = layout.tabs.find(t => t.id === sourceTabId);
         const dstTab = layout.tabs.find(t => t.id === destTabId);
         if (!srcTab || !dstTab) return;
@@ -262,7 +266,8 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const editingElement = activeTab?.elements.find(e => e.id === editingElementId);
 
   const getElementIcon = (type: string) => {
-    return ELEMENT_TYPES.find(e => e.type === type)?.label.split(' ')[0] || '📦';
+    const all = [...STATIC_CONTENT_ELEMENTS, ...LAYOUT_ELEMENTS];
+    return all.find(e => e.type === type)?.icon || '📋';
   };
 
   const getElementLabel = (el: LayoutElement) => {
@@ -272,42 +277,74 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     return el.config.title || el.type.replace('_', ' ');
   };
 
-  // Phone preview renderer
+  // Check which questionnaires are already placed in any tab
+  const placedQuestionnaireIds = new Set(
+    layout.tabs.flatMap(t => t.elements)
+      .filter(e => e.type === 'questionnaire' && e.config.questionnaire_id)
+      .map(e => e.config.questionnaire_id!)
+  );
+
+  const unplacedQuestionnaires = questionnaires.filter(q => !placedQuestionnaireIds.has(q.id));
+
+  // ── Phone preview renderer ──
   const renderPhoneElement = (el: LayoutElement) => {
     if (el.config.visible === false) return null;
+    const primary = layout.theme?.primary_color || '#10b981';
+
     switch (el.type) {
       case 'progress':
         return (
-          <div className="p-2.5 rounded-xl" style={{ backgroundColor: layout.theme?.primary_color + '15' || '#10b98115' }}>
+          <div className="p-2.5 rounded-xl" style={{ backgroundColor: primary + '15' }}>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[9px] font-semibold" style={{ color: layout.theme?.primary_color || '#10b981' }}>Study Progress</span>
-              <span className="text-[8px] text-stone-400">Day 3/7</span>
+              <span className="text-[9px] font-semibold" style={{ color: primary }}>Study Progress</span>
+              <span className="text-[8px] text-stone-400">Day 3/{studyDuration}</span>
             </div>
-            <div className="h-1.5 bg-white/50 rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: '43%', backgroundColor: layout.theme?.primary_color || '#10b981' }} />
-            </div>
+            {el.config.progress_style === 'ring' ? (
+              <div className="flex justify-center">
+                <div className="w-10 h-10 rounded-full border-[3px]" style={{ borderColor: primary + '30', borderTopColor: primary }} />
+              </div>
+            ) : (
+              <div className="h-1.5 bg-white/50 rounded-full overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: '43%', backgroundColor: primary }} />
+              </div>
+            )}
           </div>
         );
-      case 'questionnaire':
+      case 'questionnaire': {
         const q = questionnaires.find(qc => qc.id === el.config.questionnaire_id);
         return (
           <div className="p-2.5 rounded-xl bg-white border border-stone-100 shadow-sm">
             <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-semibold text-stone-700">{q?.title || 'Questionnaire'}</span>
-                <p className="text-[8px] text-stone-400 mt-0.5">{q?.questions?.length || 0} questions · {q?.estimated_duration || 5} min</p>
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] font-semibold text-stone-700 truncate block">{q?.title || el.config.title || 'Questionnaire'}</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {el.config.show_question_count !== false && (
+                    <span className="text-[8px] text-stone-400">{q?.questions?.length || 0} questions</span>
+                  )}
+                  {el.config.show_estimated_time !== false && (
+                    <span className="text-[8px] text-stone-400">· {q?.estimated_duration || 5} min</span>
+                  )}
+                </div>
               </div>
-              <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: layout.theme?.primary_color || '#10b981' }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: primary }}>
                 <span className="text-white text-[8px]">▶</span>
               </div>
             </div>
           </div>
         );
+      }
       case 'consent':
         return (
           <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
             <span className="text-[9px] font-semibold text-amber-700">🛡️ {el.config.title || 'Consent Form'}</span>
-            <p className="text-[7px] text-amber-500 mt-0.5">Tap to review and sign</p>
+            <p className="text-[7px] text-amber-500 mt-0.5">{el.config.consent_text || 'Tap to review and sign'}</p>
+          </div>
+        );
+      case 'screening':
+        return (
+          <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-100">
+            <span className="text-[9px] font-semibold text-orange-700">📝 {el.config.title || 'Screening'}</span>
+            <p className="text-[7px] text-orange-500 mt-0.5">{el.config.screening_criteria || 'Eligibility screening'}</p>
           </div>
         );
       case 'profile':
@@ -319,7 +356,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       case 'ecogram':
         return (
           <div className="p-2.5 rounded-xl bg-violet-50 border border-violet-100">
-            <span className="text-[9px] font-semibold text-violet-700">🔗 Ecogram</span>
+            <span className="text-[9px] font-semibold text-violet-700">🔗 {el.config.title || 'Ecogram'}</span>
             <div className="flex justify-center mt-1.5">
               <div className="w-5 h-5 rounded-full bg-violet-200 border-2 border-violet-300" />
             </div>
@@ -331,24 +368,15 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         const previewActiveDay = 2;
         return (
           <div className="p-2.5 rounded-xl bg-white border border-stone-100 space-y-2">
-            <span className="text-[9px] font-semibold text-stone-600">📅 Study Timeline</span>
-            {/* Day tabs */}
+            <span className="text-[9px] font-semibold text-stone-600">📅 {el.config.title || 'Study Timeline'}</span>
             <div className="flex gap-0.5 overflow-hidden">
               {Array.from({ length: days }, (_, i) => i + 1).map(d => (
-                <div
-                  key={d}
-                  className="flex-1 text-center py-0.5 rounded text-[7px] font-medium"
-                  style={{
-                    backgroundColor: d === previewActiveDay ? (layout.theme?.primary_color || '#10b981') : 'transparent',
-                    color: d === previewActiveDay ? 'white' : '#a8a29e',
-                    minWidth: 0,
-                  }}
-                >
+                <div key={d} className="flex-1 text-center py-0.5 rounded text-[7px] font-medium"
+                  style={{ backgroundColor: d === previewActiveDay ? primary : 'transparent', color: d === previewActiveDay ? 'white' : '#a8a29e', minWidth: 0 }}>
                   D{d}
                 </div>
               ))}
             </div>
-            {/* Hourly slots */}
             <div className="space-y-0.5">
               {sampleHours.map(h => {
                 const hasQ = h === 10 || h === 14 || h === 20;
@@ -357,15 +385,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 return (
                   <div key={h} className="flex items-center gap-1">
                     <span className="text-[6px] text-stone-300 w-4 text-right">{h}:00</span>
-                    <div className="flex-1 h-3 rounded" style={{ backgroundColor: hasQ
-                      ? isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : '#f0fdf4'
-                      : 'transparent'
-                    }}>
+                    <div className="flex-1 h-3 rounded" style={{ backgroundColor: hasQ ? isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : '#f0fdf4' : 'transparent' }}>
                       {hasQ && (
                         <div className="flex items-center h-full px-1">
-                          <span className="text-[5px] font-semibold truncate" style={{
-                            color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e'
-                          }}>
+                          <span className="text-[5px] font-semibold truncate" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
                             {questionnaires[0]?.title?.substring(0, 12) || 'Survey'} {isCompleted ? '✓' : isMissed ? '✗' : '○'}
                           </span>
                         </div>
@@ -375,12 +398,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 );
               })}
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex gap-1.5">
-                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" /> Completed</span>
-                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
-                <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-red-200 inline-block" /> Missed</span>
-              </div>
+            <div className="flex gap-1.5">
+              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-300 inline-block" /> Done</span>
+              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
+              <span className="flex items-center gap-0.5 text-[5px] text-stone-400"><span className="w-1.5 h-1.5 rounded-full bg-red-200 inline-block" /> Missed</span>
             </div>
           </div>
         );
@@ -398,19 +419,19 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       case 'help':
         return (
           <div className="p-2.5 rounded-xl bg-white border border-stone-100">
-            <span className="text-[9px] font-semibold text-stone-600">❓ Help & FAQ</span>
+            <span className="text-[9px] font-semibold text-stone-600">❓ {el.config.title || 'Help & FAQ'}</span>
           </div>
         );
       case 'button':
         return (
-          <button className="w-full py-2 rounded-xl text-[9px] font-semibold text-white" style={{ backgroundColor: layout.theme?.primary_color || '#10b981' }}>
-            {el.config.title || 'Button'}
+          <button className="w-full py-2 rounded-xl text-[9px] font-semibold text-white" style={{ backgroundColor: primary }}>
+            {el.config.button_label || el.config.title || 'Button'}
           </button>
         );
-      case 'screening':
+      case 'image':
         return (
-          <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-100">
-            <span className="text-[9px] font-semibold text-orange-700">📝 Screening</span>
+          <div className="rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center" style={{ height: '60px' }}>
+            <span className="text-[8px] text-stone-400">{el.config.image_url ? '🖼️ Image' : '🖼️ No image set'}</span>
           </div>
         );
       default:
@@ -420,6 +441,225 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
         );
     }
+  };
+
+  // ── Element Config Panel ──
+  const renderElementConfig = (el: LayoutElement) => {
+    const q = el.type === 'questionnaire' ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
+
+    return (
+      <div className="bg-stone-50 rounded-xl border border-stone-200 p-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <h5 className="text-[12px] font-semibold text-stone-600">
+            {getElementIcon(el.type)} Configure: {getElementLabel(el)}
+          </h5>
+          <button onClick={() => setEditingElementId(null)} className="p-1 hover:bg-stone-200 rounded">
+            <X size={12} className="text-stone-400" />
+          </button>
+        </div>
+
+        {/* Common: Title */}
+        {el.type !== 'spacer' && el.type !== 'divider' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Title</label>
+            <input
+              type="text"
+              value={el.config.title || ''}
+              onChange={(e) => updateElement(el.id, { title: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+        )}
+
+        {/* Questionnaire-specific */}
+        {el.type === 'questionnaire' && (
+          <>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Questionnaire</label>
+              <select
+                value={el.config.questionnaire_id || ''}
+                onChange={(e) => {
+                  const selected = questionnaires.find(q => q.id === e.target.value);
+                  updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || 'Questionnaire' });
+                }}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
+              >
+                <option value="">Select questionnaire...</option>
+                {questionnaires.map(qc => (
+                  <option key={qc.id} value={qc.id}>{qc.title}</option>
+                ))}
+              </select>
+            </div>
+            {q && (
+              <div className="text-[11px] text-stone-500 bg-white rounded-lg p-2 border border-stone-100">
+                <p><strong>{q.questions?.length || 0}</strong> questions · <strong>{q.estimated_duration || 5}</strong> min estimated</p>
+                {q.frequency && <p className="mt-1">Frequency: <strong>{q.frequency}</strong></p>}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={el.config.show_question_count !== false}
+                  onChange={(e) => updateElement(el.id, { show_question_count: e.target.checked })}
+                  className="rounded border-stone-300"
+                />
+                <span className="text-[11px] text-stone-600">Show question count</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={el.config.show_estimated_time !== false}
+                  onChange={(e) => updateElement(el.id, { show_estimated_time: e.target.checked })}
+                  className="rounded border-stone-300"
+                />
+                <span className="text-[11px] text-stone-600">Show estimated time</span>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Consent */}
+        {el.type === 'consent' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Description</label>
+            <textarea
+              value={el.config.consent_text || ''}
+              onChange={(e) => updateElement(el.id, { consent_text: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              rows={3}
+              placeholder="Brief description of what participants are consenting to..."
+            />
+          </div>
+        )}
+
+        {/* Screening */}
+        {el.type === 'screening' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Screening Criteria Summary</label>
+            <textarea
+              value={el.config.screening_criteria || ''}
+              onChange={(e) => updateElement(el.id, { screening_criteria: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              rows={2}
+              placeholder="Eligibility criteria description..."
+            />
+          </div>
+        )}
+
+        {/* Text block */}
+        {el.type === 'text_block' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Content</label>
+            <textarea
+              value={el.config.content || ''}
+              onChange={(e) => updateElement(el.id, { content: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              rows={3}
+            />
+          </div>
+        )}
+
+        {/* Progress */}
+        {el.type === 'progress' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Progress Style</label>
+            <select
+              value={el.config.progress_style || 'bar'}
+              onChange={(e) => updateElement(el.id, { progress_style: e.target.value as any })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
+            >
+              <option value="bar">Progress Bar</option>
+              <option value="ring">Ring / Circle</option>
+              <option value="steps">Steps</option>
+            </select>
+          </div>
+        )}
+
+        {/* Spacer */}
+        {el.type === 'spacer' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Height (px)</label>
+            <input
+              type="number"
+              value={parseInt(el.config.style?.height || '16')}
+              onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: `${e.target.value}px` } })}
+              className="w-24 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
+            />
+          </div>
+        )}
+
+        {/* Button */}
+        {el.type === 'button' && (
+          <>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input
+                type="text"
+                value={el.config.button_label || el.config.title || ''}
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Action</label>
+              <select
+                value={el.config.button_action || ''}
+                onChange={(e) => updateElement(el.id, { button_action: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
+              >
+                <option value="">None</option>
+                <option value="start_survey">Start Survey</option>
+                <option value="view_progress">View Progress</option>
+                <option value="contact_help">Contact Help</option>
+                <option value="open_url">Open URL</option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* Image */}
+        {el.type === 'image' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Image URL</label>
+            <input
+              type="text"
+              value={el.config.image_url || ''}
+              onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
+              placeholder="https://..."
+            />
+          </div>
+        )}
+
+        {/* Participant type visibility — common to all */}
+        {participantTypes.length > 0 && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to participant types</label>
+            <div className="flex flex-wrap gap-1">
+              {participantTypes.map(pt => {
+                const visible = !el.config.participant_types || el.config.participant_types.includes(pt.id);
+                return (
+                  <button
+                    key={pt.id}
+                    onClick={() => {
+                      const current = el.config.participant_types || participantTypes.map(p => p.id);
+                      const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
+                      updateElement(el.id, { participant_types: next });
+                    }}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}
+                  >
+                    {pt.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -432,14 +672,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               Drag and drop to design how participants see your study
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onUpdate(getDefaultLayout(questionnaires))}
-              className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300"
-            >
-              Reset Default
-            </button>
-          </div>
+          <button
+            onClick={() => onUpdate(getDefaultLayout(questionnaires))}
+            className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300"
+          >
+            Reset Default
+          </button>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -512,7 +750,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   )}
                 </div>
 
-                {/* Add Element Button */}
+                {/* Add Element */}
                 <div className="flex items-center justify-between">
                   <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
                   <button
@@ -524,48 +762,85 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </div>
 
                 {showAddElement && (
-                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content</p>
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
+                    {/* YOUR QUESTIONNAIRES — the real ones */}
+                    {questionnaires.length > 0 && (
+                      <>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Your Questionnaires</p>
+                        <div className="space-y-1">
+                          {questionnaires.map(q => {
+                            const alreadyPlaced = placedQuestionnaireIds.has(q.id);
+                            return (
+                              <button
+                                key={q.id}
+                                onClick={() => !alreadyPlaced && addQuestionnaire(q)}
+                                disabled={alreadyPlaced}
+                                className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border ${
+                                  alreadyPlaced
+                                    ? 'border-stone-100 bg-stone-50 opacity-50 cursor-not-allowed'
+                                    : 'border-transparent hover:bg-white hover:border-stone-200'
+                                }`}
+                              >
+                                <span className="text-lg">📋</span>
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-stone-700 font-medium truncate block">{q.title}</span>
+                                  <span className="text-[9px] text-stone-400">
+                                    {q.questions?.length || 0} questions · {q.estimated_duration || 5} min
+                                    {q.frequency ? ` · ${q.frequency}` : ''}
+                                  </span>
+                                </div>
+                                {alreadyPlaced && (
+                                  <span className="text-[9px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">Added</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Other content elements */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content Elements</p>
                     <div className="grid grid-cols-2 gap-1.5">
-                      {ELEMENT_TYPES.filter(e => e.category === 'content').map(et => (
+                      {STATIC_CONTENT_ELEMENTS.map(et => (
                         <button
                           key={et.type}
-                          onClick={() => addElement(et.type)}
+                          onClick={() => addElement(et.type, { title: et.label })}
                           className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200"
                         >
-                          <span>{et.label.split(' ')[0]}</span>
+                          <span>{et.icon}</span>
                           <div>
-                            <span className="text-stone-600 font-medium">{et.label.split(' ').slice(1).join(' ')}</span>
+                            <span className="text-stone-600 font-medium">{et.label}</span>
                             <p className="text-[9px] text-stone-400">{et.desc}</p>
                           </div>
                         </button>
                       ))}
                     </div>
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider mt-2">Layout</p>
+
+                    {/* Layout elements */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
                     <div className="grid grid-cols-3 gap-1.5">
-                      {ELEMENT_TYPES.filter(e => e.category === 'layout').map(et => (
+                      {LAYOUT_ELEMENTS.map(et => (
                         <button
                           key={et.type}
-                          onClick={() => addElement(et.type)}
+                          onClick={() => addElement(et.type, { title: et.label })}
                           className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200"
                         >
-                          <span className="text-lg">{et.label.split(' ')[0]}</span>
-                          <span className="text-stone-500 font-medium">{et.label.split(' ').slice(1).join(' ')}</span>
+                          <span className="text-lg">{et.icon}</span>
+                          <span className="text-stone-500 font-medium">{et.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Draggable Elements — drop zone for current tab (also accepts cross-tab drops) */}
+                {/* Draggable Elements */}
                 <Droppable droppableId={`elements-${activeTab.id}`} type="ELEMENT">
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`space-y-1 min-h-[60px] rounded-xl transition-colors ${
-                        snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''
-                      }`}
+                      className={`space-y-1 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}
                     >
                       {activeTab.elements.length === 0 ? (
                         <div className="py-8 text-center text-[12px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
@@ -596,7 +871,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                     <span className="text-[12px] font-medium text-stone-700 truncate">
                                       {getElementLabel(el)}
                                     </span>
-                                    <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">
+                                    <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">
                                       {el.type.replace('_', ' ')}
                                     </span>
                                   </div>
@@ -607,6 +882,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                     className="p-1 hover:bg-stone-100 rounded"
                                   >
                                     {el.config.visible !== false ? <Eye size={12} className="text-emerald-500" /> : <EyeOff size={12} className="text-stone-300" />}
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }}
+                                    className="p-1 hover:bg-stone-100 rounded"
+                                  >
+                                    <Edit3 size={12} className="text-stone-400" />
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); removeElement(el.id); }}
@@ -626,124 +907,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </Droppable>
 
                 {/* Element Config Panel */}
-                {editingElement && (
-                  <div className="bg-stone-50 rounded-xl border border-stone-200 p-3 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h5 className="text-[12px] font-semibold text-stone-600">
-                        {getElementIcon(editingElement.type)} Configure {editingElement.type.replace('_', ' ')}
-                      </h5>
-                      <button onClick={() => setEditingElementId(null)} className="p-1 hover:bg-stone-200 rounded">
-                        <X size={12} className="text-stone-400" />
-                      </button>
-                    </div>
-
-                    {/* Title */}
-                    <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Title</label>
-                      <input
-                        type="text"
-                        value={editingElement.config.title || ''}
-                        onChange={(e) => updateElement(editingElement.id, { title: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                      />
-                    </div>
-
-                    {/* Questionnaire selector */}
-                    {editingElement.type === 'questionnaire' && (
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Questionnaire</label>
-                        <select
-                          value={editingElement.config.questionnaire_id || ''}
-                          onChange={(e) => {
-                            const q = questionnaires.find(q => q.id === e.target.value);
-                            updateElement(editingElement.id, {
-                              questionnaire_id: e.target.value,
-                              title: q?.title || 'Questionnaire',
-                            });
-                          }}
-                          className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-                        >
-                          <option value="">Select questionnaire...</option>
-                          {questionnaires.map(q => (
-                            <option key={q.id} value={q.id}>{q.title}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Text block content */}
-                    {editingElement.type === 'text_block' && (
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Content</label>
-                        <textarea
-                          value={editingElement.config.content || ''}
-                          onChange={(e) => updateElement(editingElement.id, { content: e.target.value })}
-                          className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                          rows={3}
-                        />
-                      </div>
-                    )}
-
-                    {/* Spacer height */}
-                    {editingElement.type === 'spacer' && (
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Height (px)</label>
-                        <input
-                          type="number"
-                          value={parseInt(editingElement.config.style?.height || '16')}
-                          onChange={(e) => updateElement(editingElement.id, {
-                            style: { ...editingElement.config.style, height: `${e.target.value}px` },
-                          })}
-                          className="w-24 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
-                        />
-                      </div>
-                    )}
-
-                    {/* Button action */}
-                    {editingElement.type === 'button' && (
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Action</label>
-                        <select
-                          value={editingElement.config.button_action || ''}
-                          onChange={(e) => updateElement(editingElement.id, { button_action: e.target.value })}
-                          className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-                        >
-                          <option value="">None</option>
-                          <option value="start_survey">Start Survey</option>
-                          <option value="view_progress">View Progress</option>
-                          <option value="contact_help">Contact Help</option>
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Participant type visibility */}
-                    {participantTypes.length > 0 && (
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to</label>
-                        <div className="flex flex-wrap gap-1">
-                          {participantTypes.map(pt => {
-                            const visible = !editingElement.config.participant_types || editingElement.config.participant_types.includes(pt.id);
-                            return (
-                              <button
-                                key={pt.id}
-                                onClick={() => {
-                                  const current = editingElement.config.participant_types || participantTypes.map(p => p.id);
-                                  const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
-                                  updateElement(editingElement.id, { participant_types: next });
-                                }}
-                                className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                                  visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                                }`}
-                              >
-                                {pt.name}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {editingElement && renderElementConfig(editingElement)}
               </div>
             )}
 
