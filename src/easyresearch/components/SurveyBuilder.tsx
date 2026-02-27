@@ -891,6 +891,9 @@ const SurveyBuilder: React.FC = () => {
             questions={activeQuestions}
             projectTitle={project.title || ''}
             projectDescription={project.description || ''}
+            appLayout={appLayout}
+            questionnaires={questionnaireConfigs}
+            participantTypes={participantTypes}
           />
         )}
       </div>
