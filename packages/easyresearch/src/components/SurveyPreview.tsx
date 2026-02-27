@@ -164,6 +164,8 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({ questions, projectTitle, 
           </div>
         );
 
+      case 'section_header':
+        return null;
       default:
         return <div style={{ color: 'var(--text-secondary)' }}>Question type: {question.question_type}</div>;
     }
