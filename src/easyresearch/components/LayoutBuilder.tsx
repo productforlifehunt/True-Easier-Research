@@ -206,9 +206,9 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
     });
   };
 
-  // DnD handler for elements within a tab
+  // DnD handler for elements within and across tabs
   const handleDragEnd = (result: DropResult) => {
-    if (!result.destination || !activeTab) return;
+    if (!result.destination) return;
 
     const { source, destination } = result;
 
@@ -218,19 +218,43 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       const [moved] = newTabs.splice(source.index, 1);
       newTabs.splice(destination.index, 0, moved);
       newTabs.forEach((t, i) => t.order_index = i);
-      // Also reorder bottom_nav to match
       const newNav = newTabs.map(t => layout.bottom_nav.find(n => n.tab_id === t.id) || { icon: t.icon, label: t.label, tab_id: t.id });
       onUpdate({ ...layout, tabs: newTabs, bottom_nav: newNav });
       return;
     }
 
-    // Element reordering within tab
+    // Element reordering — supports cross-tab dragging
     if (result.type === 'ELEMENT') {
-      const newElements = Array.from(activeTab.elements);
-      const [moved] = newElements.splice(source.index, 1);
-      newElements.splice(destination.index, 0, moved);
-      newElements.forEach((e, i) => e.order_index = i);
-      updateTab(activeTab.id, { elements: newElements });
+      const sourceTabId = source.droppableId.replace('elements-', '');
+      const destTabId = destination.droppableId.replace('elements-', '');
+
+      if (sourceTabId === destTabId) {
+        // Same tab reorder
+        const tab = layout.tabs.find(t => t.id === sourceTabId);
+        if (!tab) return;
+        const newElements = Array.from(tab.elements);
+        const [moved] = newElements.splice(source.index, 1);
+        newElements.splice(destination.index, 0, moved);
+        newElements.forEach((e, i) => e.order_index = i);
+        updateTab(sourceTabId, { elements: newElements });
+      } else {
+        // Cross-tab move
+        const srcTab = layout.tabs.find(t => t.id === sourceTabId);
+        const dstTab = layout.tabs.find(t => t.id === destTabId);
+        if (!srcTab || !dstTab) return;
+        const srcElements = Array.from(srcTab.elements);
+        const dstElements = Array.from(dstTab.elements);
+        const [moved] = srcElements.splice(source.index, 1);
+        dstElements.splice(destination.index, 0, moved);
+        srcElements.forEach((e, i) => e.order_index = i);
+        dstElements.forEach((e, i) => e.order_index = i);
+        const newTabs = layout.tabs.map(t => {
+          if (t.id === sourceTabId) return { ...t, elements: srcElements };
+          if (t.id === destTabId) return { ...t, elements: dstElements };
+          return t;
+        });
+        onUpdate({ ...layout, tabs: newTabs });
+      }
     }
   };
 
@@ -483,7 +507,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   </div>
                 )}
 
-                {/* Draggable Elements */}
+                {/* Draggable Elements — drop zone for current tab (also accepts cross-tab drops) */}
                 <Droppable droppableId={`elements-${activeTab.id}`} type="ELEMENT">
                   {(provided, snapshot) => (
                     <div
