@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Trash2, ChevronUp, ChevronDown, Copy, FileText, Mic, Settings, Save, Eye, ArrowLeft, Pencil, GripVertical } from 'lucide-react';
+import { Save, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
-import QuestionEditor from './QuestionEditor';
 import SurveySettings from './SurveySettings';
 import SurveyLogic from './SurveyLogic';
 import SurveyPreview from './SurveyPreview';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
-import CustomDropdown from './CustomDropdown';
 import toast from 'react-hot-toast';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface Question {
   id: string;
@@ -138,7 +134,6 @@ const SurveyBuilder: React.FC = () => {
   });
   // Legacy global questions state - only used for loading/migration, all questions now live inside questionnaire configs
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>('questionnaires');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -148,7 +143,6 @@ const SurveyBuilder: React.FC = () => {
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
   const [participantTypes, setParticipantTypes] = useState<ParticipantType[]>([]);
   const [appLayout, setAppLayout] = useState<AppLayout>(getDefaultLayout([]));
-  const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
 
   const projectStatus = (project as any)?.status || 'draft';
 
@@ -450,94 +444,7 @@ const SurveyBuilder: React.FC = () => {
     }
   }, [templateData, projectId]);
 
-  // All questions now live inside questionnaire configs
-  const getActiveQuestions = (): Question[] => {
-    if (activeQuestionnaireId) {
-      const qConfig = questionnaireConfigs.find(q => q.id === activeQuestionnaireId);
-      return qConfig?.questions || [];
-    }
-    return [];
-  };
-
-  const setActiveQuestions = (newQuestions: Question[]) => {
-    if (activeQuestionnaireId) {
-      setQuestionnaireConfigs(prev => prev.map(q =>
-        q.id === activeQuestionnaireId ? { ...q, questions: newQuestions } : q
-      ));
-    }
-  };
-
-  const activeQuestions = getActiveQuestions();
-
-  const addQuestion = (type: string) => {
-    const questionTypeDef = QUESTION_TYPE_DEFINITIONS.find(def => def.type === type);
-    if (!questionTypeDef) { console.warn(`Unknown question type: ${type}`); return; }
-    let questionConfig = { ...questionTypeDef.defaultConfig };
-    let options: QuestionOption[] = [];
-    if (questionTypeDef.requiresOptions) {
-      options = [
-        { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
-        { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
-      ];
-    }
-    const newQuestion: Question = {
-      id: crypto.randomUUID(), question_type: type, question_text: 'Enter your question',
-      question_description: '', question_config: questionConfig, validation_rule: {},
-      ai_config: {}, order_index: activeQuestions.length, required: false,
-      allow_voice: false, allow_ai_assist: false, logic_rule: {}, options: options
-    };
-    setActiveQuestions([...activeQuestions, newQuestion]);
-    setSelectedQuestion(newQuestion);
-  };
-
-  const updateQuestion = (questionId: string, updates: Partial<Question>) => {
-    setActiveQuestions(activeQuestions.map(q => q.id === questionId ? { ...q, ...updates } : q));
-    if (selectedQuestion?.id === questionId) {
-      setSelectedQuestion({ ...selectedQuestion, ...updates });
-    }
-  };
-
-  const deleteQuestion = (questionId: string) => {
-    setActiveQuestions(activeQuestions.filter(q => q.id !== questionId));
-    if (selectedQuestion?.id === questionId) setSelectedQuestion(null);
-  };
-
-  const moveQuestion = (questionId: string, direction: 'up' | 'down') => {
-    const index = activeQuestions.findIndex(q => q.id === questionId);
-    if ((direction === 'up' && index > 0) || (direction === 'down' && index < activeQuestions.length - 1)) {
-      const newQuestions = [...activeQuestions];
-      const newIndex = direction === 'up' ? index - 1 : index + 1;
-      [newQuestions[index], newQuestions[newIndex]] = [newQuestions[newIndex], newQuestions[index]];
-      newQuestions.forEach((q, i) => q.order_index = i);
-      setActiveQuestions(newQuestions);
-    }
-  };
-
-  const handleQuestionDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    const items = Array.from(activeQuestions);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    const reorderedQuestions = items.map((q, index) => ({ ...q, order_index: index }));
-    setActiveQuestions(reorderedQuestions);
-    toast.success('Question order updated');
-  };
-
-  const duplicateQuestion = (question: Question) => {
-    const duplicate = {
-      ...question, id: crypto.randomUUID(), order_index: activeQuestions.length,
-      question_text: question.question_text + ' (Copy)',
-      options: question.options ? question.options.map(opt => ({ ...opt, id: crypto.randomUUID() })) : []
-    };
-    setActiveQuestions([...activeQuestions, duplicate]);
-    setSelectedQuestion(duplicate);
-  };
-
-  const handleEditQuestions = (questionnaireId: string) => {
-    setActiveQuestionnaireId(questionnaireId);
-    setSelectedQuestion(null);
-    // Stay on questionnaires tab - questions are shown inline
-  };
+  // All question management is now handled inside QuestionnaireList component
 
   const saveProject = async () => {
     setSaving(true);
@@ -650,9 +557,6 @@ const SurveyBuilder: React.FC = () => {
     { id: 'preview', label: 'Preview' },
   ];
 
-  const activeQuestionnaireName = activeQuestionnaireId
-    ? questionnaireConfigs.find(q => q.id === activeQuestionnaireId)?.title
-    : null;
 
   return (
     <div className="min-h-screen bg-stone-50/50">
@@ -687,11 +591,6 @@ const SurveyBuilder: React.FC = () => {
                   }`}>
                     {projectStatus}
                   </span>
-                  {activeQuestionnaireName && (
-                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">
-                      Editing: {activeQuestionnaireName}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
@@ -750,18 +649,9 @@ const SurveyBuilder: React.FC = () => {
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes.map(pt => ({ id: pt.id, name: pt.name }))}
             onUpdate={setQuestionnaireConfigs}
-            onEditQuestions={handleEditQuestions}
-            activeQuestionnaireId={activeQuestionnaireId}
-            selectedQuestion={selectedQuestion}
-            onSelectQuestion={setSelectedQuestion}
-            onAddQuestion={addQuestion}
-            onUpdateQuestion={updateQuestion}
-            onDeleteQuestion={deleteQuestion}
-            onMoveQuestion={moveQuestion}
-            onDuplicateQuestion={duplicateQuestion}
-            onQuestionDragEnd={handleQuestionDragEnd}
-            onCloseQuestionEditor={() => { setActiveQuestionnaireId(null); setSelectedQuestion(null); }}
             project={project}
+            logicRules={logicRules}
+            onUpdateLogic={setLogicRules}
           />
         )}
 
