@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronUp, Copy, GripVertical, FileText, Edit2, Users } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 
 export interface QuestionnaireConfig {

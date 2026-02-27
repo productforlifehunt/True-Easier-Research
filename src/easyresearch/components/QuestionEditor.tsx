@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Mic, GripVertical, X, Save, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import toast from 'react-hot-toast';
 
 interface Question {
