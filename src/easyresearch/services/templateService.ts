@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 
 // Template questions for each template ID
-const templateQuestions: Record<string, Array<{text: string, type: string, required: boolean, options?: string[]}>> = {
+const templateQuestions: Record<string, Array<{text: string, type: string, required: boolean, options?: string[], config?: Record<string, any>}>> = {
   '1': [ // CSAT
     { text: 'Overall, how satisfied are you with our product/service?', type: 'rating', required: true },
     { text: 'How would you rate the quality of our product/service?', type: 'rating', required: true },
@@ -154,6 +154,115 @@ const templateQuestions: Record<string, Array<{text: string, type: string, requi
     { text: 'I felt very confident using the system.', type: 'likert_scale', required: true },
     { text: 'I needed to learn a lot of things before I could get going with this system.', type: 'likert_scale', required: true },
   ],
+  '15': [ // Dementia Caregiver ESM Study
+    // Section 1: Activity
+    { text: 'Activity Details', type: 'section_header', required: false, config: { section_icon: '📋', section_color: '#10b981' } },
+    { text: 'What caregiving activities did you do?', type: 'checkbox_group', required: true, options: ['ADL (bathing, dressing, eating, toileting, mobility)', 'IADL (medication, finances, shopping, cooking, housework)', 'Medical care (appointments, treatments)', 'Emotional support / companionship', 'Supervision / safety monitoring', 'Transportation', 'Communication with professionals', 'Administrative tasks', 'Other'] },
+    { text: 'Please describe what you were doing', type: 'text_long', required: false },
+    { text: 'How long did you spend on this activity (minutes)?', type: 'number', required: false },
+    { text: 'How pleasant/unpleasant was this event?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Unpleasant', max_label: 'Very Pleasant' } },
+    { text: 'Did the care recipient show memory problems?', type: 'yes_no', required: true },
+    { text: 'Did the care recipient show behavior problems?', type: 'yes_no', required: true },
+    { text: 'Did the care recipient show depressive symptoms?', type: 'yes_no', required: true },
+    { text: 'How much distress did these memory/behavior problems cause you?', type: 'likert_scale', required: false, config: { scale_type: '0-4', custom_labels: ['No distress', 'A little', 'Moderate', 'Quite a bit', 'Extreme distress'] } },
+    // Section 2: Affect
+    { text: 'Your Wellbeing', type: 'section_header', required: false, config: { section_icon: '💛', section_color: '#eab308' } },
+    { text: 'Right now, I feel cheerful', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel relaxed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel enthusiastic', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel satisfied', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel insecure', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel lonely', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel anxious', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel irritated', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel down', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel desperate', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    { text: 'Right now, I feel tensed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much' } },
+    // Section 3: People & Challenges
+    { text: 'People & Challenges', type: 'section_header', required: false, config: { section_icon: '👥', section_color: '#3b82f6' } },
+    { text: 'Who was with you or helped you?', type: 'text_long', required: false },
+    { text: 'Who else do you wish could have helped?', type: 'text_long', required: false },
+    { text: 'What challenges did you face reaching the people you needed?', type: 'text_long', required: false },
+    { text: 'How challenging was this activity overall?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'No Challenges', max_label: 'Extreme Challenges' } },
+    { text: 'What types of challenges did you experience?', type: 'checkbox_group', required: false, options: ['Knowledge gaps', 'Patient condition changes', 'Coordination difficulties', 'Time constraints', 'Emotional stress', 'Physical demands', 'Communication issues', 'Safety/liability concerns', 'Privacy issues', 'Other'] },
+    { text: 'What resources or tools are you currently using?', type: 'text_long', required: false },
+    { text: 'What resources or tools do you wish you had?', type: 'text_long', required: false },
+    // Section 4: Daily Sense of Competence
+    { text: 'Daily Reflection', type: 'section_header', required: false, config: { section_icon: '🧠', section_color: '#8b5cf6' } },
+    { text: 'I felt stressed by the caregiving demands', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
+    { text: 'I felt that caregiving affected my privacy', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
+    { text: 'I felt strained in my relationship with the care recipient', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree' } },
+    { text: 'Overall, how burdensome or manageable was caregiving today?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Burdensome', max_label: 'Very Manageable' } },
+    { text: 'How urgent was the care need?', type: 'single_choice', required: false, options: ['Low', 'Medium', 'High', 'Urgent'] },
+  ],
+};
+
+// Template-specific project settings (overrides defaults when creating from template)
+const TEMPLATE_PROJECT_SETTINGS: Record<string, any> = {
+  '15': {
+    project_type: 'longitudinal',
+    methodology_type: 'esm',
+    ai_enabled: false,
+    voice_enabled: true,
+    notification_enabled: true,
+    study_duration: 7,
+    survey_frequency: 'hourly',
+    allow_participant_dnd: true,
+    onboarding_required: true,
+    consent_required: true,
+    consent_form_text: 'By participating in this 7-day study, you agree to log your caregiving activities hourly between 9am-9pm. Your data will be kept strictly confidential and used only for research purposes. You may withdraw at any time without consequence.',
+    onboarding_instructions: 'Welcome to our Dementia Caregiver Experience Study! Over the next 7 days, you will receive hourly reminders (9am-9pm) to log your caregiving activities, mood, and challenges. Each entry takes only 2-3 minutes. You can set Do Not Disturb periods and use voice input for faster logging.',
+    notification_setting: {
+      frequency: 'multiple_daily',
+      times_per_day: 13,
+      notification_times: ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'],
+      send_reminders: true,
+      timezone: 'auto',
+    },
+    sampling_strategy: {
+      type: 'fixed_schedule',
+      prompts_per_day: 13,
+      duration_days: 7,
+      start_hour: 9,
+      end_hour: 21,
+      allow_late_responses: true,
+      late_window_minutes: 60,
+    },
+    setting: {
+      show_progress_bar: true,
+      enable_timeline_view: true,
+      show_progress_tracker: true,
+    },
+    profile_questions: [
+      { id: 'pq_demographics', question: 'Caregiver Demographics', type: 'section' as const, required: false },
+      { id: 'pq_age', question: 'Your age', type: 'number' as const, required: true },
+      { id: 'pq_gender', question: 'Your gender', type: 'select' as const, options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'], required: true },
+      { id: 'pq_education', question: 'Highest education level', type: 'select' as const, options: ['Primary school', 'Secondary school', 'Vocational', 'Bachelor\'s', 'Master\'s', 'Doctorate'], required: false },
+      { id: 'pq_employment', question: 'Employment status', type: 'select' as const, options: ['Full-time', 'Part-time', 'Self-employed', 'Unemployed', 'Retired', 'Student'], required: false },
+      { id: 'pq_relationship', question: 'Relationship to care recipient', type: 'select' as const, options: ['Spouse/Partner', 'Parent', 'Child', 'Sibling', 'Other Relative', 'Friend/Neighbor', 'Professional Caregiver', 'Other'], required: true },
+      { id: 'pq_caregiving_years', question: 'How long have you been caregiving?', type: 'select' as const, options: ['Less than 6 months', '6 months - 1 year', '1-2 years', '2-5 years', 'More than 5 years'], required: true },
+      { id: 'pq_hours', question: 'Hours per week providing care', type: 'number' as const, required: false },
+      { id: 'pq_health', question: 'Your overall health status', type: 'scale' as const, required: false, config: { min: 1, max: 5, min_label: 'Poor', max_label: 'Excellent' } },
+      { id: 'pq_recipient', question: 'Care Recipient Information', type: 'section' as const, required: false },
+      { id: 'pq_rec_age', question: 'Care recipient age', type: 'number' as const, required: false },
+      { id: 'pq_rec_gender', question: 'Care recipient gender', type: 'select' as const, options: ['Male', 'Female'], required: false },
+      { id: 'pq_dementia_type', question: 'Type of dementia', type: 'select' as const, options: ['Alzheimer\'s disease', 'Vascular dementia', 'Lewy body dementia', 'Frontotemporal dementia', 'Mixed dementia', 'Unknown/Other'], required: false },
+      { id: 'pq_diagnosis_years', question: 'Years since diagnosis', type: 'number' as const, required: false },
+      { id: 'pq_dementia_stage', question: 'Dementia stage', type: 'select' as const, options: ['Early/Mild', 'Middle/Moderate', 'Late/Severe'], required: false },
+      { id: 'pq_adl', question: 'Functional Assessment (ADL)', type: 'section' as const, required: false },
+      { id: 'pq_adl_eating', question: 'Eating ability', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_adl_bathing', question: 'Bathing ability', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_adl_dressing', question: 'Dressing ability', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_adl_toileting', question: 'Toileting ability', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_adl_mobility', question: 'Mobility', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_iadl', question: 'Instrumental ADL (IADL)', type: 'section' as const, required: false },
+      { id: 'pq_iadl_medication', question: 'Medication management', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_iadl_finances', question: 'Financial management', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_iadl_shopping', question: 'Shopping', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_iadl_cooking', question: 'Cooking/meal prep', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+      { id: 'pq_iadl_housework', question: 'Housework', type: 'scale' as const, required: false, config: { min: 1, max: 3, min_label: 'Independent', max_label: 'Fully dependent' } },
+    ],
+  },
 };
 
 // Get template questions for local/demo mode
@@ -215,6 +324,10 @@ export async function createSurveyFromTemplate(
     // Generate unique survey code
     const surveyCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    // Template-specific settings
+    const templateSettings = TEMPLATE_PROJECT_SETTINGS[templateId];
+    const isLongitudinal = templateSettings?.project_type === 'longitudinal';
+
     // Create the project
     const { data: project, error: projectError } = await supabase
       .from('research_project')
@@ -223,14 +336,33 @@ export async function createSurveyFromTemplate(
         researcher_id: researcher.id,
         title: templateName,
         description: templateDescription,
-        project_type: 'survey',
-        methodology_type: 'single_survey',
-        ai_enabled: false,
-        voice_enabled: false,
-        notification_enabled: true,
+        project_type: templateSettings?.project_type || 'survey',
+        methodology_type: templateSettings?.methodology_type || 'single_survey',
+        ai_enabled: templateSettings?.ai_enabled || false,
+        voice_enabled: templateSettings?.voice_enabled || false,
+        notification_enabled: templateSettings?.notification_enabled ?? true,
         survey_code: surveyCode,
         status: 'draft',
-        setting: { show_progress_bar: true, allow_back_navigation: true }
+        study_duration: templateSettings?.study_duration,
+        survey_frequency: templateSettings?.survey_frequency,
+        allow_participant_dnd: templateSettings?.allow_participant_dnd,
+        onboarding_required: templateSettings?.onboarding_required,
+        onboarding_instruction: templateSettings?.onboarding_instructions,
+        profile_question: templateSettings?.profile_questions,
+        setting: {
+          show_progress_bar: true,
+          allow_back_navigation: true,
+          ...templateSettings?.setting,
+          consent_required: templateSettings?.consent_required,
+          consent_form_text: templateSettings?.consent_form_text,
+        },
+        notification_setting: templateSettings?.notification_setting,
+        consent_form: templateSettings?.consent_required ? {
+          required: true,
+          title: 'Research Consent Form',
+          form_text: templateSettings?.consent_form_text || 'By participating in this study, you agree to provide honest responses. Your data will be kept confidential.'
+        } : null,
+        sampling_strategy: templateSettings?.sampling_strategy,
       })
       .select()
       .single();
@@ -247,17 +379,18 @@ export async function createSurveyFromTemplate(
     }
 
     // Insert questions
-    const questionsToInsert = questions.map((q, index) => ({
+    const questionsToInsert = questions.map((q: any, index: number) => ({
       project_id: project.id,
       question_type: normalizeLegacyQuestionType(q.type),
       question_text: q.text,
       question_description: '',
       required: q.required,
       order_index: index + 1,
-      question_config: {},
+      question_config: q.config || {},
       validation_rule: {},
       logic_rule: {},
-      ai_config: {}
+      ai_config: {},
+      allow_voice: isLongitudinal && ['text_long', 'long_text'].includes(q.type),
     }));
 
     const { data: insertedQuestions, error: questionsError } = await supabase
