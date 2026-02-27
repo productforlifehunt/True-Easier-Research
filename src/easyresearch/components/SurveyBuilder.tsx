@@ -89,7 +89,7 @@ export interface SurveyProject {
   auto_advance?: boolean;
 }
 
-type TabId = 'questionnaires' | 'participants' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
+type TabId = 'questionnaires' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -136,7 +136,7 @@ const SurveyBuilder: React.FC = () => {
   // Legacy global questions state - only used for loading/migration, all questions now live inside questionnaire configs
   const [questions, setQuestions] = useState<Question[]>([]);
   const initialTab = (location.state as any)?.activeTab as TabId | undefined;
-  const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'questionnaires');
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'settings');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [logicRules, setLogicRules] = useState<any[]>([]);
@@ -551,11 +551,10 @@ const SurveyBuilder: React.FC = () => {
   };
 
   const tabs: { id: TabId; label: string }[] = [
+    { id: 'settings', label: 'Settings' },
     { id: 'questionnaires', label: 'Questionnaires' },
-    { id: 'participants', label: 'Participants' },
     { id: 'logic', label: 'Logic' },
     { id: 'layout', label: 'Layout' },
-    { id: 'settings', label: 'Settings' },
     { id: 'preview', label: 'Preview' },
     ...(projectId ? [{ id: 'responses' as TabId, label: 'Responses' }] : []),
   ];
@@ -658,13 +657,7 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
-        {/* Participant Types Tab */}
-        {activeTab === 'participants' && (
-          <ParticipantTypeManager
-            participantTypes={participantTypes}
-            onUpdate={setParticipantTypes}
-          />
-        )}
+        {/* Participants tab removed - now in Settings */}
 
         {/* Logic Tab */}
         {activeTab === 'logic' && (
@@ -683,7 +676,12 @@ const SurveyBuilder: React.FC = () => {
 
         {/* Settings Tab */}
         {activeTab === 'settings' && project && (
-          <SurveySettings project={project} onUpdateProject={(updates) => setProject(updates)} />
+          <SurveySettings
+            project={project}
+            onUpdateProject={(updates) => setProject(updates)}
+            participantTypes={participantTypes}
+            onUpdateParticipantTypes={setParticipantTypes}
+          />
         )}
 
         {/* Preview Tab */}
