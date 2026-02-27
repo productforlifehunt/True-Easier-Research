@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, GripVertical, Trash2, Edit3 } from 'lucide-react';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
@@ -10,15 +11,14 @@ interface AppPhonePreviewProps {
   questionnaires: QuestionnaireConfig[];
   participantTypes?: ParticipantType[];
   studyDuration?: number;
-  /** Which tab is active (controlled from outside for Layout builder sync) */
   activeTabId?: string;
   onActiveTabChange?: (tabId: string) => void;
-  /** Highlight element on click (for Layout builder) */
   highlightedElementId?: string | null;
   onElementClick?: (elementId: string) => void;
-  /** Visual scale factor — phone is always rendered at full size then CSS-scaled */
+  /** If true, shows drag handles and edit/delete on phone elements (Layout builder mode) */
+  editable?: boolean;
+  onRemoveElement?: (elementId: string) => void;
   scale?: number;
-  /** Height of the phone frame */
   frameHeight?: number;
 }
 
@@ -30,6 +30,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   layout, questionnaires, participantTypes, studyDuration = 7,
   activeTabId: controlledTabId, onActiveTabChange,
   highlightedElementId, onElementClick,
+  editable = false, onRemoveElement,
   scale = 1, frameHeight = 680,
 }) => {
   const [internalTabId, setInternalTabId] = useState(layout.tabs[0]?.id || '');
@@ -83,7 +84,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       case 'yes_no':
         return (<div className="flex gap-3">{['Yes', 'No'].map(opt => (<button key={opt} onClick={() => handleResponse(question.id, opt)} className={`flex-1 py-3 rounded-xl border-2 text-[13px] font-medium transition-all ${value === opt ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>{opt}</button>))}</div>);
       case 'section_header':
-        return null; // Section headers are rendered as titles, no input needed
+        return null;
       case 'date':
         return <input type="date" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />;
       default: return <p className="text-[12px] text-stone-400 italic">Preview not available for: {question.question_type}</p>;
@@ -100,8 +101,8 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       const progress = qs.length > 0 ? ((currentQuestionIndex + 1) / qs.length) * 100 : 0;
       return (
         <div className="space-y-3">
-          <button onClick={() => { setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-            className="flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-700">
+          <button type="button" onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
+            className="flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-700 cursor-pointer">
             <ChevronLeft size={14} /> Back to {activeTab?.label || 'Home'}
           </button>
           <div>
@@ -132,34 +133,28 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             </div>
           )}
           {qs.length === 0 && (
-            <p className="text-[12px] text-stone-400 italic py-4 text-center">No questions added to this questionnaire yet.</p>
+            <p className="text-[12px] text-stone-400 italic py-4 text-center">No questions added yet.</p>
           )}
           {qs.length > 0 && (
             <div className="flex justify-between pt-3 border-t border-stone-100">
-              <button
-                type="button"
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1)); }}
                 disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer"
-              >
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer">
                 <ChevronLeft size={12} /> Back
               </button>
               {currentQuestionIndex === qs.length - 1 ? (
-                <button
-                  type="button"
+                <button type="button"
                   onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
-                  style={{ backgroundColor: primaryColor }}
-                >
+                  style={{ backgroundColor: primaryColor }}>
                   Submit <Check size={12} />
                 </button>
               ) : (
-                <button
-                  type="button"
+                <button type="button"
                   onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(currentQuestionIndex + 1); }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
-                  style={{ backgroundColor: primaryColor }}
-                >
+                  style={{ backgroundColor: primaryColor }}>
                   Next <ChevronRight size={12} />
                 </button>
               )}
@@ -171,10 +166,9 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
     // Card view
     return (
-      <button
-        onClick={() => { setActiveQuestionnaireId(qId); setCurrentQuestionIndex(0); }}
-        className="w-full p-3.5 rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left"
-      >
+      <button type="button"
+        onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(qId); setCurrentQuestionIndex(0); }}
+        className="w-full p-3.5 rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left cursor-pointer">
         <div className="flex items-center justify-between">
           <div>
             <h4 className="text-[13px] font-semibold text-stone-800">{qTitle}</h4>
@@ -206,19 +200,16 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               <div className="h-full rounded-full" style={{ width: '43%', backgroundColor: primaryColor }} />
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-stone-400">
-              <span>3 entries today</span>
-              <span>7 total</span>
+              <span>3 entries today</span><span>7 total</span>
             </div>
           </div>
         );
-
       case 'questionnaire':
         if (el.config.questionnaire_id) {
           const q = questionnaires?.find(qc => qc.id === el.config.questionnaire_id);
           return renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire');
         }
         return null;
-
       case 'consent':
         return (
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
@@ -230,7 +221,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <button className="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-medium">Review & Sign</button>
           </div>
         );
-
       case 'screening':
         return (
           <div className="p-4 rounded-xl bg-orange-50 border border-orange-200">
@@ -238,7 +228,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <p className="text-[11px] text-orange-600 mt-1">{el.config.screening_criteria || 'Answer screening questions to check eligibility'}</p>
           </div>
         );
-
       case 'profile':
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
@@ -249,7 +238,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             </div>
           </div>
         );
-
       case 'ecogram':
         return (
           <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
@@ -265,29 +253,22 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             </div>
           </div>
         );
-
       case 'timeline': {
         const timelineDays = Math.min(studyDuration, 30);
         const sampleHours = [8, 10, 12, 14, 16, 18, 20];
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
             <h4 className="text-[13px] font-semibold text-stone-800">📅 {el.config.title || 'Study Timeline'}</h4>
-            {/* Day selector */}
             <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               {Array.from({ length: Math.min(timelineDays, 14) }, (_, i) => i + 1).map(d => (
-                <button key={d}
-                   onClick={() => setSelectedTimelineDay(d)}
-                   className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all shrink-0"
-                   style={{
-                     backgroundColor: d === selectedTimelineDay ? primaryColor : 'transparent',
-                     color: d === selectedTimelineDay ? 'white' : '#a8a29e',
-                  }}>
+                <button key={d} onClick={(e) => { e.stopPropagation(); setSelectedTimelineDay(d); }}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all shrink-0"
+                  style={{ backgroundColor: d === selectedTimelineDay ? primaryColor : 'transparent', color: d === selectedTimelineDay ? 'white' : '#a8a29e' }}>
                   D{d}
                 </button>
               ))}
               {timelineDays > 14 && <span className="text-[10px] text-stone-400 self-center ml-1">+{timelineDays - 14}</span>}
             </div>
-            {/* Hourly grid */}
             <div className="space-y-1">
               {sampleHours.map(h => {
                 const hasQ = h === 10 || h === 14 || h === 20;
@@ -298,14 +279,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                   <div key={h} className="flex items-center gap-2">
                     <span className="text-[10px] text-stone-300 w-8 text-right shrink-0">{h}:00</span>
                     <div className={`flex-1 rounded-lg transition-all ${hasQ ? 'p-2' : 'h-1'}`}
-                      style={{
-                        backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : 'transparent',
-                      }}>
+                      style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : 'transparent' }}>
                       {hasQ && (
                         <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-medium" style={{
-                            color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e'
-                          }}>
+                          <span className="text-[11px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
                             {questionnaires[0]?.title || 'Survey'}
                           </span>
                           <span className="text-[10px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
@@ -326,7 +303,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </div>
         );
       }
-
       case 'help':
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
@@ -334,27 +310,22 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <p className="text-[11px] text-stone-400 mt-1">Common questions and support contact</p>
           </div>
         );
-
       case 'text_block':
         return (
           <div className="p-3 rounded-xl bg-stone-50">
             <p className="text-[12px] text-stone-600">{el.config.content || el.config.title || 'Text content...'}</p>
           </div>
         );
-
       case 'spacer':
         return <div style={{ height: el.config.style?.height || '16px' }} />;
-
       case 'divider':
         return <div className="border-t border-stone-200 my-2" />;
-
       case 'button':
         return (
           <button className="w-full py-3 rounded-xl text-[13px] font-semibold text-white" style={{ backgroundColor: primaryColor }}>
             {el.config.button_label || el.config.title || 'Button'}
           </button>
         );
-
       case 'image':
         return el.config.image_url ? (
           <img src={el.config.image_url} alt="" className="w-full rounded-xl" />
@@ -363,7 +334,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <span className="text-[11px] text-stone-400">🖼️ No image set</span>
           </div>
         );
-
       default:
         return (
           <div className="p-3 rounded-xl bg-stone-50 border border-stone-100">
@@ -373,55 +343,128 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     }
   };
 
+  // ── Wrap element with editable controls (drag handle, edit, delete) ──
+  const renderElementWrapper = (el: LayoutElement, index: number) => {
+    const isHighlighted = highlightedElementId === el.id;
+    const content = renderElement(el);
+    if (content === null) return null;
+
+    if (editable) {
+      return (
+        <Draggable key={el.id} draggableId={`phone-el-${el.id}`} index={index}>
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              className={`relative group transition-all rounded-xl ${isHighlighted ? 'ring-2 ring-emerald-400' : ''} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''}`}
+              onClick={(e) => { e.stopPropagation(); onElementClick?.(el.id); }}
+            >
+              {/* Floating toolbar */}
+              <div className="absolute -top-2 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 bg-white rounded-lg shadow-md border border-stone-200 px-1 py-0.5">
+                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 hover:bg-stone-100 rounded">
+                  <GripVertical size={11} className="text-stone-400" />
+                </div>
+                <button type="button" onClick={(e) => { e.stopPropagation(); onElementClick?.(el.id); }}
+                  className="p-0.5 hover:bg-stone-100 rounded">
+                  <Edit3 size={11} className="text-stone-400" />
+                </button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); onRemoveElement?.(el.id); }}
+                  className="p-0.5 hover:bg-red-50 rounded">
+                  <Trash2 size={11} className="text-red-400" />
+                </button>
+              </div>
+              {content}
+            </div>
+          )}
+        </Draggable>
+      );
+    }
+
+    // Non-editable (Preview tab)
+    return (
+      <div
+        key={el.id}
+        className={`transition-all ${onElementClick ? 'cursor-pointer' : ''} ${isHighlighted ? 'ring-2 ring-emerald-400 rounded-xl' : ''}`}
+        onClick={() => onElementClick?.(el.id)}
+      >
+        {content}
+      </div>
+    );
+  };
+
+  // ── Elements list (with or without DnD) ──
+  const renderElements = () => {
+    if (!activeTab || activeTab.elements.length === 0) {
+      return (
+        <div className="py-16 text-center">
+          <p className="text-[12px] text-stone-400">No elements on this tab</p>
+          <p className="text-[11px] text-stone-300 mt-1">Add elements in the editor</p>
+        </div>
+      );
+    }
+
+    if (editable) {
+      return (
+        <Droppable droppableId={`phone-elements-${activeTab.id}`} type="ELEMENT">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={`space-y-3 py-4 min-h-[100px] transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/30 rounded-xl' : ''}`}
+            >
+              {activeTab.elements.map((el, idx) => renderElementWrapper(el, idx))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      );
+    }
+
+    return (
+      <div className="space-y-3 py-4">
+        {activeTab.elements.map((el, idx) => renderElementWrapper(el, idx))}
+      </div>
+    );
+  };
+
   // ── The phone frame ──
+  const bottomNavHeight = 56;
+  const headerHeight = layout.show_header ? 44 : 0;
+  const notchHeight = 28;
+  const contentHeight = frameHeight - bottomNavHeight - headerHeight - notchHeight;
+
   const phoneContent = (
-    <div className="rounded-[2rem] overflow-hidden" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
+    <div className="rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
       {/* Notch */}
-      <div className="h-7 flex items-center justify-center relative">
+      <div className="flex-shrink-0 flex items-center justify-center relative" style={{ height: `${notchHeight}px` }}>
         <div className="w-20 h-4 bg-stone-900 rounded-b-2xl absolute top-0" />
       </div>
       {/* Header */}
       {layout.show_header && (
-        <div className="px-5 py-3 bg-white/80 backdrop-blur-sm border-b border-stone-100">
+        <div className="flex-shrink-0 px-5 py-3 bg-white/80 backdrop-blur-sm border-b border-stone-100">
           <h1 className="text-[15px] font-bold text-stone-800">
             {layout.header_title || activeTab?.label || 'Home'}
           </h1>
         </div>
       )}
       {/* Content */}
-      <div className="px-4 overflow-y-auto" style={{ height: `${frameHeight - 95}px` }}>
-        <div className="space-y-3 py-4">
-          {activeQuestionnaireId ? (
-            renderQuestionnaireCard(activeQuestionnaireId,
-              questionnaires?.find(q => q.id === activeQuestionnaireId)?.title || '',
-            )
-          ) : (
-            activeTab?.elements.map(el => (
-              <div
-                key={el.id}
-                className={`transition-all ${onElementClick ? 'cursor-pointer' : ''} ${highlightedElementId === el.id ? 'ring-2 ring-emerald-400 rounded-xl' : ''}`}
-                onClick={() => onElementClick?.(el.id)}
-              >
-                {renderElement(el)}
-              </div>
-            ))
-          )}
-          {!activeQuestionnaireId && (!activeTab || activeTab.elements.length === 0) && (
-            <div className="py-16 text-center">
-              <p className="text-[12px] text-stone-400">No elements on this tab</p>
-              <p className="text-[11px] text-stone-300 mt-1">Add elements in the Layout tab</p>
-            </div>
-          )}
-        </div>
+      <div className="flex-1 px-4 overflow-y-auto" style={{ minHeight: 0 }}>
+        {activeQuestionnaireId ? (
+          <div className="py-4">
+            {renderQuestionnaireCard(activeQuestionnaireId, questionnaires?.find(q => q.id === activeQuestionnaireId)?.title || '')}
+          </div>
+        ) : (
+          renderElements()
+        )}
       </div>
       {/* Bottom Nav */}
-      <div className="h-16 border-t border-stone-200/50 flex items-center justify-around px-4 bg-white">
+      <div className="flex-shrink-0 border-t border-stone-200/50 flex items-center justify-around px-4 bg-white" style={{ height: `${bottomNavHeight}px` }}>
         {layout.bottom_nav.map(nav => {
           const IconComp = ICON_MAP[nav.icon] || Home;
           const isActive = currentTabId === nav.tab_id;
           return (
-            <button key={nav.tab_id} onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-              className="flex flex-col items-center gap-0.5">
+            <button key={nav.tab_id} type="button" onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
+              className="flex flex-col items-center gap-0.5 cursor-pointer">
               <IconComp size={18} style={{ color: isActive ? primaryColor : '#a8a29e' }} />
               <span className="text-[9px] font-medium" style={{ color: isActive ? primaryColor : '#a8a29e' }}>{nav.label}</span>
             </button>
@@ -433,10 +476,9 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
   if (scale !== 1) {
     const scaledWidth = 375;
-    const scaledHeight = frameHeight;
     return (
-      <div style={{ width: `${scaledWidth * scale}px`, height: `${scaledHeight * scale}px`, overflow: 'hidden' }}>
-        <div style={{ width: `${scaledWidth}px`, height: `${scaledHeight}px`, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+      <div style={{ width: `${scaledWidth * scale}px`, height: `${frameHeight * scale}px`, overflow: 'hidden' }}>
+        <div style={{ width: `${scaledWidth}px`, height: `${frameHeight}px`, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
           <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ width: `${scaledWidth}px` }}>
             {phoneContent}
           </div>
@@ -446,7 +488,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   }
 
   return (
-    <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ maxWidth: '375px' }}>
+    <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ maxWidth: '375px', margin: '0 auto' }}>
       {phoneContent}
     </div>
   );
