@@ -385,7 +385,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <Clock size={10} /> {frequencyOptions.find(f => f.value === q.frequency)?.label || q.frequency}
                                 </span>
                                 <span className="text-[11px] text-stone-400 flex items-center gap-1">
-                                  <FileText size={10} /> {q.questions.length} questions
+                                  <FileText size={10} /> {q.questions.length} question{q.questions.length !== 1 ? 's' : ''}
                                 </span>
                                 {q.notification_enabled && (
                                   <span className="text-[11px] text-emerald-500 flex items-center gap-1">
