@@ -275,24 +275,26 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 const isCompleted = h === 10 && selectedTimelineDay <= 2;
                 const isMissed = h === 20 && selectedTimelineDay < 2;
                 const isScheduled = hasQ && !isCompleted && !isMissed;
-                return (
-                  <div key={h} className="flex items-center gap-2">
-                    <span className="text-[10px] text-stone-300 w-8 text-right shrink-0">{h}:00</span>
-                    <div className={`flex-1 rounded-lg transition-all ${hasQ ? 'p-2' : 'h-1'}`}
-                      style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : 'transparent' }}>
-                      {hasQ && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                            {questionnaires[0]?.title || 'Survey'}
-                          </span>
-                          <span className="text-[10px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                            {isCompleted ? '✓' : isMissed ? '✗' : '○'}
-                          </span>
-                        </div>
-                      )}
+                  const targetQ = questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0];
+                  return (
+                    <div key={h} className="flex items-center gap-2">
+                      <span className="text-[10px] text-stone-300 w-8 text-right shrink-0">{h}:00</span>
+                      <div className={`flex-1 rounded-lg transition-all ${hasQ ? 'p-2 cursor-pointer hover:opacity-80' : 'h-1'}`}
+                        onClick={hasQ && targetQ ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(targetQ.id); setCurrentQuestionIndex(0); } : undefined}
+                        style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : 'transparent' }}>
+                        {hasQ && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
+                              {targetQ?.title || 'Survey'}
+                            </span>
+                            <span className="text-[10px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
+                              {isCompleted ? '✓' : isMissed ? '✗' : '○'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
               })}
             </div>
             <div className="flex gap-3">
