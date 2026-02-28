@@ -10,6 +10,7 @@ import ProjectResponsesTab from './ProjectResponsesTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
+import ComponentBuilder from './ComponentBuilder';
 
 import toast from 'react-hot-toast';
 
@@ -109,7 +110,7 @@ export interface SurveyProject {
   help_information?: string;
 }
 
-type TabId = 'questionnaires' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -775,6 +776,7 @@ const SurveyBuilder: React.FC = () => {
   const tabs: { id: TabId; label: string }[] = [
     { id: 'settings', label: 'Settings' },
     { id: 'questionnaires', label: 'Questionnaires' },
+    { id: 'components', label: 'Components' },
     { id: 'logic', label: 'Logic' },
     { id: 'layout', label: 'Layout' },
     { id: 'preview', label: 'Preview' },
@@ -876,6 +878,16 @@ const SurveyBuilder: React.FC = () => {
             project={project}
             logicRules={logicRules}
             onUpdateLogic={setLogicRules}
+          />
+        )}
+
+        {/* Components Tab */}
+        {activeTab === 'components' && (
+          <ComponentBuilder
+            questionnaires={questionnaireConfigs}
+            participantTypes={participantTypes.map(pt => ({ id: pt.id, name: pt.name }))}
+            onUpdate={setQuestionnaireConfigs}
+            project={project}
           />
         )}
 

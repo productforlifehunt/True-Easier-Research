@@ -8,7 +8,7 @@ import QuestionEditor from './QuestionEditor';
 export interface QuestionnaireConfig {
   id: string;
   project_id?: string;
-  questionnaire_type: 'survey' | 'consent' | 'screening';
+  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help';
   title: string;
   description: string;
   questions: any[];
