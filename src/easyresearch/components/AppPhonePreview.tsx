@@ -572,6 +572,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const deltaRef = useRef<{ dw: number; dh: number }>({ dw: 0, dh: 0 });
   const [resizingId, setResizingId] = useState<string | null>(null);
   const [resizeDelta, setResizeDelta] = useState<{ dw: number; dh: number }>({ dw: 0, dh: 0 });
+  const [selectedElId, setSelectedElId] = useState<string | null>(null);
 
   const startResize = useCallback((e: React.MouseEvent | React.TouchEvent, elementId: string, dir: 'height' | 'width', currentVal: number) => {
     e.stopPropagation();
@@ -598,7 +599,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         const { elementId: eid, dir: d, startVal: sv } = resizeRef.current;
         const el = activeTab?.elements.find(e => e.id === eid);
         if (d === 'height') {
-          const newH = Math.max(32, sv + deltaRef.current.dh);
+          const newH = Math.max(40, sv + deltaRef.current.dh);
           onUpdateElement(eid, { style: { ...el?.config.style, height: `${Math.round(newH)}px` } });
         } else {
           const containerW = frameWidth - 32;
@@ -626,31 +627,51 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     window.addEventListener('touchend', onEnd);
   }, [onUpdateElement, activeTab, frameWidth]);
 
-  // ── Wrap element with editable controls (drag handle, edit, delete, resize handles) ──
+  // Measure actual rendered height for resize start value
+  const elRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // ── Wrap element with editable controls ──
   const renderElementWrapper = (el: LayoutElement, index: number) => {
     const isHighlighted = highlightedElementId === el.id;
+    const isSelected = selectedElId === el.id;
     const isResizing = resizingId === el.id;
+    const showControls = isHighlighted || isSelected || isResizing;
     const content = renderElement(el);
     if (content === null) return null;
 
     if (editable) {
-      const currentHeight = el.config.style?.height ? parseInt(el.config.style.height) : 0;
+      const explicitHeight = el.config.style?.height ? parseInt(el.config.style.height) : 0;
+
+      const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Toggle selection on click — no separate edit button needed
+        setSelectedElId(isSelected ? null : el.id);
+        onElementClick?.(el.id);
+      };
+
+      const getResizeStartHeight = () => {
+        // Use explicit height if set, otherwise measure the actual DOM element
+        if (explicitHeight > 0) return explicitHeight;
+        const domEl = elRefs.current[el.id];
+        return domEl ? domEl.getBoundingClientRect().height : 100;
+      };
 
       return (
         <Draggable key={el.id} draggableId={`phone-el-${el.id}`} index={index}>
           {(provided, snapshot) => (
             <div
-              ref={provided.innerRef}
+              ref={(node) => { provided.innerRef(node); elRefs.current[el.id] = node; }}
               {...provided.draggableProps}
               data-resize-id={el.id}
-              className={`relative group/el transition-all rounded-xl ${isHighlighted ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
+              className={`relative group/el transition-all rounded-xl cursor-pointer ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
               style={{
-                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${Math.max(32, currentHeight + resizeDelta.dh)}px`, overflow: 'hidden' } : {}),
+                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${Math.max(40, (explicitHeight || 100) + resizeDelta.dh)}px`, overflow: 'hidden' } : {}),
+                ...(provided.draggableProps.style || {}),
               }}
-              onClick={(e) => { e.stopPropagation(); onElementClick?.(el.id); }}
+              onClick={handleClick}
             >
-              {/* Floating toolbar — always visible when selected */}
-              <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 bg-white rounded-full shadow-lg border border-stone-200 px-1.5 py-0.5 transition-opacity ${isHighlighted || isResizing ? 'opacity-100' : 'opacity-0 group-hover/el:opacity-100'}`}>
+              {/* Floating toolbar — visible on click/select */}
+              <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 bg-white rounded-full shadow-lg border border-stone-200 px-1.5 py-0.5 transition-opacity ${showControls ? 'opacity-100' : 'opacity-0 group-hover/el:opacity-100'}`}>
                 <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-stone-100 rounded-full" title="Drag to reorder">
                   <Move size={11} className="text-stone-500" />
                 </div>
@@ -665,35 +686,35 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               </div>
 
               {/* Dimension badge */}
-              {(isHighlighted || isResizing) && (
+              {showControls && (
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 bg-stone-800 text-white text-[9px] font-mono px-2 py-0.5 rounded-full whitespace-nowrap">
                   {el.config.width || '100%'} × {isResizing && resizeRef.current?.dir === 'height' 
-                    ? `${Math.max(32, currentHeight + resizeDelta.dh)}px` 
+                    ? `${Math.max(40, (explicitHeight || 100) + resizeDelta.dh)}px` 
                     : (el.config.style?.height || 'auto')}
                 </div>
               )}
 
               {content}
 
-              {/* Bottom resize handle (height) */}
-              {isHighlighted && (
+              {/* Bottom resize handle (height) — shows on click */}
+              {showControls && (
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-2 cursor-row-resize z-10 flex items-center justify-center group/resize"
-                  onMouseDown={(e) => startResize(e, el.id, 'height', currentHeight || 100)}
-                  onTouchStart={(e) => startResize(e, el.id, 'height', currentHeight || 100)}
+                  className="absolute bottom-0 left-0 right-0 h-3 cursor-row-resize z-10 flex items-center justify-center group/resize"
+                  onMouseDown={(e) => startResize(e, el.id, 'height', getResizeStartHeight())}
+                  onTouchStart={(e) => startResize(e, el.id, 'height', getResizeStartHeight())}
                 >
-                  <div className="w-10 h-1 bg-emerald-400 rounded-full opacity-60 group-hover/resize:opacity-100 transition-opacity" />
+                  <div className="w-12 h-1.5 bg-emerald-400 rounded-full opacity-70 group-hover/resize:opacity-100 transition-opacity" />
                 </div>
               )}
 
-              {/* Right resize handle (width) */}
-              {isHighlighted && (
+              {/* Right resize handle (width) — shows on click */}
+              {showControls && (
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-2 cursor-col-resize z-10 flex items-center justify-center group/resize"
+                  className="absolute top-0 right-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center group/resize"
                   onMouseDown={(e) => startResize(e, el.id, 'width', 0)}
                   onTouchStart={(e) => startResize(e, el.id, 'width', 0)}
                 >
-                  <div className="h-10 w-1 bg-emerald-400 rounded-full opacity-60 group-hover/resize:opacity-100 transition-opacity" />
+                  <div className="h-12 w-1.5 bg-emerald-400 rounded-full opacity-70 group-hover/resize:opacity-100 transition-opacity" />
                 </div>
               )}
             </div>
