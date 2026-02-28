@@ -28,6 +28,12 @@ export interface QuestionnaireConfig {
   consent_required?: boolean;
   // Screening-specific fields
   disqualify_logic?: any;
+  // Tab sections for internal question grouping
+  tab_sections?: Array<{
+    id: string;
+    label: string;
+    question_ids: string[];
+  }>;
 }
 
 interface QuestionnaireListProps {
@@ -417,6 +423,46 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 />
                               </div>
 
+                              {/* Tab Sections */}
+                              {q.questionnaire_type === 'survey' && (
+                                <div className="px-4 py-2 border-t border-stone-100 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Sections / Tabs</span>
+                                    <button onClick={() => {
+                                      const sections = [...(q.tab_sections || []), { id: crypto.randomUUID(), label: `Section ${(q.tab_sections?.length || 0) + 1}`, question_ids: [] }];
+                                      updateQuestionnaire(q.id, { tab_sections: sections });
+                                    }} className="text-[10px] text-emerald-500 hover:text-emerald-600 font-medium">
+                                      + Add Tab
+                                    </button>
+                                  </div>
+                                  {(q.tab_sections && q.tab_sections.length > 0) && (
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {q.tab_sections.map((section, si) => (
+                                        <div key={section.id} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-[10px]">
+                                          <input type="text" value={section.label}
+                                            onChange={(e) => {
+                                              const sections = [...(q.tab_sections || [])];
+                                              sections[si] = { ...sections[si], label: e.target.value };
+                                              updateQuestionnaire(q.id, { tab_sections: sections });
+                                            }}
+                                            className="bg-transparent border-none outline-none w-16 text-[10px] text-emerald-700 font-medium" />
+                                          <span className="text-[9px] text-emerald-400">{section.question_ids.length}q</span>
+                                          <button onClick={() => {
+                                            const sections = (q.tab_sections || []).filter((_, i) => i !== si);
+                                            updateQuestionnaire(q.id, { tab_sections: sections });
+                                          }} className="text-red-400 hover:text-red-600">
+                                            <X size={8} />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {(q.tab_sections && q.tab_sections.length > 0) && (
+                                    <p className="text-[9px] text-stone-400 italic">Drag questions below to assign them to tabs. Unassigned questions go to "General".</p>
+                                  )}
+                                </div>
+                              )}
+
                               {q.questions.length === 0 ? (
                                 <div className="text-center py-10 px-4">
                                   <FileText className="mx-auto text-stone-200 mb-2" size={28} />
@@ -456,6 +502,27 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                                     <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">
                                                       {question.question_type?.replace(/_/g, ' ')}
                                                     </span>
+                                                    {q.tab_sections && q.tab_sections.length > 0 && (
+                                                      <select
+                                                        value={q.tab_sections.find(s => s.question_ids.includes(question.id))?.id || ''}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        onChange={(e) => {
+                                                          const sections = (q.tab_sections || []).map(s => ({
+                                                            ...s,
+                                                            question_ids: s.question_ids.filter(id => id !== question.id)
+                                                          }));
+                                                          if (e.target.value) {
+                                                            const idx = sections.findIndex(s => s.id === e.target.value);
+                                                            if (idx >= 0) sections[idx].question_ids.push(question.id);
+                                                          }
+                                                          updateQuestionnaire(q.id, { tab_sections: sections });
+                                                        }}
+                                                        className="text-[9px] px-1 py-0.5 rounded border border-stone-200 bg-white text-stone-500 shrink-0"
+                                                      >
+                                                        <option value="">General</option>
+                                                        {q.tab_sections.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                                                      </select>
+                                                    )}
                                                     <span className="text-[13px] text-stone-700 truncate flex-1 min-w-0">
                                                       {question.question_text}
                                                     </span>
