@@ -144,23 +144,24 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
     const isOpen = openComponentId === comp.id;
     return (
       <div key={comp.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-        {/* Component header — click to expand inline */}
-        <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-stone-50/60 transition-colors" onClick={() => setOpenComponentId(isOpen ? null : comp.id)}>
+        {/* Component header */}
+        <div className="flex items-center gap-2 px-3 py-2.5">
           <div className="flex-1 min-w-0">
-            <input type="text" value={comp.title} onChange={(e) => { e.stopPropagation(); updateComponent(comp.id, { title: e.target.value }); }}
-              onClick={(e) => e.stopPropagation()}
+            <input type="text" value={comp.title} onChange={(e) => updateComponent(comp.id, { title: e.target.value })}
               className="text-[13px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-1.5 py-0.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 w-full transition-colors"
             />
             <span className="text-[11px] text-stone-400 ml-1">{comp.questions.length} field{comp.questions.length !== 1 ? 's' : ''}</span>
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
-            <button onClick={(e) => { e.stopPropagation(); duplicateComponent(comp); }} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors" title="Duplicate">
+            <button onClick={() => duplicateComponent(comp)} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors" title="Duplicate">
               <Copy size={12} className="text-stone-400" />
             </button>
-            <button onClick={(e) => { e.stopPropagation(); removeComponent(comp.id); }} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete">
+            <button onClick={() => removeComponent(comp.id)} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete">
               <Trash2 size={12} className="text-red-400" />
             </button>
-            {isOpen ? <ChevronDown size={13} className="text-stone-400" /> : <ChevronRight size={13} className="text-stone-400" />}
+            <button onClick={() => setOpenComponentId(isOpen ? null : comp.id)} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors" title={isOpen ? 'Collapse' : 'Expand'}>
+              {isOpen ? <ChevronDown size={13} className="text-emerald-500" /> : <ChevronRight size={13} className="text-stone-400" />}
+            </button>
           </div>
         </div>
 

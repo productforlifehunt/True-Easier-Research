@@ -220,6 +220,32 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         );
       case 'instruction':
         return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">ℹ Instruction block</div>;
+      case 'text_block':
+        return (
+          <div className="p-2 rounded-lg bg-stone-50 border border-stone-200">
+            <p className="text-[11px] text-stone-600">{question.question_config?.content || question.question_text || 'Text content...'}</p>
+          </div>
+        );
+      case 'divider':
+        return (
+          <hr style={{
+            borderStyle: question.question_config?.style || 'solid',
+            borderColor: question.question_config?.color || '#e5e7eb',
+            borderWidth: `${question.question_config?.thickness || 1}px 0 0 0`,
+            margin: '8px 0',
+          }} />
+        );
+      case 'image_block':
+        return (
+          <div className="text-center">
+            {question.question_config?.image_url ? (
+              <img src={question.question_config.image_url} alt={question.question_config?.alt_text || ''} className="max-h-24 mx-auto rounded-lg border border-stone-200" style={{ maxWidth: question.question_config?.max_width || '100%' }} />
+            ) : (
+              <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">🖼 Image placeholder</div>
+            )}
+            {question.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{question.question_config.caption}</p>}
+          </div>
+        );
       default: return null;
     }
   };
@@ -335,13 +361,16 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               }
               else if (newType === 'yes_no') { updates.question_config = { yes_label: 'Yes', no_label: 'No' }; updates.options = []; }
               else if (newType === 'instruction') { updates.question_config = { content_type: 'text' }; updates.options = []; }
+              else if (newType === 'text_block') { updates.question_config = { content: '', font_size: 14 }; updates.options = []; }
+              else if (newType === 'divider') { updates.question_config = { style: 'solid', color: '#e5e7eb', thickness: 1 }; updates.options = []; updates.question_text = 'Divider'; }
+              else if (newType === 'image_block') { updates.question_config = { image_url: '', caption: '', alt_text: '', max_width: '100%' }; updates.options = []; updates.question_text = 'Image'; }
               else if (newType === 'file_upload') { updates.question_config = { max_files: 1, max_size_mb: 10, accepted_types: 'image/*,.pdf,.doc,.docx' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','file_upload'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','file_upload'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
@@ -349,6 +378,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             <optgroup label="Layout">
               <option value="section_header">Section / Tab</option>
               <option value="instruction">Instruction Block</option>
+              <option value="text_block">Text Block</option>
+              <option value="divider">Divider Line</option>
+              <option value="image_block">Image</option>
             </optgroup>
             <optgroup label="Text">
               <option value="text_short">Short Text</option>
@@ -620,6 +652,101 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </select>
             </div>
             <p className="text-[11px] text-stone-400">The question text above will be displayed as instructional content. No response is collected.</p>
+          </div>
+        )}
+
+        {/* Text Block Configuration */}
+        {localQuestion.question_type === 'text_block' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content</label>
+              <textarea
+                value={localQuestion.question_config?.content || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+                rows={4}
+                placeholder="Enter text content to display..."
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Size (px)</label>
+              <input type="number" value={localQuestion.question_config?.font_size ?? 14} min={10} max={32}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, font_size: Number(e.target.value) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <p className="text-[11px] text-stone-400">Displays formatted text content. No response is collected.</p>
+          </div>
+        )}
+
+        {/* Divider Configuration */}
+        {localQuestion.question_type === 'divider' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Style</label>
+                <select value={localQuestion.question_config?.style || 'solid'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, style: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Color</label>
+                <input type="color" value={localQuestion.question_config?.color || '#e5e7eb'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, color: e.target.value } })}
+                  className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Thickness</label>
+                <input type="number" value={localQuestion.question_config?.thickness ?? 1} min={1} max={10}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, thickness: Number(e.target.value) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+              </div>
+            </div>
+            <p className="text-[11px] text-stone-400">Visual separator between sections. No response is collected.</p>
+          </div>
+        )}
+
+        {/* Image Block Configuration */}
+        {localQuestion.question_type === 'image_block' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Image URL</label>
+              <input type="text" value={localQuestion.question_config?.image_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, image_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                placeholder="https://example.com/image.png" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Caption</label>
+                <input type="text" value={localQuestion.question_config?.caption || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, caption: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200"
+                  placeholder="Optional caption" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Alt Text</label>
+                <input type="text" value={localQuestion.question_config?.alt_text || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, alt_text: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200"
+                  placeholder="Describe the image" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Width</label>
+              <select value={localQuestion.question_config?.max_width || '100%'}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_width: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                <option value="100%">Full Width</option>
+                <option value="75%">75%</option>
+                <option value="50%">50%</option>
+                <option value="200px">Small (200px)</option>
+              </select>
+            </div>
+            <p className="text-[11px] text-stone-400">Displays an image. No response is collected.</p>
           </div>
         )}
 
