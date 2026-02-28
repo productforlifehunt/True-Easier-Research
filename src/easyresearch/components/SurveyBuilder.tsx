@@ -686,11 +686,17 @@ const SurveyBuilder: React.FC = () => {
             question_text: (questionData as any).question_text || '',
             question_description: (questionData as any).question_description || '',
             question_config: (questionData as any).question_config || {},
-            validation_rule: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
-            logic_rule: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
+            validation_rules: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
+            logic_rules: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
             ai_config: (questionData as any).ai_config || {},
             order_index: (questionData as any).order_index ?? 0,
             required: (questionData as any).required || false,
+            allow_voice: (questionData as any).allow_voice ?? false,
+            allow_ai_assist: (questionData as any).allow_ai_assist ?? false,
+            allow_other: (questionData as any).allow_other ?? false,
+            allow_none: (questionData as any).allow_none ?? false,
+            response_required: (questionData as any).response_required || 'optional',
+            section_name: (questionData as any).section_name || null,
           };
           return dbQuestionData;
         });

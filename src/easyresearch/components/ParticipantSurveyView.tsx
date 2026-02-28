@@ -35,6 +35,7 @@ interface SurveyQuestion {
   question_type: string;
   question_text: string;
   question_description?: string;
+  question_config?: any;
   required: boolean;
   allow_voice: boolean;
   allow_ai_assist: boolean;
