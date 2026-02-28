@@ -154,24 +154,67 @@ const templateQuestions: Record<string, Array<{text: string, type: string, requi
     { text: 'I felt very confident using the system.', type: 'likert_scale', required: true },
     { text: 'I needed to learn a lot of things before I could get going with this system.', type: 'likert_scale', required: true },
   ],
-  '15': [ // Dementia Caregiver ESM Study
-    // === HOURLY ACTIVITY LOG (questionnaire_id: esm-hourly-log) ===
-    // Section 1: Activity
-    { text: 'Activity Details', type: 'section_header', required: false, config: { section_icon: '📋', section_color: '#10b981', questionnaire_id: 'esm-hourly-log' } },
-    { text: 'What caregiving activities did you do?', type: 'checkbox_group', required: true, options: ['ADL (bathing, dressing, eating, toileting, mobility)', 'IADL (medication, finances, shopping, cooking, housework)', 'Medical care (appointments, treatments)', 'Emotional support / companionship', 'Supervision / safety monitoring', 'Transportation', 'Communication with professionals', 'Administrative tasks', 'Other'], config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Please describe what you were doing', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'How long did you spend on this activity (minutes)?', type: 'number', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'How pleasant/unpleasant was this event?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Unpleasant', max_label: 'Very Pleasant', questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Did the care recipient show memory problems?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Did the care recipient show behavior problems?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Did the care recipient show depressive symptoms?', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'How much distress did these memory/behavior problems cause you?', type: 'likert_scale', required: false, config: { scale_type: '0-4', custom_labels: ['No distress', 'A little', 'Moderate', 'Quite a bit', 'Extreme distress'], questionnaire_id: 'esm-hourly-log' } },
-    // Section 2: Affect
+  '15': [ // Dementia Caregiver ESM Study — Full replication of standalone dementia survey
+    // ============================
+    // HOURLY ACTIVITY LOG (questionnaire_id: esm-hourly-log)
+    // ============================
+
+    // --- Tab 1: Activity ---
+    { text: 'Activity', type: 'section_header', required: false, config: { section_icon: '📋', section_color: '#10b981', questionnaire_id: 'esm-hourly-log' } },
+
+    // Q1: Activity Category (multi-select checkboxes — 13 categories + Other)
+    { text: 'What caregiving activities did you do?', type: 'checkbox_group', required: true, options: [
+      'Clinical: medication, medical tasks (catheter, wound care)',
+      'Functional: feeding/eating, bathing, dressing, grooming, toileting, ambulation',
+      'Cognitive: orientation (time, day, names, location), conversation, answering questions, current events',
+      'Decision Making: medical decisions, financial decisions, non-medical decisions',
+      'Housekeeping: preparing meals, cleaning house/yard, shopping, managing wardrobe',
+      'Info Management: coordinating care, communicating with care team, managing finances/bills',
+      'Logistics: scheduling appointments, reminding, ensuring delivery of necessities',
+      'Transportation: driving, arranging rides, accompanying to appointments',
+      'Companionship: social interaction, conversation, games, music, walks, outings',
+      'Caregiver Support: emotional support for other caregivers, filling in/respite',
+      'Vigilance: supervision, safety monitoring, accompanying on walks/errands, preventing wandering',
+      'Pet Care: walking pets, feeding, vet visits, pet management',
+      'Skill Development: attending classes, reading books, self-reflection, learning about dementia',
+      'Other'
+    ], config: { questionnaire_id: 'esm-hourly-log', layout: 'vertical' } },
+
+    // Q2: Event Stress Rating (bipolar -3 to +3)
+    { text: 'How pleasant/unpleasant was this event?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, step: 1, min_label: 'Very Unpleasant', max_label: 'Very Pleasant', show_value_labels: true, questionnaire_id: 'esm-hourly-log' } },
+
+    // Q3: Activity Description (text_long with voice + AI)
+    { text: 'Please describe what you were doing', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe your care activities. If you prefer not to fill each tab separately, you can describe everything here at once.' } },
+
+    // Q4: Memory problems (yes/no)
+    { text: 'During this event, did your care recipient show memory problems? (e.g., repeating things, losing things, not completing a task, not remembering events or persons, concentration difficulties)', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+    // Q5: Behavior problems (yes/no)
+    { text: 'During this event, did your care recipient show behavior problems? (e.g., breaking things on purpose, verbal aggression, threats to harm others, night wandering, opposition or provocation)', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+    // Q6: Depressive symptoms (yes/no)
+    { text: 'During this event, did your care recipient show depressive symptoms? (e.g., sadness, hopelessness, threats of self-harm, speaking of dying, suffering from loneliness, uselessness or worthlessness)', type: 'yes_no', required: true, config: { questionnaire_id: 'esm-hourly-log' } },
+
+    // Q7: Distress from MBP (0-4 scale)
+    { text: 'During this event, how much did their memory/behavioral problems disturb or upset you?', type: 'likert_scale', required: false, config: { scale_type: '0-4', custom_labels: ['0 = Not at all', '1 = A little', '2 = Moderate', '3 = Quite a bit', '4 = Extremely'], questionnaire_id: 'esm-hourly-log' } },
+
+    // Q8: Unfulfilled care needs (optional)
+    { text: 'Unfulfilled Care Needs', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe care activities you couldn\'t do due to various reasons. E.g. lack of knowledge, no one available to help, insufficient resources, safety concerns.' } },
+
+    // Q9: Ideas or Suggestions (optional)
+    { text: 'Ideas or Suggestions', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe resources, tools, or services you think might be helpful. Even if nothing particular happened, you can record your thoughts or ideas.' } },
+
+    // Q10: Time Spent (minutes)
+    { text: 'How long did you spend on this activity (minutes)?', type: 'number', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: '30' } },
+
+    // --- Tab 2: Wellbeing (Affect) ---
     { text: 'Your Wellbeing', type: 'section_header', required: false, config: { section_icon: '💛', section_color: '#eab308', questionnaire_id: 'esm-hourly-log' } },
+
+    // Q11: Positive Affect (PANAS-based, 1-7 likert each)
     { text: 'Right now, I feel cheerful', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel relaxed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel enthusiastic', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel satisfied', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
+
+    // Q12: Negative Affect (PANAS-based, 1-7 likert each)
     { text: 'Right now, I feel insecure', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel lonely', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel anxious', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
@@ -179,23 +222,62 @@ const templateQuestions: Record<string, Array<{text: string, type: string, requi
     { text: 'Right now, I feel down', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel desperate', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
     { text: 'Right now, I feel tensed', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Not at all', max_label: 'Very much', questionnaire_id: 'esm-hourly-log' } },
-    // Section 3: People & Challenges
-    { text: 'People & Challenges', type: 'section_header', required: false, config: { section_icon: '👥', section_color: '#3b82f6', questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Who was with you or helped you?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'Who else do you wish could have helped?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'What challenges did you face reaching the people you needed?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'How challenging was this activity overall?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'No Challenges', max_label: 'Extreme Challenges', questionnaire_id: 'esm-hourly-log' } },
-    { text: 'What types of challenges did you experience?', type: 'checkbox_group', required: false, options: ['Knowledge gaps', 'Patient condition changes', 'Coordination difficulties', 'Time constraints', 'Emotional stress', 'Physical demands', 'Communication issues', 'Safety/liability concerns', 'Privacy issues', 'Other'], config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'What resources or tools are you currently using?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    { text: 'What resources or tools do you wish you had?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log' } },
-    // === DAILY REFLECTION (questionnaire_id: esm-daily-log) ===
-    // Section 4: Daily Sense of Competence
-    { text: 'Daily Reflection', type: 'section_header', required: false, config: { section_icon: '🧠', section_color: '#8b5cf6', questionnaire_id: 'esm-daily-log' } },
-    { text: 'I felt stressed by the caregiving demands', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
-    { text: 'I felt that caregiving affected my privacy', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
-    { text: 'I felt strained in my relationship with the care recipient', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
-    { text: 'Overall, how burdensome or manageable was caregiving today?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, min_label: 'Very Burdensome', max_label: 'Very Manageable', questionnaire_id: 'esm-daily-log' } },
-    { text: 'How urgent was the care need?', type: 'single_choice', required: false, options: ['Low', 'Medium', 'High', 'Urgent'], config: { questionnaire_id: 'esm-daily-log' } },
+
+    // --- Tab 3: People ---
+    { text: 'People', type: 'section_header', required: false, config: { section_icon: '👥', section_color: '#06b6d4', questionnaire_id: 'esm-hourly-log' } },
+
+    // Q13: People Involved
+    { text: 'Who was with you or helped you?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe who was involved: e.g. family (spouse, children), healthcare workers (doctor, nurse, aide), friends, neighbors. What help did they provide?' } },
+    // Q14: Who else
+    { text: 'Who else do you wish could have helped?', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe people you wish could be involved but are not. E.g. other family members, neighbors, friends, professional caregivers, volunteers, social workers.' } },
+    // Q15: Challenges reaching people
+    { text: 'Challenges in reaching people you wish could help', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe challenges in contacting or getting help. E.g. felt awkward asking, scheduling conflicts, couldn\'t reach them.' } },
+
+    // --- Tab 4: Challenges & Resources ---
+    { text: 'Challenges & Resources', type: 'section_header', required: false, config: { section_icon: '⚡', section_color: '#f59e0b', questionnaire_id: 'esm-hourly-log' } },
+
+    // Q16: Task Difficulty (bipolar -3 to +3)
+    { text: 'How challenging was this activity overall?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, step: 1, min_label: 'No Challenges', max_label: 'Extreme Challenges', show_value_labels: true, questionnaire_id: 'esm-hourly-log' } },
+
+    // Q17: Challenge Types (multi-select checkboxes — 11 types)
+    { text: 'What types of challenges did you experience?', type: 'checkbox_group', required: false, options: [
+      'Handle symptoms',
+      'Condition understanding',
+      'Condition updates',
+      'Coordination difficulties',
+      'Time constraints',
+      'Emotional stress',
+      'Physical demands',
+      'Communication issues',
+      'Safety concerns',
+      'Privacy issues',
+      'Other'
+    ], config: { questionnaire_id: 'esm-hourly-log', layout: 'horizontal' } },
+
+    // Q18: Challenges faced (text_long)
+    { text: 'Describe the challenges you faced', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe difficulties. E.g. not knowing how to handle symptoms, not understanding condition, time constraints, emotional stress, coordination difficulties.' } },
+
+    // Q19: Resources currently using
+    { text: 'Resources currently using & challenges with them', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe tools/resources you use and challenges. E.g. care apps (complex interface, burden of input), reminder tools, info websites, support groups, family help.' } },
+
+    // Q20: Resources wished for
+    { text: 'Resources you wish existed or improved', type: 'text_long', required: false, config: { questionnaire_id: 'esm-hourly-log', placeholder: 'Describe tools you wish existed, or improvements to current tools. E.g. better care coordination apps, platforms to find helpers, patient info sharing tools.' } },
+
+    // ============================
+    // DAILY REFLECTION (questionnaire_id: esm-daily-log)
+    // ============================
+    { text: 'Daily Reflection', type: 'section_header', required: false, config: { section_icon: '🌙', section_color: '#8b5cf6', questionnaire_id: 'esm-daily-log' } },
+
+    // Q1: SOC Stressed (1-7 likert)
+    { text: 'Today I felt stressed due to my care responsibilities', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    // Q2: SOC Privacy (1-7 likert)
+    { text: 'Today I felt that the situation with my care recipient did not allow me as much privacy as I would have liked', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    // Q3: SOC Strained (1-7 likert)
+    { text: 'Today I felt strained in the interactions with my care recipient', type: 'likert_scale', required: true, config: { scale_type: '1-7', min_label: 'Strongly Disagree', max_label: 'Strongly Agree', questionnaire_id: 'esm-daily-log' } },
+    // Q4: Daily Burden Rating (bipolar -3 to +3)
+    { text: 'Overall, how burdensome or manageable was caregiving today?', type: 'bipolar_scale', required: true, config: { min_value: -3, max_value: 3, step: 1, min_label: 'Very Burdensome', max_label: 'Very Manageable', show_value_labels: true, questionnaire_id: 'esm-daily-log' } },
+    // Q5: Supplement notes (text_long)
+    { text: 'Supplement missed logs', type: 'text_long', required: false, config: { questionnaire_id: 'esm-daily-log', placeholder: 'If there are caregiving activities today that were not recorded during hourly reminders, you can add notes here.' } },
   ],
 };
 
