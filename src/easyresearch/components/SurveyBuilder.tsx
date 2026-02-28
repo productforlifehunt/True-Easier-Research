@@ -674,14 +674,22 @@ const SurveyBuilder: React.FC = () => {
         const removedIds = [...existingIds].filter(id => !currentIds.has(id));
         const questionPayload = allQuestions.map((question) => {
           const { options, ...questionData } = question;
+          // Only include columns that actually exist in the survey_question table
           const dbQuestionData: any = {
-            ...questionData,
+            id: question.id,
+            project_id: targetProjectId,
+            questionnaire_id: (questionData as any).questionnaire_id || null,
+            question_type: (questionData as any).question_type || 'text_short',
+            question_text: (questionData as any).question_text || '',
+            question_description: (questionData as any).question_description || '',
+            question_config: (questionData as any).question_config || {},
             validation_rule: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
             logic_rule: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
-            project_id: targetProjectId, id: question.id
+            ai_config: (questionData as any).ai_config || {},
+            order_index: (questionData as any).order_index ?? 0,
+            required: (questionData as any).required || false,
+            response_required: (questionData as any).response_required || 'Optional',
           };
-          delete dbQuestionData.validation_rules;
-          delete dbQuestionData.logic_rules;
           return dbQuestionData;
         });
         if (questionPayload.length > 0) {
