@@ -198,7 +198,16 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         }
 
         if (questions) {
-          setQuestions(questions);
+          // Hydrate allow_other/allow_none/response_required from question_config (stored there, not as DB columns)
+          const hydrated = questions.map((q: any) => {
+            if (q.question_config) {
+              if (q.question_config.allow_other !== undefined) q.allow_other = q.question_config.allow_other;
+              if (q.question_config.allow_none !== undefined) q.allow_none = q.question_config.allow_none;
+              if (q.question_config.response_required !== undefined) q.response_required = q.question_config.response_required;
+            }
+            return q;
+          });
+          setQuestions(hydrated);
         }
 
         // Check for existing enrollment
