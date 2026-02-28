@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Save, ArrowLeft, Pencil, Database } from 'lucide-react';
+import { Save, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import SurveySettings from './SurveySettings';
@@ -10,7 +10,7 @@ import ProjectResponsesTab from './ProjectResponsesTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
-import { createDementiaSeedParticipantTypes, createDementiaSeedQuestionnaires } from '../seeds/dementiaCaregiverSeed';
+
 import toast from 'react-hot-toast';
 
 interface Question {
@@ -688,7 +688,6 @@ const SurveyBuilder: React.FC = () => {
             ai_config: (questionData as any).ai_config || {},
             order_index: (questionData as any).order_index ?? 0,
             required: (questionData as any).required || false,
-            response_required: (questionData as any).response_required || 'Optional',
           };
           return dbQuestionData;
         });
@@ -821,24 +820,6 @@ const SurveyBuilder: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              {questionnaireConfigs.length === 0 && (
-                <button
-                  onClick={() => {
-                    const pts = createDementiaSeedParticipantTypes();
-                    setParticipantTypes(pts);
-                    const qs = createDementiaSeedQuestionnaires(pts[0].id, pts[1].id);
-                    setQuestionnaireConfigs(qs);
-                    if (project) {
-                      setProject({ ...project, consent_required: true, screening_enabled: true, project_type: 'esm', voice_enabled: true, ecogram_enabled: true, notification_enabled: true });
-                    }
-                    toast.success('Seeded 2 participant types + 6 questionnaires. Hit Save to persist.');
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium border border-violet-300 text-violet-600 bg-violet-50 hover:bg-violet-100 transition-all"
-                >
-                  <Database size={14} />
-                  Seed Demo Data
-                </button>
-              )}
               {projectId && (
                 <button
                   onClick={() => updatePublishStatus(projectStatus === 'published' ? 'draft' : 'published')}
