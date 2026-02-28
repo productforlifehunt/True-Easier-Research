@@ -21,6 +21,8 @@ interface AppPhonePreviewProps {
   scale?: number;
   frameWidth?: number;
   frameHeight?: number;
+  /** Filter elements by participant type ID */
+  filterParticipantTypeId?: string | null;
 }
 
 const ICON_MAP: Record<string, React.FC<any>> = {
@@ -33,6 +35,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   highlightedElementId, onElementClick,
   editable = false, onRemoveElement,
   scale = 1, frameWidth = 375, frameHeight = 680,
+  filterParticipantTypeId,
 }) => {
   const [internalTabId, setInternalTabId] = useState(layout.tabs[0]?.id || '');
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
@@ -216,23 +219,81 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   // ── Render any layout element ──
   const renderElement = (el: LayoutElement) => {
     if (el.config.visible === false) return null;
+    // Filter by participant type if a filter is active
+    if (filterParticipantTypeId && el.config.participant_types && el.config.participant_types.length > 0) {
+      if (!el.config.participant_types.includes(filterParticipantTypeId)) return null;
+    }
 
     switch (el.type) {
-      case 'progress':
+      case 'progress': {
+        const progressStyle = el.config.progress_style || 'bar';
+        const progressPercent = 43;
+        const dayNum = 3;
+        
+        if (progressStyle === 'ring') {
+          const radius = 28;
+          const circumference = 2 * Math.PI * radius;
+          const dashoffset = circumference * (1 - progressPercent / 100);
+          return (
+            <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
+              <div className="flex items-center gap-4">
+                <div className="relative shrink-0">
+                  <svg width="72" height="72" viewBox="0 0 72 72">
+                    <circle cx="36" cy="36" r={radius} fill="none" stroke="#e7e5e4" strokeWidth="5" />
+                    <circle cx="36" cy="36" r={radius} fill="none" stroke={primaryColor} strokeWidth="5"
+                      strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashoffset}
+                      transform="rotate(-90 36 36)" />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[12px] font-bold" style={{ color: primaryColor }}>
+                    {progressPercent}%
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
+                  <p className="text-[10px] text-stone-400 mt-0.5">Day {dayNum} of {studyDuration}</p>
+                  <p className="text-[10px] text-stone-400">3 entries today · 7 total</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+        
+        if (progressStyle === 'steps') {
+          return (
+            <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
+                <span className="text-[11px] text-stone-400">Day {dayNum} of {studyDuration}</span>
+              </div>
+              <div className="flex gap-1">
+                {Array.from({ length: studyDuration }, (_, i) => (
+                  <div key={i} className="flex-1 h-2 rounded-full transition-all"
+                    style={{ backgroundColor: i < dayNum ? primaryColor : '#e7e5e4' }} />
+                ))}
+              </div>
+              <div className="flex justify-between mt-2 text-[10px] text-stone-400">
+                <span>3 entries today</span><span>7 total</span>
+              </div>
+            </div>
+          );
+        }
+        
+        // Default: bar
         return (
           <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
-              <span className="text-[11px] text-stone-400">Day 3 of {studyDuration}</span>
+              <span className="text-[11px] text-stone-400">Day {dayNum} of {studyDuration}</span>
             </div>
             <div className="h-2 bg-white/60 rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: '43%', backgroundColor: primaryColor }} />
+              <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: primaryColor }} />
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-stone-400">
               <span>3 entries today</span><span>7 total</span>
             </div>
           </div>
         );
+      }
       case 'questionnaire':
         if (el.config.questionnaire_id) {
           const q = questionnaires?.find(qc => qc.id === el.config.questionnaire_id);

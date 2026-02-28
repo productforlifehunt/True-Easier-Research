@@ -110,7 +110,7 @@ const LAYOUT_ELEMENTS = [
   { type: 'image', label: 'Image', icon: '🖼️', desc: 'Image block' },
 ];
 
-const WIDTH_OPTIONS = [
+const WIDTH_PRESETS = [
   { value: '100%', label: 'Full Width' },
   { value: '75%', label: '75%' },
   { value: '50%', label: 'Half' },
@@ -168,6 +168,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
 
   const activeTab = layout.tabs.find(t => t.id === activeTabId);
 
@@ -511,22 +512,40 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         {el.type !== 'spacer' && el.type !== 'divider' && (
           <div>
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Width</label>
-            <select value={el.config.width || '100%'} onChange={(e) => updateElement(el.id, { width: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-              {WIDTH_OPTIONS.map(w => <option key={w.value} value={w.value}>{w.label}</option>)}
-            </select>
+            <div className="flex gap-1 mb-1.5">
+              {WIDTH_PRESETS.map(w => (
+                <button key={w.value} onClick={() => updateElement(el.id, { width: w.value })}
+                  className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                    (el.config.width || '100%') === w.value ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                  }`}>
+                  {w.label}
+                </button>
+              ))}
+            </div>
+            <input type="text" value={el.config.width || '100%'} placeholder="e.g. 100%, 200px"
+              onChange={(e) => updateElement(el.id, { width: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
           </div>
         )}
 
         {/* Height control */}
-        {el.type !== 'spacer' && el.type !== 'divider' && (
-          <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
-            <input type="text" value={el.config.style?.height || ''} placeholder="auto"
-              onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: e.target.value || undefined } })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+        <div>
+          <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+          <div className="flex gap-1 mb-1.5">
+            {['auto', '80px', '120px', '200px'].map(h => (
+              <button key={h} onClick={() => updateElement(el.id, { style: { ...el.config.style, height: h === 'auto' ? undefined : h } })}
+                className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                  (el.config.style?.height || 'auto') === (h === 'auto' ? undefined : h) || (!el.config.style?.height && h === 'auto')
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                }`}>
+                {h}
+              </button>
+            ))}
           </div>
-        )}
+          <input type="text" value={el.config.style?.height || ''} placeholder="auto (e.g. 150px, 10rem)"
+            onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: e.target.value || undefined } })}
+            className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+        </div>
 
         {participantTypes.length > 0 && (
           <div>
@@ -761,7 +780,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           <div className="lg:w-[430px] shrink-0">
             <div className="sticky top-24">
               {/* Device selector */}
-              <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center">
+              <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
                 {DEVICE_PRESETS.map(d => (
                   <button key={d.id} onClick={() => setSelectedDevice(d)}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
@@ -769,6 +788,21 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   </button>
                 ))}
               </div>
+              {/* Participant type filter */}
+              {participantTypes.length > 0 && (
+                <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
+                  <button onClick={() => setFilterParticipantTypeId(null)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${!filterParticipantTypeId ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                    All Roles
+                  </button>
+                  {participantTypes.map(pt => (
+                    <button key={pt.id} onClick={() => setFilterParticipantTypeId(pt.id)}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${filterParticipantTypeId === pt.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                      {pt.name}
+                    </button>
+                  ))}
+                </div>
+              )}
               <AppPhonePreview
                 layout={layout}
                 questionnaires={questionnaires}
@@ -782,6 +816,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 onRemoveElement={removeElement}
                 frameWidth={selectedDevice.width}
                 frameHeight={selectedDevice.height}
+                filterParticipantTypeId={filterParticipantTypeId}
               />
               <p className="text-[11px] text-stone-400 text-center mt-2 font-light">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
             </div>
