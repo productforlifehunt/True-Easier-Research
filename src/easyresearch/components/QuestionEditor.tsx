@@ -146,11 +146,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         if (!question.options || question.options.length === 0) return null;
         return (
           <div className="space-y-1.5">
-            {question.options.slice(0, 3).map((opt) => (
+            {localQuestion.options?.slice(0, 3).map((opt) => (
               <div key={opt.id} className="flex items-center gap-2 text-[12px] text-stone-500">
                 {localQuestion.question_type === 'single_choice' && <span className="w-3.5 h-3.5 border-2 border-stone-300 rounded-full shrink-0" />}
                 {localQuestion.question_type === 'multiple_choice' && <span className="w-3.5 h-3.5 border-2 border-stone-300 rounded shrink-0" />}
-                {question.question_type !== 'dropdown' && <span>{opt.option_text}</span>}
+                {localQuestion.question_type !== 'dropdown' && <span>{opt.option_text}</span>}
               </div>
             ))}
             {question.options.length > 3 && <p className="text-[11px] text-stone-400">+{question.options.length - 3} more</p>}
@@ -257,7 +257,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
   };
 
   const removeOption = (optionId: string) => {
-    if (!localQuestion.options) return;
+    if (!localQuestion.options || localQuestion.options.length <= 2) return;
     updateLocal({ options: localQuestion.options.filter(opt => opt.id !== optionId).map((opt, i) => ({ ...opt, order_index: i })) });
   };
 
@@ -274,10 +274,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
     updateLocal({ options: localQuestion.options.map(opt => opt.id === optionId ? { ...opt, option_text: text } : opt) });
   };
 
-  const deleteOption = (optionId: string) => {
-    if (!localQuestion.options || localQuestion.options.length <= 2) return;
-    updateLocal({ options: localQuestion.options.filter(opt => opt.id !== optionId) });
-  };
+
+
 
   const preFillTemplates = [
     { name: 'Yes - No', options: ['Yes', 'No'] },
@@ -528,7 +526,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         )}
 
         {/* Date/Time Configuration */}
-        {(localQuestion.question_type === 'date' || question.question_type === 'time') && (
+        {(localQuestion.question_type === 'date' || localQuestion.question_type === 'time') && (
           <div className="space-y-2">
             <label className="text-[12px] font-medium text-stone-400">Date/Time Settings</label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
