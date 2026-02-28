@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Save, ArrowLeft, Pencil, Sparkles } from 'lucide-react';
+import { Save, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import SurveySettings from './SurveySettings';
@@ -890,31 +890,6 @@ const SurveyBuilder: React.FC = () => {
         {/* Questionnaires Tab */}
         {activeTab === 'questionnaires' && (
           <>
-            {/* Seed button: only show when survey questionnaires exist but have 0 questions */}
-            {projectId && questionnaireConfigs.some(q => q.questionnaire_type === 'survey' && q.questions.length === 0) && (
-              <div className="mb-4 p-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-emerald-700">Empty questionnaires detected</p>
-                  <p className="text-xs text-emerald-600/70">Seed with the full Dementia Caregiver ESM questions (Hourly + Daily)?</p>
-                </div>
-                <button
-                  onClick={async () => {
-                    const { seedDementiaQuestions } = await import('../services/seedDementiaQuestions');
-                    const result = await seedDementiaQuestions(projectId);
-                    if (result.success) {
-                      toast.success(result.message);
-                      window.location.reload();
-                    } else {
-                      toast.error(result.message);
-                    }
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 transition-colors"
-                >
-                  <Sparkles size={14} />
-                  Seed Questions
-                </button>
-              </div>
-            )}
             <QuestionnaireList
               questionnaires={questionnaireConfigs}
               participantTypes={participantTypes.map(pt => ({ id: pt.id, name: pt.name }))}
