@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, GripVertical, Trash2, Edit3 } from 'lucide-react';
+import React, { useState, useRef, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, GripVertical, Trash2, Edit3, Move } from 'lucide-react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
@@ -18,6 +18,7 @@ interface AppPhonePreviewProps {
   /** If true, shows drag handles and edit/delete on phone elements (Layout builder mode) */
   editable?: boolean;
   onRemoveElement?: (elementId: string) => void;
+  onUpdateElement?: (elementId: string, config: Partial<LayoutElement['config']>) => void;
   scale?: number;
   frameWidth?: number;
   frameHeight?: number;
@@ -33,7 +34,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   layout, questionnaires, participantTypes, studyDuration = 7,
   activeTabId: controlledTabId, onActiveTabChange,
   highlightedElementId, onElementClick,
-  editable = false, onRemoveElement,
+  editable = false, onRemoveElement, onUpdateElement,
   scale = 1, frameWidth = 375, frameHeight = 680,
   filterParticipantTypeId,
 }) => {
@@ -475,37 +476,135 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     }
   };
 
-  // ── Wrap element with editable controls (drag handle, edit, delete) ──
+  // ── Resize logic ──
+  const resizeRef = useRef<{ elementId: string; dir: 'height' | 'width'; startY: number; startX: number; startVal: number } | null>(null);
+  const deltaRef = useRef<{ dw: number; dh: number }>({ dw: 0, dh: 0 });
+  const [resizingId, setResizingId] = useState<string | null>(null);
+  const [resizeDelta, setResizeDelta] = useState<{ dw: number; dh: number }>({ dw: 0, dh: 0 });
+
+  const startResize = useCallback((e: React.MouseEvent | React.TouchEvent, elementId: string, dir: 'height' | 'width', currentVal: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    resizeRef.current = { elementId, dir, startY: clientY, startX: clientX, startVal: currentVal };
+    deltaRef.current = { dw: 0, dh: 0 };
+    setResizingId(elementId);
+    setResizeDelta({ dw: 0, dh: 0 });
+
+    const onMove = (ev: MouseEvent | TouchEvent) => {
+      if (!resizeRef.current) return;
+      const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+      const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+      const dx = cx - resizeRef.current.startX;
+      const dy = cy - resizeRef.current.startY;
+      deltaRef.current = { dw: dx, dh: dy };
+      setResizeDelta({ dw: dx, dh: dy });
+    };
+
+    const onEnd = () => {
+      if (resizeRef.current && onUpdateElement) {
+        const { elementId: eid, dir: d, startVal: sv } = resizeRef.current;
+        const el = activeTab?.elements.find(e => e.id === eid);
+        if (d === 'height') {
+          const newH = Math.max(32, sv + deltaRef.current.dh);
+          onUpdateElement(eid, { style: { ...el?.config.style, height: `${Math.round(newH)}px` } });
+        } else {
+          const containerW = frameWidth - 32;
+          const currentPct = parseInt(el?.config.width || '100') || 100;
+          const currentPx = (currentPct / 100) * containerW;
+          const newPx = currentPx + deltaRef.current.dw;
+          const pct = Math.round((newPx / containerW) * 100);
+          const snapped = pct >= 90 ? '100%' : pct >= 62 ? '75%' : pct >= 40 ? '50%' : pct >= 28 ? '33%' : '25%';
+          onUpdateElement(eid, { width: snapped });
+        }
+      }
+      resizeRef.current = null;
+      deltaRef.current = { dw: 0, dh: 0 };
+      setResizingId(null);
+      setResizeDelta({ dw: 0, dh: 0 });
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+  }, [onUpdateElement, activeTab, frameWidth]);
+
+  // ── Wrap element with editable controls (drag handle, edit, delete, resize handles) ──
   const renderElementWrapper = (el: LayoutElement, index: number) => {
     const isHighlighted = highlightedElementId === el.id;
+    const isResizing = resizingId === el.id;
     const content = renderElement(el);
     if (content === null) return null;
 
     if (editable) {
+      const currentHeight = el.config.style?.height ? parseInt(el.config.style.height) : 0;
+
       return (
         <Draggable key={el.id} draggableId={`phone-el-${el.id}`} index={index}>
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
               {...provided.draggableProps}
-              className={`relative group transition-all rounded-xl ${isHighlighted ? 'ring-2 ring-emerald-400' : ''} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''}`}
+              data-resize-id={el.id}
+              className={`relative group/el transition-all rounded-xl ${isHighlighted ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
+              style={{
+                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${Math.max(32, currentHeight + resizeDelta.dh)}px`, overflow: 'hidden' } : {}),
+              }}
               onClick={(e) => { e.stopPropagation(); onElementClick?.(el.id); }}
             >
-              {/* Floating toolbar */}
-              <div className="absolute -top-2 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 bg-white rounded-lg shadow-md border border-stone-200 px-1 py-0.5">
-                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 hover:bg-stone-100 rounded">
-                  <GripVertical size={11} className="text-stone-400" />
+              {/* Floating toolbar — always visible when selected */}
+              <div className={`absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 bg-white rounded-full shadow-lg border border-stone-200 px-1.5 py-0.5 transition-opacity ${isHighlighted || isResizing ? 'opacity-100' : 'opacity-0 group-hover/el:opacity-100'}`}>
+                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-1 hover:bg-stone-100 rounded-full" title="Drag to reorder">
+                  <Move size={11} className="text-stone-500" />
                 </div>
                 <button type="button" onClick={(e) => { e.stopPropagation(); onElementClick?.(el.id); }}
-                  className="p-0.5 hover:bg-stone-100 rounded">
-                  <Edit3 size={11} className="text-stone-400" />
+                  className="p-1 hover:bg-emerald-50 rounded-full" title="Edit settings">
+                  <Edit3 size={11} className="text-emerald-500" />
                 </button>
                 <button type="button" onClick={(e) => { e.stopPropagation(); onRemoveElement?.(el.id); }}
-                  className="p-0.5 hover:bg-red-50 rounded">
+                  className="p-1 hover:bg-red-50 rounded-full" title="Delete">
                   <Trash2 size={11} className="text-red-400" />
                 </button>
               </div>
+
+              {/* Dimension badge */}
+              {(isHighlighted || isResizing) && (
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 bg-stone-800 text-white text-[9px] font-mono px-2 py-0.5 rounded-full whitespace-nowrap">
+                  {el.config.width || '100%'} × {isResizing && resizeRef.current?.dir === 'height' 
+                    ? `${Math.max(32, currentHeight + resizeDelta.dh)}px` 
+                    : (el.config.style?.height || 'auto')}
+                </div>
+              )}
+
               {content}
+
+              {/* Bottom resize handle (height) */}
+              {isHighlighted && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-2 cursor-row-resize z-10 flex items-center justify-center group/resize"
+                  onMouseDown={(e) => startResize(e, el.id, 'height', currentHeight || 100)}
+                  onTouchStart={(e) => startResize(e, el.id, 'height', currentHeight || 100)}
+                >
+                  <div className="w-10 h-1 bg-emerald-400 rounded-full opacity-60 group-hover/resize:opacity-100 transition-opacity" />
+                </div>
+              )}
+
+              {/* Right resize handle (width) */}
+              {isHighlighted && (
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-2 cursor-col-resize z-10 flex items-center justify-center group/resize"
+                  onMouseDown={(e) => startResize(e, el.id, 'width', 0)}
+                  onTouchStart={(e) => startResize(e, el.id, 'width', 0)}
+                >
+                  <div className="h-10 w-1 bg-emerald-400 rounded-full opacity-60 group-hover/resize:opacity-100 transition-opacity" />
+                </div>
+              )}
             </div>
           )}
         </Draggable>
