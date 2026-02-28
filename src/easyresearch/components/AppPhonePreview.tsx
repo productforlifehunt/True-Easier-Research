@@ -641,20 +641,24 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
     if (editable) {
       const explicitHeight = el.config.style?.height ? parseInt(el.config.style.height) : 0;
+      const savedHeight = el.config.style?.height || '';
 
       const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // Toggle selection on click — no separate edit button needed
         setSelectedElId(isSelected ? null : el.id);
         onElementClick?.(el.id);
       };
 
       const getResizeStartHeight = () => {
-        // Use explicit height if set, otherwise measure the actual DOM element
         if (explicitHeight > 0) return explicitHeight;
         const domEl = elRefs.current[el.id];
         return domEl ? domEl.getBoundingClientRect().height : 100;
       };
+
+      // Compute live height during resize
+      const liveHeight = isResizing && resizeRef.current?.dir === 'height'
+        ? Math.max(40, (explicitHeight || (elRefs.current[el.id]?.getBoundingClientRect().height ?? 100)) + resizeDelta.dh)
+        : explicitHeight;
 
       return (
         <Draggable key={el.id} draggableId={`phone-el-${el.id}`} index={index}>
@@ -665,7 +669,8 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               data-resize-id={el.id}
               className={`relative group/el transition-all rounded-xl cursor-pointer ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
               style={{
-                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${Math.max(40, (explicitHeight || 100) + resizeDelta.dh)}px`, overflow: 'hidden' } : {}),
+                ...(savedHeight && !isResizing ? { height: savedHeight, overflow: 'hidden' } : {}),
+                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${liveHeight}px`, overflow: 'hidden' } : {}),
                 ...(provided.draggableProps.style || {}),
               }}
               onClick={handleClick}
@@ -689,8 +694,8 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               {showControls && (
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 bg-stone-800 text-white text-[9px] font-mono px-2 py-0.5 rounded-full whitespace-nowrap">
                   {el.config.width || '100%'} × {isResizing && resizeRef.current?.dir === 'height' 
-                    ? `${Math.max(40, (explicitHeight || 100) + resizeDelta.dh)}px` 
-                    : (el.config.style?.height || 'auto')}
+                    ? `${liveHeight}px` 
+                    : (savedHeight || 'auto')}
                 </div>
               )}
 
@@ -763,7 +768,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 const wrapped = renderElementWrapper(el, idx);
                 if (!wrapped) return null;
                 return (
-                  <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)`, height: el.config.style?.height || undefined }}>
+                  <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)` }}>
                     {wrapped}
                   </div>
                 );
@@ -782,7 +787,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           const wrapped = renderElementWrapper(el, idx);
           if (!wrapped) return null;
           return (
-            <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)`, height: el.config.style?.height || undefined }}>
+            <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)` }}>
               {wrapped}
             </div>
           );
