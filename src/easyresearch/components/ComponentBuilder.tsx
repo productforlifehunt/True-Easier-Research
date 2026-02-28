@@ -24,11 +24,19 @@ const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNo
 
 const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, participantTypes, onUpdate, project }) => {
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<ComponentType>>(new Set());
   const [openComponentId, setOpenComponentId] = useState<string | null>(null);
 
-  // Filter only component-type questionnaires
   const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
-  const surveyQuestionnaires = questionnaires.filter(q => !['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
+
+  const toggleSection = (type: ComponentType) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
+  };
 
   const addComponent = (type: ComponentType) => {
     const def = COMPONENT_TYPES.find(c => c.type === type)!;
@@ -51,6 +59,8 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
       order_index: questionnaires.length,
     };
     onUpdate([...questionnaires, newQ]);
+    // Auto-expand section and open the new component
+    setExpandedSections(prev => new Set(prev).add(type));
     setOpenComponentId(newQ.id);
   };
 
@@ -72,6 +82,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
       order_index: questionnaires.length,
     };
     onUpdate([...questionnaires, dup]);
+    setExpandedSections(prev => new Set(prev).add(c.questionnaire_type as ComponentType));
   };
 
   const addQuestion = (componentId: string, type: string) => {
@@ -129,212 +140,211 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
     updateComponent(componentId, { questions: items });
   };
 
-  const getTypeInfo = (type: string) => COMPONENT_TYPES.find(c => c.type === type);
+  const renderComponentEditor = (comp: QuestionnaireConfig) => {
+    const isOpen = openComponentId === comp.id;
+    return (
+      <div key={comp.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+        {/* Component header — click to expand inline */}
+        <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-stone-50/60 transition-colors" onClick={() => setOpenComponentId(isOpen ? null : comp.id)}>
+          <div className="flex-1 min-w-0">
+            <input type="text" value={comp.title} onChange={(e) => { e.stopPropagation(); updateComponent(comp.id, { title: e.target.value }); }}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[13px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-1.5 py-0.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 w-full transition-colors"
+            />
+            <span className="text-[11px] text-stone-400 ml-1">{comp.questions.length} field{comp.questions.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button onClick={(e) => { e.stopPropagation(); duplicateComponent(comp); }} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors" title="Duplicate">
+              <Copy size={12} className="text-stone-400" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); removeComponent(comp.id); }} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete">
+              <Trash2 size={12} className="text-red-400" />
+            </button>
+            {isOpen ? <ChevronDown size={13} className="text-stone-400" /> : <ChevronRight size={13} className="text-stone-400" />}
+          </div>
+        </div>
+
+        {isOpen && (
+          <div className="border-t border-stone-100">
+            {/* Settings */}
+            <div className="px-3 py-2.5 bg-stone-50/50 space-y-2.5">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Description</label>
+                <textarea value={comp.description || ''} onChange={(e) => updateComponent(comp.id, { description: e.target.value })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={2} placeholder="Optional description..." />
+              </div>
+
+              {comp.questionnaire_type === 'consent' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Document URL</label>
+                    <input type="text" value={(comp as any).consent_url || ''} onChange={(e) => updateComponent(comp.id, { consent_url: e.target.value } as any)}
+                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://..." />
+                  </div>
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={(comp as any).consent_required !== false} onChange={(e) => updateComponent(comp.id, { consent_required: e.target.checked } as any)} className="rounded border-stone-300 accent-emerald-500" />
+                      <span className="text-[12px] text-stone-600">Required to proceed</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {participantTypes.length > 0 && (
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Assigned to</label>
+                  <div className="flex flex-wrap gap-1">
+                    {participantTypes.map(pt => {
+                      const assigned = comp.assigned_participant_types.includes(pt.id);
+                      return (
+                        <button key={pt.id} onClick={() => {
+                          const next = assigned
+                            ? comp.assigned_participant_types.filter(id => id !== pt.id)
+                            : [...comp.assigned_participant_types, pt.id];
+                          updateComponent(comp.id, { assigned_participant_types: next });
+                        }} className={`px-2 py-0.5 rounded-lg text-[11px] font-medium border transition-colors ${
+                          assigned ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                        }`}>{pt.name}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Questions */}
+            <div className="px-3 py-2.5 space-y-2">
+              <h5 className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Fields / Questions</h5>
+
+              <DragDropContext onDragEnd={(result) => handleQuestionDragEnd(comp.id, result)}>
+                <Droppable droppableId={`comp-questions-${comp.id}`}>
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-0 divide-y divide-stone-100 border border-stone-100 rounded-xl overflow-hidden">
+                      {comp.questions.length === 0 ? (
+                        <p className="text-[12px] text-stone-400 italic py-4 text-center">No fields yet. Add below.</p>
+                      ) : comp.questions.map((question, idx) => {
+                        const isEditing = editingQuestionId === question.id;
+                        return (
+                          <Draggable key={question.id} draggableId={question.id} index={idx}>
+                            {(dragProvided, dragSnapshot) => (
+                              <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} {...dragProvided.dragHandleProps}
+                                className={`transition-all ${dragSnapshot.isDragging ? 'shadow-lg bg-white ring-2 ring-emerald-200 rounded-lg' : ''}`}
+                                style={dragProvided.draggableProps.style}>
+                                <div className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
+                                  onClick={() => setEditingQuestionId(isEditing ? null : question.id)}>
+                                  <GripVertical size={11} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
+                                  <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">F{idx + 1}</span>
+                                  {question.required && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>}
+                                  <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">{question.question_type?.replace(/_/g, ' ')}</span>
+                                  <span className="text-[12px] text-stone-700 truncate flex-1 min-w-0">{question.question_text}</span>
+                                  <button onClick={(e) => { e.stopPropagation(); deleteQuestion(comp.id, question.id); }}
+                                    className="p-1 rounded-lg hover:bg-red-50 transition-colors text-red-400 shrink-0" title="Delete">
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                                {isEditing && (
+                                  <div className="px-3 pb-3 pt-1 bg-stone-50/50 border-t border-stone-100">
+                                    <QuestionEditor
+                                      question={question}
+                                      project={project}
+                                      questionnaireType={comp.questionnaire_type}
+                                      onUpdateQuestion={(questionId, updates) => updateQuestion(comp.id, questionId, updates)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+
+              <select onChange={(e) => { if (e.target.value) addQuestion(comp.id, e.target.value); e.target.value = ''; }}
+                defaultValue=""
+                className="w-full py-1.5 px-2.5 border border-dashed border-stone-300 rounded-xl text-[12px] text-stone-500 hover:border-emerald-400 transition-colors bg-white appearance-none cursor-pointer">
+                <option value="" disabled>+ Add Field...</option>
+                {(['text', 'choice', 'scale', 'data', 'layout'] as const).map(cat => (
+                  <optgroup key={cat} label={cat.charAt(0).toUpperCase() + cat.slice(1)}>
+                    {QUESTION_TYPE_DEFINITIONS.filter(d => d.category === cat).map(def => (
+                      <option key={def.type} value={def.type}>{def.icon} {def.label}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-[16px] font-semibold text-stone-800">Components</h3>
-          <p className="text-[12px] text-stone-400 mt-0.5">Build consent forms, screening, profiles, and help — all using the unified questionnaire system</p>
-        </div>
+      <div>
+        <h3 className="text-[16px] font-semibold text-stone-800">Components</h3>
+        <p className="text-[12px] text-stone-400 mt-0.5">Build consent forms, screening, profiles, and help — all using the unified questionnaire system</p>
       </div>
 
-      {/* Add buttons for each type */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Each type is a section with its instances inline */}
+      <div className="space-y-3">
         {COMPONENT_TYPES.map(ct => {
-          const count = components.filter(c => c.questionnaire_type === ct.type).length;
+          const instances = components.filter(c => c.questionnaire_type === ct.type);
+          const isExpanded = expandedSections.has(ct.type);
+
           return (
-            <button key={ct.type} onClick={() => addComponent(ct.type)}
-              className="flex items-center gap-3 p-3 rounded-xl border border-stone-200 bg-white hover:border-emerald-300 hover:shadow-sm transition-all text-left">
-              <div className="w-9 h-9 rounded-lg bg-stone-50 flex items-center justify-center shrink-0">
-                {ct.icon}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-stone-700">{ct.label}</span>
-                  {count > 0 && <span className="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full font-medium">{count}</span>}
+            <div key={ct.type} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+              {/* Section header */}
+              <div
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-stone-50/50 transition-colors"
+                onClick={() => instances.length > 0 ? toggleSection(ct.type) : addComponent(ct.type)}
+              >
+                <div className="w-9 h-9 rounded-lg bg-stone-50 flex items-center justify-center shrink-0">
+                  {ct.icon}
                 </div>
-                <p className="text-[10px] text-stone-400 truncate">{ct.desc}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] font-semibold text-stone-800">{ct.label}</span>
+                    {instances.length > 0 && (
+                      <span className="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full font-medium">{instances.length}</span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-stone-400 truncate">{ct.desc}</p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); addComponent(ct.type); }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                    title={`Add ${ct.label}`}
+                  >
+                    <Plus size={12} /> Add
+                  </button>
+                  {instances.length > 0 && (
+                    isExpanded ? <ChevronDown size={14} className="text-stone-400 ml-1" /> : <ChevronRight size={14} className="text-stone-400 ml-1" />
+                  )}
+                </div>
               </div>
-              <Plus size={14} className="text-stone-300 shrink-0" />
-            </button>
+
+              {/* Instances — shown inline when section expanded */}
+              {isExpanded && instances.length > 0 && (
+                <div className="border-t border-stone-100 px-3 py-2.5 space-y-2 bg-stone-50/30">
+                  {instances.map(comp => renderComponentEditor(comp))}
+                </div>
+              )}
+
+              {/* Empty hint when expanded but no instances */}
+              {isExpanded && instances.length === 0 && (
+                <div className="border-t border-stone-100 px-4 py-4 text-center">
+                  <p className="text-[12px] text-stone-400">No {ct.label.toLowerCase()} components yet. Click "Add" to create one.</p>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
-
-      {/* Existing components */}
-      {components.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-stone-100 p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
-            <Shield size={24} className="text-stone-300" />
-          </div>
-          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">No Components Yet</h2>
-          <p className="text-[13px] text-stone-400">Add consent forms, screening questions, profile fields, or help sections above.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {components.map((comp) => {
-            const typeInfo = getTypeInfo(comp.questionnaire_type);
-            const isOpen = openComponentId === comp.id;
-            return (
-              <div key={comp.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer" onClick={() => setOpenComponentId(isOpen ? null : comp.id)}>
-                  <div className="w-8 h-8 rounded-lg bg-stone-50 flex items-center justify-center shrink-0">
-                    {typeInfo?.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">{typeInfo?.label}</span>
-                      <input type="text" value={comp.title} onChange={(e) => { e.stopPropagation(); updateComponent(comp.id, { title: e.target.value }); }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[14px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-0.5 -ml-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 flex-1 transition-colors"
-                      />
-                    </div>
-                    <span className="text-[11px] text-stone-400">{comp.questions.length} fields</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button onClick={(e) => { e.stopPropagation(); duplicateComponent(comp); }} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors" title="Duplicate">
-                      <Copy size={13} className="text-stone-400" />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); removeComponent(comp.id); }} className="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete">
-                      <Trash2 size={13} className="text-red-400" />
-                    </button>
-                    {isOpen ? <ChevronDown size={14} className="text-stone-400" /> : <ChevronRight size={14} className="text-stone-400" />}
-                  </div>
-                </div>
-
-                {isOpen && (
-                  <div className="border-t border-stone-100">
-                    {/* Component-specific settings */}
-                    <div className="px-4 py-3 bg-stone-50/50 space-y-3">
-                      <div>
-                        <label className="block text-[11px] font-medium text-stone-400 mb-1">Description</label>
-                        <textarea value={comp.description || ''} onChange={(e) => updateComponent(comp.id, { description: e.target.value })}
-                          className="w-full px-3 py-2 rounded-lg text-[12px] border border-stone-200 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={2} placeholder="Optional description..." />
-                      </div>
-
-                      {comp.questionnaire_type === 'consent' && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Document URL</label>
-                            <input type="text" value={comp.consent_url || ''} onChange={(e) => updateComponent(comp.id, { consent_url: e.target.value })}
-                              className="w-full px-3 py-2 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://..." />
-                          </div>
-                          <div className="flex items-end">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" checked={comp.consent_required !== false} onChange={(e) => updateComponent(comp.id, { consent_required: e.target.checked })} className="rounded border-stone-300 accent-emerald-500" />
-                              <span className="text-[12px] text-stone-600">Required to proceed</span>
-                            </label>
-                          </div>
-                        </div>
-                      )}
-
-                      {participantTypes.length > 0 && (
-                        <div>
-                          <label className="block text-[11px] font-medium text-stone-400 mb-1">Assigned to</label>
-                          <div className="flex flex-wrap gap-1">
-                            {participantTypes.map(pt => {
-                              const assigned = comp.assigned_participant_types.includes(pt.id);
-                              return (
-                                <button key={pt.id} onClick={() => {
-                                  const next = assigned
-                                    ? comp.assigned_participant_types.filter(id => id !== pt.id)
-                                    : [...comp.assigned_participant_types, pt.id];
-                                  updateComponent(comp.id, { assigned_participant_types: next });
-                                }} className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
-                                  assigned ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                                }`}>{pt.name}</button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Questions */}
-                    <div className="px-4 py-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h5 className="text-[12px] font-semibold text-stone-500 uppercase tracking-wider">Fields / Questions</h5>
-                      </div>
-
-                      <DragDropContext onDragEnd={(result) => handleQuestionDragEnd(comp.id, result)}>
-                        <Droppable droppableId={`comp-questions-${comp.id}`}>
-                          {(provided) => (
-                            <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-0 divide-y divide-stone-100 border border-stone-100 rounded-xl overflow-hidden">
-                              {comp.questions.length === 0 ? (
-                                <p className="text-[12px] text-stone-400 italic py-6 text-center">No fields added yet. Add questions below.</p>
-                              ) : comp.questions.map((question, idx) => {
-                                const isEditing = editingQuestionId === question.id;
-                                return (
-                                  <Draggable key={question.id} draggableId={question.id} index={idx}>
-                                    {(dragProvided, dragSnapshot) => (
-                                      <div ref={dragProvided.innerRef} {...dragProvided.draggableProps} {...dragProvided.dragHandleProps}
-                                        className={`transition-all ${dragSnapshot.isDragging ? 'shadow-lg bg-white ring-2 ring-emerald-200 rounded-lg' : ''}`}
-                                        style={dragProvided.draggableProps.style}>
-                                        <div className={`flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
-                                          onClick={() => setEditingQuestionId(isEditing ? null : question.id)}>
-                                          <GripVertical size={12} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
-                                          <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">F{idx + 1}</span>
-                                          {question.required && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Required</span>}
-                                          <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">{question.question_type?.replace(/_/g, ' ')}</span>
-                                          <span className="text-[13px] text-stone-700 truncate flex-1 min-w-0">{question.question_text}</span>
-                                          <div className="flex items-center gap-0.5 shrink-0">
-                                            <button onClick={(e) => { e.stopPropagation(); setEditingQuestionId(isEditing ? null : question.id); }}
-                                              className={`p-1 rounded-lg transition-colors ${isEditing ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-stone-100 text-stone-400'}`} title="Edit">
-                                              <Edit2 size={12} />
-                                            </button>
-                                            <button onClick={(e) => { e.stopPropagation(); deleteQuestion(comp.id, question.id); }}
-                                              className="p-1 rounded-lg hover:bg-red-50 transition-colors text-red-400" title="Delete">
-                                              <Trash2 size={12} />
-                                            </button>
-                                          </div>
-                                        </div>
-                                        {isEditing && (
-                                          <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100">
-                                            <QuestionEditor
-                                              question={question}
-                                              project={project}
-                                              questionnaireType={comp.questionnaire_type}
-                                              onUpdateQuestion={(questionId, updates) => updateQuestion(comp.id, questionId, updates)}
-                                            />
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                );
-                              })}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </DragDropContext>
-
-                      {/* Add question dropdown */}
-                      <div className="relative">
-                        <select onChange={(e) => { if (e.target.value) addQuestion(comp.id, e.target.value); e.target.value = ''; }}
-                          defaultValue=""
-                          className="w-full py-2 px-3 border border-dashed border-stone-300 rounded-xl text-[12px] text-stone-500 hover:border-emerald-400 transition-colors bg-white appearance-none cursor-pointer">
-                          <option value="" disabled>+ Add Field...</option>
-                          {(['text', 'choice', 'scale', 'data', 'layout'] as const).map(cat => (
-                            <optgroup key={cat} label={cat.charAt(0).toUpperCase() + cat.slice(1)}>
-                              {QUESTION_TYPE_DEFINITIONS.filter(d => d.category === cat).map(def => (
-                                <option key={def.type} value={def.type}>{def.icon} {def.label}</option>
-                              ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };
