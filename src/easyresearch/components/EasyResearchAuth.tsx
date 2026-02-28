@@ -1,17 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import { UserCheck, FlaskConical, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const EasyResearchAuth: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [role, setRole] = useState<'participant' | 'researcher'>('participant');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect logged-in users away from auth page
+  useEffect(() => {
+    if (authLoading || !currentUser) return;
+    const params = new URLSearchParams(location.search);
+    const redirectTo = params.get('redirectTo');
+    if (redirectTo && redirectTo.startsWith('/easyresearch')) {
+      navigate(redirectTo, { replace: true });
+    } else {
+      // Check if researcher
+      supabase.from('researcher').select('id').eq('user_id', currentUser.id).maybeSingle()
+        .then(({ data }) => {
+          if (data || currentUser.user_metadata?.role === 'researcher') {
+            navigate('/easyresearch/dashboard', { replace: true });
+          } else {
+            navigate('/easyresearch/home', { replace: true });
+          }
+        });
+    }
+  }, [currentUser, authLoading, location.search, navigate]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -63,6 +85,14 @@ const EasyResearchAuth: React.FC = () => {
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
   };
+
+  if (authLoading || currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f9faf8' }}>
+        <div className="text-stone-400 text-sm">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f9faf8' }}>
