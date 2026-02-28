@@ -38,6 +38,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [selectedTimelineDay, setSelectedTimelineDay] = useState(2);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   const currentTabId = controlledTabId ?? internalTabId;
   const setCurrentTabId = (id: string) => {
@@ -97,17 +98,44 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     const qConfig = questionnaires?.find(q => q.id === qId);
 
     if (activeQuestionnaireId === qId) {
-      const currentQ = qs[currentQuestionIndex];
-      const progress = qs.length > 0 ? ((currentQuestionIndex + 1) / qs.length) * 100 : 0;
+      const tabSections = qConfig?.tab_sections;
+      const hasTabSections = tabSections && tabSections.length > 0;
+      
+      const filteredQs = hasTabSections && activeSectionId
+        ? qs.filter(q => tabSections.find(s => s.id === activeSectionId)?.question_ids.includes(q.id))
+        : hasTabSections
+          ? qs.filter(q => !tabSections.some(s => s.question_ids.includes(q.id)))
+          : qs;
+      
+      const displayQs = filteredQs.length > 0 ? filteredQs : qs;
+      const currentQ = displayQs[currentQuestionIndex >= displayQs.length ? 0 : currentQuestionIndex];
+      const progress = displayQs.length > 0 ? ((Math.min(currentQuestionIndex, displayQs.length - 1) + 1) / displayQs.length) * 100 : 0;
       return (
         <div className="space-y-3">
           <button type="button" onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
             className="flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-700 cursor-pointer">
             <ChevronLeft size={14} /> Back to {activeTab?.label || 'Home'}
           </button>
+          {/* Tab section navigation */}
+          {hasTabSections && (
+            <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              <button onClick={(e) => { e.stopPropagation(); setActiveSectionId(null); setCurrentQuestionIndex(0); }}
+                className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all shrink-0"
+                style={{ backgroundColor: !activeSectionId ? primaryColor : '#f5f5f4', color: !activeSectionId ? 'white' : '#a8a29e' }}>
+                General
+              </button>
+              {tabSections.map(s => (
+                <button key={s.id} onClick={(e) => { e.stopPropagation(); setActiveSectionId(s.id); setCurrentQuestionIndex(0); }}
+                  className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all shrink-0"
+                  style={{ backgroundColor: activeSectionId === s.id ? primaryColor : '#f5f5f4', color: activeSectionId === s.id ? 'white' : '#a8a29e' }}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div>
             <div className="flex justify-between text-[11px] text-stone-400 mb-1">
-              <span>{qTitle} — Q{currentQuestionIndex + 1}/{qs.length}</span>
+              <span>{qTitle} — Q{Math.min(currentQuestionIndex, displayQs.length - 1) + 1}/{displayQs.length}</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
@@ -254,47 +282,50 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </div>
         );
       case 'timeline': {
-        const timelineDays = Math.min(studyDuration, 30);
-        const sampleHours = [8, 10, 12, 14, 16, 18, 20];
+        const days = el.config.timeline_days || studyDuration || 7;
+        const startH = el.config.timeline_start_hour ?? 0;
+        const endH = el.config.timeline_end_hour ?? 23;
+        const allHours: number[] = [];
+        for (let h = startH; h <= endH; h++) allHours.push(h);
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
             <h4 className="text-[13px] font-semibold text-stone-800">📅 {el.config.title || 'Study Timeline'}</h4>
             <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              {Array.from({ length: Math.min(timelineDays, 14) }, (_, i) => i + 1).map(d => (
+              {Array.from({ length: Math.min(days, 30) }, (_, i) => i + 1).map(d => (
                 <button key={d} onClick={(e) => { e.stopPropagation(); setSelectedTimelineDay(d); }}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all shrink-0"
+                  className="px-2 py-1 rounded-lg text-[10px] font-medium transition-all shrink-0"
                   style={{ backgroundColor: d === selectedTimelineDay ? primaryColor : 'transparent', color: d === selectedTimelineDay ? 'white' : '#a8a29e' }}>
                   D{d}
                 </button>
               ))}
-              {timelineDays > 14 && <span className="text-[10px] text-stone-400 self-center ml-1">+{timelineDays - 14}</span>}
+              {days > 30 && <span className="text-[9px] text-stone-400 self-center ml-1">+{days - 30}</span>}
             </div>
-            <div className="space-y-1">
-              {sampleHours.map(h => {
-                const hasQ = h === 10 || h === 14 || h === 20;
-                const isCompleted = h === 10 && selectedTimelineDay <= 2;
-                const isMissed = h === 20 && selectedTimelineDay < 2;
+            <div className="space-y-0.5 max-h-48 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+              {allHours.map(h => {
+                const hasQ = h % 2 === 0 && h >= 8 && h <= 20;
+                const isCompleted = hasQ && h <= 10 && selectedTimelineDay <= 2;
+                const isMissed = hasQ && h >= 18 && selectedTimelineDay < 2;
                 const isScheduled = hasQ && !isCompleted && !isMissed;
-                  const targetQ = questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0];
-                  return (
-                    <div key={h} className="flex items-center gap-2">
-                      <span className="text-[10px] text-stone-300 w-8 text-right shrink-0">{h}:00</span>
-                      <div className={`flex-1 rounded-lg transition-all ${hasQ ? 'p-2 cursor-pointer hover:opacity-80' : 'h-1'}`}
-                        onClick={hasQ && targetQ ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(targetQ.id); setCurrentQuestionIndex(0); } : undefined}
-                        style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : 'transparent' }}>
-                        {hasQ && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                              {targetQ?.title || 'Survey'}
-                            </span>
-                            <span className="text-[10px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                              {isCompleted ? '✓' : isMissed ? '✗' : '○'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                const targetQ = questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0];
+                return (
+                  <div key={h} className="flex items-center gap-2">
+                    <span className="text-[9px] text-stone-300 w-7 text-right shrink-0 font-mono">{String(h).padStart(2, '0')}:00</span>
+                    <div className={`flex-1 rounded-md transition-all ${hasQ ? 'py-1.5 px-2 cursor-pointer hover:opacity-80' : 'h-px bg-stone-50'}`}
+                      onClick={hasQ && targetQ ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(targetQ.id); setCurrentQuestionIndex(0); } : undefined}
+                      style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : undefined }}>
+                      {hasQ && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
+                            {targetQ?.title || 'Survey'}
+                          </span>
+                          <span className="text-[9px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
+                            {isCompleted ? '✓' : isMissed ? '✗' : '○'}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  );
+                  </div>
+                );
               })}
             </div>
             <div className="flex gap-3">
@@ -336,6 +367,43 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <span className="text-[11px] text-stone-400">🖼️ No image set</span>
           </div>
         );
+      case 'todo_list': {
+        const cards = el.config.todo_cards || [];
+        return (
+          <div className="space-y-2">
+            <h4 className="text-[13px] font-semibold text-stone-800">✅ {el.config.title || 'To-Do'}</h4>
+            {cards.length === 0 ? (
+              <p className="text-[11px] text-stone-400 italic">No tasks configured</p>
+            ) : (
+              <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}>
+                {cards.map((card, ci) => {
+                  const isFirst = ci === 0;
+                  const qTitle = card.type === 'questionnaire' ? (questionnaires?.find(q => q.id === card.questionnaire_id)?.title || 'Survey') : card.title;
+                  return (
+                    <div key={card.id} className="shrink-0 w-[85%] p-3.5 rounded-xl border shadow-sm transition-all"
+                      style={{ scrollSnapAlign: 'start', backgroundColor: isFirst ? '#f0fdf4' : 'white', borderColor: isFirst ? '#86efac' : '#e7e5e4' }}
+                      onClick={card.type === 'questionnaire' && card.questionnaire_id ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(card.questionnaire_id!); setCurrentQuestionIndex(0); } : undefined}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[12px] font-semibold text-stone-800">{qTitle || 'Task'}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: isFirst ? '#dcfce7' : '#f5f5f4', color: isFirst ? '#16a34a' : '#a8a29e' }}>
+                          {isFirst ? 'Current' : card.completion_trigger === 'time' ? 'Timed' : 'Upcoming'}
+                        </span>
+                      </div>
+                      {card.description && <p className="text-[10px] text-stone-400">{card.description}</p>}
+                      {card.type === 'questionnaire' && (
+                        <div className="mt-2 flex items-center gap-1">
+                          <ChevronRight size={10} className="text-emerald-500" />
+                          <span className="text-[10px] text-emerald-600 font-medium">Start</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      }
       default:
         return (
           <div className="p-3 rounded-xl bg-stone-50 border border-stone-100">
@@ -405,6 +473,9 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       );
     }
 
+    const hasWidths = activeTab.elements.some(e => e.config.width && e.config.width !== '100%');
+    const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
+
     if (editable) {
       return (
         <Droppable droppableId={`phone-elements-${activeTab.id}`} type="ELEMENT">
@@ -412,9 +483,18 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={`space-y-3 py-4 min-h-[100px] transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/30 rounded-xl' : ''}`}
+              className={`${containerClass} min-h-[100px] transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/30 rounded-xl' : ''}`}
             >
-              {activeTab.elements.map((el, idx) => renderElementWrapper(el, idx))}
+              {activeTab.elements.map((el, idx) => {
+                const w = el.config.width || '100%';
+                const wrapped = renderElementWrapper(el, idx);
+                if (!wrapped) return null;
+                return (
+                  <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)`, height: el.config.style?.height || undefined }}>
+                    {wrapped}
+                  </div>
+                );
+              })}
               {provided.placeholder}
             </div>
           )}
@@ -423,8 +503,17 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     }
 
     return (
-      <div className="space-y-3 py-4">
-        {activeTab.elements.map((el, idx) => renderElementWrapper(el, idx))}
+      <div className={containerClass}>
+        {activeTab.elements.map((el, idx) => {
+          const w = el.config.width || '100%';
+          const wrapped = renderElementWrapper(el, idx);
+          if (!wrapped) return null;
+          return (
+            <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)`, height: el.config.style?.height || undefined }}>
+              {wrapped}
+            </div>
+          );
+        })}
       </div>
     );
   };

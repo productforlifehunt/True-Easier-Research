@@ -15,13 +15,14 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'spacer' | 'divider' | 'image' | 'button';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
   config: {
     questionnaire_id?: string;
     title?: string;
     content?: string;
     visible?: boolean;
     participant_types?: string[];
+    width?: string; // '25%' | '33%' | '50%' | '75%' | '100%'
     style?: {
       padding?: string;
       background?: string;
@@ -37,6 +38,25 @@ export interface LayoutElement {
     screening_criteria?: string;
     help_sections?: { title: string; content: string }[];
     progress_style?: 'bar' | 'ring' | 'steps';
+    // Timeline config
+    timeline_start_hour?: number;
+    timeline_end_hour?: number;
+    timeline_days?: number;
+    // To-Do List config
+    todo_cards?: Array<{
+      id: string;
+      type: 'questionnaire' | 'custom';
+      questionnaire_id?: string;
+      title?: string;
+      description?: string;
+      completion_trigger?: 'manual' | 'time' | 'questionnaire_complete';
+    }>;
+    // Questionnaire tab sections
+    tab_sections?: Array<{
+      id: string;
+      label: string;
+      question_ids: string[];
+    }>;
   };
   order_index: number;
 }
@@ -82,10 +102,19 @@ const STATIC_CONTENT_ELEMENTS = [
 
 const LAYOUT_ELEMENTS = [
   { type: 'text_block', label: 'Text Block', icon: '📄', desc: 'Custom text or instructions' },
+  { type: 'todo_list', label: 'To-Do List', icon: '✅', desc: 'Task cards slider' },
   { type: 'spacer', label: 'Spacer', icon: '↕️', desc: 'Add vertical space' },
   { type: 'divider', label: 'Divider', icon: '➖', desc: 'Horizontal divider line' },
   { type: 'button', label: 'Button', icon: '🔘', desc: 'Action button' },
   { type: 'image', label: 'Image', icon: '🖼️', desc: 'Image block' },
+];
+
+const WIDTH_OPTIONS = [
+  { value: '100%', label: 'Full Width' },
+  { value: '75%', label: '75%' },
+  { value: '50%', label: 'Half' },
+  { value: '33%', label: '1/3' },
+  { value: '25%', label: '1/4' },
 ];
 
 const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
@@ -367,6 +396,87 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
         )}
 
+        {el.type === 'timeline' && (
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Days</label>
+              <input type="number" min={1} max={90} value={el.config.timeline_days || studyDuration || 7}
+                onChange={(e) => updateElement(el.id, { timeline_days: parseInt(e.target.value) || 7 })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">From</label>
+              <input type="number" min={0} max={23} value={el.config.timeline_start_hour ?? 0}
+                onChange={(e) => updateElement(el.id, { timeline_start_hour: parseInt(e.target.value) || 0 })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">To</label>
+              <input type="number" min={0} max={23} value={el.config.timeline_end_hour ?? 23}
+                onChange={(e) => updateElement(el.id, { timeline_end_hour: parseInt(e.target.value) || 23 })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+          </div>
+        )}
+
+        {el.type === 'todo_list' && (
+          <div className="space-y-2">
+            <label className="block text-[11px] font-medium text-stone-400">Task Cards</label>
+            {(el.config.todo_cards || []).map((card, ci) => (
+              <div key={card.id} className="flex items-center gap-1.5 p-2 bg-white rounded-lg border border-stone-200 text-[11px]">
+                <select value={card.type} onChange={(e) => {
+                  const cards = [...(el.config.todo_cards || [])];
+                  cards[ci] = { ...cards[ci], type: e.target.value as any };
+                  updateElement(el.id, { todo_cards: cards });
+                }} className="px-1.5 py-1 rounded border border-stone-200 bg-white text-[10px]">
+                  <option value="questionnaire">Survey</option>
+                  <option value="custom">Custom</option>
+                </select>
+                {card.type === 'questionnaire' ? (
+                  <select value={card.questionnaire_id || ''} onChange={(e) => {
+                    const cards = [...(el.config.todo_cards || [])];
+                    const q = questionnaires.find(qc => qc.id === e.target.value);
+                    cards[ci] = { ...cards[ci], questionnaire_id: e.target.value, title: q?.title || '' };
+                    updateElement(el.id, { todo_cards: cards });
+                  }} className="flex-1 px-1.5 py-1 rounded border border-stone-200 bg-white text-[10px] min-w-0">
+                    <option value="">Select...</option>
+                    {questionnaires.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
+                  </select>
+                ) : (
+                  <input type="text" value={card.title || ''} placeholder="Task title"
+                    onChange={(e) => {
+                      const cards = [...(el.config.todo_cards || [])];
+                      cards[ci] = { ...cards[ci], title: e.target.value };
+                      updateElement(el.id, { todo_cards: cards });
+                    }}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[10px] min-w-0" />
+                )}
+                <select value={card.completion_trigger || 'manual'} onChange={(e) => {
+                  const cards = [...(el.config.todo_cards || [])];
+                  cards[ci] = { ...cards[ci], completion_trigger: e.target.value as any };
+                  updateElement(el.id, { todo_cards: cards });
+                }} className="px-1 py-1 rounded border border-stone-200 bg-white text-[9px]">
+                  <option value="manual">Manual</option>
+                  <option value="time">Timed</option>
+                  <option value="questionnaire_complete">Auto</option>
+                </select>
+                <button onClick={() => {
+                  const cards = (el.config.todo_cards || []).filter((_, i) => i !== ci);
+                  updateElement(el.id, { todo_cards: cards });
+                }} className="p-0.5 hover:bg-red-50 rounded shrink-0">
+                  <Trash2 size={10} className="text-red-400" />
+                </button>
+              </div>
+            ))}
+            <button onClick={() => {
+              const cards = [...(el.config.todo_cards || []), { id: crypto.randomUUID(), type: 'custom' as const, title: '', completion_trigger: 'manual' as const }];
+              updateElement(el.id, { todo_cards: cards });
+            }} className="w-full py-1.5 text-[11px] text-emerald-600 border border-dashed border-emerald-300 rounded-lg hover:bg-emerald-50">
+              + Add Card
+            </button>
+          </div>
+        )}
+
         {el.type === 'button' && (
           <>
             <div>
@@ -392,6 +502,27 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Image URL</label>
             <input type="text" value={el.config.image_url || ''} onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://..." />
+          </div>
+        )}
+
+        {/* Width control */}
+        {el.type !== 'spacer' && el.type !== 'divider' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Width</label>
+            <select value={el.config.width || '100%'} onChange={(e) => updateElement(el.id, { width: e.target.value })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+              {WIDTH_OPTIONS.map(w => <option key={w.value} value={w.value}>{w.label}</option>)}
+            </select>
+          </div>
+        )}
+
+        {/* Height control */}
+        {el.type !== 'spacer' && el.type !== 'divider' && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+            <input type="text" value={el.config.style?.height || ''} placeholder="auto"
+              onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: e.target.value || undefined } })}
+              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
           </div>
         )}
 
@@ -567,6 +698,9 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                     <span className="text-sm">{getElementIcon(el.type)}</span>
                                     <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
                                     <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
+                                    {el.config.width && el.config.width !== '100%' && (
+                                      <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">{el.config.width}</span>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
