@@ -625,7 +625,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </div>
 
                 {showAddElement && (
-                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3 max-h-[400px] overflow-y-auto">
                     {questionnaires.length > 0 && (
                       <>
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Your Questionnaires</p>
