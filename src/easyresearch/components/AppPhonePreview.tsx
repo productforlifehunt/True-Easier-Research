@@ -228,8 +228,13 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     switch (el.type) {
       case 'progress': {
         const progressStyle = el.config.progress_style || 'bar';
-        const progressPercent = 43;
-        const dayNum = 3;
+        // Calculate real progress from study duration and questionnaire counts
+        const totalQuestionnaires = questionnaires?.filter(q => q.questionnaire_type === 'survey').length || 1;
+        const totalSurveySlots = totalQuestionnaires * studyDuration;
+        const dayNum = Math.min(Math.ceil(studyDuration * 0.4), studyDuration); // Simulated current day based on study config
+        const completedSlots = Math.floor(dayNum * totalQuestionnaires * 0.7); // ~70% completion rate simulation
+        const progressPercent = totalSurveySlots > 0 ? Math.round((completedSlots / totalSurveySlots) * 100) : 0;
+        const todayEntries = Math.min(totalQuestionnaires, Math.ceil(totalQuestionnaires * 0.6));
         
         if (progressStyle === 'ring') {
           const radius = 28;
@@ -252,7 +257,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 <div className="flex-1">
                   <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
                   <p className="text-[10px] text-stone-400 mt-0.5">Day {dayNum} of {studyDuration}</p>
-                  <p className="text-[10px] text-stone-400">3 entries today · 7 total</p>
+                  <p className="text-[10px] text-stone-400">{todayEntries} entries today · {completedSlots} total</p>
                 </div>
               </div>
             </div>
@@ -273,7 +278,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 ))}
               </div>
               <div className="flex justify-between mt-2 text-[10px] text-stone-400">
-                <span>3 entries today</span><span>7 total</span>
+                <span>{todayEntries} entries today</span><span>{completedSlots} total</span>
               </div>
             </div>
           );
@@ -290,7 +295,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: primaryColor }} />
             </div>
             <div className="flex justify-between mt-2 text-[10px] text-stone-400">
-              <span>3 entries today</span><span>7 total</span>
+              <span>{todayEntries} entries today</span><span>{completedSlots} total</span>
             </div>
           </div>
         );
@@ -301,38 +306,85 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           return renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire');
         }
         return null;
-      case 'consent':
+      case 'consent': {
+        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
+        }
         return (
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🛡️</span>
               <h4 className="text-[13px] font-semibold text-amber-800">{el.config.title || 'Consent Form'}</h4>
             </div>
-            <p className="text-[11px] text-amber-600">{el.config.consent_text || 'Tap to review and sign the consent form'}</p>
-            <button className="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-medium">Review & Sign</button>
+            {linkedQ ? (
+              <>
+                <p className="text-[11px] text-amber-600">{linkedQ.description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
+                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
+                  className="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-medium hover:bg-amber-600 transition-colors">
+                  Review & Sign
+                </button>
+              </>
+            ) : (
+              <p className="text-[11px] text-amber-600 italic">No consent form linked</p>
+            )}
           </div>
         );
-      case 'screening':
+      }
+      case 'screening': {
+        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
+        }
         return (
           <div className="p-4 rounded-xl bg-orange-50 border border-orange-200">
             <h4 className="text-[13px] font-semibold text-orange-800">📝 {el.config.title || 'Screening'}</h4>
-            <p className="text-[11px] text-orange-600 mt-1">{el.config.screening_criteria || 'Answer screening questions to check eligibility'}</p>
+            {linkedQ ? (
+              <>
+                <p className="text-[11px] text-orange-600 mt-1">{linkedQ.questions?.length || 0} screening questions</p>
+                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
+                  className="mt-2 px-3 py-1.5 rounded-lg bg-orange-500 text-white text-[11px] font-medium hover:bg-orange-600 transition-colors">
+                  Start Screening
+                </button>
+              </>
+            ) : (
+              <p className="text-[11px] text-orange-600 mt-1 italic">No screening linked</p>
+            )}
           </div>
         );
-      case 'profile':
+      }
+      case 'profile': {
+        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
+        }
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
             <h4 className="text-[13px] font-semibold text-stone-800">👤 {el.config.title || 'Profile'}</h4>
-            <div className="mt-2 space-y-2">
-              <div className="h-2.5 bg-stone-100 rounded-full w-3/4" />
-              <div className="h-2.5 bg-stone-100 rounded-full w-1/2" />
-            </div>
+            {linkedQ ? (
+              <>
+                <p className="text-[11px] text-stone-400 mt-1">{linkedQ.questions?.length || 0} profile fields</p>
+                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
+                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
+                  Edit Profile
+                </button>
+              </>
+            ) : (
+              <div className="mt-2 space-y-2">
+                <div className="h-2.5 bg-stone-100 rounded-full w-3/4" />
+                <div className="h-2.5 bg-stone-100 rounded-full w-1/2" />
+                <p className="text-[10px] text-stone-400 italic">No profile linked</p>
+              </div>
+            )}
           </div>
         );
-      case 'ecogram':
+      }
+      case 'ecogram': {
+        const ecogramEnabled = true; // Rendered if placed in layout
         return (
           <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
             <h4 className="text-[13px] font-semibold text-violet-800">🔗 {el.config.title || 'Ecogram'}</h4>
+            <p className="text-[10px] text-violet-500 mt-1">Interactive care network diagram</p>
             <div className="flex justify-center mt-3">
               <div className="relative">
                 <div className="w-12 h-12 rounded-full bg-violet-300 border-3 border-violet-400 flex items-center justify-center text-[10px] text-white font-bold">You</div>
@@ -342,8 +394,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 ))}
               </div>
             </div>
+            <p className="text-[9px] text-center text-violet-400 mt-2">Tap to edit your network</p>
           </div>
         );
+      }
       case 'timeline': {
         const days = el.config.timeline_days || studyDuration || 7;
         const startH = el.config.timeline_start_hour ?? 0;
@@ -399,13 +453,28 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </div>
         );
       }
-      case 'help':
+      case 'help': {
+        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
+        }
         return (
           <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
             <h4 className="text-[13px] font-semibold text-stone-800">❓ {el.config.title || 'Help & FAQ'}</h4>
-            <p className="text-[11px] text-stone-400 mt-1">Common questions and support contact</p>
+            {linkedQ ? (
+              <>
+                <p className="text-[11px] text-stone-400 mt-1">{linkedQ.questions?.length || 0} help items</p>
+                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
+                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
+                  View Help
+                </button>
+              </>
+            ) : (
+              <p className="text-[11px] text-stone-400 mt-1">Common questions and support contact</p>
+            )}
           </div>
         );
+      }
       case 'text_block':
         return (
           <div className="p-3 rounded-xl bg-stone-50">

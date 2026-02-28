@@ -355,19 +355,26 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {el.type === 'consent' && (
-          <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Description</label>
-            <textarea value={el.config.consent_text || ''} onChange={(e) => updateElement(el.id, { consent_text: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={3} placeholder="Brief description..." />
-          </div>
-        )}
-
-        {el.type === 'screening' && (
-          <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Screening Criteria</label>
-            <textarea value={el.config.screening_criteria || ''} onChange={(e) => updateElement(el.id, { screening_criteria: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={2} placeholder="Eligibility criteria..." />
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help') && (
+          <div className="space-y-2">
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Component</label>
+            <select value={el.config.questionnaire_id || ''} onChange={(e) => {
+              const selected = questionnaires.find(q => q.id === e.target.value);
+              updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || el.config.title });
+            }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+              <option value="">— Select {el.type} component —</option>
+              {questionnaires.filter(q => q.questionnaire_type === el.type).map(q => (
+                <option key={q.id} value={q.id}>{q.title} ({q.questions?.length || 0} fields)</option>
+              ))}
+            </select>
+            {el.config.questionnaire_id && (
+              <div className="text-[10px] text-emerald-600 bg-emerald-50 rounded-lg px-2 py-1.5 border border-emerald-100">
+                ✓ Linked to "{questionnaires.find(q => q.id === el.config.questionnaire_id)?.title}" — {questionnaires.find(q => q.id === el.config.questionnaire_id)?.questions?.length || 0} fields
+              </div>
+            )}
+            {!el.config.questionnaire_id && (
+              <p className="text-[10px] text-stone-400 italic">No component linked. Create one in the Components tab first.</p>
+            )}
           </div>
         )}
 
@@ -647,11 +654,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                 {showAddElement && (
                   <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3 max-h-[400px] overflow-y-auto">
-                    {questionnaires.length > 0 && (
+                    {/* Survey Questionnaires */}
+                    {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Your Questionnaires</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Questionnaires</p>
                         <div className="space-y-1">
-                          {questionnaires.map(q => {
+                          {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => {
                             const countOnThisTab = activeTab?.elements.filter(e => e.type === 'questionnaire' && e.config.questionnaire_id === q.id).length || 0;
                             return (
                               <button key={q.id} onClick={() => addQuestionnaire(q)}
@@ -668,6 +676,29 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         </div>
                       </>
                     )}
+
+                    {/* Components (consent/screening/profile/help) */}
+                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type)).length > 0 && (
+                      <>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Components</p>
+                        <div className="space-y-1">
+                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type)).map(q => {
+                            const typeIcon = q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'screening' ? '📝' : q.questionnaire_type === 'profile' ? '👤' : '❓';
+                            return (
+                              <button key={q.id} onClick={() => addElement(q.questionnaire_type as any, { title: q.title, questionnaire_id: q.id })}
+                                className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
+                                <span className="text-lg">{typeIcon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-stone-700 font-medium truncate block">{q.title}</span>
+                                  <span className="text-[9px] text-stone-400">{q.questionnaire_type} · {q.questions?.length || 0} fields</span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+
                     <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content Elements</p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {STATIC_CONTENT_ELEMENTS.map(et => (
