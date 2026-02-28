@@ -24,6 +24,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('mobile');
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [responses, setResponses] = useState<{ [key: string]: any }>({});
+  const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
   // Legacy hooks
   const sections = groupQuestionsBySections(questions);
   const hasSections = sections.length > 1 || (sections.length === 1 && sections[0].id !== 'default');
@@ -75,7 +76,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
       <div className="max-w-4xl mx-auto space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h2 className="text-[17px] font-semibold tracking-tight text-stone-800">App Preview</h2>
-          <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
+          <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 flex-wrap">
             {DEVICE_PRESETS.map(d => (
               <button key={d.id} onClick={() => setSelectedDevice(d)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
@@ -84,6 +85,22 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Participant type filter */}
+        {participantTypes && participantTypes.length > 0 && (
+          <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 justify-center flex-wrap">
+            <button onClick={() => setFilterParticipantTypeId(null)}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${!filterParticipantTypeId ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+              All Roles
+            </button>
+            {participantTypes.map(pt => (
+              <button key={pt.id} onClick={() => setFilterParticipantTypeId(pt.id)}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${filterParticipantTypeId === pt.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                {pt.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         <p className="text-[11px] text-stone-400 text-center">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
 
@@ -95,13 +112,14 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             studyDuration={studyDuration}
             frameWidth={selectedDevice.width}
             frameHeight={selectedDevice.height}
+            filterParticipantTypeId={filterParticipantTypeId}
           />
         </div>
 
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
           <h3 className="text-[14px] font-semibold text-stone-800 mb-1">Live Preview</h3>
           <p className="text-[13px] text-stone-400 font-light">
-            This preview renders exactly what participants will see. Click questionnaires to test the question flow. Responses are not saved.
+            This preview renders exactly what participants will see. Use the role filter to see what each participant type sees. Responses are not saved.
           </p>
         </div>
       </div>
