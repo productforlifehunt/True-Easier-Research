@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, GripVertical, FileText, Edit2, Users, Mic, Settings, X, GitBranch } from 'lucide-react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Mic, Settings, X, GitBranch } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
@@ -242,7 +242,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       <div
         ref={dragProvided.innerRef}
         {...dragProvided.draggableProps}
-        {...dragProvided.dragHandleProps}
         className={`transition-all ${dragSnapshot.isDragging ? 'shadow-lg bg-white ring-2 ring-emerald-200 rounded-lg' : ''}`}
         style={dragProvided.draggableProps.style}
       >
@@ -250,9 +249,12 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           className={`flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
           onClick={() => setEditingQuestionId(isEditing ? null : question.id)}
         >
-          <GripVertical size={12} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
+          <div {...dragProvided.dragHandleProps} className="flex items-center gap-0.5 shrink-0 cursor-grab active:cursor-grabbing px-1 py-0.5 rounded hover:bg-stone-100 transition-colors" title="Drag to reorder" onClick={(e) => e.stopPropagation()}>
+            <ArrowUpDown size={11} className="text-stone-300" />
+            <span className="text-[9px] text-stone-300 font-medium">Move</span>
+          </div>
           <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">
-            Q{globalIdx + 1}
+            Question {globalIdx + 1}
           </span>
           {question.required && (
             <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Required</span>
@@ -336,17 +338,19 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          {...provided.dragHandleProps}
                           className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
                             snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200 border-emerald-200' : 'border-stone-100'
                           }`}
                         >
                           {/* Questionnaire Header */}
                           <div className="flex items-center gap-3 px-4 py-3">
-                            <GripVertical size={14} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
+                            <div {...provided.dragHandleProps} className="flex items-center gap-0.5 shrink-0 cursor-grab active:cursor-grabbing px-1.5 py-1 rounded-lg hover:bg-stone-100 transition-colors" title="Drag to reorder">
+                              <ArrowUpDown size={13} className="text-stone-300" />
+                              <span className="text-[9px] text-stone-300 font-medium">Move</span>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">Q{idx + 1}</span>
+                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">Questionnaire {idx + 1}</span>
                                 <select
                                   value={q.questionnaire_type}
                                   onChange={(e) => { e.stopPropagation(); updateQuestionnaire(q.id, { questionnaire_type: e.target.value as any }); }}
@@ -758,7 +762,7 @@ const QuestionLogicEditor: React.FC<{
               <select value={rule.targetQuestionId} onChange={(e) => updateRule(rule.id, 'targetQuestionId', e.target.value)}
                 className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white max-w-[120px]">
                 {allQuestions.filter(q => q.id !== question.id).map((q, i) => (
-                  <option key={q.id} value={q.id}>Q{allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
+                  <option key={q.id} value={q.id}>Question {allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
                 ))}
               </select>
               <button onClick={() => deleteRule(rule.id)} className="p-0.5 rounded hover:bg-red-50">
