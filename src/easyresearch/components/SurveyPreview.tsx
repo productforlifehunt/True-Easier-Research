@@ -64,6 +64,21 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
         return (<div className="flex gap-3">{['Yes', 'No'].map(opt => (<button key={opt} onClick={() => handleResponse(question.id, opt)} className={`flex-1 py-3 rounded-xl border-2 text-[13px] font-medium transition-all ${value === opt ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>{opt}</button>))}</div>);
       case 'section_header':
         return null;
+      case 'text_block':
+        return <div className="p-3 rounded-xl bg-stone-50 text-[13px] text-stone-600" style={{ fontSize: question.question_config?.font_size ? `${question.question_config.font_size}px` : undefined }}>{question.question_config?.content || question.question_text}</div>;
+      case 'divider':
+        return <hr style={{ borderStyle: question.question_config?.style || 'solid', borderColor: question.question_config?.color || '#e5e7eb', borderWidth: `${question.question_config?.thickness || 1}px 0 0 0` }} />;
+      case 'image_block':
+        return (
+          <div className="text-center">
+            {question.question_config?.image_url ? (
+              <img src={question.question_config.image_url} alt={question.question_config?.alt_text || ''} className="mx-auto rounded-lg" style={{ maxWidth: question.question_config?.max_width || '100%' }} />
+            ) : (
+              <div className="h-20 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-stone-400">🖼 Image</div>
+            )}
+            {question.question_config?.caption && <p className="text-[11px] text-stone-400 mt-1">{question.question_config.caption}</p>}
+          </div>
+        );
       case 'date':
         return <input type="date" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />;
       default: return <p className="text-[12px] text-stone-400 italic">Preview not available for: {question.question_type}</p>;
