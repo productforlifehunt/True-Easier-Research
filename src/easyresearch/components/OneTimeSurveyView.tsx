@@ -542,7 +542,7 @@ const OneTimeSurveyView: React.FC = () => {
         return (<input type="email" value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}} placeholder="Enter your email..."/>);
 
       case 'dropdown':
-        return (<select value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2 bg-white" style={{borderColor:'var(--border-light)'}}><option value="">Select an option...</option>{question.options?.map((o:any,i:number)=>(<option key={i} value={o.id||o.option_text||o}>{o.option_text||o}</option>))}</select>);
+        return (<select value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2 bg-white" style={{borderColor:'var(--border-light)'}}><option value="">Select an option...</option>{question.options?.map((o:any,i:number)=>{const optVal = o.id || o.option_value || o.option_text || (typeof o === 'string' ? o : String(o)); const optLabel = o.option_text || o.text || o.label || (typeof o === 'string' ? o : String(o)); return (<option key={i} value={optVal}>{optLabel}</option>);})}</select>);
 
       case 'slider':
         const sliderCfg = (question as any).question_config || {};
