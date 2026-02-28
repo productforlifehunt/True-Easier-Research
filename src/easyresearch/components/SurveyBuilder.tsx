@@ -453,6 +453,12 @@ const SurveyBuilder: React.FC = () => {
               const qMap = new Map<string, any[]>();
               qConfigs.forEach(qc => qMap.set(qc.id, []));
               for (const q of questionsData) {
+                // Hydrate allow_other/allow_none from question_config (they're stored there, not as DB columns)
+                if (q.question_config) {
+                  if (q.question_config.allow_other !== undefined) q.allow_other = q.question_config.allow_other;
+                  if (q.question_config.allow_none !== undefined) q.allow_none = q.question_config.allow_none;
+                  if (q.question_config.response_required !== undefined) q.response_required = q.question_config.response_required;
+                }
                 const qId = q.questionnaire_id;
                 if (qId && qMap.has(qId)) {
                   qMap.get(qId)!.push(q);
@@ -685,17 +691,20 @@ const SurveyBuilder: React.FC = () => {
             question_type: (questionData as any).question_type || 'text_short',
             question_text: (questionData as any).question_text || '',
             question_description: (questionData as any).question_description || '',
-            question_config: (questionData as any).question_config || {},
-            validation_rules: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
-            logic_rules: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
+            question_config: {
+              ...((questionData as any).question_config || {}),
+              // Store allow_other/allow_none/response_required inside question_config since they're not DB columns
+              allow_other: (questionData as any).allow_other ?? (questionData as any).question_config?.allow_other ?? false,
+              allow_none: (questionData as any).allow_none ?? (questionData as any).question_config?.allow_none ?? false,
+              response_required: (questionData as any).response_required ?? (questionData as any).question_config?.response_required ?? 'optional',
+            },
+            validation_rule: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
+            logic_rule: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
             ai_config: (questionData as any).ai_config || {},
             order_index: (questionData as any).order_index ?? 0,
             required: (questionData as any).required || false,
             allow_voice: (questionData as any).allow_voice ?? false,
             allow_ai_assist: (questionData as any).allow_ai_assist ?? false,
-            allow_other: (questionData as any).allow_other ?? false,
-            allow_none: (questionData as any).allow_none ?? false,
-            response_required: (questionData as any).response_required || 'optional',
             section_name: (questionData as any).section_name || null,
           };
           return dbQuestionData;
