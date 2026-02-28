@@ -37,6 +37,9 @@ export const SUPPORTED_QUESTION_TYPES = {
 
   // Layout Types
   SECTION_HEADER: 'section_header',
+  TEXT_BLOCK: 'text_block',
+  DIVIDER: 'divider',
+  IMAGE_BLOCK: 'image_block',
 } as const;
 
 export type SupportedQuestionType = typeof SUPPORTED_QUESTION_TYPES[keyof typeof SUPPORTED_QUESTION_TYPES];
@@ -319,6 +322,39 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: { section_icon: '', section_color: '#10b981' }
   },
+  {
+    type: SUPPORTED_QUESTION_TYPES.TEXT_BLOCK,
+    label: 'Text Block',
+    description: 'Rich text content block for descriptions, notes, or formatted information',
+    icon: '📝',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { content: '', font_size: 14 }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.DIVIDER,
+    label: 'Divider Line',
+    description: 'Visual separator line between sections or questions',
+    icon: '━',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { style: 'solid', color: '#e5e7eb', thickness: 1 }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.IMAGE_BLOCK,
+    label: 'Image',
+    description: 'Display an image with optional caption (no response collected)',
+    icon: '🖼',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { image_url: '', caption: '', alt_text: '', max_width: '100%' }
+  },
 ];
 
 // Helper functions
@@ -348,6 +384,9 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'checkbox_group': SUPPORTED_QUESTION_TYPES.CHECKBOX_GROUP,
   'section': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
   'section_header': SUPPORTED_QUESTION_TYPES.SECTION_HEADER,
+  'text_block': SUPPORTED_QUESTION_TYPES.TEXT_BLOCK,
+  'divider': SUPPORTED_QUESTION_TYPES.DIVIDER,
+  'image_block': SUPPORTED_QUESTION_TYPES.IMAGE_BLOCK,
   'matrix': SUPPORTED_QUESTION_TYPES.MATRIX,
   'ranking': SUPPORTED_QUESTION_TYPES.RANKING,
   'file_upload': SUPPORTED_QUESTION_TYPES.FILE_UPLOAD,
