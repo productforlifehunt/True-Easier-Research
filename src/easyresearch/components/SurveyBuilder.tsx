@@ -445,6 +445,7 @@ const SurveyBuilder: React.FC = () => {
             consent_url: qr.consent_url,
             consent_required: qr.consent_required,
             disqualify_logic: qr.disqualify_logic,
+            tab_sections: qr.tab_sections || undefined,
           }));
 
           if (questionsData && mounted) {
@@ -640,6 +641,7 @@ const SurveyBuilder: React.FC = () => {
             consent_url: qc.consent_url || null,
             consent_required: qc.consent_required ?? true,
             disqualify_logic: qc.disqualify_logic || {},
+            tab_sections: qc.tab_sections || null,
           };
           await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
 
@@ -700,21 +702,38 @@ const SurveyBuilder: React.FC = () => {
           await supabase.from('question_option').delete().in('question_id', removedIds);
           await supabase.from('survey_question').delete().in('id', removedIds);
         }
+
+        // Batch all options into a single upsert + single cleanup query
+        const allOptionPayloads: any[] = [];
+        const allCurrentOptionIds = new Set<string>();
+        const questionIdsWithOptions: string[] = [];
+
         for (const question of allQuestions) {
           const options = question.options || [];
-          if (options.length > 0) {
-            const { error: optionUpsertError } = await supabase.from('question_option').upsert(
-              options.map(opt => ({ ...opt, question_id: question.id, id: opt.id })),
-              { onConflict: 'id' }
-            );
-            if (optionUpsertError) throw optionUpsertError;
+          questionIdsWithOptions.push(question.id);
+          for (const opt of options) {
+            allCurrentOptionIds.add(opt.id);
+            allOptionPayloads.push({ ...opt, question_id: question.id, id: opt.id });
           }
-          const { data: existingOptions } = await supabase.from('question_option').select('id').eq('question_id', question.id);
-          const existingOptionIds = new Set((existingOptions || []).map((opt: any) => opt.id));
-          const currentOptionIds = new Set(options.map(opt => opt.id));
-          const removedOptionIds = [...existingOptionIds].filter(id => !currentOptionIds.has(id));
-          if (removedOptionIds.length > 0) {
-            await supabase.from('question_option').delete().in('id', removedOptionIds);
+        }
+
+        // Single batch upsert for all options
+        if (allOptionPayloads.length > 0) {
+          const { error: optionUpsertError } = await supabase.from('question_option').upsert(allOptionPayloads, { onConflict: 'id' });
+          if (optionUpsertError) throw optionUpsertError;
+        }
+
+        // Single query to find stale options, then single delete
+        if (questionIdsWithOptions.length > 0) {
+          const { data: existingOptions } = await supabase
+            .from('question_option')
+            .select('id')
+            .in('question_id', questionIdsWithOptions);
+          const staleOptionIds = (existingOptions || [])
+            .map((o: any) => o.id)
+            .filter((id: string) => !allCurrentOptionIds.has(id));
+          if (staleOptionIds.length > 0) {
+            await supabase.from('question_option').delete().in('id', staleOptionIds);
           }
         }
       };
@@ -739,10 +758,10 @@ const SurveyBuilder: React.FC = () => {
       if (projectId) {
         const { error: projectUpdateError } = await supabase.from('research_project').update(toDbRow(project)).eq('id', projectId);
         if (projectUpdateError) throw projectUpdateError;
+        // Participant types must come first (FK dependency), then questionnaires, then questions+logic in parallel
         await syncParticipantTypes(projectId);
         await syncQuestionnaires(projectId);
-        await syncQuestions(projectId);
-        await syncLogicRules(projectId);
+        await Promise.all([syncQuestions(projectId), syncLogicRules(projectId)]);
       } else {
         const surveyCode = project.survey_code || await generateSurveyCode();
         const newProjectData = {
@@ -758,8 +777,7 @@ const SurveyBuilder: React.FC = () => {
         if (newProject) {
           await syncParticipantTypes(newProject.id);
           await syncQuestionnaires(newProject.id);
-          await syncQuestions(newProject.id);
-          await syncLogicRules(newProject.id);
+          await Promise.all([syncQuestions(newProject.id), syncLogicRules(newProject.id)]);
           toast.success('Project created successfully!');
           navigate(`/easyresearch/project/${newProject.id}`);
         }
