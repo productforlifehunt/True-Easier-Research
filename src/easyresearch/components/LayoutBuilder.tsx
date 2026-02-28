@@ -814,6 +814,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 onElementClick={setEditingElementId}
                 editable={true}
                 onRemoveElement={removeElement}
+                onUpdateElement={updateElement}
                 frameWidth={selectedDevice.width}
                 frameHeight={selectedDevice.height}
                 filterParticipantTypeId={filterParticipantTypeId}
