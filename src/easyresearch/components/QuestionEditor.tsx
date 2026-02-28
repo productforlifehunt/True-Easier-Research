@@ -83,18 +83,18 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
   }
 
   const renderPreview = () => {
-    const normalizedType = normalizeLegacyQuestionType(question.question_type);
+    const normalizedType = normalizeLegacyQuestionType(localQuestion.question_type);
     switch (normalizedType) {
       case 'section_header':
         return (
-          <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: (question.question_config?.section_color || '#10b981') + '15' }}>
-            {question.question_config?.section_icon && <span className="text-lg">{question.question_config.section_icon}</span>}
-            <span className="text-[12px] font-semibold" style={{ color: question.question_config?.section_color || '#10b981' }}>Section Tab</span>
+          <div className="flex items-center gap-2 p-2 rounded-lg" style={{ backgroundColor: (localQuestion.question_config?.section_color || '#10b981') + '15' }}>
+            {localQuestion.question_config?.section_icon && <span className="text-lg">{localQuestion.question_config.section_icon}</span>}
+            <span className="text-[12px] font-semibold" style={{ color: localQuestion.question_config?.section_color || '#10b981' }}>Section Tab</span>
           </div>
         );
       case 'bipolar_scale':
-        const bMin = question.question_config?.min_value ?? -3;
-        const bMax = question.question_config?.max_value ?? 3;
+        const bMin = localQuestion.question_config?.min_value ?? -3;
+        const bMax = localQuestion.question_config?.max_value ?? 3;
         const bMid = 0;
         return (
           <div className="space-y-2">
@@ -107,43 +107,43 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               ))}
             </div>
             <div className="flex justify-between text-[10px] text-stone-400">
-              <span>{question.question_config?.min_label || 'Negative'}</span>
-              <span>{question.question_config?.max_label || 'Positive'}</span>
+              <span>{localQuestion.question_config?.min_label || 'Negative'}</span>
+              <span>{localQuestion.question_config?.max_label || 'Positive'}</span>
             </div>
           </div>
         );
       case 'checkbox_group':
-        if (!question.options || question.options.length === 0) return null;
+        if (!localQuestion.options || localQuestion.options.length === 0) return null;
         return (
           <div className="grid grid-cols-2 gap-1">
-            {question.options.slice(0, 4).map((opt) => (
+            {localQuestion.options.slice(0, 4).map((opt) => (
               <div key={opt.id} className="flex items-center gap-1.5 text-[11px] text-stone-500">
                 <span className="w-3 h-3 border border-stone-300 rounded shrink-0" />
                 <span className="truncate">{opt.option_text}</span>
               </div>
             ))}
-            {question.options.length > 4 && <p className="text-[10px] text-stone-400 col-span-2">+{question.options.length - 4} more</p>}
+            {localQuestion.options.length > 4 && <p className="text-[10px] text-stone-400 col-span-2">+{localQuestion.options.length - 4} more</p>}
           </div>
         );
       case 'slider':
-        const minVal = question.question_config?.min_value ?? question.question_config?.min ?? 0;
-        const maxVal = question.question_config?.max_value ?? question.question_config?.max ?? 10;
-        const stepVal = question.question_config?.step ?? 1;
+        const minVal = localQuestion.question_config?.min_value ?? localQuestion.question_config?.min ?? 0;
+        const maxVal = localQuestion.question_config?.max_value ?? localQuestion.question_config?.max ?? 10;
+        const stepVal = localQuestion.question_config?.step ?? 1;
         const midVal = Math.round((minVal + maxVal) / 2);
         return (
           <div className="space-y-2">
             <input type="range" min={minVal} max={maxVal} step={stepVal} defaultValue={midVal} className="w-full cursor-pointer accent-emerald-500" />
             <div className="flex justify-between text-[11px] text-stone-400">
-              <span>{question.question_config?.min_label || minVal}</span>
+              <span>{localQuestion.question_config?.min_label || minVal}</span>
               <span className="font-semibold text-emerald-600">{midVal}</span>
-              <span>{question.question_config?.max_label || maxVal}</span>
+              <span>{localQuestion.question_config?.max_label || maxVal}</span>
             </div>
           </div>
         );
       case 'single_choice':
       case 'multiple_choice':
       case 'dropdown':
-        if (!question.options || question.options.length === 0) return null;
+        if (!localQuestion.options || localQuestion.options.length === 0) return null;
         return (
           <div className="space-y-1.5">
             {localQuestion.options?.slice(0, 3).map((opt) => (
@@ -153,11 +153,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 {localQuestion.question_type !== 'dropdown' && <span>{opt.option_text}</span>}
               </div>
             ))}
-            {question.options.length > 3 && <p className="text-[11px] text-stone-400">+{question.options.length - 3} more</p>}
+            {localQuestion.options && localQuestion.options.length > 3 && <p className="text-[11px] text-stone-400">+{localQuestion.options.length - 3} more</p>}
           </div>
         );
       case 'likert_scale':
-        const scaleType = question.question_config?.scale_type || '1-5';
+        const scaleType = localQuestion.question_config?.scale_type || '1-5';
         const range = scaleType.split('-').map(Number);
         const scaleOptions: number[] = [];
         for (let i = range[0]; i <= range[1]; i++) scaleOptions.push(i);
@@ -171,24 +171,24 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'text_short': case 'text_long': case 'number': case 'email': case 'date': case 'time': case 'phone':
         return <div className="h-8 rounded-lg border border-stone-200 bg-stone-50" />;
       case 'rating':
-        return <div className="flex gap-1 text-amber-300">{Array.from({length: question.question_config?.max_value || 5}).map((_, i) => <span key={i} className="text-lg">★</span>)}</div>;
+        return <div className="flex gap-1 text-amber-300">{Array.from({length: localQuestion.question_config?.max_value || 5}).map((_, i) => <span key={i} className="text-lg">★</span>)}</div>;
       case 'nps':
         return <div className="flex gap-0.5 flex-wrap">{Array.from({length: 11}, (_, i) => <div key={i} className="w-6 h-6 rounded border border-stone-200 flex items-center justify-center text-[10px] text-stone-400">{i}</div>)}</div>;
       case 'yes_no':
         return (
           <div className="flex gap-2">
-            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{question.question_config?.yes_label || 'Yes'}</div>
-            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{question.question_config?.no_label || 'No'}</div>
+            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{localQuestion.question_config?.yes_label || 'Yes'}</div>
+            <div className="flex-1 text-center py-2 rounded-lg border border-stone-200 text-[12px] text-stone-500">{localQuestion.question_config?.no_label || 'No'}</div>
           </div>
         );
       case 'matrix':
-        const matrixCols = question.question_config?.columns || [];
+        const matrixCols = localQuestion.question_config?.columns || [];
         return (
           <div className="space-y-1">
             <div className="flex gap-1 text-[9px] text-stone-400 pl-16">
               {matrixCols.slice(0, 5).map((col: string, i: number) => <div key={i} className="flex-1 text-center truncate">{col}</div>)}
             </div>
-            {(question.options || []).slice(0, 2).map((opt: any) => (
+            {(localQuestion.options || []).slice(0, 2).map((opt: any) => (
               <div key={opt.id} className="flex items-center gap-1">
                 <span className="w-16 text-[10px] text-stone-500 truncate">{opt.option_text}</span>
                 {matrixCols.slice(0, 5).map((_: string, i: number) => <div key={i} className="flex-1 flex justify-center"><span className="w-3 h-3 rounded-full border border-stone-300" /></div>)}
@@ -197,10 +197,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'ranking':
-        if (!question.options || question.options.length === 0) return null;
+        if (!localQuestion.options || localQuestion.options.length === 0) return null;
         return (
           <div className="space-y-1">
-            {question.options.slice(0, 3).map((opt: any, i: number) => (
+            {localQuestion.options.slice(0, 3).map((opt: any, i: number) => (
               <div key={opt.id} className="flex items-center gap-1.5 text-[11px] text-stone-500 p-1 border border-dashed border-stone-200 rounded">
                 <span className="text-[10px] font-bold text-stone-400">{i+1}.</span>
                 <span className="truncate">{opt.option_text}</span>
@@ -213,7 +213,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'image_choice':
         return (
           <div className="flex gap-1">
-            {(question.options || []).slice(0, 3).map((opt: any) => (
+            {(localQuestion.options || []).slice(0, 3).map((opt: any) => (
               <div key={opt.id} className="w-12 h-12 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center text-[16px]">{opt.option_text}</div>
             ))}
           </div>
@@ -223,27 +223,27 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'text_block':
         return (
           <div className="p-2 rounded-lg bg-stone-50 border border-stone-200">
-            <p className="text-[11px] text-stone-600">{question.question_config?.content || question.question_text || 'Text content...'}</p>
+            <p className="text-[11px] text-stone-600">{localQuestion.question_config?.content || localQuestion.question_text || 'Text content...'}</p>
           </div>
         );
       case 'divider':
         return (
           <hr style={{
-            borderStyle: question.question_config?.style || 'solid',
-            borderColor: question.question_config?.color || '#e5e7eb',
-            borderWidth: `${question.question_config?.thickness || 1}px 0 0 0`,
+            borderStyle: localQuestion.question_config?.style || 'solid',
+            borderColor: localQuestion.question_config?.color || '#e5e7eb',
+            borderWidth: `${localQuestion.question_config?.thickness || 1}px 0 0 0`,
             margin: '8px 0',
           }} />
         );
       case 'image_block':
         return (
           <div className="text-center">
-            {question.question_config?.image_url ? (
-              <img src={question.question_config.image_url} alt={question.question_config?.alt_text || ''} className="max-h-24 mx-auto rounded-lg border border-stone-200" style={{ maxWidth: question.question_config?.max_width || '100%' }} />
+            {localQuestion.question_config?.image_url ? (
+              <img src={localQuestion.question_config.image_url} alt={localQuestion.question_config?.alt_text || ''} className="max-h-24 mx-auto rounded-lg border border-stone-200" style={{ maxWidth: localQuestion.question_config?.max_width || '100%' }} />
             ) : (
               <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">🖼 Image placeholder</div>
             )}
-            {question.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{question.question_config.caption}</p>}
+            {localQuestion.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{localQuestion.question_config.caption}</p>}
           </div>
         );
       default: return null;
@@ -273,8 +273,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
     if (!localQuestion.options) return;
     updateLocal({ options: localQuestion.options.map(opt => opt.id === optionId ? { ...opt, option_text: text } : opt) });
   };
-
-
 
 
   const preFillTemplates = [
@@ -894,15 +892,15 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             <p className="text-[11px] font-medium text-stone-400 mb-2">Preview</p>
             <div className="bg-white p-3 rounded-lg border border-stone-100">
               <p className="text-[13px] font-medium text-stone-800 mb-1.5">
-                {question.question_text || 'Enter your question'}
-                {question.response_required === 'force' && <span className="text-red-500 ml-1">*</span>}
+                {localQuestion.question_text || 'Enter your question'}
+                {localQuestion.response_required === 'force' && <span className="text-red-500 ml-1">*</span>}
               </p>
-              {question.question_description && <p className="text-[12px] text-stone-400 mb-2">{question.question_description}</p>}
+              {localQuestion.question_description && <p className="text-[12px] text-stone-400 mb-2">{localQuestion.question_description}</p>}
               {renderPreview()}
             </div>
           </div>
 
-          {['text_short', 'text_long'].includes(question.question_type) && (
+          {['text_short', 'text_long'].includes(localQuestion.question_type) && (
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.allow_voice} onChange={(e) => updateLocal({ allow_voice: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
               <Mic size={12} className="text-emerald-500" /> Voice input
