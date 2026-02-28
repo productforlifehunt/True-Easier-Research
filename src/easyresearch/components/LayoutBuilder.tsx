@@ -16,7 +16,7 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
   config: {
     questionnaire_id?: string;
     title?: string;
@@ -92,13 +92,9 @@ const ICON_OPTIONS = [
 ];
 
 const STATIC_CONTENT_ELEMENTS = [
-  { type: 'consent', label: 'Consent Form', icon: '🛡️', desc: 'Display consent agreement' },
-  { type: 'screening', label: 'Screening', icon: '📝', desc: 'Eligibility screening questions' },
-  { type: 'profile', label: 'Profile', icon: '👤', desc: 'Participant profile collection' },
   { type: 'ecogram', label: 'Ecogram', icon: '🔗', desc: 'Care network diagram' },
   { type: 'progress', label: 'Progress', icon: '📊', desc: 'Study progress overview' },
   { type: 'timeline', label: 'Timeline', icon: '📅', desc: 'Study timeline view' },
-  { type: 'help', label: 'Help', icon: '❓', desc: 'Help and FAQ section' },
 ];
 
 const LAYOUT_ELEMENTS = [
@@ -355,7 +351,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help') && (
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help' || el.type === 'custom') && (
           <div className="space-y-2">
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Component</label>
             <select value={el.config.questionnaire_id || ''} onChange={(e) => {
@@ -363,7 +359,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || el.config.title });
             }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
               <option value="">— Select {el.type} component —</option>
-              {questionnaires.filter(q => q.questionnaire_type === el.type).map(q => (
+              {questionnaires.filter(q => q.questionnaire_type === el.type || (el.type === 'custom' && q.questionnaire_type === 'custom')).map(q => (
                 <option key={q.id} value={q.id}>{q.title} ({q.questions?.length || 0} fields)</option>
               ))}
             </select>
@@ -678,12 +674,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     )}
 
                     {/* Components (consent/screening/profile/help) */}
-                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type)).length > 0 && (
+                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).length > 0 && (
                       <>
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Components</p>
                         <div className="space-y-1">
-                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type)).map(q => {
-                            const typeIcon = q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'screening' ? '📝' : q.questionnaire_type === 'profile' ? '👤' : '❓';
+                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).map(q => {
+                            const typeIcon = q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'screening' ? '📝' : q.questionnaire_type === 'profile' ? '👤' : q.questionnaire_type === 'help' ? '❓' : '🧩';
                             return (
                               <button key={q.id} onClick={() => addElement(q.questionnaire_type as any, { title: q.title, questionnaire_id: q.id })}
                                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">

@@ -33,7 +33,7 @@ export interface ParticipantType {
 interface QuestionnaireRef {
   id: string;
   title: string;
-  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help';
+  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom';
   assigned_participant_types: string[];
 }
 

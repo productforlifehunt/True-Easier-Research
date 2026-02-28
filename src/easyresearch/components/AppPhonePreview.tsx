@@ -475,6 +475,28 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </div>
         );
       }
+      case 'custom': {
+        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
+        }
+        return (
+          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+            <h4 className="text-[13px] font-semibold text-emerald-800">🧩 {el.config.title || 'Custom Component'}</h4>
+            {linkedQ ? (
+              <>
+                <p className="text-[11px] text-emerald-600 mt-1">{linkedQ.questions?.length || 0} fields</p>
+                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
+                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors">
+                  Open
+                </button>
+              </>
+            ) : (
+              <p className="text-[11px] text-emerald-600 mt-1 italic">No component linked</p>
+            )}
+          </div>
+        );
+      }
       case 'text_block':
         return (
           <div className="p-3 rounded-xl bg-stone-50">

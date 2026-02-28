@@ -5,7 +5,7 @@ import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
 import QuestionEditor from './QuestionEditor';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 
-type ComponentType = 'consent' | 'screening' | 'profile' | 'help';
+type ComponentType = 'consent' | 'screening' | 'profile' | 'help' | 'custom';
 
 interface ComponentBuilderProps {
   questionnaires: QuestionnaireConfig[];
@@ -19,6 +19,7 @@ const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNo
   { type: 'screening', label: 'Screening', icon: <ClipboardCheck size={16} className="text-orange-500" />, desc: 'Eligibility screening questions with disqualification logic', defaultTitle: 'Screening Questions' },
   { type: 'profile', label: 'Profile', icon: <User size={16} className="text-blue-500" />, desc: 'Participant demographics, contact info, and baseline data', defaultTitle: 'Participant Profile' },
   { type: 'help', label: 'Help / FAQ', icon: <HelpCircle size={16} className="text-violet-500" />, desc: 'Help sections, FAQ, and support contact for participants', defaultTitle: 'Help & FAQ' },
+  { type: 'custom', label: 'Custom', icon: <Plus size={16} className="text-emerald-500" />, desc: 'Create any custom component with your own name and fields', defaultTitle: 'Custom Component' },
 ];
 
 const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, participantTypes, onUpdate, project }) => {
@@ -26,8 +27,8 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
   const [openComponentId, setOpenComponentId] = useState<string | null>(null);
 
   // Filter only component-type questionnaires
-  const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type));
-  const surveyQuestionnaires = questionnaires.filter(q => !['consent', 'screening', 'profile', 'help'].includes(q.questionnaire_type));
+  const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
+  const surveyQuestionnaires = questionnaires.filter(q => !['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
 
   const addComponent = (type: ComponentType) => {
     const def = COMPONENT_TYPES.find(c => c.type === type)!;
