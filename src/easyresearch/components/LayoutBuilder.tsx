@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
+import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 
 export interface LayoutTab {
   id: string;
@@ -165,6 +166,7 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
 const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
 
   const activeTab = layout.tabs.find(t => t.id === activeTabId);
@@ -756,8 +758,17 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
 
           {/* Right: Live Phone Preview — uses the SAME renderer as Preview tab */}
-          <div className="lg:w-[380px] shrink-0">
+          <div className="lg:w-[430px] shrink-0">
             <div className="sticky top-24">
+              {/* Device selector */}
+              <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center">
+                {DEVICE_PRESETS.map(d => (
+                  <button key={d.id} onClick={() => setSelectedDevice(d)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                    {d.brand === 'apple' ? '🍎' : '🤖'} {d.label}
+                  </button>
+                ))}
+              </div>
               <AppPhonePreview
                 layout={layout}
                 questionnaires={questionnaires}
@@ -769,9 +780,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 onElementClick={setEditingElementId}
                 editable={true}
                 onRemoveElement={removeElement}
-                frameHeight={680}
+                frameWidth={selectedDevice.width}
+                frameHeight={selectedDevice.height}
               />
-              <p className="text-[11px] text-stone-400 text-center mt-3 font-light">Live Preview — drag to reorder, click to edit</p>
+              <p className="text-[11px] text-stone-400 text-center mt-2 font-light">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
             </div>
           </div>
         </div>

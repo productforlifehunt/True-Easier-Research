@@ -19,6 +19,7 @@ interface AppPhonePreviewProps {
   editable?: boolean;
   onRemoveElement?: (elementId: string) => void;
   scale?: number;
+  frameWidth?: number;
   frameHeight?: number;
 }
 
@@ -31,7 +32,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   activeTabId: controlledTabId, onActiveTabChange,
   highlightedElementId, onElementClick,
   editable = false, onRemoveElement,
-  scale = 1, frameHeight = 680,
+  scale = 1, frameWidth = 375, frameHeight = 680,
 }) => {
   const [internalTabId, setInternalTabId] = useState(layout.tabs[0]?.id || '');
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
@@ -566,11 +567,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   );
 
   if (scale !== 1) {
-    const scaledWidth = 375;
     return (
-      <div style={{ width: `${scaledWidth * scale}px`, height: `${frameHeight * scale}px`, overflow: 'hidden' }}>
-        <div style={{ width: `${scaledWidth}px`, height: `${frameHeight}px`, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-          <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ width: `${scaledWidth}px` }}>
+      <div style={{ width: `${frameWidth * scale}px`, height: `${frameHeight * scale}px`, overflow: 'hidden' }}>
+        <div style={{ width: `${frameWidth}px`, height: `${frameHeight}px`, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+          <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ width: `${frameWidth}px` }}>
             {phoneContent}
           </div>
         </div>
@@ -579,7 +579,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   }
 
   return (
-    <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ maxWidth: '375px', margin: '0 auto' }}>
+    <div className="bg-stone-900 rounded-[2.5rem] p-2.5 shadow-2xl" style={{ maxWidth: `${frameWidth}px`, margin: '0 auto' }}>
       {phoneContent}
     </div>
   );
