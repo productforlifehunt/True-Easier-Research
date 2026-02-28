@@ -175,11 +175,56 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     if (!result.destination) return;
     const qConfig = questionnaires.find(q => q.id === qId);
     if (!qConfig) return;
-    const items = Array.from(qConfig.questions);
-    const [moved] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, moved);
-    items.forEach((q, i) => q.order_index = i);
-    updateQuestionnaire(qId, { questions: items });
+
+    const sourceDropId = result.source.droppableId;
+    const destDropId = result.destination.droppableId;
+
+    // If tab sections exist, handle cross-section moves
+    if (qConfig.tab_sections && qConfig.tab_sections.length > 0) {
+      const sourceSectionId = sourceDropId.replace(`questions-${qId}-`, '');
+      const destSectionId = destDropId.replace(`questions-${qId}-`, '');
+
+      // Get questions grouped by section
+      const getQuestionsForSection = (sectionId: string) => {
+        if (sectionId === 'general') {
+          const assignedIds = new Set(qConfig.tab_sections!.flatMap(s => s.question_ids));
+          return qConfig.questions.filter(q => !assignedIds.has(q.id));
+        }
+        const section = qConfig.tab_sections!.find(s => s.id === sectionId);
+        if (!section) return [];
+        return section.question_ids.map(id => qConfig.questions.find(q => q.id === id)).filter(Boolean) as any[];
+      };
+
+      const sourceQuestions = getQuestionsForSection(sourceSectionId);
+      const movedQuestion = sourceQuestions[result.source.index];
+      if (!movedQuestion) return;
+
+      // Update tab_sections to move question between sections
+      let sections = (qConfig.tab_sections || []).map(s => ({
+        ...s,
+        question_ids: s.question_ids.filter(id => id !== movedQuestion.id),
+      }));
+
+      if (destSectionId !== 'general') {
+        const destIdx = sections.findIndex(s => s.id === destSectionId);
+        if (destIdx >= 0) {
+          const destQuestions = getQuestionsForSection(destSectionId).filter(q => q.id !== movedQuestion.id);
+          const insertAt = Math.min(result.destination.index, destQuestions.length);
+          const newIds = destQuestions.map(q => q.id);
+          newIds.splice(insertAt, 0, movedQuestion.id);
+          sections[destIdx] = { ...sections[destIdx], question_ids: newIds };
+        }
+      }
+
+      updateQuestionnaire(qId, { tab_sections: sections });
+    } else {
+      // Simple reorder without sections
+      const items = Array.from(qConfig.questions);
+      const [moved] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, moved);
+      items.forEach((q, i) => q.order_index = i);
+      updateQuestionnaire(qId, { questions: items });
+    }
   };
 
   const handleQuestionnaireDragEnd = (result: DropResult) => {
@@ -189,6 +234,70 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     items.splice(result.destination.index, 0, moved);
     items.forEach((q, i) => q.order_index = i);
     onUpdate(items);
+  };
+
+  const renderQuestionRow = (dragProvided: any, dragSnapshot: any, question: any, q: QuestionnaireConfig, globalIdx: number) => {
+    const isEditing = editingQuestionId === question.id;
+    return (
+      <div
+        ref={dragProvided.innerRef}
+        {...dragProvided.draggableProps}
+        {...dragProvided.dragHandleProps}
+        className={`transition-all ${dragSnapshot.isDragging ? 'shadow-lg bg-white ring-2 ring-emerald-200 rounded-lg' : ''}`}
+        style={dragProvided.draggableProps.style}
+      >
+        <div
+          className={`flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
+          onClick={() => setEditingQuestionId(isEditing ? null : question.id)}
+        >
+          <GripVertical size={12} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
+          <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">
+            Q{globalIdx + 1}
+          </span>
+          {question.required && (
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Required</span>
+          )}
+          <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">
+            {question.question_type?.replace(/_/g, ' ')}
+          </span>
+          <span className="text-[13px] text-stone-700 truncate flex-1 min-w-0">
+            {question.question_text}
+          </span>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button onClick={(e) => { e.stopPropagation(); setEditingQuestionId(isEditing ? null : question.id); }}
+              className={`p-1 rounded-lg transition-colors ${isEditing ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-stone-100 text-stone-400'}`} title="Edit">
+              <Edit2 size={12} />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); duplicateQuestion(q.id, question); }}
+              className="p-1 rounded-lg hover:bg-stone-100 transition-colors text-stone-400" title="Duplicate">
+              <Copy size={12} />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); deleteQuestion(q.id, question.id); }}
+              className="p-1 rounded-lg hover:bg-red-50 transition-colors text-red-400" title="Delete">
+              <Trash2 size={12} />
+            </button>
+          </div>
+        </div>
+        {isEditing && (
+          <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100">
+            <QuestionEditor
+              question={question}
+              project={project}
+              questionnaireType={q.questionnaire_type}
+              onUpdateQuestion={(questionId, updates) => updateQuestion(q.id, questionId, updates)}
+            />
+            {onUpdateLogic && (
+              <QuestionLogicEditor
+                question={question}
+                allQuestions={q.questions}
+                logicRules={logicRules}
+                onUpdateLogic={onUpdateLogic}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -470,107 +579,82 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               ) : (
                                 <DragDropContext onDragEnd={(result) => handleQuestionDragEnd(q.id, result)}>
-                                  <Droppable droppableId={`questions-${q.id}`}>
-                                    {(provided) => (
-                                      <div ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-stone-100">
-                                        {q.questions.map((question: any, qIdx: number) => {
-                                          const isEditing = editingQuestionId === question.id;
-                                          return (
-                                            <Draggable key={question.id} draggableId={question.id} index={qIdx}>
-                                              {(dragProvided, dragSnapshot) => (
-                                                <div
-                                                  ref={dragProvided.innerRef}
-                                                  {...dragProvided.draggableProps}
-                                                  {...dragProvided.dragHandleProps}
-                                                  className={`transition-all ${dragSnapshot.isDragging ? 'shadow-lg bg-white ring-2 ring-emerald-200 rounded-lg' : ''}`}
-                                                  style={dragProvided.draggableProps.style}
-                                                >
-                                                  {/* Question Row */}
-                                                  <div
-                                                    className={`flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-stone-50/50 transition-colors ${
-                                                      isEditing ? 'bg-emerald-50/30' : ''
-                                                    }`}
-                                                    onClick={() => setEditingQuestionId(isEditing ? null : question.id)}
-                                                  >
-                                                    <GripVertical size={12} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
-                                                    <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">
-                                                      Q{qIdx + 1}
-                                                    </span>
-                                                    {question.required && (
-                                                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Required</span>
-                                                    )}
-                                                    <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">
-                                                      {question.question_type?.replace(/_/g, ' ')}
-                                                    </span>
-                                                    {q.tab_sections && q.tab_sections.length > 0 && (
-                                                      <select
-                                                        value={q.tab_sections.find(s => s.question_ids.includes(question.id))?.id || ''}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        onChange={(e) => {
-                                                          const sections = (q.tab_sections || []).map(s => ({
-                                                            ...s,
-                                                            question_ids: s.question_ids.filter(id => id !== question.id)
-                                                          }));
-                                                          if (e.target.value) {
-                                                            const idx = sections.findIndex(s => s.id === e.target.value);
-                                                            if (idx >= 0) sections[idx].question_ids.push(question.id);
-                                                          }
-                                                          updateQuestionnaire(q.id, { tab_sections: sections });
-                                                        }}
-                                                        className="text-[9px] px-1 py-0.5 rounded border border-stone-200 bg-white text-stone-500 shrink-0"
-                                                      >
-                                                        <option value="">General</option>
-                                                        {q.tab_sections.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                                                      </select>
-                                                    )}
-                                                    <span className="text-[13px] text-stone-700 truncate flex-1 min-w-0">
-                                                      {question.question_text}
-                                                    </span>
-                                                    <div className="flex items-center gap-0.5 shrink-0">
-                                                      <button onClick={(e) => { e.stopPropagation(); setEditingQuestionId(isEditing ? null : question.id); }}
-                                                        className={`p-1 rounded-lg transition-colors ${isEditing ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-stone-100 text-stone-400'}`} title="Edit">
-                                                        <Edit2 size={12} />
-                                                      </button>
-                                                      <button onClick={(e) => { e.stopPropagation(); duplicateQuestion(q.id, question); }}
-                                                        className="p-1 rounded-lg hover:bg-stone-100 transition-colors text-stone-400" title="Duplicate">
-                                                        <Copy size={12} />
-                                                      </button>
-                                                      <button onClick={(e) => { e.stopPropagation(); deleteQuestion(q.id, question.id); }}
-                                                        className="p-1 rounded-lg hover:bg-red-50 transition-colors text-red-400" title="Delete">
-                                                        <Trash2 size={12} />
-                                                      </button>
-                                                    </div>
-                                                  </div>
-
-                                                  {/* Inline Editor */}
-                                                  {isEditing && (
-                                                    <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100">
-                                                      <QuestionEditor
-                                                        question={question}
-                                                        project={project}
-                                                        questionnaireType={q.questionnaire_type}
-                                                        onUpdateQuestion={(questionId, updates) => updateQuestion(q.id, questionId, updates)}
-                                                      />
-                                                      {/* Inline Logic for this question */}
-                                                      {onUpdateLogic && (
-                                                        <QuestionLogicEditor
-                                                          question={question}
-                                                          allQuestions={q.questions}
-                                                          logicRules={logicRules}
-                                                          onUpdateLogic={onUpdateLogic}
-                                                        />
-                                                      )}
-                                                    </div>
+                                  {q.tab_sections && q.tab_sections.length > 0 ? (
+                                    // Render questions grouped by tab sections
+                                    <div className="divide-y divide-stone-100">
+                                      {/* General (unassigned) section */}
+                                      {(() => {
+                                        const assignedIds = new Set(q.tab_sections!.flatMap(s => s.question_ids));
+                                        const generalQuestions = q.questions.filter(qq => !assignedIds.has(qq.id));
+                                        return (
+                                          <div>
+                                            <div className="px-4 py-1.5 bg-stone-50 border-b border-stone-100">
+                                              <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">📋 General ({generalQuestions.length})</span>
+                                            </div>
+                                            <Droppable droppableId={`questions-${q.id}-general`}>
+                                              {(provided, dropSnapshot) => (
+                                                <div ref={provided.innerRef} {...provided.droppableProps}
+                                                  className={`min-h-[32px] transition-colors ${dropSnapshot.isDraggingOver ? 'bg-emerald-50/30' : ''}`}>
+                                                  {generalQuestions.map((question: any, qIdx: number) => (
+                                                    <Draggable key={question.id} draggableId={question.id} index={qIdx}>
+                                                      {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, q.questions.indexOf(question))}
+                                                    </Draggable>
+                                                  ))}
+                                                  {provided.placeholder}
+                                                  {generalQuestions.length === 0 && !dropSnapshot.isDraggingOver && (
+                                                    <p className="text-[10px] text-stone-300 italic text-center py-2">Drop questions here</p>
                                                   )}
                                                 </div>
                                               )}
+                                            </Droppable>
+                                          </div>
+                                        );
+                                      })()}
+                                      {/* Named tab sections */}
+                                      {q.tab_sections!.map(section => {
+                                        const sectionQuestions = section.question_ids
+                                          .map(id => q.questions.find(qq => qq.id === id))
+                                          .filter(Boolean) as any[];
+                                        return (
+                                          <div key={section.id}>
+                                            <div className="px-4 py-1.5 bg-emerald-50/50 border-b border-stone-100">
+                                              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">📑 {section.label} ({sectionQuestions.length})</span>
+                                            </div>
+                                            <Droppable droppableId={`questions-${q.id}-${section.id}`}>
+                                              {(provided, dropSnapshot) => (
+                                                <div ref={provided.innerRef} {...provided.droppableProps}
+                                                  className={`min-h-[32px] transition-colors ${dropSnapshot.isDraggingOver ? 'bg-emerald-50/30' : ''}`}>
+                                                  {sectionQuestions.map((question: any, qIdx: number) => (
+                                                    <Draggable key={question.id} draggableId={question.id} index={qIdx}>
+                                                      {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, q.questions.indexOf(question))}
+                                                    </Draggable>
+                                                  ))}
+                                                  {provided.placeholder}
+                                                  {sectionQuestions.length === 0 && !dropSnapshot.isDraggingOver && (
+                                                    <p className="text-[10px] text-stone-300 italic text-center py-2">Drop questions here</p>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </Droppable>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    // Flat list (no tab sections)
+                                    <Droppable droppableId={`questions-${q.id}-general`}>
+                                      {(provided) => (
+                                        <div ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-stone-100">
+                                          {q.questions.map((question: any, qIdx: number) => (
+                                            <Draggable key={question.id} draggableId={question.id} index={qIdx}>
+                                              {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, qIdx)}
                                             </Draggable>
-                                          );
-                                        })}
-                                        {provided.placeholder}
-                                      </div>
-                                    )}
-                                  </Droppable>
+                                          ))}
+                                          {provided.placeholder}
+                                        </div>
+                                      )}
+                                    </Droppable>
+                                  )}
                                 </DragDropContext>
                               )}
                             </div>
