@@ -4,71 +4,13 @@ import CustomDropdown from './CustomDropdown';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
 import EcogramBuilder from './EcogramBuilder';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
+import { type SurveyProject } from './SurveyBuilder';
 
-interface SurveyProject {
-  id?: string;
+interface QuestionnaireRef {
+  id: string;
   title: string;
-  description: string;
-  project_type: string;
-  ai_enabled: boolean;
-  voice_enabled: boolean;
-  notification_enabled: boolean;
-  consent_required?: boolean;
-  consent_form_url?: string;
-  consent_form_text?: string;
-  consent_form: any;
-  recruitment_criteria: any;
-  notification_settings: any;
-  compensation_amount?: number;
-  compensation_type?: string;
-  max_participants?: number;
-  starts_at?: string;
-  ends_at?: string;
-  survey_code?: string;
-  study_duration?: number;
-  survey_frequency?: string;
-  allow_participant_dnd?: boolean;
-  participant_numbering?: boolean;
-  participant_number_prefix?: string;
-  participant_relation_enabled?: boolean;
-  participant_relation_options?: string[];
-  screening_enabled?: boolean;
-  screening_questions?: Array<{
-    id: string;
-    question: string;
-    type: 'yes_no' | 'text' | 'select';
-    options?: string[];
-    required: boolean;
-    disqualify_value?: string;
-  }>;
-  ecogram_enabled?: boolean;
-  ecogram_config?: {
-    relationship_options?: { value: string; label: string; color: string }[];
-    support_categories?: { value: string; label: string }[];
-    center_label?: string;
-  };
-  onboarding_required?: boolean;
-  onboarding_instructions?: string;
-  profile_questions?: Array<{
-    id: string;
-    question: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
-    options?: string[];
-    required: boolean;
-    config?: {
-      min?: number;
-      max?: number;
-      min_label?: string;
-      max_label?: string;
-      scale_type?: string;
-      placeholder?: string;
-    };
-  }>;
-  allow_start_date_selection?: boolean;
-  show_progress_bar?: boolean;
-  disable_backtracking?: boolean;
-  randomize_questions?: boolean;
-  auto_advance?: boolean;
+  questionnaire_type: 'survey' | 'consent' | 'screening';
+  questions: any[];
 }
 
 interface SurveySettingsProps {
@@ -76,9 +18,11 @@ interface SurveySettingsProps {
   onUpdateProject: (updates: SurveyProject) => void;
   participantTypes: ParticipantType[];
   onUpdateParticipantTypes: (types: ParticipantType[]) => void;
+  questionnaires: QuestionnaireRef[];
+  onAddQuestionnaire: (type: 'consent' | 'screening') => void;
 }
 
-const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProject, participantTypes, onUpdateParticipantTypes }) => {
+const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProject, participantTypes, onUpdateParticipantTypes, questionnaires, onAddQuestionnaire }) => {
   const [copied, setCopied] = useState(false);
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   const canShare = Boolean(project.id);
@@ -143,17 +87,50 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           {/* Global toggles */}
           <div className="divide-y divide-stone-100">
             <Toggle enabled={project.consent_required || false} onChange={(v) => onUpdateProject({ ...project, consent_required: v })} label="Require Consent" desc="Participants must accept consent forms before enrollment" />
-            <Toggle enabled={project.screening_enabled || false} onChange={(v) => onUpdateProject({ ...project, screening_enabled: v })} label="Require Screening" desc="Ask eligibility questions before enrollment" />
-          </div>
+            {project.consent_required && (
+              <div className="py-3 pl-3 border-l-2 border-emerald-200 ml-2">
+                <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-2">Consent Forms</p>
+                {questionnaires.filter(q => q.questionnaire_type === 'consent').length === 0 ? (
+                  <p className="text-[12px] text-stone-400 italic mb-2">No consent forms yet.</p>
+                ) : (
+                  <div className="space-y-1 mb-2">
+                    {questionnaires.filter(q => q.questionnaire_type === 'consent').map(q => (
+                      <div key={q.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100">
+                        <Shield size={12} className="text-emerald-500 shrink-0" />
+                        <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={() => onAddQuestionnaire('consent')} className="flex items-center gap-1 text-[12px] text-emerald-600 hover:text-emerald-700 font-medium">
+                  <Plus size={12} /> Add Consent Form
+                </button>
+              </div>
+            )}
 
-          {/* Info about per-type configuration */}
-          {(project.consent_required || project.screening_enabled) && participantTypes.length > 0 && (
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-100">
-              <p className="text-[12px] text-amber-700 font-medium">
-                ✨ Configure consent forms and screening questions per participant type below.
-              </p>
-            </div>
-          )}
+            <Toggle enabled={project.screening_enabled || false} onChange={(v) => onUpdateProject({ ...project, screening_enabled: v })} label="Require Screening" desc="Ask eligibility questions before enrollment" />
+            {project.screening_enabled && (
+              <div className="py-3 pl-3 border-l-2 border-amber-200 ml-2">
+                <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-2">Screening Questionnaires</p>
+                {questionnaires.filter(q => q.questionnaire_type === 'screening').length === 0 ? (
+                  <p className="text-[12px] text-stone-400 italic mb-2">No screening questionnaires yet.</p>
+                ) : (
+                  <div className="space-y-1 mb-2">
+                    {questionnaires.filter(q => q.questionnaire_type === 'screening').map(q => (
+                      <div key={q.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100">
+                        <ClipboardCheck size={12} className="text-amber-500 shrink-0" />
+                        <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
+                        <span className="text-[10px] text-stone-400">{q.questions.length} q</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={() => onAddQuestionnaire('screening')} className="flex items-center gap-1 text-[12px] text-amber-600 hover:text-amber-700 font-medium">
+                  <Plus size={12} /> Add Screening Questionnaire
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Participant Numbering */}
           <div className="border-t border-stone-100 pt-3 space-y-2">
@@ -171,6 +148,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             <ParticipantTypeManager
               participantTypes={participantTypes}
               onUpdate={onUpdateParticipantTypes}
+              questionnaires={questionnaires.map(q => ({ id: q.id, title: q.title, questionnaire_type: q.questionnaire_type, assigned_participant_types: (q as any).assigned_participant_types || [] }))}
             />
           </div>
         </div>
@@ -190,8 +168,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           <Toggle enabled={project.ecogram_enabled || false} onChange={(v) => onUpdateProject({ ...project, ecogram_enabled: v })} label="Enable Ecogram" desc="Let participants build a care network diagram" />
           {project.ecogram_enabled && (
             <div className="pl-3 border-l-2 border-teal-200 space-y-2">
-              <InputField label="Center Label" type="text" value={project.ecogram_config?.center_label || 'You'} 
-                onChange={(e) => onUpdateProject({ ...project, ecogram_config: { ...project.ecogram_config, center_label: (e.target as HTMLInputElement).value } })} placeholder="You / Patient" />
+              <InputField label="Center Label" type="text" value={project.ecogram_center_label || 'You'} 
+                onChange={(e) => onUpdateProject({ ...project, ecogram_center_label: (e.target as HTMLInputElement).value })} placeholder="You / Patient" />
               <p className="text-[11px] text-stone-400">The ecogram will be available in participant settings. Data is stored per-enrollment.</p>
             </div>
           )}
@@ -210,18 +188,18 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
       {/* Schedule */}
       <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title="Schedule">
         <div className="grid grid-cols-2 gap-3">
-          <InputField label="Start Date" type="datetime-local" value={project.starts_at || ''} onChange={(e) => onUpdateProject({ ...project, starts_at: (e.target as HTMLInputElement).value })} />
-          <InputField label="End Date" type="datetime-local" value={project.ends_at || ''} onChange={(e) => onUpdateProject({ ...project, ends_at: (e.target as HTMLInputElement).value })} />
+          <InputField label="Start Date" type="datetime-local" value={project.start_at || ''} onChange={(e) => onUpdateProject({ ...project, start_at: (e.target as HTMLInputElement).value })} />
+          <InputField label="End Date" type="datetime-local" value={project.end_at || ''} onChange={(e) => onUpdateProject({ ...project, end_at: (e.target as HTMLInputElement).value })} />
         </div>
       </SectionCard>
 
       {/* Participants limits */}
       <SectionCard icon={Users} iconBg="from-cyan-50 to-teal-50" iconColor="text-cyan-600" title="Capacity">
         <div className="space-y-3">
-          <InputField label="Max Participants" type="number" value={project.max_participants || ''} onChange={(e) => onUpdateProject({ ...project, max_participants: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder="Unlimited" />
+          <InputField label="Max Participants" type="number" value={project.max_participant || ''} onChange={(e) => onUpdateProject({ ...project, max_participant: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder="Unlimited" />
           <div>
             <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Recruitment Criteria</label>
-            <textarea value={project.recruitment_criteria?.description || ''} onChange={(e) => onUpdateProject({ ...project, recruitment_criteria: { ...project.recruitment_criteria, description: e.target.value } })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Eligibility criteria" />
+            <textarea value={project.recruitment_criteria_text || ''} onChange={(e) => onUpdateProject({ ...project, recruitment_criteria_text: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Eligibility criteria" />
           </div>
         </div>
       </SectionCard>
@@ -259,7 +237,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             {project.onboarding_required && (
               <div>
                 <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Onboarding Instructions</label>
-                <textarea value={project.onboarding_instructions || ''} onChange={(e) => onUpdateProject({ ...project, onboarding_instructions: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Welcome! This study will track..." />
+                <textarea value={project.onboarding_instruction || ''} onChange={(e) => onUpdateProject({ ...project, onboarding_instruction: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Welcome! This study will track..." />
               </div>
             )}
           </div>
@@ -309,16 +287,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Profile Questions Builder */}
-      <SectionCard icon={Users} iconBg="from-pink-50 to-rose-50" iconColor="text-pink-600" title="Participant Profile Questions">
-        <p className="text-[12px] text-stone-400 font-light mb-4">
-          Define custom profile fields collected during participant onboarding (e.g., demographics, baseline assessments).
-        </p>
-        <ProfileQuestionsBuilder 
-          questions={project.profile_questions || []} 
-          onChange={(pq) => onUpdateProject({ ...project, profile_questions: pq })} 
-        />
-      </SectionCard>
+      {/* Profile Questions Builder — TODO: wire to profile_question table instead of JSONB */}
+      {/* Profile questions are now stored in the profile_question table, not on the project row */}
 
       {/* Questionnaire Management */}
       {isLongitudinal && project.id && (

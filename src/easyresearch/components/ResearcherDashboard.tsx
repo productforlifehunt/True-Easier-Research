@@ -187,7 +187,11 @@ const ResearcherDashboard: React.FC = () => {
           methodology_type: (project as any).methodology_type || 'single_survey',
           ai_enabled: project.ai_enabled, voice_enabled: project.voice_enabled,
           max_participant: (project as any).max_participant || 100,
-          setting: (project as any).setting || {}, notification_setting: (project as any).notification_setting || {}
+          show_progress_bar: (project as any).show_progress_bar ?? true,
+          consent_required: (project as any).consent_required ?? false,
+          screening_enabled: (project as any).screening_enabled ?? false,
+          notification_frequency: (project as any).notification_frequency,
+          notification_times_per_day: (project as any).notification_times_per_day
         })
         .select().single();
       

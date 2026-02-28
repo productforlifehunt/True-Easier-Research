@@ -52,9 +52,8 @@ export async function getAIEntitlements(organizationId: string): Promise<AIEntit
     }
 
     const limits = PLAN_LIMITS[org.plan] || PLAN_LIMITS.free;
-    const settingFlags = (org.setting as Record<string, any>) || {};
-    const aiEnabledBySetting = settingFlags.ai_features_enabled !== false;
-    const voiceEnabledBySetting = settingFlags.voice_features_enabled !== false;
+    const aiEnabledBySetting = (org as any).ai_features_enabled !== false;
+    const voiceEnabledBySetting = (org as any).voice_features_enabled !== false;
 
     return {
       aiAssistEnabled: aiEnabledBySetting && limits.aiEnabled,

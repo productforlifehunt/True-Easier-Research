@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Save, ArrowLeft, Pencil } from 'lucide-react';
+import { Save, ArrowLeft, Pencil, Database } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import SurveySettings from './SurveySettings';
@@ -10,6 +10,7 @@ import ProjectResponsesTab from './ProjectResponsesTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
+import { createDementiaSeedParticipantTypes, createDementiaSeedQuestionnaires } from '../seeds/dementiaCaregiverSeed';
 import toast from 'react-hot-toast';
 
 interface Question {
@@ -45,48 +46,67 @@ export interface SurveyProject {
   description: string;
   status?: string;
   project_type: string;
+  methodology_type?: string;
   ai_enabled: boolean;
   voice_enabled: boolean;
   notification_enabled: boolean;
+  // Consent (proper columns)
   consent_required?: boolean;
-  consent_form_url?: string;
+  consent_form_title?: string;
   consent_form_text?: string;
-  consent_form: any;
-  recruitment_criteria: any;
-  notification_settings: any;
+  consent_form_url?: string;
+  // Screening
+  screening_enabled?: boolean;
+  // Compensation
   compensation_amount?: number;
   compensation_type?: string;
-  max_participants?: number;
-  starts_at?: string;
-  ends_at?: string;
-  survey_code?: string;
-  published_at?: string | null;
+  // Participant config
+  max_participant?: number;
+  participant_numbering?: boolean;
+  participant_number_prefix?: string;
+  participant_relation_enabled?: boolean;
+  participant_relation_options?: string[];
+  // Schedule
+  start_at?: string;
+  end_at?: string;
   study_duration?: number;
   survey_frequency?: string;
   allow_participant_dnd?: boolean;
-  participant_numbering?: boolean;
-  onboarding_required?: boolean;
-  onboarding_instructions?: string;
-  profile_questions?: Array<{
-    id: string;
-    question: string;
-    type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'scale' | 'section';
-    options?: string[];
-    required: boolean;
-    config?: {
-      min?: number;
-      max?: number;
-      min_label?: string;
-      max_label?: string;
-      scale_type?: string;
-      placeholder?: string;
-    };
-  }>;
   allow_start_date_selection?: boolean;
+  survey_code?: string;
+  published_at?: string | null;
+  // Onboarding
+  onboarding_required?: boolean;
+  onboarding_instruction?: string;
+  // Display settings (proper columns)
   show_progress_bar?: boolean;
   disable_backtracking?: boolean;
   randomize_questions?: boolean;
   auto_advance?: boolean;
+  // Ecogram (proper columns)
+  ecogram_enabled?: boolean;
+  ecogram_center_label?: string;
+  ecogram_relationship_options?: string[];
+  ecogram_support_categories?: string[];
+  // Notification (proper columns)
+  notification_frequency?: string;
+  notification_times_per_day?: number;
+  notification_times?: string[];
+  notification_send_reminders?: boolean;
+  notification_timezone?: string;
+  // Sampling (proper columns)
+  sampling_type?: string;
+  sampling_prompts_per_day?: number;
+  sampling_start_hour?: number;
+  sampling_end_hour?: number;
+  sampling_allow_late?: boolean;
+  sampling_late_window_minutes?: number;
+  // Recruitment
+  recruitment_criteria_text?: string;
+  // App layout (JSONB — only remaining JSONB, legitimate use for deeply nested UI config)
+  app_layout?: any;
+  // Help
+  help_information?: string;
 }
 
 type TabId = 'questionnaires' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
@@ -129,12 +149,7 @@ const SurveyBuilder: React.FC = () => {
     ai_enabled: false,
     voice_enabled: false,
     notification_enabled: true,
-    consent_form: {},
-    recruitment_criteria: {},
-    notification_settings: {}
   });
-  // Legacy global questions state - only used for loading/migration, all questions now live inside questionnaire configs
-  const [questions, setQuestions] = useState<Question[]>([]);
   const initialTab = (location.state as any)?.activeTab as TabId | undefined;
   const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'settings');
   const [saving, setSaving] = useState(false);
@@ -148,92 +163,122 @@ const SurveyBuilder: React.FC = () => {
 
   const projectStatus = (project as any)?.status || 'draft';
 
-  const normalizeProject = (p: any) => {
-    if (!p) return p;
-    const s = p.setting ?? p.settings ?? {};
-    return {
-      ...p,
-      settings: s,
-      notification_settings: p.notification_settings ?? p.notification_setting,
-      max_participants: p.max_participants ?? p.max_participant,
-      starts_at: p.starts_at ?? p.start_at,
-      ends_at: p.ends_at ?? p.end_at,
-      onboarding_instructions: p.onboarding_instructions ?? p.onboarding_instruction,
-      profile_questions: p.profile_questions ?? p.profile_question,
-      show_progress_bar: p.show_progress_bar ?? s.show_progress_bar,
-      disable_backtracking: p.disable_backtracking ?? s.disable_backtracking,
-      randomize_questions: p.randomize_questions ?? s.randomize_questions,
-      auto_advance: p.auto_advance ?? s.auto_advance,
-      consent_required: p.consent_required ?? s.consent_required,
-      consent_form_url: p.consent_form_url ?? s.consent_form_url,
-      consent_form_text: p.consent_form_text ?? s.consent_form_text,
-      screening_enabled: p.screening_enabled ?? s.screening_enabled,
-      screening_questions: p.screening_questions ?? s.screening_questions,
-      participant_numbering: p.participant_numbering ?? s.participant_numbering,
-      participant_number_prefix: p.participant_number_prefix ?? s.participant_number_prefix ?? 'PP',
-      participant_relation_enabled: p.participant_relation_enabled ?? s.participant_relation_enabled,
-      participant_relation_options: p.participant_relation_options ?? s.participant_relation_options,
-      ecogram_enabled: p.ecogram_enabled ?? s.ecogram_enabled,
-      ecogram_config: p.ecogram_config ?? s.ecogram_config,
-    };
-  };
+  // Direct DB row → frontend state. All columns are flat now, no JSONB normalization needed.
+  const toProjectState = (row: any): SurveyProject => ({
+    id: row.id,
+    organization_id: row.organization_id,
+    researcher_id: row.researcher_id,
+    title: row.title || '',
+    description: row.description || '',
+    status: row.status || 'draft',
+    project_type: row.project_type || 'survey',
+    methodology_type: row.methodology_type,
+    ai_enabled: row.ai_enabled ?? false,
+    voice_enabled: row.voice_enabled ?? false,
+    notification_enabled: row.notification_enabled ?? true,
+    consent_required: row.consent_required ?? false,
+    consent_form_title: row.consent_form_title,
+    consent_form_text: row.consent_form_text,
+    consent_form_url: row.consent_form_url,
+    screening_enabled: row.screening_enabled ?? false,
+    compensation_amount: row.compensation_amount,
+    compensation_type: row.compensation_type,
+    max_participant: row.max_participant,
+    participant_numbering: row.participant_numbering ?? false,
+    participant_number_prefix: row.participant_number_prefix || 'PP',
+    participant_relation_enabled: row.participant_relation_enabled ?? false,
+    participant_relation_options: row.participant_relation_options || [],
+    start_at: row.start_at,
+    end_at: row.end_at,
+    study_duration: row.study_duration,
+    survey_frequency: row.survey_frequency,
+    allow_participant_dnd: row.allow_participant_dnd ?? false,
+    allow_start_date_selection: row.allow_start_date_selection ?? false,
+    survey_code: row.survey_code,
+    published_at: row.published_at,
+    onboarding_required: row.onboarding_required ?? false,
+    onboarding_instruction: row.onboarding_instruction,
+    show_progress_bar: row.show_progress_bar ?? true,
+    disable_backtracking: row.disable_backtracking ?? false,
+    randomize_questions: row.randomize_questions ?? false,
+    auto_advance: row.auto_advance ?? false,
+    ecogram_enabled: row.ecogram_enabled ?? false,
+    ecogram_center_label: row.ecogram_center_label || 'Me',
+    ecogram_relationship_options: row.ecogram_relationship_options || [],
+    ecogram_support_categories: row.ecogram_support_categories || [],
+    notification_frequency: row.notification_frequency,
+    notification_times_per_day: row.notification_times_per_day,
+    notification_times: row.notification_times || [],
+    notification_send_reminders: row.notification_send_reminders ?? true,
+    notification_timezone: row.notification_timezone,
+    sampling_type: row.sampling_type,
+    sampling_prompts_per_day: row.sampling_prompts_per_day,
+    sampling_start_hour: row.sampling_start_hour ?? 8,
+    sampling_end_hour: row.sampling_end_hour ?? 21,
+    sampling_allow_late: row.sampling_allow_late ?? true,
+    sampling_late_window_minutes: row.sampling_late_window_minutes ?? 60,
+    recruitment_criteria_text: row.recruitment_criteria_text,
+    app_layout: row.app_layout || {},
+    help_information: row.help_information,
+  });
 
-  const toDbProjectUpdate = (p: any) => {
-    const baseSettings = p?.settings ?? p?.setting ?? {};
-    const notification_settings = p?.notification_settings ?? p?.notification_setting;
-    const mergedSettings = {
-      ...baseSettings,
-      show_progress_bar: p?.show_progress_bar,
-      disable_backtracking: p?.disable_backtracking,
-      randomize_questions: p?.randomize_questions,
-      auto_advance: p?.auto_advance,
-      consent_required: p?.consent_required,
-      consent_form_url: p?.consent_form_url,
-      consent_form_text: p?.consent_form_text,
-      screening_enabled: p?.screening_enabled,
-      screening_questions: p?.screening_questions,
-      participant_numbering: p?.participant_numbering,
-      participant_number_prefix: p?.participant_number_prefix,
-      participant_relation_enabled: p?.participant_relation_enabled,
-      participant_relation_options: p?.participant_relation_options,
-      ecogram_enabled: p?.ecogram_enabled,
-      ecogram_config: p?.ecogram_config,
-      // New multi-questionnaire data stored in settings JSON
-      questionnaire_configs: questionnaireConfigs,
-      participant_types: participantTypes,
-      app_layout: appLayout,
-    };
-    return {
-      organization_id: p?.organization_id,
-      researcher_id: p?.researcher_id,
-      title: p?.title,
-      description: p?.description,
-      status: p?.status,
-      published_at: p?.published_at,
-      project_type: p?.project_type,
-      setting: mergedSettings,
-      ai_enabled: p?.ai_enabled,
-      voice_enabled: p?.voice_enabled,
-      notification_enabled: p?.notification_enabled,
-      consent_form: p?.consent_form,
-      recruitment_criteria: p?.recruitment_criteria,
-      notification_setting: notification_settings,
-      compensation_amount: p?.compensation_amount,
-      compensation_type: p?.compensation_type,
-      max_participant: p?.max_participants ?? p?.max_participant,
-      start_at: p?.starts_at ?? p?.start_at,
-      end_at: p?.ends_at ?? p?.end_at,
-      study_duration: p?.study_duration,
-      survey_frequency: p?.survey_frequency,
-      allow_participant_dnd: p?.allow_participant_dnd,
-      participant_numbering: p?.participant_numbering,
-      onboarding_required: p?.onboarding_required,
-      onboarding_instruction: p?.onboarding_instructions ?? p?.onboarding_instruction,
-      profile_question: p?.profile_questions ?? p?.profile_question,
-      allow_start_date_selection: p?.allow_start_date_selection,
-      survey_code: p?.survey_code,
-    };
-  };
+  // Frontend state → DB row for upsert. Direct column mapping, no JSONB merging.
+  const toDbRow = (p: SurveyProject) => ({
+    organization_id: p.organization_id,
+    researcher_id: p.researcher_id,
+    title: p.title,
+    description: p.description,
+    status: p.status,
+    published_at: p.published_at,
+    project_type: p.project_type,
+    methodology_type: p.methodology_type,
+    ai_enabled: p.ai_enabled,
+    voice_enabled: p.voice_enabled,
+    notification_enabled: p.notification_enabled,
+    consent_required: p.consent_required,
+    consent_form_title: p.consent_form_title,
+    consent_form_text: p.consent_form_text,
+    consent_form_url: p.consent_form_url,
+    screening_enabled: p.screening_enabled,
+    compensation_amount: p.compensation_amount,
+    compensation_type: p.compensation_type,
+    max_participant: p.max_participant,
+    participant_numbering: p.participant_numbering,
+    participant_number_prefix: p.participant_number_prefix,
+    participant_relation_enabled: p.participant_relation_enabled,
+    participant_relation_options: p.participant_relation_options,
+    start_at: p.start_at,
+    end_at: p.end_at,
+    study_duration: p.study_duration,
+    survey_frequency: p.survey_frequency,
+    allow_participant_dnd: p.allow_participant_dnd,
+    allow_start_date_selection: p.allow_start_date_selection,
+    survey_code: p.survey_code,
+    onboarding_required: p.onboarding_required,
+    onboarding_instruction: p.onboarding_instruction,
+    show_progress_bar: p.show_progress_bar,
+    disable_backtracking: p.disable_backtracking,
+    randomize_questions: p.randomize_questions,
+    auto_advance: p.auto_advance,
+    ecogram_enabled: p.ecogram_enabled,
+    ecogram_center_label: p.ecogram_center_label,
+    ecogram_relationship_options: p.ecogram_relationship_options,
+    ecogram_support_categories: p.ecogram_support_categories,
+    notification_frequency: p.notification_frequency,
+    notification_times_per_day: p.notification_times_per_day,
+    notification_times: p.notification_times,
+    notification_send_reminders: p.notification_send_reminders,
+    notification_timezone: p.notification_timezone,
+    sampling_type: p.sampling_type,
+    sampling_prompts_per_day: p.sampling_prompts_per_day,
+    sampling_start_hour: p.sampling_start_hour,
+    sampling_end_hour: p.sampling_end_hour,
+    sampling_allow_late: p.sampling_allow_late,
+    sampling_late_window_minutes: p.sampling_late_window_minutes,
+    recruitment_criteria_text: p.recruitment_criteria_text,
+    app_layout: appLayout,
+    help_information: p.help_information,
+  });
 
   const generateSurveyCode = async () => {
     for (let i = 0; i < 5; i++) {
@@ -310,36 +355,106 @@ const SurveyBuilder: React.FC = () => {
           return;
         }
         if (projectData && mounted) {
-          const normalized = normalizeProject(projectData);
-          setProject(normalized);
-          if (normalized.settings?.logic_rules) {
-            setLogicRules(normalized.settings.logic_rules);
+          setProject(toProjectState(projectData));
+          if (projectData.app_layout && Object.keys(projectData.app_layout).length > 0) {
+            setAppLayout(projectData.app_layout);
           }
-          // Load multi-questionnaire configs from settings
-          let qConfigs: QuestionnaireConfig[] = normalized.settings?.questionnaire_configs || [];
-          if (normalized.settings?.participant_types) {
-            setParticipantTypes(normalized.settings.participant_types);
+
+          // Load logic rules from logic_rule table
+          const { data: logicRows } = await supabase
+            .from('logic_rule')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('order_index');
+          if (logicRows && mounted) {
+            setLogicRules(logicRows.map((r: any) => ({
+              id: r.id,
+              questionId: r.question_id,
+              condition: r.condition,
+              value: r.value,
+              action: r.action,
+              targetQuestionId: r.target_question_id,
+            })));
           }
-          if (normalized.settings?.app_layout) {
-            setAppLayout(normalized.settings.app_layout);
+
+          // Load questionnaires from questionnaire table
+          const { data: questionnaireRows } = await supabase
+            .from('questionnaire')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('order_index');
+
+          // Load participant types from participant_type table
+          const { data: ptRows } = await supabase
+            .from('participant_type')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('order_index');
+
+          if (ptRows && mounted) {
+            setParticipantTypes(ptRows.map((pt: any) => ({
+              ...pt,
+              relations: pt.relations || [],
+              consent_forms: [],
+              screening_questions: [],
+            })));
           }
-          // Load questions from DB and distribute into questionnaire configs
+
+          // Load questionnaire<->participant_type assignments
+          let qptMap = new Map<string, string[]>();
+          if (questionnaireRows && questionnaireRows.length > 0) {
+            const qIds = questionnaireRows.map((q: any) => q.id);
+            const { data: qptRows } = await supabase
+              .from('questionnaire_participant_type')
+              .select('questionnaire_id, participant_type_id')
+              .in('questionnaire_id', qIds);
+            if (qptRows) {
+              for (const row of qptRows) {
+                if (!qptMap.has(row.questionnaire_id)) qptMap.set(row.questionnaire_id, []);
+                qptMap.get(row.questionnaire_id)!.push(row.participant_type_id);
+              }
+            }
+          }
+
+          // Load questions from DB and distribute into questionnaires via questionnaire_id FK
           const { data: questionsData } = await supabase
             .from('survey_question')
             .select('*, options:question_option(*)')
             .eq('project_id', projectId)
             .order('order_index');
+
+          let qConfigs: QuestionnaireConfig[] = (questionnaireRows || []).map((qr: any) => ({
+            id: qr.id,
+            project_id: qr.project_id,
+            questionnaire_type: qr.questionnaire_type || 'survey',
+            title: qr.title,
+            description: qr.description || '',
+            questions: [],
+            estimated_duration: qr.estimated_duration || 5,
+            frequency: qr.frequency || 'once',
+            time_windows: qr.time_windows || [{ start: '09:00', end: '21:00' }],
+            notification_enabled: qr.notification_enabled || false,
+            notification_minutes_before: qr.notification_minutes_before || 5,
+            dnd_allowed: qr.dnd_allowed || false,
+            dnd_default_start: qr.dnd_default_start || '22:00',
+            dnd_default_end: qr.dnd_default_end || '08:00',
+            assigned_participant_types: qptMap.get(qr.id) || [],
+            order_index: qr.order_index || 0,
+            consent_text: qr.consent_text,
+            consent_url: qr.consent_url,
+            consent_required: qr.consent_required,
+            disqualify_logic: qr.disqualify_logic,
+          }));
+
           if (questionsData && mounted) {
-            // Distribute questions into their questionnaires based on questionnaire_id in config
             if (qConfigs.length > 0) {
               const qMap = new Map<string, any[]>();
               qConfigs.forEach(qc => qMap.set(qc.id, []));
               for (const q of questionsData) {
-                const qId = q.question_config?.questionnaire_id;
+                const qId = q.questionnaire_id;
                 if (qId && qMap.has(qId)) {
                   qMap.get(qId)!.push(q);
                 } else if (qConfigs.length > 0) {
-                  // Default to first questionnaire if no match
                   qMap.get(qConfigs[0].id)!.push(q);
                 }
               }
@@ -349,6 +464,8 @@ const SurveyBuilder: React.FC = () => {
           } else {
             setQuestionnaireConfigs(qConfigs);
           }
+
+          // No legacy JSONB fallbacks — all data is in proper tables now
         }
         if (mounted) setLoading(false);
       } catch (error) {
@@ -392,10 +509,10 @@ const SurveyBuilder: React.FC = () => {
           })) || []
         }));
 
-        // Load questionnaire configs and distribute questions into them
-        let qConfigs: QuestionnaireConfig[] = settings?.setting?.questionnaire_configs || [];
+        // Load questionnaire configs from template (in-memory only, saved to tables on save)
+        const templateQConfigs = settings?.questionnaire_configs || [];
+        let qConfigs: QuestionnaireConfig[] = templateQConfigs.map((c: any) => ({ ...c, questionnaire_type: c.questionnaire_type || 'survey' }));
         if (qConfigs.length > 0 && builtQuestions.length > 0) {
-          // Distribute questions by questionnaire_id tag in their config
           const qMap = new Map<string, any[]>();
           qConfigs.forEach(qc => qMap.set(qc.id, []));
           for (const q of builtQuestions) {
@@ -403,11 +520,9 @@ const SurveyBuilder: React.FC = () => {
             if (qId && qMap.has(qId)) {
               qMap.get(qId)!.push(q);
             } else {
-              // Default to first questionnaire
               qMap.get(qConfigs[0].id)!.push(q);
             }
           }
-          // Re-index within each questionnaire
           qConfigs = qConfigs.map(qc => {
             const qs = qMap.get(qc.id) || [];
             qs.forEach((q, i) => q.order_index = i);
@@ -415,9 +530,9 @@ const SurveyBuilder: React.FC = () => {
           });
           setQuestionnaireConfigs(qConfigs);
         } else if (builtQuestions.length > 0) {
-          // No questionnaire configs from template - create a default one
           const defaultQ: QuestionnaireConfig = {
             id: crypto.randomUUID(),
+            questionnaire_type: 'survey',
             title: 'Main Questionnaire',
             description: '',
             questions: builtQuestions,
@@ -435,11 +550,12 @@ const SurveyBuilder: React.FC = () => {
           setQuestionnaireConfigs([defaultQ]);
         }
 
-        if (settings?.setting?.participant_types) {
-          setParticipantTypes(settings.setting.participant_types);
+        // Load template participant types and app layout (in-memory, saved to tables on save)
+        if (settings?.participant_types) {
+          setParticipantTypes(settings.participant_types);
         }
-        if (settings?.setting?.app_layout) {
-          setAppLayout(settings.setting.app_layout);
+        if (settings?.app_layout) {
+          setAppLayout(settings.app_layout);
         }
       });
       setLoading(false);
@@ -463,15 +579,91 @@ const SurveyBuilder: React.FC = () => {
         .maybeSingle();
       if (!researcherData) throw new Error('Researcher not found');
 
+      // ── Sync participant types to participant_type table ──
+      const syncParticipantTypes = async (targetProjectId: string) => {
+        const { data: existingPTs } = await supabase.from('participant_type').select('id').eq('project_id', targetProjectId);
+        const existingPTIds = new Set((existingPTs || []).map((pt: any) => pt.id));
+        const currentPTIds = new Set(participantTypes.map(pt => pt.id));
+        const removedPTIds = [...existingPTIds].filter(id => !currentPTIds.has(id));
+
+        if (removedPTIds.length > 0) {
+          await supabase.from('questionnaire_participant_type').delete().in('participant_type_id', removedPTIds);
+          await supabase.from('participant_type').delete().in('id', removedPTIds);
+        }
+
+        for (const pt of participantTypes) {
+          const ptPayload = {
+            id: pt.id,
+            project_id: targetProjectId,
+            name: pt.name,
+            description: pt.description || '',
+            relations: pt.relations || [],
+            color: pt.color || '#10b981',
+            order_index: pt.order_index ?? 0,
+          };
+          await supabase.from('participant_type').upsert(ptPayload, { onConflict: 'id' });
+        }
+      };
+
+      // ── Sync questionnaires to questionnaire table ──
+      const syncQuestionnaires = async (targetProjectId: string) => {
+        const { data: existingQs } = await supabase.from('questionnaire').select('id').eq('project_id', targetProjectId);
+        const existingQIds = new Set((existingQs || []).map((q: any) => q.id));
+        const currentQIds = new Set(questionnaireConfigs.map(q => q.id));
+        const removedQIds = [...existingQIds].filter(id => !currentQIds.has(id));
+
+        if (removedQIds.length > 0) {
+          await supabase.from('questionnaire_participant_type').delete().in('questionnaire_id', removedQIds);
+          // Nullify questionnaire_id on orphaned questions (don't delete them — they still belong to project)
+          await supabase.from('survey_question').update({ questionnaire_id: null }).in('questionnaire_id', removedQIds);
+          await supabase.from('questionnaire').delete().in('id', removedQIds);
+        }
+
+        for (const qc of questionnaireConfigs) {
+          const qPayload = {
+            id: qc.id,
+            project_id: targetProjectId,
+            questionnaire_type: qc.questionnaire_type || 'survey',
+            title: qc.title,
+            description: qc.description || '',
+            estimated_duration: qc.estimated_duration || 5,
+            frequency: qc.frequency || 'once',
+            time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
+            notification_enabled: qc.notification_enabled || false,
+            notification_minutes_before: qc.notification_minutes_before || 5,
+            dnd_allowed: qc.dnd_allowed || false,
+            dnd_default_start: qc.dnd_default_start || '22:00',
+            dnd_default_end: qc.dnd_default_end || '08:00',
+            order_index: qc.order_index ?? 0,
+            consent_text: qc.consent_text || null,
+            consent_url: qc.consent_url || null,
+            consent_required: qc.consent_required ?? true,
+            disqualify_logic: qc.disqualify_logic || {},
+          };
+          await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
+
+          // Sync questionnaire<->participant_type assignments
+          await supabase.from('questionnaire_participant_type').delete().eq('questionnaire_id', qc.id);
+          if (qc.assigned_participant_types && qc.assigned_participant_types.length > 0) {
+            const junctionRows = qc.assigned_participant_types.map(ptId => ({
+              questionnaire_id: qc.id,
+              participant_type_id: ptId,
+            }));
+            await supabase.from('questionnaire_participant_type').insert(junctionRows);
+          }
+        }
+      };
+
+      // ── Sync questions to survey_question table (with proper questionnaire_id FK) ──
       const syncQuestions = async (targetProjectId: string) => {
-        // All questions now live inside questionnaire configs
         const allQuestions: Question[] = [];
         for (const qConfig of questionnaireConfigs) {
           for (const q of qConfig.questions) {
             allQuestions.push({
               ...q,
+              questionnaire_id: qConfig.id,
               question_config: { ...q.question_config, questionnaire_id: qConfig.id },
-            });
+            } as any);
           }
         }
 
@@ -519,24 +711,47 @@ const SurveyBuilder: React.FC = () => {
         }
       };
 
+      // ── Sync logic rules to logic_rule table ──
+      const syncLogicRules = async (targetProjectId: string) => {
+        await supabase.from('logic_rule').delete().eq('project_id', targetProjectId);
+        if (logicRules.length > 0) {
+          const rows = logicRules.map((r, i) => ({
+            project_id: targetProjectId,
+            question_id: r.questionId || null,
+            condition: r.condition || 'equals',
+            value: r.value || '',
+            action: r.action || 'skip',
+            target_question_id: r.targetQuestionId || null,
+            order_index: i,
+          }));
+          await supabase.from('logic_rule').insert(rows);
+        }
+      };
+
       if (projectId) {
-        const projectWithLogic = { ...project, settings: { ...(project as any).settings, logic_rules: logicRules } };
-        const { error: projectUpdateError } = await supabase.from('research_project').update(toDbProjectUpdate(projectWithLogic)).eq('id', projectId);
+        const { error: projectUpdateError } = await supabase.from('research_project').update(toDbRow(project)).eq('id', projectId);
         if (projectUpdateError) throw projectUpdateError;
+        await syncParticipantTypes(projectId);
+        await syncQuestionnaires(projectId);
         await syncQuestions(projectId);
+        await syncLogicRules(projectId);
       } else {
         const surveyCode = project.survey_code || await generateSurveyCode();
-        const projectWithLogic = {
-          ...project,
-          settings: { ...(project as any).settings, logic_rules: logicRules },
-          organization_id: researcherData.organization_id,
-          researcher_id: researcherData.id,
-          survey_code: surveyCode,
-          status: (project as any)?.status || 'draft'
+        const newProjectData = {
+          ...toDbRow({
+            ...project,
+            organization_id: researcherData.organization_id,
+            researcher_id: researcherData.id,
+            survey_code: surveyCode,
+            status: project.status || 'draft',
+          }),
         };
-        const { data: newProject } = await supabase.from('research_project').insert(toDbProjectUpdate(projectWithLogic) as any).select().single();
+        const { data: newProject } = await supabase.from('research_project').insert(newProjectData as any).select().single();
         if (newProject) {
+          await syncParticipantTypes(newProject.id);
+          await syncQuestionnaires(newProject.id);
           await syncQuestions(newProject.id);
+          await syncLogicRules(newProject.id);
           toast.success('Project created successfully!');
           navigate(`/easyresearch/project/${newProject.id}`);
         }
@@ -598,6 +813,24 @@ const SurveyBuilder: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              {questionnaireConfigs.length === 0 && (
+                <button
+                  onClick={() => {
+                    const pts = createDementiaSeedParticipantTypes();
+                    setParticipantTypes(pts);
+                    const qs = createDementiaSeedQuestionnaires(pts[0].id, pts[1].id);
+                    setQuestionnaireConfigs(qs);
+                    if (project) {
+                      setProject({ ...project, consent_required: true, screening_enabled: true, project_type: 'esm', voice_enabled: true, ecogram_enabled: true, notification_enabled: true });
+                    }
+                    toast.success('Seeded 2 participant types + 6 questionnaires. Hit Save to persist.');
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium border border-violet-300 text-violet-600 bg-violet-50 hover:bg-violet-100 transition-all"
+                >
+                  <Database size={14} />
+                  Seed Demo Data
+                </button>
+              )}
               {projectId && (
                 <button
                   onClick={() => updatePublishStatus(projectStatus === 'published' ? 'draft' : 'published')}
@@ -682,6 +915,28 @@ const SurveyBuilder: React.FC = () => {
             onUpdateProject={(updates) => setProject(updates)}
             participantTypes={participantTypes}
             onUpdateParticipantTypes={setParticipantTypes}
+            questionnaires={questionnaireConfigs}
+            onAddQuestionnaire={(type) => {
+              const newQ = {
+                id: crypto.randomUUID(),
+                questionnaire_type: type,
+                title: type === 'consent' ? 'Consent Form' : 'Screening Questions',
+                description: '',
+                questions: [],
+                estimated_duration: 5,
+                frequency: 'once',
+                time_windows: [{ start: '09:00', end: '21:00' }],
+                notification_enabled: false,
+                notification_minutes_before: 5,
+                dnd_allowed: false,
+                dnd_default_start: '22:00',
+                dnd_default_end: '08:00',
+                assigned_participant_types: participantTypes.map(pt => pt.id),
+                order_index: questionnaireConfigs.length,
+              };
+              setQuestionnaireConfigs([...questionnaireConfigs, newQ]);
+              setActiveTab('questionnaires');
+            }}
           />
         )}
 

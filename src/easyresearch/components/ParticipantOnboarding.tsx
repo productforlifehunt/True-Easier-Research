@@ -48,19 +48,57 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
       if (enrollmentId) { navigate(`/easyresearch/participant/${projectId}?skip_consent=true`); return; }
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
-        const settings = (projectData as any).setting || {};
+        // Load screening questions from questionnaire table (type = 'screening')
+        let loadedScreeningQuestions: ScreeningQuestion[] = [];
+        const { data: screeningQuestionnaires } = await supabase
+          .from('questionnaire')
+          .select('id')
+          .eq('project_id', projectId)
+          .eq('questionnaire_type', 'screening');
+        if (screeningQuestionnaires && screeningQuestionnaires.length > 0) {
+          const sqIds = screeningQuestionnaires.map((q: any) => q.id);
+          const { data: sqRows } = await supabase
+            .from('survey_question')
+            .select('*')
+            .in('questionnaire_id', sqIds)
+            .order('order_index');
+          if (sqRows) {
+            loadedScreeningQuestions = sqRows.map((q: any) => ({
+              id: q.id,
+              question: q.question_text,
+              type: q.question_type === 'yes_no' ? 'yes_no' as const : q.question_type === 'single_choice' ? 'select' as const : 'text' as const,
+              required: q.required ?? true,
+              disqualify_value: q.question_config?.disqualify_value || undefined,
+            }));
+          }
+        }
+
+        // Load profile questions from profile_question table
+        const { data: profileRows } = await supabase
+          .from('profile_question')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('order_index');
+
+        const screeningEnabled = projectData.screening_enabled || loadedScreeningQuestions.length > 0;
+
         setProject({
           ...projectData,
-          profile_questions: (projectData as any).profile_question || settings.profile_questions,
-          screening_questions: settings.screening_questions,
-          screening_enabled: settings.screening_enabled,
-          participant_numbering: settings.participant_numbering || (projectData as any).participant_numbering,
-          participant_number_prefix: settings.participant_number_prefix || 'PP',
-          participant_relation_enabled: settings.participant_relation_enabled,
-          participant_relation_options: settings.participant_relation_options || [],
+          profile_questions: (profileRows || []).map((pq: any) => ({
+            id: pq.id,
+            question: pq.question_text,
+            type: pq.question_type || 'text',
+            options: pq.options || [],
+            required: pq.required ?? false,
+          })),
+          screening_questions: loadedScreeningQuestions,
+          screening_enabled: screeningEnabled,
+          participant_numbering: projectData.participant_numbering,
+          participant_number_prefix: projectData.participant_number_prefix || 'PP',
+          participant_relation_enabled: projectData.participant_relation_enabled,
+          participant_relation_options: projectData.participant_relation_options || [],
         });
-        // Start with screening if enabled
-        if (settings.screening_enabled && settings.screening_questions?.length > 0) {
+        if (screeningEnabled && loadedScreeningQuestions.length > 0) {
           setStep('screening');
         }
       }

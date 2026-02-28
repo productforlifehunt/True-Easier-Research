@@ -7,6 +7,8 @@ import QuestionEditor from './QuestionEditor';
 
 export interface QuestionnaireConfig {
   id: string;
+  project_id?: string;
+  questionnaire_type: 'survey' | 'consent' | 'screening';
   title: string;
   description: string;
   questions: any[];
@@ -20,6 +22,12 @@ export interface QuestionnaireConfig {
   dnd_default_end: string;
   assigned_participant_types: string[];
   order_index: number;
+  // Consent-specific fields
+  consent_text?: string;
+  consent_url?: string;
+  consent_required?: boolean;
+  // Screening-specific fields
+  disqualify_logic?: any;
 }
 
 interface QuestionnaireListProps {
@@ -60,6 +68,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     const num = questionnaires.length + 1;
     const newQ: QuestionnaireConfig = {
       id: crypto.randomUUID(),
+      questionnaire_type: 'survey',
       title: `Questionnaire ${num}`,
       description: '',
       questions: [],
@@ -228,11 +237,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   value={q.title}
                                   onChange={(e) => updateQuestionnaire(q.id, { title: e.target.value })}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="text-[14px] font-semibold text-stone-800 bg-transparent border-none focus:outline-none focus:ring-0 p-0 min-w-0 flex-1"
+                                  className="text-[14px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-0.5 -ml-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 flex-1 transition-colors"
                                   placeholder="Questionnaire title"
                                 />
                               </div>
-                              <div className="flex items-center gap-3 mt-0.5">
+                              <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                                 <span className="text-[11px] text-stone-400 flex items-center gap-1">
                                   <Clock size={10} /> {frequencyOptions.find(f => f.value === q.frequency)?.label || q.frequency}
                                 </span>
@@ -242,6 +251,16 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {q.notification_enabled && (
                                   <span className="text-[11px] text-emerald-500 flex items-center gap-1">
                                     <Bell size={10} /> On
+                                  </span>
+                                )}
+                                {participantTypes.length > 0 && (
+                                  <span className="text-[11px] text-blue-500 flex items-center gap-1">
+                                    <Users size={10} /> 
+                                    {q.assigned_participant_types.length === 0 
+                                      ? 'No types' 
+                                      : q.assigned_participant_types.length === participantTypes.length 
+                                        ? 'All types' 
+                                        : `${q.assigned_participant_types.length} type${q.assigned_participant_types.length > 1 ? 's' : ''}`}
                                   </span>
                                 )}
                               </div>

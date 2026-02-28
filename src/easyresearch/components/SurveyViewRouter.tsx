@@ -27,7 +27,7 @@ const SurveyViewRouter: React.FC = () => {
         // Load project details including consent requirements
         const { data: projectData } = await supabase
           .from('research_project')
-          .select('id, title, project_type, consent_form')
+          .select('id, title, project_type, consent_required, consent_form_text, consent_form_url')
           .eq('id', projectId)
           .maybeSingle();
 
@@ -39,8 +39,7 @@ const SurveyViewRouter: React.FC = () => {
         setProject(projectData);
         setProjectType(projectData.project_type);
 
-        // Check if consent is required (consent_form is a JSONB object)
-        const consentRequired = projectData.consent_form?.required === true;
+        const consentRequired = projectData.consent_required === true;
         
         if (consentRequired) {
           // Check if user already gave consent
@@ -152,8 +151,8 @@ const SurveyViewRouter: React.FC = () => {
           onClose={handleConsentDecline}
           onAccept={handleConsentAccept}
           projectTitle={project.title}
-          consentFormUrl={project.consent_form?.form_url}
-          consentFormText={project.consent_form?.form_text}
+          consentFormUrl={project.consent_form_url}
+          consentFormText={project.consent_form_text}
         />
       </>
     );

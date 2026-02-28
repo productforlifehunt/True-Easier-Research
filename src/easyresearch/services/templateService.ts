@@ -236,28 +236,22 @@ const TEMPLATE_PROJECT_SETTINGS: Record<string, any> = {
       { id: 'sq_smartphone', question: 'Do you have access to a smartphone or tablet for daily logging?', type: 'yes_no', required: true, disqualify_value: 'no' },
       { id: 'sq_language', question: 'Are you comfortable reading and writing in the study language?', type: 'yes_no', required: true, disqualify_value: 'no' },
     ],
-    notification_setting: {
-      frequency: 'multiple_daily',
-      times_per_day: 13,
-      notification_times: ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'],
-      send_reminders: true,
-      timezone: 'auto',
-    },
-    sampling_strategy: {
-      type: 'fixed_schedule',
-      prompts_per_day: 13,
-      duration_days: 7,
-      start_hour: 9,
-      end_hour: 21,
-      allow_late_responses: true,
-      late_window_minutes: 60,
-    },
-    setting: {
-      show_progress_bar: true,
-      enable_timeline_view: true,
-      show_progress_tracker: true,
-      // Multi-questionnaire configs for the ESM template
-      questionnaire_configs: [
+    notification_frequency: 'multiple_daily',
+    notification_times_per_day: 13,
+    notification_times: ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'],
+    notification_send_reminders: true,
+    notification_timezone: 'auto',
+    sampling_type: 'fixed_schedule',
+    sampling_prompts_per_day: 13,
+    sampling_start_hour: 9,
+    sampling_end_hour: 21,
+    sampling_allow_late: true,
+    sampling_late_window_minutes: 60,
+    show_progress_bar: true,
+    enable_timeline_view: true,
+    show_progress_tracker: true,
+    // Multi-questionnaire configs for the ESM template
+    questionnaire_configs: [
         {
           id: 'esm-hourly-log',
           title: 'Hourly Activity Log',
@@ -380,7 +374,6 @@ const TEMPLATE_PROJECT_SETTINGS: Record<string, any> = {
           card_style: 'elevated',
         },
       },
-    },
     profile_questions: [
       { id: 'pq_demographics', question: 'Caregiver Demographics', type: 'section' as const, required: false },
       { id: 'pq_age', question: 'Your age', type: 'number' as const, required: true },
@@ -481,7 +474,7 @@ export async function createSurveyFromTemplate(
     const templateSettings = TEMPLATE_PROJECT_SETTINGS[templateId];
     const isLongitudinal = templateSettings?.project_type === 'longitudinal';
 
-    // Create the project
+    // Create the project — all flat columns, no JSONB
     const { data: project, error: projectError } = await supabase
       .from('research_project')
       .insert({
@@ -501,33 +494,34 @@ export async function createSurveyFromTemplate(
         allow_participant_dnd: templateSettings?.allow_participant_dnd,
         onboarding_required: templateSettings?.onboarding_required,
         onboarding_instruction: templateSettings?.onboarding_instructions,
-        profile_question: templateSettings?.profile_questions,
-        setting: {
-          show_progress_bar: true,
-          allow_back_navigation: true,
-          ...templateSettings?.setting,
-          consent_required: templateSettings?.consent_required,
-          consent_form_text: templateSettings?.consent_form_text,
-          screening_enabled: templateSettings?.screening_enabled || false,
-          screening_questions: templateSettings?.screening_questions || [],
-          participant_numbering: templateSettings?.participant_numbering || false,
-          participant_number_prefix: templateSettings?.participant_number_prefix || 'PP',
-          participant_relation_enabled: templateSettings?.participant_relation_enabled || false,
-          participant_relation_options: templateSettings?.participant_relation_options || [],
-          ecogram_enabled: templateSettings?.ecogram_enabled || false,
-          ecogram_config: templateSettings?.ecogram_config || null,
-          // Persist multi-questionnaire configs if present
-          questionnaire_configs: templateSettings?.setting?.questionnaire_configs || undefined,
-          participant_types: templateSettings?.setting?.participant_types || undefined,
-          app_layout: templateSettings?.setting?.app_layout || undefined,
-        },
-        notification_setting: templateSettings?.notification_setting,
-        consent_form: templateSettings?.consent_required ? {
-          required: true,
-          title: 'Research Consent Form',
-          form_text: templateSettings?.consent_form_text || 'By participating in this study, you agree to provide honest responses. Your data will be kept confidential.'
-        } : null,
-        sampling_strategy: templateSettings?.sampling_strategy,
+        // Display settings — flat columns
+        show_progress_bar: templateSettings?.show_progress_bar ?? true,
+        consent_required: templateSettings?.consent_required || false,
+        consent_form_title: 'Research Consent Form',
+        consent_form_text: templateSettings?.consent_form_text || null,
+        screening_enabled: templateSettings?.screening_enabled || false,
+        participant_numbering: templateSettings?.participant_numbering || false,
+        participant_number_prefix: templateSettings?.participant_number_prefix || 'PP',
+        participant_relation_enabled: templateSettings?.participant_relation_enabled || false,
+        participant_relation_options: templateSettings?.participant_relation_options || [],
+        ecogram_enabled: templateSettings?.ecogram_enabled || false,
+        ecogram_center_label: templateSettings?.ecogram_config?.center_label || 'Me',
+        ecogram_relationship_options: (templateSettings?.ecogram_config?.relationship_options || []).map((o: any) => o.value || o),
+        ecogram_support_categories: (templateSettings?.ecogram_config?.support_categories || []).map((o: any) => o.value || o),
+        app_layout: templateSettings?.app_layout || {},
+        // Notification — flat columns
+        notification_frequency: templateSettings?.notification_frequency || null,
+        notification_times_per_day: templateSettings?.notification_times_per_day || null,
+        notification_times: templateSettings?.notification_times || [],
+        notification_send_reminders: templateSettings?.notification_send_reminders ?? true,
+        notification_timezone: templateSettings?.notification_timezone || null,
+        // Sampling — flat columns
+        sampling_type: templateSettings?.sampling_type || null,
+        sampling_prompts_per_day: templateSettings?.sampling_prompts_per_day || null,
+        sampling_start_hour: templateSettings?.sampling_start_hour ?? 8,
+        sampling_end_hour: templateSettings?.sampling_end_hour ?? 21,
+        sampling_allow_late: templateSettings?.sampling_allow_late ?? true,
+        sampling_late_window_minutes: templateSettings?.sampling_late_window_minutes ?? 60,
       })
       .select()
       .single();
@@ -537,26 +531,137 @@ export async function createSurveyFromTemplate(
       return { error: projectError.message };
     }
 
+    // ── Insert participant types into participant_type table ──
+    const templateParticipantTypes = templateSettings?.participant_types || [];
+    const insertedPTIdMap = new Map<string, string>(); // old template id -> new db id
+    for (const pt of templateParticipantTypes) {
+      const ptId = crypto.randomUUID();
+      insertedPTIdMap.set(pt.id, ptId);
+      await supabase.from('participant_type').insert({
+        id: ptId,
+        project_id: project.id,
+        name: pt.name,
+        description: pt.description || '',
+        relations: pt.relations || [],
+        color: pt.color || '#10b981',
+        order_index: pt.order_index ?? 0,
+      });
+
+      // Insert consent forms as consent-type questionnaires
+      if (pt.consent_forms) {
+        for (const cf of pt.consent_forms) {
+          const cfQId = crypto.randomUUID();
+          await supabase.from('questionnaire').insert({
+            id: cfQId,
+            project_id: project.id,
+            questionnaire_type: 'consent',
+            title: cf.title || 'Consent Form',
+            description: '',
+            consent_text: cf.text || '',
+            consent_url: cf.url || null,
+            consent_required: cf.required ?? true,
+            order_index: 0,
+          });
+          await supabase.from('questionnaire_participant_type').insert({
+            questionnaire_id: cfQId,
+            participant_type_id: ptId,
+          });
+        }
+      }
+
+      // Insert screening questions as screening-type questionnaires
+      if (pt.screening_questions && pt.screening_questions.length > 0) {
+        const sqQId = crypto.randomUUID();
+        await supabase.from('questionnaire').insert({
+          id: sqQId,
+          project_id: project.id,
+          questionnaire_type: 'screening',
+          title: `${pt.name} Screening`,
+          description: '',
+          order_index: 0,
+        });
+        await supabase.from('questionnaire_participant_type').insert({
+          questionnaire_id: sqQId,
+          participant_type_id: ptId,
+        });
+        // Insert screening questions as survey_question rows linked to the screening questionnaire
+        for (let sqIdx = 0; sqIdx < pt.screening_questions.length; sqIdx++) {
+          const sq = pt.screening_questions[sqIdx];
+          await supabase.from('survey_question').insert({
+            project_id: project.id,
+            questionnaire_id: sqQId,
+            question_type: sq.type === 'yes_no' ? 'yes_no' : sq.type === 'select' ? 'single_choice' : 'text_short',
+            question_text: sq.question,
+            required: sq.required ?? true,
+            order_index: sqIdx,
+            question_config: { disqualify_value: sq.disqualify_value || null },
+          });
+        }
+      }
+    }
+
+    // ── Insert survey-type questionnaires into questionnaire table ──
+    const templateQConfigs = templateSettings?.questionnaire_configs || [];
+    const insertedQIdMap = new Map<string, string>(); // old template id -> new db id
+    for (const qc of templateQConfigs) {
+      const qcId = crypto.randomUUID();
+      insertedQIdMap.set(qc.id, qcId);
+      await supabase.from('questionnaire').insert({
+        id: qcId,
+        project_id: project.id,
+        questionnaire_type: 'survey',
+        title: qc.title,
+        description: qc.description || '',
+        estimated_duration: qc.estimated_duration || 5,
+        frequency: qc.frequency || 'once',
+        time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
+        notification_enabled: qc.notification_enabled || false,
+        notification_minutes_before: qc.notification_minutes_before || 5,
+        dnd_allowed: qc.dnd_allowed || false,
+        dnd_default_start: qc.dnd_default_start || '22:00',
+        dnd_default_end: qc.dnd_default_end || '08:00',
+        order_index: qc.order_index ?? 0,
+      });
+      // Link to participant types
+      if (qc.assigned_participant_types) {
+        for (const oldPtId of qc.assigned_participant_types) {
+          const newPtId = insertedPTIdMap.get(oldPtId);
+          if (newPtId) {
+            await supabase.from('questionnaire_participant_type').insert({
+              questionnaire_id: qcId,
+              participant_type_id: newPtId,
+            });
+          }
+        }
+      }
+    }
+
     // Get template questions (do not silently create the wrong survey)
     const questions = templateQuestions[templateId];
     if (!questions) {
       return { error: 'This template is not supported yet.' };
     }
 
-    // Insert questions
-    const questionsToInsert = questions.map((q: any, index: number) => ({
-      project_id: project.id,
-      question_type: normalizeLegacyQuestionType(q.type),
-      question_text: q.text,
-      question_description: '',
-      required: q.required,
-      order_index: index + 1,
-      question_config: q.config || {},
-      validation_rule: {},
-      logic_rule: {},
-      ai_config: {},
-      allow_voice: isLongitudinal && ['text_long', 'long_text'].includes(q.type),
-    }));
+    // Insert questions with proper questionnaire_id FK
+    const questionsToInsert = questions.map((q: any, index: number) => {
+      // Resolve questionnaire_id: use the new DB id from the map
+      const oldQId = q.config?.questionnaire_id;
+      const newQId = oldQId ? insertedQIdMap.get(oldQId) : undefined;
+      return {
+        project_id: project.id,
+        questionnaire_id: newQId || null,
+        question_type: normalizeLegacyQuestionType(q.type),
+        question_text: q.text,
+        question_description: '',
+        required: q.required,
+        order_index: index + 1,
+        question_config: q.config || {},
+        validation_rule: {},
+        logic_rule: {},
+        ai_config: {},
+        allow_voice: isLongitudinal && ['text_long', 'long_text'].includes(q.type),
+      };
+    });
 
     const { data: insertedQuestions, error: questionsError } = await supabase
       .from('survey_question')

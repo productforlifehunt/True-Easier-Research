@@ -20,6 +20,7 @@ export interface ScreeningQuestion {
 
 export interface ParticipantType {
   id: string;
+  project_id?: string;
   name: string;
   description: string;
   relations: string[]; // e.g. ['Primary Caregiver', 'Spouse', 'Child']
@@ -29,14 +30,22 @@ export interface ParticipantType {
   order_index: number;
 }
 
+interface QuestionnaireRef {
+  id: string;
+  title: string;
+  questionnaire_type: 'survey' | 'consent' | 'screening';
+  assigned_participant_types: string[];
+}
+
 interface ParticipantTypeManagerProps {
   participantTypes: ParticipantType[];
   onUpdate: (types: ParticipantType[]) => void;
+  questionnaires?: QuestionnaireRef[];
 }
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
 
-const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ participantTypes, onUpdate }) => {
+const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ participantTypes, onUpdate, questionnaires = [] }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
@@ -119,14 +128,14 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                       {pt.relations.length > 0 && (
                         <span className="text-[11px] text-stone-400">{pt.relations.length} relations</span>
                       )}
-                      {pt.consent_forms.length > 0 && (
+                      {questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id)).length > 0 && (
                         <span className="text-[11px] text-amber-500 flex items-center gap-0.5">
-                          <Shield size={10} /> {pt.consent_forms.length} consent
+                          <Shield size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id)).length} consent
                         </span>
                       )}
-                      {pt.screening_questions.length > 0 && (
+                      {questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id)).length > 0 && (
                         <span className="text-[11px] text-orange-500 flex items-center gap-0.5">
-                          <ClipboardCheck size={10} /> {pt.screening_questions.length} screening
+                          <ClipboardCheck size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id)).length} screening
                         </span>
                       )}
                     </div>
@@ -211,111 +220,58 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                       </button>
                     </div>
 
-                    {/* Consent Forms */}
+                    {/* Consent Forms — synced from questionnaire table */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                       <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
                         <Shield size={12} /> Consent Forms
                       </h5>
-                      {pt.consent_forms.map((cf, cfIdx) => (
-                        <div key={cf.id} className="p-2 rounded-lg border border-stone-100 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={cf.title}
-                              onChange={(e) => {
-                                const newForms = [...pt.consent_forms];
-                                newForms[cfIdx] = { ...newForms[cfIdx], title: e.target.value };
-                                updateType(pt.id, { consent_forms: newForms });
-                              }}
-                              className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200"
-                              placeholder="Consent form title"
-                            />
-                            <button onClick={() => updateType(pt.id, { consent_forms: pt.consent_forms.filter((_, i) => i !== cfIdx) })} className="p-0.5 hover:bg-red-50 rounded">
-                              <Trash2 size={10} className="text-red-400" />
-                            </button>
-                          </div>
-                          <textarea
-                            value={cf.text}
-                            onChange={(e) => {
-                              const newForms = [...pt.consent_forms];
-                              newForms[cfIdx] = { ...newForms[cfIdx], text: e.target.value };
-                              updateType(pt.id, { consent_forms: newForms });
-                            }}
-                            className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none"
-                            rows={2}
-                            placeholder="Consent text..."
-                          />
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => updateType(pt.id, { consent_forms: [...pt.consent_forms, { id: crypto.randomUUID(), title: '', text: '', required: true }] })}
-                        className="text-[11px] text-amber-500 hover:text-amber-600 font-medium"
-                      >
-                        + Add Consent Form
-                      </button>
+                      {(() => {
+                        const assigned = questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id));
+                        const unassigned = questionnaires.filter(q => q.questionnaire_type === 'consent' && !q.assigned_participant_types.includes(pt.id));
+                        return (
+                          <>
+                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">No consent forms assigned to this type.</p>}
+                            {assigned.map(q => (
+                              <div key={q.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100">
+                                <Shield size={11} className="text-emerald-500 shrink-0" />
+                                <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
+                                <span className="text-[10px] text-emerald-500 font-medium">Assigned</span>
+                              </div>
+                            ))}
+                            {unassigned.length > 0 && (
+                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other consent form{unassigned.length > 1 ? 's' : ''} exist but not assigned to this type</p>
+                            )}
+                            <p className="text-[10px] text-stone-400">Manage consent forms in the Questionnaires tab. Assign them via "Assigned Types" in questionnaire settings.</p>
+                          </>
+                        );
+                      })()}
                     </div>
 
-                    {/* Screening Questions */}
+                    {/* Screening — synced from questionnaire table */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                       <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <ClipboardCheck size={12} /> Screening Questions
+                        <ClipboardCheck size={12} /> Screening Questionnaires
                       </h5>
-                      {pt.screening_questions.map((sq, sqIdx) => (
-                        <div key={sq.id} className="p-2 rounded-lg border border-stone-100 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={sq.question}
-                              onChange={(e) => {
-                                const newSQ = [...pt.screening_questions];
-                                newSQ[sqIdx] = { ...newSQ[sqIdx], question: e.target.value };
-                                updateType(pt.id, { screening_questions: newSQ });
-                              }}
-                              className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200"
-                              placeholder="Screening question..."
-                            />
-                            <button onClick={() => updateType(pt.id, { screening_questions: pt.screening_questions.filter((_, i) => i !== sqIdx) })} className="p-0.5 hover:bg-red-50 rounded">
-                              <Trash2 size={10} className="text-red-400" />
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <select
-                              value={sq.type}
-                              onChange={(e) => {
-                                const newSQ = [...pt.screening_questions];
-                                newSQ[sqIdx] = { ...newSQ[sqIdx], type: e.target.value as any };
-                                updateType(pt.id, { screening_questions: newSQ });
-                              }}
-                              className="px-2 py-1 rounded-lg text-[11px] border border-stone-200 bg-white"
-                            >
-                              <option value="yes_no">Yes/No</option>
-                              <option value="text">Text</option>
-                              <option value="select">Select</option>
-                            </select>
-                            {sq.type === 'yes_no' && (
-                              <select
-                                value={sq.disqualify_value || ''}
-                                onChange={(e) => {
-                                  const newSQ = [...pt.screening_questions];
-                                  newSQ[sqIdx] = { ...newSQ[sqIdx], disqualify_value: e.target.value };
-                                  updateType(pt.id, { screening_questions: newSQ });
-                                }}
-                                className="px-2 py-1 rounded-lg text-[11px] border border-stone-200 bg-white"
-                              >
-                                <option value="">No disqualification</option>
-                                <option value="yes">Disqualify if Yes</option>
-                                <option value="no">Disqualify if No</option>
-                              </select>
+                      {(() => {
+                        const assigned = questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id));
+                        const unassigned = questionnaires.filter(q => q.questionnaire_type === 'screening' && !q.assigned_participant_types.includes(pt.id));
+                        return (
+                          <>
+                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">No screening questionnaires assigned to this type.</p>}
+                            {assigned.map(q => (
+                              <div key={q.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-amber-50 border border-amber-100">
+                                <ClipboardCheck size={11} className="text-amber-500 shrink-0" />
+                                <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
+                                <span className="text-[10px] text-amber-500 font-medium">Assigned</span>
+                              </div>
+                            ))}
+                            {unassigned.length > 0 && (
+                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other screening set{unassigned.length > 1 ? 's' : ''} exist but not assigned to this type</p>
                             )}
-                          </div>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => updateType(pt.id, { screening_questions: [...pt.screening_questions, { id: crypto.randomUUID(), question: '', type: 'yes_no', required: true }] })}
-                        className="text-[11px] text-orange-500 hover:text-orange-600 font-medium"
-                      >
-                        + Add Screening Question
-                      </button>
+                            <p className="text-[10px] text-stone-400">Manage screening in the Questionnaires tab. Assign them via "Assigned Types" in questionnaire settings.</p>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}

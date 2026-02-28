@@ -33,17 +33,20 @@ const ParticipantSettings: React.FC = () => {
     try {
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
-        const settings = (projectData as any).setting || {};
         setProject({ 
           ...(projectData as any), 
-          profile_questions: (projectData as any).profile_questions ?? (projectData as any).profile_question,
-          ecogram_enabled: settings.ecogram_enabled || false,
-          ecogram_config: settings.ecogram_config || {},
-          notification_enabled: (projectData as any).notification_enabled,
-          study_duration: (projectData as any).study_duration,
-          survey_frequency: (projectData as any).survey_frequency,
+          ecogram_enabled: projectData.ecogram_enabled || false,
+          notification_enabled: projectData.notification_enabled,
+          study_duration: projectData.study_duration,
+          survey_frequency: projectData.survey_frequency,
         });
-        if ((projectData as any).profile_question) setProfileQuestions((projectData as any).profile_question);
+        // Load profile questions from profile_question table
+        const { data: profileRows } = await supabase
+          .from('profile_question')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('order_index');
+        if (profileRows) setProfileQuestions(profileRows);
       }
       const { data: questionsData } = await supabase.from('enrollment_question').select('*').eq('project_id', projectId).order('order_index');
       if (questionsData) setEnrollmentQuestions((questionsData as any[]).map((q: any) => ({ ...q, options: q.options ?? q.option ?? null })));

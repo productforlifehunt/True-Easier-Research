@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Plus, Calendar, TrendingUp } from 'lucide-react';
 import ParticipantOnboarding from './ParticipantOnboarding';
 
-interface SurveyProject { id: string; title: string; description: string; consent_form: any; settings: any; project_type?: string; onboarding_required?: boolean; onboarding_instructions?: string; study_duration?: number; survey_frequency?: string; }
+interface SurveyProject { id: string; title: string; description: string; consent_required?: boolean; consent_form_title?: string; consent_form_text?: string; project_type?: string; onboarding_required?: boolean; onboarding_instruction?: string; study_duration?: number; survey_frequency?: string; }
 
 const LongitudinalSurveyView: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -23,7 +23,7 @@ const LongitudinalSurveyView: React.FC = () => {
     try {
       const { data: project } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (project) {
-        setProject({ ...(project as any), settings: (project as any).settings ?? (project as any).setting, onboarding_instructions: (project as any).onboarding_instructions ?? (project as any).onboarding_instruction });
+        setProject(project as any);
         let existingEnrollmentId = localStorage.getItem(`enrollment_${projectId}`);
         if (existingEnrollmentId) {
           const { data: enrollment } = await supabase.from('enrollment').select('*').eq('id', existingEnrollmentId).maybeSingle();

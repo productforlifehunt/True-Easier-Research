@@ -13,11 +13,13 @@ interface SurveyProject {
   organization_id?: string;
   title: string;
   description: string;
-  consent_form: any;
-  settings: any;
+  consent_required?: boolean;
+  consent_form_title?: string;
+  consent_form_text?: string;
+  consent_form_url?: string;
   project_type?: string;
   onboarding_required?: boolean;
-  onboarding_instructions?: string;
+  onboarding_instruction?: string;
   participant_numbering?: boolean;
   allow_participant_dnd?: boolean;
   study_duration?: number;
@@ -163,20 +165,24 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         .maybeSingle();
 
       if (project) {
-        // Normalize: extract display/behavior settings from setting jsonb
-        const s = (project as any).setting || {};
-        const normalizedProject = {
-          ...project,
-          show_progress_bar: project.show_progress_bar ?? s.show_progress_bar,
-          disable_backtracking: project.disable_backtracking ?? s.disable_backtracking,
-          randomize_questions: project.randomize_questions ?? s.randomize_questions,
-          auto_advance: project.auto_advance ?? s.auto_advance,
-        };
-        setProject(normalizedProject);
+        // All display/behavior settings are proper columns now — no JSONB normalization needed
+        setProject(project);
         
-        // Load logic rules from project settings
-        if (s.logic_rules) {
-          setLogicRules(s.logic_rules);
+        // Load logic rules from logic_rule table
+        const { data: logicRows } = await supabase
+          .from('logic_rule')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('order_index');
+        if (logicRows) {
+          setLogicRules(logicRows.map((r: any) => ({
+            id: r.id,
+            questionId: r.question_id,
+            condition: r.condition,
+            value: r.value,
+            action: r.action,
+            targetQuestionId: r.target_question_id,
+          })));
         }
 
         // Load questions
@@ -214,7 +220,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
           if (enrollment) {
             setEnrollmentId(enrollment.id);
-            const consentRequired = !!project.consent_form?.required;
+            const consentRequired = !!project.consent_required;
             const hasConsent = !!(enrollment as any).consent_signed_at;
             setShowConsent(consentRequired && !hasConsent);
             setShowOnboarding(false);
@@ -230,11 +236,12 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             if (project.project_type === 'longitudinal' && project.onboarding_required) {
               setShowOnboarding(true);
               setShowConsent(false);
-            } else if (project.consent_form && Object.keys(project.consent_form).length > 0) {
-              // Show consent if it exists
+            } else if (project.consent_required) {
               setShowConsent(true);
             } else if (project.project_type === 'longitudinal' && !existingEnrollmentId) {
               setShowOnboarding(true);
+              setShowConsent(false);
+            } else if (!project.consent_required) {
               setShowConsent(false);
             }
           }
@@ -243,13 +250,12 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           if (project.project_type === 'longitudinal' && project.onboarding_required) {
             setShowOnboarding(true);
             setShowConsent(false);
-          } else if (project.consent_form && Object.keys(project.consent_form).length > 0) {
-            // Show consent if it exists
+          } else if (project.consent_required) {
             setShowConsent(true);
           } else if (project.project_type === 'longitudinal' && !existingEnrollmentId) {
             setShowOnboarding(true);
             setShowConsent(false);
-          } else if (!project.consent_form?.required) {
+          } else if (!project.consent_required) {
             setShowConsent(false);
           }
         }
@@ -263,7 +269,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleConsentAccept = async () => {
     try {
-      const consentRequired = !!project?.consent_form?.required;
+      const consentRequired = !!project?.consent_required;
       if (consentRequired) {
         const now = new Date().toISOString();
         let currentEnrollmentId = enrollmentId || localStorage.getItem(`enrollment_${projectId}`);
@@ -549,7 +555,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             participant_id: user?.id || null,
             participant_email: fallbackEmail,
             status: 'active',
-            ...(project?.consent_form?.required ? { consent_signed_at: now } : {})
+            ...(project?.consent_required ? { consent_signed_at: now } : {})
           })
           .select('id')
           .single();
@@ -1414,18 +1420,18 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     );
   }
 
-  if (showConsent && project.consent_form?.required) {
+  if (showConsent && project.consent_required) {
     return (
       <>
       <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
             <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-              {project.consent_form.title || 'Research Consent Form'}
+              {project.consent_form_title || 'Research Consent Form'}
             </h1>
             <div className="prose max-w-none mb-8" style={{ color: 'var(--text-secondary)' }}>
               <p className="whitespace-pre-wrap">
-                {project.consent_form.text || 'Please read and accept the consent form to continue.'}
+                {project.consent_form_text || 'Please read and accept the consent form to continue.'}
               </p>
             </div>
             <div className="flex gap-4">

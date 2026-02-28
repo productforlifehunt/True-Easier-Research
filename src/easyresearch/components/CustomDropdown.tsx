@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
 interface DropdownOption {
@@ -27,25 +28,45 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 });
+
+  const updatePosition = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+    }
+  }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    if (!isOpen) return;
+    updatePosition();
+    const handleClose = (e: MouseEvent) => {
+      if (
+        buttonRef.current && !buttonRef.current.contains(e.target as Node) &&
+        menuRef.current && !menuRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    const handleScroll = () => updatePosition();
+    document.addEventListener('mousedown', handleClose);
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClose);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [isOpen, updatePosition]);
 
   const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`relative ${className}`}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => { if (!disabled) { updatePosition(); setIsOpen(!isOpen); } }}
         disabled={disabled}
         className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium border border-stone-200 bg-white hover:border-stone-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         style={buttonStyle}
@@ -60,8 +81,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         />
       </button>
 
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 rounded-xl border border-stone-100 bg-white shadow-lg shadow-stone-200/50 overflow-hidden" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+      {isOpen && ReactDOM.createPortal(
+        <div
+          ref={menuRef}
+          className="fixed rounded-xl border border-stone-100 bg-white shadow-lg shadow-stone-200/50 overflow-hidden"
+          style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width, maxHeight: 280, overflowY: 'auto', zIndex: 9999 }}
+        >
           {options.map((option) => (
             <button
               key={option.value}
@@ -77,7 +102,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
               <span>{option.label}</span>
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

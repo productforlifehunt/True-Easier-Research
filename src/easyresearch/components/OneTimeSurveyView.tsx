@@ -11,8 +11,14 @@ interface SurveyProject {
   organization_id?: string;
   title: string;
   description: string;
-  consent_form: any;
-  settings: any;
+  consent_required?: boolean;
+  consent_form_title?: string;
+  consent_form_text?: string;
+  consent_form_url?: string;
+  show_progress_bar?: boolean;
+  disable_backtracking?: boolean;
+  randomize_questions?: boolean;
+  auto_advance?: boolean;
   project_type?: string;
   study_duration?: number;
   survey_frequency?: string;
@@ -66,10 +72,7 @@ const OneTimeSurveyView: React.FC = () => {
         .maybeSingle();
 
       if (project) {
-        setProject({
-          ...(project as any),
-          settings: (project as any).settings ?? (project as any).setting,
-        });
+        setProject(project as any);
 
         const { data: questions } = await supabase
           .from('survey_question')
@@ -84,7 +87,7 @@ const OneTimeSurveyView: React.FC = () => {
         const existingEnrollmentId = localStorage.getItem(`enrollment_${projectId}`);
         const skipConsent = searchParams.get('skip_consent') === 'true';
 
-        const consentRequired = !!(project as any).consent_form?.required;
+        const consentRequired = !!project.consent_required;
 
         if (existingEnrollmentId) {
           // Validate enrollment (and whether consent is actually signed)
@@ -240,7 +243,7 @@ const OneTimeSurveyView: React.FC = () => {
             participant_id: user?.id || null,
             participant_email: fallbackEmail,
             status: 'active',
-            ...(project?.consent_form?.required ? { consent_signed_at: now } : {})
+            ...(project?.consent_required ? { consent_signed_at: now } : {})
           })
           .select()
           .single();
@@ -603,18 +606,18 @@ const OneTimeSurveyView: React.FC = () => {
     );
   }
 
-  if (showConsent && project.consent_form?.required) {
+  if (showConsent && project.consent_required) {
     return (
       <>
       <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
             <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-              {project.consent_form.title || 'Research Consent Form'}
+              {project.consent_form_title || 'Research Consent Form'}
             </h1>
             <div className="prose max-w-none mb-8" style={{ color: 'var(--text-secondary)' }}>
               <p className="whitespace-pre-wrap">
-                {project.consent_form.text || 'Please read and accept the consent form to continue.'}
+                {project.consent_form_text || 'Please read and accept the consent form to continue.'}
               </p>
             </div>
             <div className="flex gap-4">

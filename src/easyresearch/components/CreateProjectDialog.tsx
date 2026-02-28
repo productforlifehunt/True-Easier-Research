@@ -103,6 +103,11 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
         notification_times: ['09:00'], send_reminders: true, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       } : { frequency: 'once', send_reminders: false };
 
+      // Build sampling fields based on methodology
+      const isEsm = projectData.methodology === 'esm' || projectData.methodology === 'ema';
+      const isDiary = projectData.methodology === 'daily_diary';
+      const isLongitudinal = projectData.methodology === 'longitudinal';
+
       const { data: project, error: projectError } = await supabase
         .from('research_project')
         .insert({
@@ -117,27 +122,24 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
           notification_enabled: true,
           max_participant: projectData.max_participants,
           study_duration: projectData.duration_days,
-          setting: {
-            study_duration_days: projectData.duration_days,
-            enable_timeline_view: projectData.methodology !== 'single_survey',
-            show_progress_tracker: true
-          },
-          notification_setting: notificationSettings,
-          consent_form: projectData.requires_consent ? {
-            required: true, title: 'Research Consent Form',
-            form_text: projectData.consent_text || 'By participating in this study, you agree to provide honest responses. Your data will be kept confidential.'
-          } : null,
-          sampling_strategy: projectData.methodology === 'esm' || projectData.methodology === 'ema' ? {
-            type: projectData.sampling_strategy, prompts_per_day: projectData.prompts_per_day,
-            duration_days: projectData.duration_days, start_hour: projectData.start_hour, end_hour: projectData.end_hour,
-            allow_late_responses: true, late_window_minutes: projectData.time_window_minutes
-          } : projectData.methodology === 'daily_diary' ? {
-            type: 'fixed_schedule', prompts_per_day: 1, duration_days: projectData.duration_days,
-            reminder_hour: projectData.start_hour, allow_late_responses: true, late_window_minutes: 720
-          } : projectData.methodology === 'longitudinal' ? {
-            type: 'periodic', interval_days: projectData.prompts_per_day,
-            total_waves: Math.ceil(projectData.duration_days / projectData.prompts_per_day)
-          } : null,
+          show_progress_bar: true,
+          // Consent — flat columns
+          consent_required: projectData.requires_consent || false,
+          consent_form_title: 'Research Consent Form',
+          consent_form_text: projectData.requires_consent ? (projectData.consent_text || 'By participating in this study, you agree to provide honest responses. Your data will be kept confidential.') : null,
+          // Notification — flat columns
+          notification_frequency: isEsm ? 'multiple_daily' : isDiary ? 'daily' : isLongitudinal ? 'periodic' : 'once',
+          notification_times_per_day: isEsm ? projectData.prompts_per_day : isDiary ? 1 : null,
+          notification_times: notificationSettings.notification_times || [],
+          notification_send_reminders: notificationSettings.send_reminders ?? true,
+          notification_timezone: notificationSettings.timezone || null,
+          // Sampling — flat columns
+          sampling_type: isEsm ? projectData.sampling_strategy : isDiary ? 'fixed_schedule' : isLongitudinal ? 'periodic' : null,
+          sampling_prompts_per_day: isEsm ? projectData.prompts_per_day : isDiary ? 1 : null,
+          sampling_start_hour: projectData.start_hour,
+          sampling_end_hour: projectData.end_hour,
+          sampling_allow_late: true,
+          sampling_late_window_minutes: isEsm ? projectData.time_window_minutes : isDiary ? 720 : 60,
           status: 'draft'
         }).select().single();
 
