@@ -5,6 +5,7 @@ import type { AppLayout, LayoutElement } from './LayoutBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
+import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 
 interface SurveyPreviewProps {
   questions: any[];
@@ -21,6 +22,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
   appLayout, questionnaires, participantTypes, studyDuration = 7,
 }) => {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('mobile');
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [responses, setResponses] = useState<{ [key: string]: any }>({});
   // Legacy hooks
   const sections = groupQuestionsBySections(questions);
@@ -71,17 +73,19 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
   if (isLayoutDriven && appLayout && questionnaires) {
     return (
       <div className="max-w-4xl mx-auto space-y-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <h2 className="text-[17px] font-semibold tracking-tight text-stone-800">App Preview</h2>
           <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
-            {[{mode: 'desktop' as const, icon: Monitor, label: 'Desktop'}, {mode: 'mobile' as const, icon: Smartphone, label: 'Mobile'}].map(m => (
-              <button key={m.mode} onClick={() => setPreviewMode(m.mode)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${previewMode === m.mode ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'}`}>
-                <m.icon size={13} /> {m.label}
+            {DEVICE_PRESETS.map(d => (
+              <button key={d.id} onClick={() => setSelectedDevice(d)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                {d.brand === 'apple' ? '🍎' : '🤖'} {d.label}
               </button>
             ))}
           </div>
         </div>
+
+        <p className="text-[11px] text-stone-400 text-center">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
 
         <div className="bg-stone-100 rounded-2xl p-6 lg:p-10 flex justify-center">
           <AppPhonePreview
@@ -89,7 +93,8 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             questionnaires={questionnaires}
             participantTypes={participantTypes}
             studyDuration={studyDuration}
-            frameHeight={previewMode === 'mobile' ? 680 : 600}
+            frameWidth={selectedDevice.width}
+            frameHeight={selectedDevice.height}
           />
         </div>
 
