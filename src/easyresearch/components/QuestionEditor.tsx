@@ -41,7 +41,7 @@ interface SurveyProject {
 interface QuestionEditorProps {
   question: Question | null;
   project: SurveyProject;
-  questionnaireType?: 'survey' | 'consent' | 'screening' | 'profile' | 'help';
+  questionnaireType?: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom';
   onUpdateQuestion: (questionId: string, updates: Partial<Question>) => void;
 }
 
