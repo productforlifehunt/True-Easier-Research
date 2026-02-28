@@ -48,6 +48,9 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
       case 'text_short': return <input type="text" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Your answer..." />;
       case 'text_long': return <textarea value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={4} placeholder="Your answer..." />;
       case 'number': return <input type="number" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Enter number..." />;
+      case 'email': return <input type="email" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="your@email.com" />;
+      case 'phone': return <input type="tel" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="+1 (555) 123-4567" />;
+      case 'time': return <input type="time" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />;
       case 'likert_scale':
         const lc = question.question_config || {}; const ls = lc.scale_type || '1-5'; const [lmin, lmax] = ls.split('-').map(Number); const lo: number[] = []; for (let i = lmin; i <= lmax; i++) lo.push(i);
         return (<div className="flex justify-between gap-1">{lo.map(v => (<div key={v} onClick={() => handleResponse(question.id, v)} className="flex-1 text-center cursor-pointer"><div className={`aspect-square flex items-center justify-center rounded-xl border-2 font-semibold text-[14px] mb-1 transition-all hover:scale-105 ${value === v ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-stone-200 text-stone-600'}`}>{v}</div><p className="text-[9px] text-stone-400">{lc.labels?.[v] || lc.custom_labels?.[v - lmin] || ''}</p></div>))}</div>);
@@ -62,6 +65,25 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
         return (<div className="flex flex-wrap gap-1 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n => (<button key={n} onClick={() => handleResponse(question.id, n)} className={`w-9 h-9 rounded-lg font-medium text-[12px] transition-all ${value === n ? 'bg-emerald-500 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>{n}</button>))}</div>);
       case 'yes_no':
         return (<div className="flex gap-3">{['Yes', 'No'].map(opt => (<button key={opt} onClick={() => handleResponse(question.id, opt)} className={`flex-1 py-3 rounded-xl border-2 text-[13px] font-medium transition-all ${value === opt ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>{opt}</button>))}</div>);
+      case 'slider':
+        const sMin = question.question_config?.min_value ?? 0; const sMax = question.question_config?.max_value ?? 10; const sStep = question.question_config?.step ?? 1;
+        return (<div className="space-y-2"><input type="range" min={sMin} max={sMax} step={sStep} value={value ?? sMin} onChange={(e) => handleResponse(question.id, Number(e.target.value))} className="w-full accent-emerald-500" /><div className="flex justify-between text-[11px] text-stone-400"><span>{question.question_config?.min_label || sMin}</span><span className="font-semibold text-emerald-600">{value ?? sMin}</span><span>{question.question_config?.max_label || sMax}</span></div></div>);
+      case 'matrix':
+        const mCols = question.question_config?.columns || []; const mRows = question.options || []; const mVal = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+        return (<div className="overflow-x-auto"><table className="w-full text-[12px]"><thead><tr><th className="text-left p-1.5 text-stone-400"></th>{mCols.map((c: string, i: number) => <th key={i} className="text-center p-1.5 text-stone-500 text-[11px]">{c}</th>)}</tr></thead><tbody>{mRows.map((r: any) => (<tr key={r.id} className="border-t border-stone-100"><td className="p-1.5 text-stone-700">{r.option_text}</td>{mCols.map((c: string, ci: number) => (<td key={ci} className="text-center p-1.5"><button onClick={() => handleResponse(question.id, { ...mVal, [r.id]: c })} className="w-5 h-5 rounded-full border-2 mx-auto" style={{ borderColor: mVal[r.id] === c ? '#10b981' : '#e7e5e4', backgroundColor: mVal[r.id] === c ? '#10b981' : 'white' }} /></td>))}</tr>))}</tbody></table></div>);
+      case 'ranking':
+        const rOpts = question.options || []; const rVal: string[] = Array.isArray(value) ? value : rOpts.map((o: any) => o.id);
+        const rItems = rVal.map(id => rOpts.find((o: any) => o.id === id)).filter(Boolean);
+        return (<div className="space-y-1.5">{rItems.map((item: any, idx: number) => (<div key={item.id} className="flex items-center gap-2 p-2 rounded-lg border border-stone-200 bg-white"><span className="w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold bg-emerald-50 text-emerald-600">{idx + 1}</span><span className="flex-1 text-[13px] text-stone-700">{item.option_text}</span><div className="flex flex-col gap-0.5"><button onClick={() => { if (idx > 0) { const n = [...rVal]; [n[idx-1], n[idx]] = [n[idx], n[idx-1]]; handleResponse(question.id, n); }}} disabled={idx === 0} className="p-0.5 rounded hover:bg-stone-100 disabled:opacity-30 text-stone-400">▲</button><button onClick={() => { if (idx < rItems.length - 1) { const n = [...rVal]; [n[idx], n[idx+1]] = [n[idx+1], n[idx]]; handleResponse(question.id, n); }}} disabled={idx === rItems.length - 1} className="p-0.5 rounded hover:bg-stone-100 disabled:opacity-30 text-stone-400">▼</button></div></div>))}</div>);
+      case 'file_upload':
+        return (<div className="border-2 border-dashed border-stone-200 rounded-xl p-6 text-center"><p className="text-stone-400 text-[12px]">📎 Click or drag to upload</p><p className="text-stone-300 text-[10px] mt-1">Max {question.question_config?.max_size_mb || 10}MB</p></div>);
+      case 'image_choice':
+        const icOpts = question.options || []; const icMulti = question.question_config?.allow_multiple || false;
+        return (<div className="grid grid-cols-3 gap-2">{icOpts.map((opt: any) => { const sel = icMulti ? (Array.isArray(value) && value.includes(opt.id)) : value === opt.id; return (<button key={opt.id} onClick={() => { if (icMulti) { const a = Array.isArray(value) ? value : []; handleResponse(question.id, sel ? a.filter((v: string) => v !== opt.id) : [...a, opt.id]); } else { handleResponse(question.id, opt.id); }}} className={`p-3 rounded-xl border-2 text-center transition-all ${sel ? 'border-emerald-400 bg-emerald-50' : 'border-stone-200'}`}><div className="text-2xl mb-1">{opt.option_text}</div></button>);})}</div>);
+      case 'instruction':
+        const cType = question.question_config?.content_type || 'text';
+        const bgMap: Record<string, string> = { text: '#f9fafb', info: '#eff6ff', warning: '#fffbeb', tip: '#f0fdf4' };
+        return (<div className="rounded-xl p-3 border" style={{ backgroundColor: bgMap[cType] || '#f9fafb', borderColor: '#e5e7eb' }}><p className="text-[13px] text-stone-600">{question.question_text}</p>{question.question_description && <p className="text-[12px] text-stone-400 mt-1">{question.question_description}</p>}</div>);
       case 'section_header':
         return null;
       case 'text_block':
@@ -81,6 +103,9 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
         );
       case 'date':
         return <input type="date" value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />;
+      case 'dropdown':
+        const ddOpts = question.options || [];
+        return (<select value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"><option value="">Select an option...</option>{ddOpts.map((o: any) => <option key={o.id} value={o.id}>{o.option_text}</option>)}</select>);
       default: return <p className="text-[12px] text-stone-400 italic">Preview not available for: {question.question_type}</p>;
     }
   };
