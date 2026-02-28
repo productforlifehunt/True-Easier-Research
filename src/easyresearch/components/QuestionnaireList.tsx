@@ -358,18 +358,13 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><BellOff size={11} /> Do Not Disturb</h5>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[12px] text-stone-600">Allow DND</span>
+                                  <span className="text-[12px] text-stone-600">Allow participants to set DND</span>
                                   <button onClick={() => updateQuestionnaire(q.id, { dnd_allowed: !q.dnd_allowed })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.dnd_allowed ? 'bg-emerald-500' : 'bg-stone-200'}`}>
                                     <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.dnd_allowed ? '22px' : '2px' }} />
                                   </button>
                                 </div>
                                 {q.dnd_allowed && (
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[11px] text-stone-400">Default:</span>
-                                    <input type="time" value={q.dnd_default_start} onChange={(e) => updateQuestionnaire(q.id, { dnd_default_start: e.target.value })} className="px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
-                                    <span className="text-[11px] text-stone-400">to</span>
-                                    <input type="time" value={q.dnd_default_end} onChange={(e) => updateQuestionnaire(q.id, { dnd_default_end: e.target.value })} className="px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
-                                  </div>
+                                  <p className="text-[11px] text-stone-400">Participants can configure their own quiet hours from the app settings.</p>
                                 )}
                               </div>
 
@@ -377,16 +372,24 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               {participantTypes.length > 0 && (
                                 <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> Assigned Types</h5>
-                                  <div className="flex flex-wrap gap-1.5">
+                                  <div className="space-y-1.5">
                                     {participantTypes.map(pt => {
                                       const assigned = q.assigned_participant_types.includes(pt.id);
                                       return (
-                                        <button key={pt.id} onClick={() => {
-                                          const newAssigned = assigned ? q.assigned_participant_types.filter(id => id !== pt.id) : [...q.assigned_participant_types, pt.id];
-                                          updateQuestionnaire(q.id, { assigned_participant_types: newAssigned });
-                                        }} className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${assigned ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'}`}>
-                                          {pt.name}
-                                        </button>
+                                        <label key={pt.id} className="flex items-center gap-2 cursor-pointer group">
+                                          <input
+                                            type="checkbox"
+                                            checked={assigned}
+                                            onChange={() => {
+                                              const newAssigned = assigned ? q.assigned_participant_types.filter(id => id !== pt.id) : [...q.assigned_participant_types, pt.id];
+                                              updateQuestionnaire(q.id, { assigned_participant_types: newAssigned });
+                                            }}
+                                            className="w-4 h-4 rounded border-stone-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                                          />
+                                          <span className={`text-[12px] font-medium transition-colors ${assigned ? 'text-emerald-600' : 'text-stone-400 group-hover:text-stone-600'}`}>
+                                            {pt.name}
+                                          </span>
+                                        </label>
                                       );
                                     })}
                                   </div>
@@ -478,6 +481,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                                       <QuestionEditor
                                                         question={question}
                                                         project={project}
+                                                        questionnaireType={q.questionnaire_type}
                                                         onUpdateQuestion={(questionId, updates) => updateQuestion(q.id, questionId, updates)}
                                                       />
                                                       {/* Inline Logic for this question */}

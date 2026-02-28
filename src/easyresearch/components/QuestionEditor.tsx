@@ -41,10 +41,11 @@ interface SurveyProject {
 interface QuestionEditorProps {
   question: Question | null;
   project: SurveyProject;
+  questionnaireType?: 'survey' | 'consent' | 'screening';
   onUpdateQuestion: (questionId: string, updates: Partial<Question>) => void;
 }
 
-const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUpdateQuestion }) => {
+const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, questionnaireType, onUpdateQuestion }) => {
   const [localQuestion, setLocalQuestion] = useState<Question | null>(question);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -696,6 +697,58 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, onUp
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_value: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Screening Disqualification Logic */}
+        {questionnaireType === 'screening' && (
+          <div className="space-y-3 pt-3 border-t border-stone-100">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-medium text-red-500">🚫 Screening Logic</span>
+            </div>
+            <p className="text-[11px] text-stone-400">
+              Set which answer value should disqualify a participant. If a participant selects this value, they will not pass screening.
+            </p>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Disqualify if answer equals</label>
+              {localQuestion.question_type === 'yes_no' ? (
+                <select
+                  value={localQuestion.question_config?.disqualify_value || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                >
+                  <option value="">No disqualification</option>
+                  <option value="yes">{localQuestion.question_config?.yes_label || 'Yes'}</option>
+                  <option value="no">{localQuestion.question_config?.no_label || 'No'}</option>
+                </select>
+              ) : ['single_choice', 'dropdown'].includes(localQuestion.question_type) && localQuestion.options?.length ? (
+                <select
+                  value={localQuestion.question_config?.disqualify_value || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                >
+                  <option value="">No disqualification</option>
+                  {localQuestion.options.map(opt => (
+                    <option key={opt.id} value={opt.option_text}>{opt.option_text}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={localQuestion.question_config?.disqualify_value || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                  placeholder="Enter the disqualifying answer value"
+                />
+              )}
+            </div>
+            {localQuestion.question_config?.disqualify_value && (
+              <div className="p-2 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-[11px] text-red-600">
+                  ⚠️ Participants answering "<strong>{localQuestion.question_config.disqualify_value}</strong>" will be disqualified from the study.
+                </p>
               </div>
             )}
           </div>
