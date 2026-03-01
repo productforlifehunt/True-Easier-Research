@@ -184,18 +184,6 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
                         <span className="text-[10px] text-stone-400">{q.questions_per_page ? 'paginated' : 'all at once'}</span>
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Mode</label>
-                      <select
-                        value={q.display_mode || 'one_per_page'}
-                        onChange={(e) => onUpdateQuestionnaire(q.id, { display_mode: e.target.value as any })}
-                        className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 bg-white"
-                      >
-                        <option value="one_per_page">One/page</option>
-                        <option value="all_at_once">All at once</option>
-                        <option value="section_per_page">Section/page</option>
-                      </select>
-                    </div>
                   </div>
                   {/* Per-tab overrides */}
                   {q.tab_sections && q.tab_sections.length > 0 && (
