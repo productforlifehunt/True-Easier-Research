@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import {
   LayoutDashboard, Plus, Users, Settings,
-  LogOut, FileText
+  LogOut, FileText, Search
 } from 'lucide-react';
 
 const AppSidebar: React.FC = () => {
@@ -21,7 +21,8 @@ const AppSidebar: React.FC = () => {
     { path: '/easyresearch/dashboard?create=true', label: 'New Project', icon: Plus },
     { path: '/easyresearch/participants', label: 'Participants', icon: Users },
     { path: '/easyresearch/responses', label: 'Responses', icon: FileText },
-    { path: '/easyresearch/settings', label: 'Settings', icon: Settings }
+    { path: '/easyresearch/settings', label: 'Settings', icon: Settings },
+    { path: '/easyresearch/home', label: 'Browse & Participate', icon: Search },
   ];
 
   const isActive = (path: string) => {
