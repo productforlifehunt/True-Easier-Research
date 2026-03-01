@@ -84,6 +84,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [lastAnsweredId, setLastAnsweredId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [isRecording, setIsRecording] = useState<string | null>(null);
+  const [displayMode, setDisplayMode] = useState<'one_per_page' | 'all_at_once' | 'section_per_page'>('one_per_page');
 
   useEffect(() => {
     if (projectId) {
@@ -208,6 +209,30 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             return q;
           });
           setQuestions(hydrated);
+
+          // Load questionnaire display_mode
+          let questionnaireId: string | null = null;
+          if (propInstanceId) {
+            const { data: inst } = await supabase
+              .from('survey_instance')
+              .select('questionnaire_id')
+              .eq('id', propInstanceId)
+              .maybeSingle();
+            questionnaireId = inst?.questionnaire_id || null;
+          }
+          if (!questionnaireId && hydrated.length > 0) {
+            questionnaireId = hydrated[0].questionnaire_id || null;
+          }
+          if (questionnaireId) {
+            const { data: qRow } = await supabase
+              .from('questionnaire')
+              .select('display_mode')
+              .eq('id', questionnaireId)
+              .maybeSingle();
+            if (qRow?.display_mode) {
+              setDisplayMode(qRow.display_mode);
+            }
+          }
         }
 
         // Check for existing enrollment
@@ -543,6 +568,22 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleSubmit = async () => {
     if (submitting) return;
+
+    // In all-at-once mode, validate all questions before submitting
+    if (displayMode === 'all_at_once') {
+      const { errors } = validateSurveyResponse(orderedVisibleQuestions, responses);
+      const hasErrors = Object.values(errors).some(e => e.length > 0);
+      if (hasErrors) {
+        setFieldErrors(errors);
+        const firstErrorQ = orderedVisibleQuestions.find(q => errors[q.id]?.length > 0);
+        if (firstErrorQ) {
+          const el = document.getElementById(`question-${firstErrorQ.id}`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        toast.error('Please complete all required questions.');
+        return;
+      }
+    }
     
     setSubmitting(true);
     
@@ -1624,72 +1665,118 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           </div>
         )}
 
-        <div className="space-y-6 mb-8">
-          {currentQuestion && (
-            <div key={currentQuestion.id} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
-              <div className="mb-6">
-                <div className="flex items-start justify-between mb-2">
-                  <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{currentQuestionIndex + 1}. </span>
-                    {currentQuestion.question_text}
-                    {currentQuestion.required && (
-                      <span className="text-red-500 ml-1">*</span>
+        {/* All-at-once mode: show all questions on one scrollable page */}
+        {displayMode === 'all_at_once' ? (
+          <>
+            <div className="space-y-6 mb-8">
+              {orderedVisibleQuestions.map((q, idx) => (
+                <div key={q.id} id={`question-${q.id}`} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
+                  <div className="mb-6">
+                    <div className="flex items-start justify-between mb-2">
+                      <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{idx + 1}. </span>
+                        {q.question_text}
+                        {q.required && <span className="text-red-500 ml-1">*</span>}
+                      </h2>
+                    </div>
+                    {q.question_description && (
+                      <p style={{ color: 'var(--text-secondary)' }}>{q.question_description}</p>
                     )}
-                  </h2>
+                  </div>
+                  {renderQuestion(q, responses[q.id])}
+                  {fieldErrors[q.id]?.length > 0 && (
+                    <div className="mt-4 text-sm text-red-600">
+                      {fieldErrors[q.id].map((err, eIdx) => <div key={eIdx}>{err}</div>)}
+                    </div>
+                  )}
                 </div>
-                {currentQuestion.question_description && (
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    {currentQuestion.question_description}
-                  </p>
-                )}
+              ))}
+            </div>
+            {(!isCompleted || editMode) && (
+              <div className="flex justify-center mb-8">
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--color-green)' }}
+                >
+                  {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
+                  <Check size={20} />
+                </button>
               </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* One-per-page mode (default) */}
+            <div className="space-y-6 mb-8">
+              {currentQuestion && (
+                <div key={currentQuestion.id} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
+                  <div className="mb-6">
+                    <div className="flex items-start justify-between mb-2">
+                      <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{currentQuestionIndex + 1}. </span>
+                        {currentQuestion.question_text}
+                        {currentQuestion.required && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
+                      </h2>
+                    </div>
+                    {currentQuestion.question_description && (
+                      <p style={{ color: 'var(--text-secondary)' }}>
+                        {currentQuestion.question_description}
+                      </p>
+                    )}
+                  </div>
 
-              {renderQuestion(currentQuestion, responses[currentQuestion.id])}
+                  {renderQuestion(currentQuestion, responses[currentQuestion.id])}
 
-              {fieldErrors[currentQuestion.id]?.length > 0 && (
-                <div className="mt-4 text-sm text-red-600">
-                  {fieldErrors[currentQuestion.id].map((err, idx) => (
-                    <div key={idx}>{err}</div>
-                  ))}
+                  {fieldErrors[currentQuestion.id]?.length > 0 && (
+                    <div className="mt-4 text-sm text-red-600">
+                      {fieldErrors[currentQuestion.id].map((err, idx) => (
+                        <div key={idx}>{err}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0 || project?.disable_backtracking}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
-            style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-          >
-            <ChevronLeft size={16} /> Back
-          </button>
-          {currentQuestionIndex < orderedVisibleQuestions.length - 1 ? (
-            <button
-              onClick={handleNextQuestion}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
-              style={{ backgroundColor: 'var(--color-green)' }}
-            >
-              Next <ChevronRight size={16} />
-            </button>
-          ) : null}
-        </div>
+            <div className="flex items-center justify-between mb-8">
+              <button
+                onClick={handlePreviousQuestion}
+                disabled={currentQuestionIndex === 0 || project?.disable_backtracking}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
+                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
+              >
+                <ChevronLeft size={16} /> Back
+              </button>
+              {currentQuestionIndex < orderedVisibleQuestions.length - 1 ? (
+                <button
+                  onClick={handleNextQuestion}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
+                  style={{ backgroundColor: 'var(--color-green)' }}
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              ) : null}
+            </div>
 
-        {/* Submit Button */}
-        {(!isCompleted || editMode) && currentQuestionIndex >= orderedVisibleQuestions.length - 1 && (
-          <div className="flex justify-center">
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: 'var(--color-green)' }}
-            >
-              {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
-              <Check size={20} />
-            </button>
-          </div>
+            {/* Submit Button */}
+            {(!isCompleted || editMode) && currentQuestionIndex >= orderedVisibleQuestions.length - 1 && (
+              <div className="flex justify-center">
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--color-green)' }}
+                >
+                  {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
+                  <Check size={20} />
+                </button>
+              </div>
+            )}
+          </>
         )}
           </>
         )}

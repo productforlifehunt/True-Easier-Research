@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check } from 'lucide-react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
@@ -26,6 +26,7 @@ export interface QuestionnaireConfig {
   consent_url?: string;
   consent_required?: boolean;
   disqualify_logic?: any;
+  display_mode?: 'all_at_once' | 'one_per_page' | 'section_per_page';
   tab_sections?: Array<{
     id: string;
     label: string;
@@ -602,6 +603,9 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 <span className="text-[11px] text-stone-400 flex items-center gap-1">
                                   <FileText size={10} /> {q.questions.length} question{q.questions.length !== 1 ? 's' : ''}
                                 </span>
+                                <span className="text-[11px] text-stone-400 flex items-center gap-1">
+                                  <LayoutList size={10} /> {q.display_mode === 'all_at_once' ? 'All at once' : q.display_mode === 'section_per_page' ? 'By section' : 'One per page'}
+                                </span>
                                 {q.notification_enabled && (
                                   <span className="text-[11px] text-emerald-500 flex items-center gap-1">
                                     <Bell size={10} /> On
@@ -669,6 +673,29 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <label className="block text-[11px] font-medium text-stone-400 mb-1">Est. Duration (min)</label>
                                   <input type="number" value={q.estimated_duration} onChange={(e) => updateQuestionnaire(q.id, { estimated_duration: parseInt(e.target.value) || 5 })}
                                     className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
+                                </div>
+                              </div>
+
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> Display Mode</h5>
+                                <div>
+                                  <CustomDropdown
+                                    options={[
+                                      { value: 'one_per_page', label: 'One question per page' },
+                                      { value: 'all_at_once', label: 'All questions on one page' },
+                                      { value: 'section_per_page', label: 'One section per page' },
+                                    ]}
+                                    value={q.display_mode || 'one_per_page'}
+                                    onChange={(v) => updateQuestionnaire(q.id, { display_mode: v as any })}
+                                    placeholder="Select display mode"
+                                  />
+                                  <p className="text-[10px] text-stone-400 mt-1.5">
+                                    {(q.display_mode || 'one_per_page') === 'all_at_once'
+                                      ? 'All questions shown on a single scrollable page.'
+                                      : (q.display_mode || 'one_per_page') === 'section_per_page'
+                                        ? 'Questions grouped by tab sections, one section per page.'
+                                        : 'One question at a time with back/next navigation.'}
+                                  </p>
                                 </div>
                               </div>
 
