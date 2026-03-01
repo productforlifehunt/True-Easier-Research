@@ -100,8 +100,10 @@ const RequireResearcher: React.FC<{ children: React.ReactNode }> = ({ children }
 
   if (loading || checking) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <LoadingDisplay loading={{ isLoading: true, loadingMessage: 'Loading page...' }} />
+      <div className="max-w-lg mx-auto px-4 py-8 space-y-4 animate-pulse">
+        <div className="h-10 bg-stone-100 rounded-xl w-1/2" />
+        <div className="h-14 bg-stone-100 rounded-xl" />
+        <div className="h-14 bg-stone-100 rounded-xl" />
       </div>
     );
   }
@@ -166,13 +168,11 @@ function App() {
           <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
             <main>
               <Suspense fallback={
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  minHeight: '60vh'
-                }}>
-                  <LoadingDisplay loading={{ isLoading: true, loadingMessage: "Loading page..." }} />
+                <div className="max-w-lg mx-auto px-4 py-8 space-y-4 animate-pulse">
+                  <div className="h-10 bg-stone-100 rounded-xl w-2/3" />
+                  <div className="h-14 bg-stone-100 rounded-xl" />
+                  <div className="h-14 bg-stone-100 rounded-xl" />
+                  <div className="h-32 bg-stone-100 rounded-xl" />
                 </div>
               }>
                 <Routes>

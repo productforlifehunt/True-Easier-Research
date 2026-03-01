@@ -319,27 +319,34 @@ const ParticipantAppView: React.FC = () => {
     );
   };
 
-  // ── Render elements for current tab ──
+  // Memoize tab content to prevent unnecessary re-renders during tab switches
+  const tabContentMap = useMemo(() => {
+    if (!layout) return {};
+    const map: Record<string, React.ReactNode> = {};
+    for (const tab of layout.tabs) {
+      if (tab.elements.length === 0) {
+        map[tab.id] = <div className="py-16 text-center"><p className="text-[13px] text-stone-400">No content on this tab</p></div>;
+        continue;
+      }
+      const hasWidths = tab.elements.some(e => e.config.width && e.config.width !== '100%');
+      const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
+      map[tab.id] = (
+        <div className={containerClass}>
+          {tab.elements.map(el => {
+            const w = el.config.width || '100%';
+            const content = renderElement(el);
+            if (!content) return null;
+            return <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)` }}>{content}</div>;
+          })}
+        </div>
+      );
+    }
+    return map;
+  }, [layout, questionnaires, responses, selectedTimelineDay, completedTodoIds, activeQuestionnaireId]);
+
   const renderTabContent = () => {
     if (!layout) return null;
-    const activeTab = layout.tabs.find(t => t.id === currentTabId);
-    if (!activeTab || activeTab.elements.length === 0) {
-      return <div className="py-16 text-center"><p className="text-[13px] text-stone-400">No content on this tab</p></div>;
-    }
-
-    const hasWidths = activeTab.elements.some(e => e.config.width && e.config.width !== '100%');
-    const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
-
-    return (
-      <div className={containerClass}>
-        {activeTab.elements.map(el => {
-          const w = el.config.width || '100%';
-          const content = renderElement(el);
-          if (!content) return null;
-          return <div key={el.id} style={{ width: w === '100%' ? '100%' : `calc(${w} - 8px)` }}>{content}</div>;
-        })}
-      </div>
-    );
+    return tabContentMap[currentTabId] || <div className="py-16 text-center"><p className="text-[13px] text-stone-400">No content on this tab</p></div>;
   };
 
   // ── Inline loading skeleton (no full-screen spinner — shell stays visible) ──

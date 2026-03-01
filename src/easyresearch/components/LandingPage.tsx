@@ -188,12 +188,10 @@ const LandingPage: React.FC = () => {
       <footer className="py-8" style={{ borderTop: '1px solid rgba(16,185,129,0.06)' }}>
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
-              <span className="text-white text-[11px] font-bold">E</span>
-            </div>
-            <span className="text-[14px] font-semibold text-stone-800">Easier</span>
+            <img src="/favicon.svg" alt="Easier Research" className="w-6 h-6" />
+            <span className="text-[14px] font-semibold text-stone-800">Easier Research</span>
           </div>
-          <p className="text-[12px] text-stone-300">© 2025 Easier. All rights reserved.</p>
+          <p className="text-[12px] text-stone-300">© 2026 Easier Research. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -30,11 +30,11 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-sm" style={{ borderRight: '1px solid var(--border-light)' }}>
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            <BarChart3 style={{ color: 'var(--color-green)' }} size={32} />
+           <div className="flex items-center gap-3 mb-8">
+            <img src="/favicon.svg" alt="Easier Research" className="w-8 h-8" />
             <div>
               <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-                Easier-research
+                Easier Research
               </h2>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 Research Platform
