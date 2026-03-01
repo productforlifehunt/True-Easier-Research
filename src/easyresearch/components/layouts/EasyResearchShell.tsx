@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Search, Settings, Users } from 'lucide-react';
+import { Home, Search, Settings, MessageSquare } from 'lucide-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import ResearcherFooter from '../ResearcherFooter';
@@ -84,7 +84,7 @@ const EasyResearchShellInner: React.FC = () => {
   const tabs = useMemo(() => [
     { id: 'home', path: '/easyresearch/dashboard', icon: Home, labelKey: 'nav.myStudies' },
     { id: 'discover', path: '/easyresearch/participant/join', icon: Search, labelKey: 'nav.discover' },
-    { id: 'participants', path: '/easyresearch/participant-library', icon: Users, labelKey: 'nav.participants' },
+    { id: 'inbox', path: '/easyresearch/inbox', icon: MessageSquare, labelKey: 'nav.inbox' },
     { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, labelKey: 'nav.settings' },
   ], []);
 
