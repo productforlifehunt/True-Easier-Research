@@ -44,7 +44,7 @@ const LongitudinalSurveyView: React.FC = () => {
   };
 
   const handleOnboardingComplete = () => { setShowOnboarding(false); loadProject(); };
-  const handleAddEntry = () => { navigate(`/easyresearch/participant/${projectId}/dashboard`); };
+  const handleAddEntry = () => { navigate(`/easyresearch/participant/${projectId}`); };
 
   if (loading) {
     return (

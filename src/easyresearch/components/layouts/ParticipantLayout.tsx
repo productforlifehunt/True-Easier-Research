@@ -16,12 +16,12 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ children }) => {
 
   const tabs = [
     { id: 'home', path: '/easyresearch/home', icon: Home, label: 'Home' },
-    { id: 'survey', path: projectId ? `/easyresearch/participant/${projectId}/timeline` : '/easyresearch/home', icon: FileText, label: 'Survey' },
+    { id: 'survey', path: projectId ? `/easyresearch/participant/${projectId}` : '/easyresearch/home', icon: FileText, label: 'Survey' },
     { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, label: 'Settings' }
   ];
 
   const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path.split('/timeline')[0] + '/');
+    return location.pathname === path || (path.includes('/participant/') && location.pathname.startsWith(path));
   };
 
   return (

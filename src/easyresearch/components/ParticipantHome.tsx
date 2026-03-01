@@ -97,10 +97,7 @@ const ParticipantHome: React.FC = () => {
   };
 
   const handleEnrolledSurveyClick = (enrollment: Enrollment) => {
-    const project = enrollment.research_project;
-    if (project.project_type === 'longitudinal') navigate(`/easyresearch/participant/${enrollment.project_id}/timeline`);
-    else if (project.project_type === 'esm' || project.project_type === 'ema') navigate(`/easyresearch/participant/${enrollment.project_id}/dashboard`);
-    else navigate(`/easyresearch/participant/${enrollment.project_id}`);
+    navigate(`/easyresearch/participant/${enrollment.project_id}`);
   };
 
   const handleAvailableSurveyClick = (surveyId: string) => { navigate(`/easyresearch/participant/${surveyId}`); };

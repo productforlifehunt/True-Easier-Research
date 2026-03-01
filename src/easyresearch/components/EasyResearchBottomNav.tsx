@@ -35,7 +35,7 @@ const EasyResearchBottomNav: React.FC = () => {
 
   const tabs = [
     { id: 'home', path: '/easyresearch', icon: Home, label: 'Home' },
-    { id: 'survey', path: activeProjectId ? `/easyresearch/participant/${activeProjectId}/timeline` : '/easyresearch', icon: FileText, label: 'Survey' },
+    { id: 'survey', path: activeProjectId ? `/easyresearch/participant/${activeProjectId}` : '/easyresearch', icon: FileText, label: 'Survey' },
     { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, label: 'Settings' }
   ];
 

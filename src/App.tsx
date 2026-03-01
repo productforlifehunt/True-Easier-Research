@@ -227,8 +227,8 @@ function App() {
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
                     <Route path="/easyresearch/participant/join" element={<ParticipantJoin />} />
                     <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />
-                    <Route path="/easyresearch/participant/:projectId/dashboard" element={<ESMParticipantDashboard />} />
-                    <Route path="/easyresearch/participant/:projectId/timeline" element={<ESMParticipantDashboard />} />
+                    <Route path="/easyresearch/participant/:projectId/dashboard" element={<SurveyViewRouter />} />
+                    <Route path="/easyresearch/participant/:projectId/timeline" element={<SurveyViewRouter />} />
                     <Route path="/easyresearch/participant/:projectId/settings" element={<ParticipantSettings />} />
                     <Route path="/easyresearch/survey/:projectId/complete" element={
                       <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'var(--bg-primary)'}}>
