@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// @ts-ignore - AIQuestionWrapper import
+import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Mic, X, ChevronRight, ChevronLeft, Check, Clock, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -1696,7 +1698,18 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                           <p style={{ color: 'var(--text-secondary)' }}>{q.question_description}</p>
                         )}
                       </div>
-                      {renderQuestion(q, responses[q.id])}
+                      <AIQuestionWrapper
+                        question={q}
+                        value={responses[q.id]}
+                        onResponse={(qId, val) => handleResponseChange(qId, val)}
+                        aiConfig={{
+                          allow_ai_assist: q.question_config?.allow_ai_assist || (q as any).allow_ai_assist,
+                          allow_ai_auto_answer: q.question_config?.allow_ai_auto_answer,
+                          allow_voice: q.question_config?.allow_voice || (q as any).allow_voice,
+                        }}
+                      >
+                        {renderQuestion(q, responses[q.id])}
+                      </AIQuestionWrapper>
                       {fieldErrors[q.id]?.length > 0 && (
                         <div className="mt-4 text-sm text-red-600">
                           {fieldErrors[q.id].map((err, eIdx) => <div key={eIdx}>{err}</div>)}

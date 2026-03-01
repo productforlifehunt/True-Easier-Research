@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import QuestionRenderer from './QuestionRenderer';
+import AIQuestionWrapper from './AIQuestionWrapper';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
 
 interface QuestionnaireViewProps {
@@ -133,13 +134,25 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
                     {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
                   </h3>
                   {currentQ.question_description && <p className={`${s.descTxt} text-stone-400`}>{currentQ.question_description}</p>}
-                  <QuestionRenderer
+                  <AIQuestionWrapper
                     question={currentQ}
                     value={responses[currentQ.id]}
                     onResponse={onResponse}
-                    primaryColor={primaryColor}
+                    aiConfig={{
+                      allow_ai_assist: currentQ.question_config?.allow_ai_assist || currentQ.allow_ai_assist,
+                      allow_ai_auto_answer: currentQ.question_config?.allow_ai_auto_answer,
+                      allow_voice: currentQ.question_config?.allow_voice || currentQ.allow_voice,
+                    }}
                     compact={compact}
-                  />
+                  >
+                    <QuestionRenderer
+                      question={currentQ}
+                      value={responses[currentQ.id]}
+                      onResponse={onResponse}
+                      primaryColor={primaryColor}
+                      compact={compact}
+                    />
+                  </AIQuestionWrapper>
                 </>
               )}
             </div>

@@ -1,1 +1,4 @@
 project_id = "yekarqanirdkdckimpna"
+
+[functions.ai-survey-support]
+verify_jwt = false
