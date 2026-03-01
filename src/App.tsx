@@ -25,24 +25,62 @@ const EntryDetail = lazy(() => import('./pages/EntryDetail'));
 // EasyResearch Platform Components
 import EasyResearchAuth from './easyresearch/components/EasyResearchAuth';
 import { EasyResearchShell } from './easyresearch/components/layouts';
-const LandingPage = React.lazy(() => import('./easyresearch/components/LandingPage'));
-const ParticipantHome = React.lazy(() => import('./easyresearch/components/ParticipantHome'));
-const ResearcherDashboard = React.lazy(() => import('./easyresearch/components/ResearcherDashboard'));
-const SurveyBuilder = React.lazy(() => import('./easyresearch/components/SurveyBuilder'));
-const MobileSurveyEditor = React.lazy(() => import('./easyresearch/components/MobileSurveyEditor'));
-const ParticipantJoin = React.lazy(() => import('./easyresearch/components/ParticipantJoin'));
-const ESMParticipantDashboard = React.lazy(() => import('./easyresearch/components/ESMParticipantDashboard'));
-const AnalyticsPage = React.lazy(() => import('./easyresearch/components/AnalyticsDashboard'));
-const ResearcherSettings = React.lazy(() => import('./easyresearch/components/SettingsPage'));
-const ParticipantSettings = React.lazy(() => import('./easyresearch/components/ParticipantSettings'));
-const UserSettings = React.lazy(() => import('./easyresearch/components/UserSettings'));
-const SurveyResponses = React.lazy(() => import('./easyresearch/components/SurveyResponses'));
-const ResponsesPage = React.lazy(() => import('./easyresearch/components/ResponsesPage'));
-const TemplateLibrary = React.lazy(() => import('./easyresearch/components/TemplateLibrary'));
-const PricingPage = React.lazy(() => import('./easyresearch/components/PricingPage'));
-const ParticipantsPage = React.lazy(() => import('./easyresearch/components/ParticipantsPage'));
-const ParticipantLibrary = React.lazy(() => import('./easyresearch/components/ParticipantLibrary'));
-const SurveyViewRouter = React.lazy(() => import('./easyresearch/components/SurveyViewRouter'));
+
+// Eager-import factories for preloading (eliminates Suspense flash on tab switch)
+const lazyImports = {
+  LandingPage: () => import('./easyresearch/components/LandingPage'),
+  ParticipantHome: () => import('./easyresearch/components/ParticipantHome'),
+  ResearcherDashboard: () => import('./easyresearch/components/ResearcherDashboard'),
+  SurveyBuilder: () => import('./easyresearch/components/SurveyBuilder'),
+  MobileSurveyEditor: () => import('./easyresearch/components/MobileSurveyEditor'),
+  ParticipantJoin: () => import('./easyresearch/components/ParticipantJoin'),
+  ESMParticipantDashboard: () => import('./easyresearch/components/ESMParticipantDashboard'),
+  AnalyticsPage: () => import('./easyresearch/components/AnalyticsDashboard'),
+  ResearcherSettings: () => import('./easyresearch/components/SettingsPage'),
+  ParticipantSettings: () => import('./easyresearch/components/ParticipantSettings'),
+  UserSettings: () => import('./easyresearch/components/UserSettings'),
+  SurveyResponses: () => import('./easyresearch/components/SurveyResponses'),
+  ResponsesPage: () => import('./easyresearch/components/ResponsesPage'),
+  TemplateLibrary: () => import('./easyresearch/components/TemplateLibrary'),
+  PricingPage: () => import('./easyresearch/components/PricingPage'),
+  ParticipantsPage: () => import('./easyresearch/components/ParticipantsPage'),
+  ParticipantLibrary: () => import('./easyresearch/components/ParticipantLibrary'),
+  SurveyViewRouter: () => import('./easyresearch/components/SurveyViewRouter'),
+};
+
+const LandingPage = React.lazy(lazyImports.LandingPage);
+const ParticipantHome = React.lazy(lazyImports.ParticipantHome);
+const ResearcherDashboard = React.lazy(lazyImports.ResearcherDashboard);
+const SurveyBuilder = React.lazy(lazyImports.SurveyBuilder);
+const MobileSurveyEditor = React.lazy(lazyImports.MobileSurveyEditor);
+const ParticipantJoin = React.lazy(lazyImports.ParticipantJoin);
+const ESMParticipantDashboard = React.lazy(lazyImports.ESMParticipantDashboard);
+const AnalyticsPage = React.lazy(lazyImports.AnalyticsPage);
+const ResearcherSettings = React.lazy(lazyImports.ResearcherSettings);
+const ParticipantSettings = React.lazy(lazyImports.ParticipantSettings);
+const UserSettings = React.lazy(lazyImports.UserSettings);
+const SurveyResponses = React.lazy(lazyImports.SurveyResponses);
+const ResponsesPage = React.lazy(lazyImports.ResponsesPage);
+const TemplateLibrary = React.lazy(lazyImports.TemplateLibrary);
+const PricingPage = React.lazy(lazyImports.PricingPage);
+const ParticipantsPage = React.lazy(lazyImports.ParticipantsPage);
+const ParticipantLibrary = React.lazy(lazyImports.ParticipantLibrary);
+const SurveyViewRouter = React.lazy(lazyImports.SurveyViewRouter);
+
+// Preload all EasyResearch chunks after initial paint
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    // Use requestIdleCallback to preload without blocking main thread
+    const preload = () => {
+      Object.values(lazyImports).forEach(fn => fn());
+    };
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(preload);
+    } else {
+      setTimeout(preload, 1500);
+    }
+  }, { once: true });
+}
 import { notificationService } from './utils/notifications'
 import { mobileService } from './utils/mobile'
 
@@ -169,12 +207,7 @@ function App() {
           <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
             <main>
               <Suspense fallback={
-                <div className="max-w-lg mx-auto px-4 py-8 space-y-4 animate-pulse">
-                  <div className="h-10 bg-stone-100 rounded-xl w-2/3" />
-                  <div className="h-14 bg-stone-100 rounded-xl" />
-                  <div className="h-14 bg-stone-100 rounded-xl" />
-                  <div className="h-32 bg-stone-100 rounded-xl" />
-                </div>
+                <div style={{ minHeight: '100vh' }} />
               }>
                 <Routes>
                   {/* Dementia Caregiver Survey Routes */}

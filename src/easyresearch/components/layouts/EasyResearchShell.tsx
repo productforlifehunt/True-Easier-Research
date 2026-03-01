@@ -99,6 +99,7 @@ const EasyResearchShellInner: React.FC = () => {
   }, [location.pathname]);
 
   const showBottomNav = user && !isPublicRoute;
+  // Sidebar shows on researcher routes — uses lg: breakpoint so it appears on smaller desktops too
   const showSidebar = user && isResearcherRoute;
 
   return (
@@ -111,8 +112,8 @@ const EasyResearchShellInner: React.FC = () => {
       <div
         ref={contentRef}
         className={`flex-1 pt-14 ${
-          showSidebar ? 'md:pl-56' : ''
-        } ${showBottomNav ? 'pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0' : ''}`}
+          showSidebar ? 'lg:pl-56' : ''
+        } ${showBottomNav ? 'pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-0' : ''}`}
         style={{ willChange: 'opacity' }}
       >
         {showSidebar ? (
@@ -126,7 +127,7 @@ const EasyResearchShellInner: React.FC = () => {
 
       {/* Desktop footer — shown on non-dashboard routes */}
       {!isDashboardRoute && (
-        <div className={`hidden md:block ${showSidebar ? 'md:pl-56' : ''}`}>
+        <div className={`hidden lg:block ${showSidebar ? 'lg:pl-56' : ''}`}>
           <ResearcherFooter />
         </div>
       )}
@@ -134,7 +135,7 @@ const EasyResearchShellInner: React.FC = () => {
       {/* Persistent bottom nav — mobile only for logged-in users */}
       {showBottomNav && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl"
+          className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl"
           style={{
             borderTop: '1px solid rgba(0,0,0,0.06)',
             paddingBottom: 'env(safe-area-inset-bottom)',
