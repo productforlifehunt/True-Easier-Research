@@ -235,7 +235,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
                                   onClick={() => setEditingQuestionId(isEditing ? null : question.id)}>
                                   <GripVertical size={11} className="text-stone-300 shrink-0 cursor-grab active:cursor-grabbing" />
                                   <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">F{idx + 1}</span>
-                                  {question.required && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>}
+                                  {(question.response_required === 'force' || (!question.response_required && question.required)) && <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>}
                                   <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">{question.question_type?.replace(/_/g, ' ')}</span>
                                   <span className="text-[12px] text-stone-700 truncate flex-1 min-w-0">{question.question_text}</span>
                                   <button onClick={(e) => { e.stopPropagation(); deleteQuestion(comp.id, question.id); }}

@@ -961,7 +961,7 @@ const MobileSurveyEditor: React.FC = () => {
                 <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Response Type</label>
                 <select
                   value={question.response_required || 'optional'}
-                  onChange={(e) => updateQuestion(question.id, { response_required: e.target.value })}
+                  onChange={(e) => updateQuestion(question.id, { response_required: e.target.value, required: e.target.value === 'force' })}
                   className="w-full px-2 py-1 rounded border text-sm"
                   style={{ borderColor: 'var(--border-light)' }}
                 >
