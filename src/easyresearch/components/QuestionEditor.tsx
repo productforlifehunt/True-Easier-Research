@@ -786,6 +786,20 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         )}
 
+        {/* Response Type - First setting, only for response-collecting types */}
+        {!['section_header', 'text_block', 'instruction', 'divider', 'image_block'].includes(localQuestion.question_type) && (
+          <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+            <label className="text-[12px] font-medium text-stone-400">Response Type</label>
+            <select value={localQuestion.response_required || 'optional'} onChange={(e) => {
+              const val = e.target.value;
+              updateLocal({ response_required: val, required: val === 'force' });
+            }}
+              className="px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400">
+              <option value="optional">Optional</option><option value="request">Request</option><option value="force">Required</option>
+            </select>
+          </div>
+        )}
+
         {/* Validation Rules */}
         {['text_short', 'text_long', 'number', 'email', 'phone'].includes(localQuestion.question_type) && (
           <div className="space-y-3 pt-3 border-t border-stone-100">
@@ -879,13 +893,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {/* Settings section */}
         <div className="space-y-3 pt-3 border-t border-stone-100">
-          <div className="flex items-center justify-between">
-            <label className="text-[12px] font-medium text-stone-400">Response Type</label>
-            <select value={localQuestion.response_required || 'optional'} onChange={(e) => updateLocal({ response_required: e.target.value })}
-              className="px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400">
-              <option value="optional">Optional</option><option value="request">Request</option><option value="force">Required</option>
-            </select>
-          </div>
 
           {/* Preview */}
           <div className="p-3 rounded-xl bg-stone-50">

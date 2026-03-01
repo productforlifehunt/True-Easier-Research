@@ -295,7 +295,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           </span>
 
           {/* Required badge */}
-          {question.required && (
+          {(question.response_required === 'force' || (!question.response_required && question.required)) && (
             <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>
           )}
 
