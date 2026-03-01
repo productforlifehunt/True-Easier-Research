@@ -205,12 +205,12 @@ const ParticipantHome: React.FC = () => {
         </div>
 
         {/* Configurable tabs */}
-        <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-0.5 -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {visibleTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                 activeTab === tab.id
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-100'
