@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Search, Settings } from 'lucide-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
+import ResearcherFooter from '../ResearcherFooter';
 import { useAuth } from '../../../hooks/useAuth';
 
 /**
@@ -62,6 +63,20 @@ const EasyResearchShell: React.FC = () => {
       p === '/easyresearch/templates';
   }, [location.pathname]);
 
+  // Dashboard routes where footer should NOT show
+  const isDashboardRoute = useMemo(() => {
+    const p = location.pathname;
+    return p === '/easyresearch/dashboard' ||
+      p === '/easyresearch/home' ||
+      p.startsWith('/easyresearch/project/') ||
+      p === '/easyresearch/create-survey' ||
+      p === '/easyresearch/create' ||
+      p === '/easyresearch/responses' ||
+      p === '/easyresearch/participants' ||
+      p === '/easyresearch/settings' ||
+      p.startsWith('/easyresearch/mobile/edit/');
+  }, [location.pathname]);
+
   // Bottom nav tabs
   const tabs = useMemo(() => [
     { id: 'home', path: '/easyresearch/dashboard', icon: Home, label: 'My Studies' },
@@ -104,6 +119,13 @@ const EasyResearchShell: React.FC = () => {
           <Outlet />
         )}
       </div>
+
+      {/* Desktop footer — shown on non-dashboard routes */}
+      {!isDashboardRoute && (
+        <div className={`hidden md:block ${showSidebar ? 'md:pl-56' : ''}`}>
+          <ResearcherFooter />
+        </div>
+      )}
 
       {/* Persistent bottom nav — mobile only for logged-in users */}
       {showBottomNav && (

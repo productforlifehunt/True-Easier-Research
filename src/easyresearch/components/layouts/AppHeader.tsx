@@ -50,7 +50,12 @@ const AppHeader: React.FC = () => {
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to={user ? '/easyresearch/dashboard' : '/easyresearch'} className="flex items-center gap-2.5 group">
-            <img src="/favicon.svg" alt="Easier Research" className="w-7 h-7" />
+            <svg className="w-7 h-7" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="30" r="12" fill="#34d399" opacity="0.85"/>
+              <circle cx="40" cy="30" r="12" fill="#14b8a6" opacity="0.85"/>
+              <ellipse cx="32" cy="22" rx="9" ry="12" fill="#10b981"/>
+              <rect x="30.5" y="34" width="3" height="12" rx="1.5" fill="#10b981"/>
+            </svg>
             <span className="text-[15px] font-semibold tracking-tight text-stone-800">Easier Research</span>
           </Link>
 
