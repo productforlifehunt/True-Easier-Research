@@ -8,8 +8,8 @@ const ParticipantLayout: React.FC = () => {
   const navigate = useNavigate();
 
   const tabs = [
-    { id: 'home', path: '/easyresearch/home', icon: Home, label: 'Home' },
-    { id: 'join', path: '/easyresearch/participant/join', icon: FileText, label: 'Join Study' },
+    { id: 'home', path: '/easyresearch/home', icon: Home, label: 'My Studies' },
+    { id: 'join', path: '/easyresearch/participant/join', icon: FileText, label: 'Discover' },
     { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, label: 'Settings' },
   ];
 
