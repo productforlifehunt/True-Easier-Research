@@ -134,8 +134,10 @@ const SurveyViewRouter: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--color-green)' }}></div>
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-4 animate-pulse">
+        <div className="h-20 bg-stone-100 rounded-xl" />
+        <div className="h-14 bg-stone-100 rounded-xl" />
+        <div className="h-14 bg-stone-100 rounded-xl" />
       </div>
     );
   }
@@ -143,25 +145,23 @@ const SurveyViewRouter: React.FC = () => {
   // Show consent modal if required and not yet accepted
   if (showConsentModal && project) {
     return (
-      <>
-        <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }} />
-        <ConsentModal
-          isOpen={showConsentModal}
-          onClose={handleConsentDecline}
-          onAccept={handleConsentAccept}
-          projectTitle={project.title}
-          consentFormUrl={project.consent_form_url}
-          consentFormText={project.consent_form_text}
-        />
-      </>
+      <ConsentModal
+        isOpen={showConsentModal}
+        onClose={handleConsentDecline}
+        onAccept={handleConsentAccept}
+        projectTitle={project.title}
+        consentFormUrl={project.consent_form_url}
+        consentFormText={project.consent_form_text}
+      />
     );
   }
 
   // Only show survey if consent check is complete
   if (!consentChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--color-green)' }}></div>
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-4 animate-pulse">
+        <div className="h-20 bg-stone-100 rounded-xl" />
+        <div className="h-14 bg-stone-100 rounded-xl" />
       </div>
     );
   }
