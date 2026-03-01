@@ -21,19 +21,14 @@ const EditDashboardModal: React.FC<Props> = ({
 }) => {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const dragOverIdx = useRef<number | null>(null);
-  const touchStart = useRef<{ idx: number; y: number } | null>(null);
 
   if (!open) return null;
 
-  const handleDragStart = (idx: number) => {
-    setDragIdx(idx);
-  };
-
+  const handleDragStart = (idx: number) => setDragIdx(idx);
   const handleDragOver = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
     dragOverIdx.current = idx;
   };
-
   const handleDrop = () => {
     if (dragIdx !== null && dragOverIdx.current !== null && dragIdx !== dragOverIdx.current) {
       onReorder(dragIdx, dragOverIdx.current);
@@ -42,73 +37,58 @@ const EditDashboardModal: React.FC<Props> = ({
     dragOverIdx.current = null;
   };
 
-  const handleTouchStart = (idx: number, e: React.TouchEvent) => {
-    touchStart.current = { idx, y: e.touches[0].clientY };
-  };
-
-  const handleTouchEnd = (idx: number) => {
-    if (touchStart.current && touchStart.current.idx !== idx) {
-      onReorder(touchStart.current.idx, idx);
-    }
-    touchStart.current = null;
-  };
-
   const visibleCount = config.tabs.filter(t => t.visible).length;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      {/* Click-away — transparent, no overlay */}
+      <div className="absolute inset-0" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl max-h-[85vh] overflow-y-auto"
-        style={{ boxShadow: '0 -4px 40px rgba(0,0,0,0.12)' }}>
-        
-        {/* Handle bar (mobile) */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-stone-200" />
-        </div>
-
+      {/* Card */}
+      <div
+        className="relative w-full max-w-sm bg-white rounded-2xl max-h-[80vh] overflow-y-auto"
+        style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3">
-          <h2 className="text-[16px] font-bold text-stone-800">Edit Dashboard</h2>
-          <div className="flex items-center gap-2">
+        <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-5 pt-4 pb-3 border-b border-stone-100">
+          <h2 className="text-[15px] font-bold text-stone-800">Edit Dashboard</h2>
+          <div className="flex items-center gap-1.5">
             <button onClick={onReset}
               className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors"
               title="Reset to defaults">
-              <RotateCcw size={16} />
+              <RotateCcw size={15} />
             </button>
             <button onClick={onClose}
               className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors">
-              <X size={18} />
+              <X size={17} />
             </button>
           </div>
         </div>
 
         {/* Role toggles */}
-        <div className="px-5 pb-4">
-          <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-2.5">My Roles</p>
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3.5 py-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <FlaskConical size={14} className="text-blue-500" />
+        <div className="px-5 pt-4 pb-3">
+          <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2">My Roles</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
+                  <FlaskConical size={12} className="text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-stone-700">Researcher</p>
-                  <p className="text-[11px] text-stone-400">Create & manage studies</p>
+                  <p className="text-[12px] font-semibold text-stone-700">Researcher</p>
+                  <p className="text-[10px] text-stone-400">Create & manage studies</p>
                 </div>
               </div>
               <IOSToggle checked={roles.isResearcher} onChange={(v) => onUpdateRoles({ isResearcher: v })} />
             </div>
-            <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3.5 py-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <Users size={14} className="text-amber-500" />
+            <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center">
+                  <Users size={12} className="text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-stone-700">Participant</p>
-                  <p className="text-[11px] text-stone-400">Join & complete studies</p>
+                  <p className="text-[12px] font-semibold text-stone-700">Participant</p>
+                  <p className="text-[10px] text-stone-400">Join & complete studies</p>
                 </div>
               </div>
               <IOSToggle checked={roles.isParticipant} onChange={(v) => onUpdateRoles({ isParticipant: v })} />
@@ -117,10 +97,10 @@ const EditDashboardModal: React.FC<Props> = ({
         </div>
 
         {/* Tab ordering */}
-        <div className="px-5 pb-4">
-          <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-2.5">Tabs &amp; Order</p>
-          <p className="text-[11px] text-stone-400 mb-3">Drag to reorder · toggle to show/hide</p>
-          <div className="space-y-1.5">
+        <div className="px-5 pb-3">
+          <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Tabs &amp; Order</p>
+          <p className="text-[10px] text-stone-400 mb-2">Drag to reorder · toggle to show/hide</p>
+          <div className="space-y-1">
             {config.tabs.map((tab, idx) => (
               <div
                 key={tab.id}
@@ -129,17 +109,14 @@ const EditDashboardModal: React.FC<Props> = ({
                 onDragOver={(e) => handleDragOver(e, idx)}
                 onDrop={handleDrop}
                 onDragEnd={() => setDragIdx(null)}
-                onTouchStart={(e) => handleTouchStart(idx, e)}
-                onTouchEnd={() => handleTouchEnd(idx)}
-                className={`flex items-center gap-2.5 bg-white border rounded-xl px-3 py-2.5 transition-all ${
+                className={`flex items-center gap-2 bg-white border rounded-xl px-3 py-2 transition-all ${
                   dragIdx === idx ? 'border-emerald-300 shadow-md scale-[1.02]' : 'border-stone-100'
                 } ${!tab.visible ? 'opacity-50' : ''}`}
               >
-                <GripVertical size={16} className="text-stone-300 cursor-grab active:cursor-grabbing shrink-0" />
-                <span className="flex-1 text-[13px] font-medium text-stone-700">{tab.label}</span>
+                <GripVertical size={14} className="text-stone-300 cursor-grab active:cursor-grabbing shrink-0" />
+                <span className="flex-1 text-[12px] font-medium text-stone-700">{tab.label}</span>
                 <button
                   onClick={() => {
-                    // Prevent hiding all tabs
                     if (tab.visible && visibleCount <= 1) return;
                     onToggleTab(tab.id);
                   }}
@@ -147,7 +124,7 @@ const EditDashboardModal: React.FC<Props> = ({
                     tab.visible ? 'text-emerald-500 hover:bg-emerald-50' : 'text-stone-300 hover:bg-stone-50'
                   }`}
                 >
-                  {tab.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                  {tab.visible ? <Eye size={14} /> : <EyeOff size={14} />}
                 </button>
               </div>
             ))}
@@ -155,16 +132,16 @@ const EditDashboardModal: React.FC<Props> = ({
         </div>
 
         {/* New Study button toggle */}
-        <div className="px-5 pb-6">
-          <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mb-2.5">Quick Actions</p>
-          <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3.5 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <Plus size={14} className="text-emerald-500" />
+        <div className="px-5 pb-5">
+          <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2">Quick Actions</p>
+          <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
+                <Plus size={12} className="text-emerald-500" />
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-stone-700">+ New Study Button</p>
-                <p className="text-[11px] text-stone-400">Show on dashboard header</p>
+                <p className="text-[12px] font-semibold text-stone-700">+ New Study Button</p>
+                <p className="text-[10px] text-stone-400">Show on dashboard</p>
               </div>
             </div>
             <IOSToggle checked={config.showNewStudyButton} onChange={onToggleNewStudy} />
