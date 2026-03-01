@@ -990,6 +990,9 @@ const SurveyBuilder: React.FC = () => {
             participantTypes={participantTypes}
             studyDuration={project.study_duration || 7}
             onUpdate={setAppLayout}
+            onUpdateQuestionnaire={(id, updates) => {
+              setQuestionnaireConfigs(prev => prev.map(q => q.id === id ? { ...q, ...updates } : q));
+            }}
           />
         )}
 
@@ -1035,6 +1038,9 @@ const SurveyBuilder: React.FC = () => {
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
             studyDuration={project.study_duration || 7}
+            onUpdateQuestionnaire={(id, updates) => {
+              setQuestionnaireConfigs(prev => prev.map(q => q.id === id ? { ...q, ...updates } : q));
+            }}
           />
         )}
         {/* Responses Tab */}

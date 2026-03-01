@@ -80,6 +80,7 @@ interface LayoutBuilderProps {
   participantTypes: ParticipantType[];
   studyDuration?: number;
   onUpdate: (layout: AppLayout) => void;
+  onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
 
 const ICON_OPTIONS = [
@@ -159,7 +160,7 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
   };
 };
 
-const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate }) => {
+const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate, onUpdateQuestionnaire }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
@@ -348,6 +349,80 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <input type="checkbox" checked={el.config.show_estimated_time !== false} onChange={(e) => updateElement(el.id, { show_estimated_time: e.target.checked })} className="rounded border-stone-300" />
               <span className="text-[11px] text-stone-600">Show estimated time</span>
             </label>
+
+            {/* Display Density Settings */}
+            {q && onUpdateQuestionnaire && (
+              <div className="border-t border-stone-200 pt-3 space-y-2">
+                <h6 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Display Settings</h6>
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Questions Per Page (default)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={q.questions_per_page ?? ''}
+                      placeholder="Unlimited"
+                      onChange={(e) => {
+                        const val = e.target.value ? parseInt(e.target.value) : null;
+                        onUpdateQuestionnaire(q.id, { questions_per_page: val });
+                      }}
+                      className="w-20 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                    <span className="text-[10px] text-stone-400">{q.questions_per_page ? `${q.questions_per_page} per page` : 'All at once'}</span>
+                    {q.questions_per_page && (
+                      <button onClick={() => onUpdateQuestionnaire(q.id, { questions_per_page: null })} className="text-[10px] text-stone-400 hover:text-stone-600 underline">
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Per-tab section overrides */}
+                {q.tab_sections && q.tab_sections.length > 0 && (
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-medium text-stone-400">Per-Tab Overrides</label>
+                    {q.tab_sections.map((section) => (
+                      <div key={section.id} className="flex items-center gap-2 text-[11px]">
+                        <span className="text-stone-600 flex-1 truncate">{section.label}</span>
+                        <input
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={section.questions_per_page ?? ''}
+                          placeholder={q.questions_per_page ? String(q.questions_per_page) : '∞'}
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value) : null;
+                            const updatedSections = q.tab_sections!.map(s =>
+                              s.id === section.id ? { ...s, questions_per_page: val } : s
+                            );
+                            onUpdateQuestionnaire(q.id, { tab_sections: updatedSections });
+                          }}
+                          className="w-16 px-2 py-1 rounded-lg text-[11px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        />
+                        <span className="text-[9px] text-stone-400 w-12">
+                          {section.questions_per_page ?? (q.questions_per_page ?? '∞')}/pg
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Display mode */}
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Mode</label>
+                  <select
+                    value={q.display_mode || 'one_per_page'}
+                    onChange={(e) => onUpdateQuestionnaire(q.id, { display_mode: e.target.value as any })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
+                  >
+                    <option value="one_per_page">One question per page</option>
+                    <option value="all_at_once">All at once (scroll)</option>
+                    <option value="section_per_page">Section per page</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -776,9 +851,27 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               </div>
             )}
 
-            {/* Theme */}
+            {/* Theme & Global Settings */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Theme</h5>
+              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">App Design</h5>
+              
+              {/* Header */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={layout.show_header !== false} onChange={(e) => onUpdate({ ...layout, show_header: e.target.checked })} className="rounded border-stone-300" />
+                  <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
+                </label>
+                {layout.show_header !== false && (
+                  <div>
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                    <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
+                      placeholder="Auto (uses tab name)"
+                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                  </div>
+                )}
+              </div>
+
+              {/* Colors */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
@@ -799,6 +892,14 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     <option value="outlined">Outlined</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Bottom nav count */}
+              <div className="pt-2 border-t border-stone-200">
+                <p className="text-[10px] text-stone-400">
+                  <strong>{layout.tabs.length}</strong> tabs · <strong>{layout.bottom_nav.length}</strong> nav items · 
+                  <strong> {layout.tabs.reduce((acc, t) => acc + t.elements.length, 0)}</strong> total elements
+                </p>
               </div>
             </div>
           </div>
