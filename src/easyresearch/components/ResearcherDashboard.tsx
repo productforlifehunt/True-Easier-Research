@@ -5,9 +5,10 @@ import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { 
   BarChart3, Users, FileText, Plus, Clock, CheckCircle, Archive, AlertCircle,
-  Search, Trash2, Copy, X
+  Search, Trash2, Copy, X, Sparkles
 } from 'lucide-react';
 import CreateProjectDialog from './CreateProjectDialog';
+import AIProjectBuilder from './AIProjectBuilder';
 
 // Define interfaces
 interface Organization {
@@ -55,6 +56,7 @@ const ResearcherDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'draft' | 'completed'>('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showAIBuilder, setShowAIBuilder] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -261,12 +263,20 @@ const ResearcherDashboard: React.FC = () => {
                 {organization?.name}
               </p>
             </div>
-            <button
-              onClick={() => setShowCreateDialog(true)}
-              className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5"
-            >
-              <Plus size={16} /> New Project
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAIBuilder(true)}
+                className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm shadow-violet-200 flex items-center gap-1.5"
+              >
+                <Sparkles size={14} /> AI Create
+              </button>
+              <button
+                onClick={() => setShowCreateDialog(true)}
+                className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5"
+              >
+                <Plus size={16} /> New Project
+              </button>
+            </div>
           </div>
         </div>
 
@@ -392,6 +402,12 @@ const ResearcherDashboard: React.FC = () => {
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onSuccess={loadDashboardData}
+      />
+
+      <AIProjectBuilder
+        isOpen={showAIBuilder}
+        onClose={() => setShowAIBuilder(false)}
+        onProjectCreated={(projectId) => { navigate(`/easyresearch/project/${projectId}`); }}
       />
 
       {showDeleteConfirm && (

@@ -5,6 +5,7 @@ import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import ResearcherFooter from '../ResearcherFooter';
 import { useAuth } from '../../../hooks/useAuth';
+import { I18nProvider } from '../../hooks/useI18n';
 
 /**
  * Unified shell for ALL /easyresearch/* routes.
@@ -98,6 +99,7 @@ const EasyResearchShell: React.FC = () => {
   const showSidebar = user && isResearcherRoute;
 
   return (
+    <I18nProvider>
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9faf8' }}>
       <AppHeader />
 
@@ -167,6 +169,7 @@ const EasyResearchShell: React.FC = () => {
         </nav>
       )}
     </div>
+    </I18nProvider>
   );
 };
 

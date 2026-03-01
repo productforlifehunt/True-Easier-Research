@@ -212,6 +212,111 @@ RULES:
         )
       }
 
+      case 'ai_build_project': {
+        // AI generates entire project structure from description
+        if (!messages || !Array.isArray(messages)) {
+          throw new Error('Missing messages for ai_build_project action')
+        }
+
+        const currentProject = body.currentProject
+
+        systemPrompt = `You are an expert research methodology AI. You help researchers design complete research projects by chatting with them.
+
+YOUR TASK: Based on the researcher's description, generate a complete research project structure.
+
+When you have enough information to generate a project, include a JSON block in your response:
+<<<PROJECT_DATA>>>
+{
+  "title": "Project Title",
+  "description": "Project description",
+  "methodology": "single_survey|esm|ema|daily_diary|longitudinal",
+  "duration_days": 7,
+  "max_participants": 100,
+  "consent_required": false,
+  "questionnaires": [
+    {
+      "title": "Questionnaire Title",
+      "description": "Description",
+      "type": "survey",
+      "frequency": "once|daily|weekly",
+      "estimated_duration": 10,
+      "questions": [
+        {
+          "question_text": "Your question here",
+          "question_type": "text_short|text_long|single_choice|multiple_choice|likert_scale|nps|rating|slider|yes_no|number|date|dropdown|checkbox_group|bipolar_scale|matrix|ranking",
+          "required": true,
+          "options": ["Option 1", "Option 2"],
+          "question_config": {}
+        }
+      ]
+    }
+  ]
+}
+<<<END_PROJECT>>>
+
+RULES:
+- Ask clarifying questions if the description is too vague
+- Use appropriate question types for each question
+- For likert_scale, set question_config.scale_type (e.g., "1-5", "1-7")
+- For slider, set question_config.min_value, question_config.max_value, question_config.step
+- For rating, set question_config.max_value
+- For nps, no extra config needed
+- For matrix, set question_config.columns array and use options for rows
+- For bipolar_scale, set question_config.min_value, max_value, min_label, max_label
+- Include options array only for choice-type questions
+- Generate at least 5-10 well-thought-out questions per questionnaire
+- Be conversational and explain your design choices
+- If the user asks to modify, update the project data accordingly
+${currentProject ? `\nCurrent project data:\n${JSON.stringify(currentProject, null, 2)}` : ''}`
+
+        const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages]
+        
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://easierresearch.app',
+            'X-Title': 'Easier Research AI'
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3-27b-it',
+            messages: fullMessages,
+            temperature: 0.7,
+            max_tokens: 4000
+          })
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('OpenRouter API error:', errorText)
+          throw new Error(`OpenRouter API failed: ${response.status}`)
+        }
+
+        const aiResponse = await response.json()
+        const aiMessage = aiResponse.choices?.[0]?.message?.content?.trim() || ''
+
+        // Parse project data
+        let projectData = null
+        const projectMatch = aiMessage.match(/<<<PROJECT_DATA>>>([\s\S]*?)<<<END_PROJECT>>>/)
+        if (projectMatch) {
+          try {
+            projectData = JSON.parse(projectMatch[1].trim())
+          } catch (e) {
+            console.error('Failed to parse project data:', e)
+          }
+        }
+
+        const displayMessage = aiMessage
+          .replace(/<<<PROJECT_DATA>>>[\s\S]*?<<<END_PROJECT>>>/g, '')
+          .trim()
+
+        return new Response(
+          JSON.stringify({ response: displayMessage, projectData }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         throw new Error(`Unknown action: ${action}`)
     }
