@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
@@ -16,6 +16,7 @@ const ParticipantAppView: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(true);
   const [layout, setLayout] = useState<AppLayout | null>(null);
@@ -34,6 +35,16 @@ const ParticipantAppView: React.FC = () => {
   useEffect(() => {
     if (projectId) loadProjectData();
   }, [projectId]);
+
+  // Sync tab selection from URL search params (set by ParticipantLayout's bottom nav)
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && layout?.tabs?.length) {
+      setCurrentTabId(tabParam);
+      setActiveQuestionnaireId(null);
+      setCurrentPageIndex(0);
+    }
+  }, [searchParams, layout]);
 
   const loadProjectData = async () => {
     try {
@@ -740,99 +751,58 @@ const ParticipantAppView: React.FC = () => {
   // ── No layout fallback: show a simple questionnaire list ──
   if (!layout) {
     return (
-      <div className="min-h-screen bg-stone-50 pb-20">
-        <div className="sticky top-0 z-30 px-4 py-3 bg-white/90 backdrop-blur-sm border-b border-stone-100 flex items-center gap-3">
-          <button onClick={() => navigate('/easyresearch/home')} className="p-1.5 -ml-1 rounded-lg hover:bg-stone-100 transition-colors">
-            <ArrowLeft size={20} className="text-stone-600" />
-          </button>
-          <h1 className="text-[16px] font-bold text-stone-800 flex-1 truncate">{project?.title || 'Survey'}</h1>
-        </div>
-        <div className="max-w-lg mx-auto px-4 py-6">
-          {activeQuestionnaireId ? (
-            renderQuestionnaireExpanded(activeQuestionnaireId)
-          ) : (
-            <div className="space-y-3">
-              {questionnaires.filter(q => q.questionnaire_type === 'survey').length === 0 ? (
-                <p className="text-stone-400 text-center py-8">No surveys available yet.</p>
-              ) : (
-                questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => renderQuestionnaireCard(q.id))
-              )}
-            </div>
-          )}
-        </div>
+      <div className="max-w-lg mx-auto px-4 py-6">
+        {activeQuestionnaireId ? (
+          renderQuestionnaireExpanded(activeQuestionnaireId)
+        ) : (
+          <div className="space-y-3">
+            {questionnaires.filter(q => q.questionnaire_type === 'survey').length === 0 ? (
+              <p className="text-stone-400 text-center py-8">No surveys available yet.</p>
+            ) : (
+              questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => renderQuestionnaireCard(q.id))
+            )}
+          </div>
+        )}
       </div>
     );
   }
 
-  // ── Full layout-based view ──
+  // ── Full layout-based view (no header/nav — ParticipantLayout provides those) ──
   const primaryColor = layout.theme?.primary_color || '#10b981';
-  const bgColor = layout.theme?.background_color || '#f5f5f4';
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: bgColor }}>
-      {/* App Header */}
-      <div className="sticky top-0 z-30 px-4 py-3 bg-white/90 backdrop-blur-sm border-b border-stone-100 flex items-center gap-3">
-        <button onClick={() => navigate('/easyresearch/home')} className="p-1.5 -ml-1 rounded-lg hover:bg-stone-100 transition-colors">
-          <ArrowLeft size={20} className="text-stone-600" />
-        </button>
-        <h1 className="text-[16px] font-bold text-stone-800 flex-1 truncate">
-          {layout.show_header ? (layout.header_title || project?.title || 'Survey') : (layout.tabs.find(t => t.id === currentTabId)?.label || project?.title || 'Survey')}
-        </h1>
+    <div className="flex-1 flex flex-col">
+      {/* Desktop horizontal tab bar */}
+      <div className="hidden md:flex gap-1 px-4 pt-3 bg-transparent">
+        {layout.bottom_nav.map(nav => {
+          const IconComp = ICON_MAP[nav.icon] || Home;
+          const isActive = currentTabId === nav.tab_id;
+          return (
+            <button key={nav.tab_id} type="button"
+              onClick={() => navigate(`/easyresearch/participant/${projectId}?tab=${nav.tab_id}`)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all"
+              style={{
+                backgroundColor: isActive ? primaryColor + '15' : 'transparent',
+                color: isActive ? primaryColor : '#a8a29e',
+              }}>
+              <IconComp size={16} />
+              {nav.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Content area with desktop tab bar */}
-      <div className="flex-1 flex flex-col pb-20 md:pb-4 overflow-y-auto">
-        {/* Desktop horizontal tab bar */}
-        <div className="hidden md:flex gap-1 px-4 pt-3 bg-transparent">
-          {layout.bottom_nav.map(nav => {
-            const IconComp = ICON_MAP[nav.icon] || Home;
-            const isActive = currentTabId === nav.tab_id;
-            return (
-              <button key={nav.tab_id} type="button"
-                onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentPageIndex(0); }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all"
-                style={{
-                  backgroundColor: isActive ? primaryColor + '15' : 'transparent',
-                  color: isActive ? primaryColor : '#a8a29e',
-                }}>
-                <IconComp size={16} />
-                {nav.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="px-4">
-          {activeQuestionnaireId ? (
-            <div className="max-w-lg mx-auto py-4">
-              {renderQuestionnaireExpanded(activeQuestionnaireId)}
-            </div>
-          ) : (
-            <div className="max-w-lg mx-auto">
-              {renderTabContent()}
-            </div>
-          )}
-        </div>
+      <div className="px-4">
+        {activeQuestionnaireId ? (
+          <div className="max-w-lg mx-auto py-4">
+            {renderQuestionnaireExpanded(activeQuestionnaireId)}
+          </div>
+        ) : (
+          <div className="max-w-lg mx-auto">
+            {renderTabContent()}
+          </div>
+        )}
       </div>
-
-      {/* Bottom Nav (mobile) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200/50 z-40"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-center justify-around" style={{ height: '60px' }}>
-          {layout.bottom_nav.map(nav => {
-            const IconComp = ICON_MAP[nav.icon] || Home;
-            const isActive = currentTabId === nav.tab_id;
-            return (
-              <button key={nav.tab_id} type="button"
-                onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentPageIndex(0); }}
-                className="flex flex-col items-center gap-0.5">
-                <IconComp size={20} style={{ color: isActive ? primaryColor : '#a8a29e' }} />
-                <span className="text-[10px] font-medium" style={{ color: isActive ? primaryColor : '#a8a29e' }}>{nav.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
     </div>
   );
 };
