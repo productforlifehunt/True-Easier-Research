@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, FileText, Settings, BarChart3, HelpCircle, Layout as LayoutIcon } from 'lucide-react';
 import AppHeader from './AppHeader';
@@ -8,44 +8,65 @@ const ICON_MAP: Record<string, React.FC<any>> = {
   Home, FileText, Settings, BarChart3, HelpCircle, Layout: LayoutIcon,
 };
 
-interface ParticipantLayoutProps {
-  children?: React.ReactNode;
-}
+// Simple in-memory cache to avoid re-fetching on every navigation
+const layoutCache = new Map<string, { data: any; ts: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ children }) => {
+const ParticipantLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Extract projectId from URL if present
   const projectId = location.pathname.match(/\/participant\/([^\/]+)/)?.[1];
   const isInProject = !!projectId;
 
-  // Layout-driven tabs from the project's app_layout
   const [layoutTabs, setLayoutTabs] = useState<any[] | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#10b981');
+  const prevProjectId = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (!projectId) {
-      setLayoutTabs(null);
-      return;
-    }
-    const loadLayout = async () => {
-      const { data } = await supabase
-        .from('research_project')
-        .select('app_layout')
-        .eq('id', projectId)
-        .maybeSingle();
-      
-      const appLayout = data?.app_layout as any;
+  const loadLayout = useCallback(async (pid: string) => {
+    // Check cache first
+    const cached = layoutCache.get(pid);
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      const appLayout = cached.data;
       if (appLayout?.bottom_nav?.length) {
         setLayoutTabs(appLayout.bottom_nav);
         if (appLayout.theme?.primary_color) setPrimaryColor(appLayout.theme.primary_color);
       } else {
         setLayoutTabs(null);
       }
-    };
-    loadLayout();
-  }, [projectId]);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('research_project')
+      .select('app_layout')
+      .eq('id', pid)
+      .maybeSingle();
+    
+    const appLayout = data?.app_layout as any;
+    layoutCache.set(pid, { data: appLayout, ts: Date.now() });
+
+    if (appLayout?.bottom_nav?.length) {
+      setLayoutTabs(appLayout.bottom_nav);
+      if (appLayout.theme?.primary_color) setPrimaryColor(appLayout.theme.primary_color);
+    } else {
+      setLayoutTabs(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!projectId) {
+      setLayoutTabs(null);
+      setPrimaryColor('#10b981');
+      prevProjectId.current = null;
+      return;
+    }
+    // Only fetch if project changed
+    if (prevProjectId.current !== projectId) {
+      prevProjectId.current = projectId;
+      loadLayout(projectId);
+    }
+  }, [projectId, loadLayout]);
 
   // Default tabs for hub pages
   const defaultTabs = [
@@ -62,12 +83,12 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <AppHeader />
       
-      {/* Main Content */}
-      <main className="flex-1 pt-14 pb-20 md:pb-0">
-        {children || <Outlet />}
+      {/* Main Content — fixed offsets for header + bottom nav */}
+      <main className="flex-1 pt-14 pb-[calc(60px+env(safe-area-inset-bottom))] md:pb-0">
+        <Outlet />
       </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation — always visible */}
       <nav 
         className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm"
         style={{ 
@@ -79,11 +100,8 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ children }) => {
       >
         <div className="flex items-center justify-around" style={{ height: '60px' }}>
           {isInProject && layoutTabs ? (
-            // Layout-driven tabs from the project's app_layout
             layoutTabs.map((nav: any) => {
               const IconComp = ICON_MAP[nav.icon] || Home;
-              // For layout tabs, we use hash or search params to communicate tab changes
-              // The ParticipantAppView listens for these
               const tabPath = `/easyresearch/participant/${projectId}?tab=${nav.tab_id}`;
               const isTabActive = location.search.includes(`tab=${nav.tab_id}`) || 
                 (!location.search.includes('tab=') && layoutTabs.indexOf(nav) === 0);
@@ -102,7 +120,6 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ children }) => {
               );
             })
           ) : (
-            // Default hub tabs
             defaultTabs.map((tab) => {
               const Icon = tab.icon;
               const active = isActive(tab.path);
