@@ -1,64 +1,114 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, ChevronRight, Loader2, Search } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
-interface Enrollment {
+interface StudyItem {
   id: string;
   project_id: string;
-  created_at: string;
+  title: string;
+  description: string;
+  project_type: string;
+  study_duration: number | null;
   status: string;
-  research_project: {
-    id: string;
-    title: string;
-    description: string;
-    project_type: string;
-    study_duration: number;
-    status: string;
-  } | null;
+  role: 'owner' | 'participant';
+  enrolled_at?: string;
 }
 
 const ParticipantHome: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [studies, setStudies] = useState<StudyItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'owner' | 'participant'>('all');
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    loadEnrollments();
+    loadAllStudies();
   }, [user]);
 
-  const loadEnrollments = async () => {
+  const loadAllStudies = async () => {
     try {
-      const { data: enrollmentsData } = await supabase
-        .from('enrollment')
-        .select('id, project_id, created_at, status')
-        .eq('participant_id', user!.id)
-        .order('created_at', { ascending: false });
+      // Load owned projects and enrollments in parallel
+      const [ownedRes, enrolledRes] = await Promise.all([
+        supabase
+          .from('research_project')
+          .select('id, title, description, project_type, study_duration, status')
+          .eq('researcher_id', user!.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('enrollment')
+          .select('id, project_id, created_at, status')
+          .eq('participant_id', user!.id)
+          .order('created_at', { ascending: false }),
+      ]);
 
-      if (enrollmentsData && enrollmentsData.length > 0) {
-        const projectIds = Array.from(new Set(enrollmentsData.map((e: any) => e.project_id).filter(Boolean)));
-        const { data: projectsData } = projectIds.length
-          ? await supabase.from('research_project')
-              .select('id, title, description, project_type, study_duration, status')
-              .in('id', projectIds)
-          : { data: [] as any[] };
-        const projectById = new Map((projectsData || []).map((p: any) => [p.id, p]));
-        setEnrollments(
-          (enrollmentsData as any[]).map((e: any) => ({
-            ...e,
-            research_project: projectById.get(e.project_id) || null,
-          }))
-        );
-      } else {
-        setEnrollments([]);
+      const items: StudyItem[] = [];
+
+      // Add owned projects
+      if (ownedRes.data) {
+        for (const p of ownedRes.data) {
+          items.push({
+            id: p.id,
+            project_id: p.id,
+            title: p.title || 'Untitled Study',
+            description: p.description || '',
+            project_type: p.project_type || 'survey',
+            study_duration: p.study_duration,
+            status: p.status || 'draft',
+            role: 'owner',
+          });
+        }
       }
+
+      // Add enrolled studies (skip if also owner)
+      if (enrolledRes.data && enrolledRes.data.length > 0) {
+        const ownedIds = new Set(items.map(i => i.project_id));
+        const enrolledProjectIds = Array.from(
+          new Set((enrolledRes.data as any[]).map(e => e.project_id).filter((id: string) => !ownedIds.has(id)))
+        );
+
+        if (enrolledProjectIds.length > 0) {
+          const { data: projects } = await supabase
+            .from('research_project')
+            .select('id, title, description, project_type, study_duration, status')
+            .in('id', enrolledProjectIds);
+
+          const projectMap = new Map((projects || []).map((p: any) => [p.id, p]));
+
+          for (const e of enrolledRes.data as any[]) {
+            if (ownedIds.has(e.project_id)) continue;
+            const p = projectMap.get(e.project_id);
+            if (!p) continue;
+            items.push({
+              id: e.id,
+              project_id: e.project_id,
+              title: p.title || 'Untitled Study',
+              description: p.description || '',
+              project_type: p.project_type || 'survey',
+              study_duration: p.study_duration,
+              status: e.status || 'active',
+              role: 'participant',
+              enrolled_at: e.created_at,
+            });
+          }
+        }
+      }
+
+      setStudies(items);
     } catch (error) {
-      console.error('Error loading enrollments:', error);
+      console.error('Error loading studies:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStudyClick = (study: StudyItem) => {
+    if (study.role === 'owner') {
+      navigate(`/easyresearch/project/${study.project_id}`);
+    } else {
+      navigate(`/easyresearch/participant/${study.project_id}`);
     }
   };
 
@@ -70,7 +120,7 @@ const ParticipantHome: React.FC = () => {
             <FileText size={28} className="text-emerald-400" />
           </div>
           <h1 className="text-lg font-bold text-stone-800 mb-1">Sign in to get started</h1>
-          <p className="text-[13px] text-stone-400 mb-5">Join studies and track your participation</p>
+          <p className="text-[13px] text-stone-400 mb-5">Create or join research studies</p>
           <button
             onClick={() => navigate('/easyresearch/auth')}
             className="px-6 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
@@ -90,49 +140,100 @@ const ParticipantHome: React.FC = () => {
     );
   }
 
-  const activeStudies = enrollments.filter(e => e.status === 'active' && e.research_project);
-  const completedStudies = enrollments.filter(e => e.status !== 'active' && e.research_project);
+  const filtered = filter === 'all' ? studies : studies.filter(s => s.role === filter);
+  const ownerCount = studies.filter(s => s.role === 'owner').length;
+  const participantCount = studies.filter(s => s.role === 'participant').length;
 
   return (
     <div className="bg-stone-50/50">
       <div className="max-w-lg mx-auto px-4 py-4">
-        {/* Greeting */}
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-stone-800 tracking-tight">My Studies</h1>
-          <p className="text-[13px] text-stone-400 font-light mt-0.5">
-            {activeStudies.length > 0
-              ? `${activeStudies.length} active ${activeStudies.length === 1 ? 'study' : 'studies'}`
-              : 'No active studies yet'}
-          </p>
+        {/* Header with Create button */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-xl font-bold text-stone-800 tracking-tight">My Studies</h1>
+            <p className="text-[13px] text-stone-400 font-light mt-0.5">
+              {studies.length} {studies.length === 1 ? 'study' : 'studies'}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/easyresearch/create-survey')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200 hover:shadow-md transition-all"
+          >
+            <Plus size={14} /> New Study
+          </button>
         </div>
 
-        {/* Active Studies */}
-        {activeStudies.length > 0 ? (
-          <div className="space-y-2.5 mb-6">
-            {activeStudies.map(enrollment => (
+        {/* Role filter pills */}
+        <div className="flex gap-1.5 mb-4">
+          {[
+            { key: 'all' as const, label: 'All', count: studies.length },
+            { key: 'owner' as const, label: 'Owner', count: ownerCount },
+            { key: 'participant' as const, label: 'Participant', count: participantCount },
+          ].map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
+                filter === f.key
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-100'
+              }`}
+            >
+              {f.label} <span className="ml-0.5 opacity-60">{f.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Study cards */}
+        {filtered.length > 0 ? (
+          <div className="space-y-2.5">
+            {filtered.map(study => (
               <button
-                key={enrollment.id}
-                onClick={() => navigate(`/easyresearch/participant/${enrollment.project_id}`)}
+                key={`${study.role}-${study.id}`}
+                onClick={() => handleStudyClick(study)}
                 className="w-full bg-white rounded-2xl border border-stone-100 p-4 text-left hover:shadow-md hover:shadow-stone-100/80 transition-all group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">
-                      {enrollment.research_project?.title || 'Untitled Study'}
-                    </h3>
-                    <p className="text-[12px] text-stone-400 font-light mt-0.5 line-clamp-1">
-                      {enrollment.research_project?.description}
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-[14px] font-semibold text-stone-800 truncate">
+                        {study.title}
+                      </h3>
+                      {/* Role badge */}
+                      <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        study.role === 'owner'
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'bg-amber-50 text-amber-600'
+                      }`}>
+                        {study.role === 'owner' ? (
+                          <span className="flex items-center gap-0.5"><FlaskConical size={9} /> Owner</span>
+                        ) : (
+                          <span className="flex items-center gap-0.5"><Users size={9} /> Participant</span>
+                        )}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-stone-400 font-light line-clamp-1">
+                      {study.description || 'No description'}
                     </p>
                   </div>
                   <ChevronRight size={16} className="text-stone-300 group-hover:text-emerald-400 transition-colors ml-2 shrink-0" />
                 </div>
                 <div className="flex items-center gap-2 mt-2.5">
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
-                    {enrollment.research_project?.project_type || 'survey'}
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                    study.status === 'active' || study.status === 'published'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : study.status === 'draft'
+                      ? 'bg-stone-50 text-stone-500'
+                      : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {study.status}
                   </span>
-                  {enrollment.research_project?.study_duration && (
+                  <span className="text-[10px] text-stone-400">
+                    {study.project_type}
+                  </span>
+                  {study.study_duration && (
                     <span className="text-[10px] text-stone-400 flex items-center gap-0.5">
-                      <Clock size={9} /> {enrollment.research_project.study_duration}d
+                      <Clock size={9} /> {study.study_duration}d
                     </span>
                   )}
                 </div>
@@ -140,46 +241,23 @@ const ParticipantHome: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center mb-6">
+          <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
             <div className="w-14 h-14 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-3">
               <Search size={22} className="text-stone-300" />
             </div>
-            <h2 className="text-[14px] font-semibold text-stone-700 mb-1">No active studies</h2>
-            <p className="text-[12px] text-stone-400 font-light mb-4">Find and join research studies to get started</p>
+            <h2 className="text-[14px] font-semibold text-stone-700 mb-1">
+              {filter === 'all' ? 'No studies yet' : `No ${filter} studies`}
+            </h2>
+            <p className="text-[12px] text-stone-400 font-light mb-4">
+              {filter === 'participant' ? 'Join studies from the Discover tab' : 'Create your first research study'}
+            </p>
             <button
-              onClick={() => navigate('/easyresearch/participant/join')}
+              onClick={() => filter === 'participant' ? navigate('/easyresearch/participant/join') : navigate('/easyresearch/create-survey')}
               className="px-5 py-2 rounded-full text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
             >
-              Find Studies
+              {filter === 'participant' ? 'Find Studies' : 'Create Study'}
             </button>
           </div>
-        )}
-
-        {/* Completed / Past Studies */}
-        {completedStudies.length > 0 && (
-          <>
-            <h2 className="text-[12px] font-medium text-stone-400 uppercase tracking-wider mb-2">Past Studies</h2>
-            <div className="space-y-2">
-              {completedStudies.map(enrollment => (
-                <button
-                  key={enrollment.id}
-                  onClick={() => navigate(`/easyresearch/participant/${enrollment.project_id}`)}
-                  className="w-full bg-white/60 rounded-xl border border-stone-100 p-3.5 text-left group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-[13px] font-medium text-stone-500 truncate">
-                        {enrollment.research_project?.title || 'Untitled'}
-                      </h3>
-                    </div>
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-stone-100 text-stone-400 ml-2">
-                      {enrollment.status}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </>
         )}
       </div>
     </div>
