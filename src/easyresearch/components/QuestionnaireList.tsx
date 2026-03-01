@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Mic, Settings, X, GitBranch } from 'lucide-react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
@@ -22,13 +22,10 @@ export interface QuestionnaireConfig {
   dnd_default_end: string;
   assigned_participant_types: string[];
   order_index: number;
-  // Consent-specific fields
   consent_text?: string;
   consent_url?: string;
   consent_required?: boolean;
-  // Screening-specific fields
   disqualify_logic?: any;
-  // Tab sections for internal question grouping
   tab_sections?: Array<{
     id: string;
     label: string;
@@ -58,10 +55,12 @@ const frequencyOptions = [
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, logicRules = [], onUpdateLogic,
 }) => {
-  // Track which sections are open: { [questionnaireId]: 'settings' | 'questions' | null }
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
-  // Track which question is being edited inline (per questionnaire)
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  // Active tab filter per questionnaire: null = show all, 'general' = unassigned, sectionId = specific tab
+  const [activeTabFilter, setActiveTabFilter] = useState<Record<string, string | null>>({});
+  // Which question is showing its "assign to tab" dropdown
+  const [assigningQuestionId, setAssigningQuestionId] = useState<string | null>(null);
 
   const toggleSection = (qId: string, section: 'settings' | 'questions') => {
     setOpenSections(prev => ({
@@ -112,10 +111,12 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     onUpdate([...questionnaires, dup]);
   };
 
-  // Question CRUD within a questionnaire
   const addQuestion = (qId: string, type: string) => {
     const def = QUESTION_TYPE_DEFINITIONS.find(d => d.type === type);
     if (!def) return;
+    const qConfig = questionnaires.find(q => q.id === qId);
+    if (!qConfig) return;
+
     const newQ: any = {
       id: crypto.randomUUID(),
       question_type: type,
@@ -125,7 +126,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       validation_rule: {},
       logic_rule: {},
       ai_config: {},
-      order_index: 0,
+      order_index: qConfig.questions.length,
       required: false,
       allow_voice: false,
       allow_ai_assist: false,
@@ -134,10 +135,20 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false },
       ] : [],
     };
-    const qConfig = questionnaires.find(q => q.id === qId);
-    if (!qConfig) return;
-    newQ.order_index = qConfig.questions.length;
-    updateQuestionnaire(qId, { questions: [...qConfig.questions, newQ] });
+
+    // If a tab filter is active, auto-assign to that tab
+    const activeFilter = activeTabFilter[qId];
+    let updatedSections = qConfig.tab_sections;
+    if (activeFilter && activeFilter !== 'general' && qConfig.tab_sections) {
+      updatedSections = qConfig.tab_sections.map(s =>
+        s.id === activeFilter ? { ...s, question_ids: [...s.question_ids, newQ.id] } : s
+      );
+    }
+
+    updateQuestionnaire(qId, {
+      questions: [...qConfig.questions, newQ],
+      ...(updatedSections ? { tab_sections: updatedSections } : {}),
+    });
     setEditingQuestionId(newQ.id);
   };
 
@@ -152,8 +163,14 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   const deleteQuestion = (qId: string, questionId: string) => {
     const qConfig = questionnaires.find(q => q.id === qId);
     if (!qConfig) return;
+    // Also remove from tab sections
+    const updatedSections = qConfig.tab_sections?.map(s => ({
+      ...s,
+      question_ids: s.question_ids.filter(id => id !== questionId),
+    }));
     updateQuestionnaire(qId, {
       questions: qConfig.questions.filter(q => q.id !== questionId).map((q, i) => ({ ...q, order_index: i })),
+      ...(updatedSections ? { tab_sections: updatedSections } : {}),
     });
     if (editingQuestionId === questionId) setEditingQuestionId(null);
   };
@@ -171,60 +188,44 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     updateQuestionnaire(qId, { questions: [...qConfig.questions, dup] });
   };
 
+  const assignQuestionToTab = (qId: string, questionId: string, targetSectionId: string | 'general') => {
+    const qConfig = questionnaires.find(q => q.id === qId);
+    if (!qConfig || !qConfig.tab_sections) return;
+    // Remove from all sections first
+    let sections = qConfig.tab_sections.map(s => ({
+      ...s,
+      question_ids: s.question_ids.filter(id => id !== questionId),
+    }));
+    // Add to target section (unless 'general' which means unassigned)
+    if (targetSectionId !== 'general') {
+      sections = sections.map(s =>
+        s.id === targetSectionId ? { ...s, question_ids: [...s.question_ids, questionId] } : s
+      );
+    }
+    updateQuestionnaire(qId, { tab_sections: sections });
+    setAssigningQuestionId(null);
+  };
+
   const handleQuestionDragEnd = (qId: string, result: DropResult) => {
     if (!result.destination) return;
     const qConfig = questionnaires.find(q => q.id === qId);
     if (!qConfig) return;
 
-    const sourceDropId = result.source.droppableId;
-    const destDropId = result.destination.droppableId;
+    // Simple reorder within the filtered view
+    const items = Array.from(qConfig.questions);
+    const filteredItems = getFilteredQuestions(qConfig);
+    const movedQuestion = filteredItems[result.source.index];
+    if (!movedQuestion) return;
 
-    // If tab sections exist, handle cross-section moves
-    if (qConfig.tab_sections && qConfig.tab_sections.length > 0) {
-      const sourceSectionId = sourceDropId.replace(`questions-${qId}-`, '');
-      const destSectionId = destDropId.replace(`questions-${qId}-`, '');
+    // Find actual indices in the full array
+    const fromIdx = items.findIndex(q => q.id === movedQuestion.id);
+    const targetQuestion = filteredItems[result.destination.index];
+    const toIdx = targetQuestion ? items.findIndex(q => q.id === targetQuestion.id) : items.length - 1;
 
-      // Get questions grouped by section
-      const getQuestionsForSection = (sectionId: string) => {
-        if (sectionId === 'general') {
-          const assignedIds = new Set(qConfig.tab_sections!.flatMap(s => s.question_ids));
-          return qConfig.questions.filter(q => !assignedIds.has(q.id));
-        }
-        const section = qConfig.tab_sections!.find(s => s.id === sectionId);
-        if (!section) return [];
-        return section.question_ids.map(id => qConfig.questions.find(q => q.id === id)).filter(Boolean) as any[];
-      };
-
-      const sourceQuestions = getQuestionsForSection(sourceSectionId);
-      const movedQuestion = sourceQuestions[result.source.index];
-      if (!movedQuestion) return;
-
-      // Update tab_sections to move question between sections
-      let sections = (qConfig.tab_sections || []).map(s => ({
-        ...s,
-        question_ids: s.question_ids.filter(id => id !== movedQuestion.id),
-      }));
-
-      if (destSectionId !== 'general') {
-        const destIdx = sections.findIndex(s => s.id === destSectionId);
-        if (destIdx >= 0) {
-          const destQuestions = getQuestionsForSection(destSectionId).filter(q => q.id !== movedQuestion.id);
-          const insertAt = Math.min(result.destination.index, destQuestions.length);
-          const newIds = destQuestions.map(q => q.id);
-          newIds.splice(insertAt, 0, movedQuestion.id);
-          sections[destIdx] = { ...sections[destIdx], question_ids: newIds };
-        }
-      }
-
-      updateQuestionnaire(qId, { tab_sections: sections });
-    } else {
-      // Simple reorder without sections
-      const items = Array.from(qConfig.questions);
-      const [moved] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, moved);
-      items.forEach((q, i) => q.order_index = i);
-      updateQuestionnaire(qId, { questions: items });
-    }
+    const [moved] = items.splice(fromIdx, 1);
+    items.splice(toIdx, 0, moved);
+    items.forEach((q, i) => q.order_index = i);
+    updateQuestionnaire(qId, { questions: items });
   };
 
   const handleQuestionnaireDragEnd = (result: DropResult) => {
@@ -236,8 +237,39 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     onUpdate(items);
   };
 
+  // Get the current tab a question belongs to
+  const getQuestionTab = (qConfig: QuestionnaireConfig, questionId: string): string => {
+    if (!qConfig.tab_sections) return 'general';
+    for (const section of qConfig.tab_sections) {
+      if (section.question_ids.includes(questionId)) return section.id;
+    }
+    return 'general';
+  };
+
+  // Get filtered questions based on active tab
+  const getFilteredQuestions = (qConfig: QuestionnaireConfig): any[] => {
+    const filter = activeTabFilter[qConfig.id];
+    if (!filter || !qConfig.tab_sections || qConfig.tab_sections.length === 0) {
+      return qConfig.questions;
+    }
+    if (filter === 'general') {
+      const assignedIds = new Set(qConfig.tab_sections.flatMap(s => s.question_ids));
+      return qConfig.questions.filter(q => !assignedIds.has(q.id));
+    }
+    const section = qConfig.tab_sections.find(s => s.id === filter);
+    if (!section) return qConfig.questions;
+    return section.question_ids
+      .map(id => qConfig.questions.find(q => q.id === id))
+      .filter(Boolean) as any[];
+  };
+
   const renderQuestionRow = (dragProvided: any, dragSnapshot: any, question: any, q: QuestionnaireConfig, globalIdx: number) => {
     const isEditing = editingQuestionId === question.id;
+    const isAssigning = assigningQuestionId === question.id;
+    const hasTabs = q.tab_sections && q.tab_sections.length > 0;
+    const currentTab = hasTabs ? getQuestionTab(q, question.id) : null;
+    const currentTabLabel = currentTab === 'general' ? 'General' : q.tab_sections?.find(s => s.id === currentTab)?.label;
+
     return (
       <div
         ref={dragProvided.innerRef}
@@ -246,26 +278,53 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         style={dragProvided.draggableProps.style}
       >
         <div
-          className={`flex items-center gap-2 px-4 py-2.5 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
+          className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-stone-50/50 transition-colors ${isEditing ? 'bg-emerald-50/30' : ''}`}
           onClick={() => setEditingQuestionId(isEditing ? null : question.id)}
         >
-          <div {...dragProvided.dragHandleProps} className="flex items-center gap-0.5 shrink-0 cursor-grab active:cursor-grabbing px-1 py-0.5 rounded hover:bg-stone-100 transition-colors" title="Drag to reorder" onClick={(e) => e.stopPropagation()}>
-            <ArrowUpDown size={11} className="text-stone-300" />
-            <span className="text-[9px] text-stone-300 font-medium">Move</span>
+          {/* Drag handle */}
+          <div {...dragProvided.dragHandleProps} className="shrink-0 cursor-grab active:cursor-grabbing p-1 rounded hover:bg-stone-100 transition-colors" title="Drag to reorder" onClick={(e) => e.stopPropagation()}>
+            <ArrowUpDown size={12} className="text-stone-300" />
           </div>
+
+          {/* Question number */}
           <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full shrink-0">
-            Question {globalIdx + 1}
+            Q{globalIdx + 1}
           </span>
+
+          {/* Required badge */}
           {question.required && (
-            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Required</span>
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>
           )}
-          <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0">
+
+          {/* Type */}
+          <span className="text-[9px] uppercase font-bold text-stone-300 shrink-0 hidden sm:inline">
             {question.question_type?.replace(/_/g, ' ')}
           </span>
+
+          {/* Question text */}
           <span className="text-[13px] text-stone-700 truncate flex-1 min-w-0">
             {question.question_text}
           </span>
-          <div className="flex items-center gap-0.5 shrink-0">
+
+          {/* Tab badge - only show when viewing "All" (no filter active) */}
+          {hasTabs && !activeTabFilter[q.id] && currentTabLabel && (
+            <span className={`text-[9px] px-1.5 py-0.5 rounded-full shrink-0 ${
+              currentTab === 'general' ? 'bg-stone-100 text-stone-400' : 'bg-emerald-50 text-emerald-500'
+            }`}>
+              {currentTabLabel}
+            </span>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-0.5 shrink-0 relative">
+            {/* Assign to tab */}
+            {hasTabs && (
+              <button onClick={(e) => { e.stopPropagation(); setAssigningQuestionId(isAssigning ? null : question.id); }}
+                className={`p-1 rounded-lg transition-colors ${isAssigning ? 'bg-blue-100 text-blue-600' : 'hover:bg-stone-100 text-stone-400'}`}
+                title="Assign to tab">
+                <FolderInput size={12} />
+              </button>
+            )}
             <button onClick={(e) => { e.stopPropagation(); setEditingQuestionId(isEditing ? null : question.id); }}
               className={`p-1 rounded-lg transition-colors ${isEditing ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-stone-100 text-stone-400'}`} title="Edit">
               <Edit2 size={12} />
@@ -278,8 +337,26 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               className="p-1 rounded-lg hover:bg-red-50 transition-colors text-red-400" title="Delete">
               <Trash2 size={12} />
             </button>
+
+            {/* Assign dropdown */}
+            {isAssigning && hasTabs && (
+              <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl border border-stone-200 shadow-xl py-1 min-w-[140px]" onClick={(e) => e.stopPropagation()}>
+                <button onClick={() => assignQuestionToTab(q.id, question.id, 'general')}
+                  className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-stone-50 flex items-center justify-between ${currentTab === 'general' ? 'text-emerald-600 font-medium' : 'text-stone-600'}`}>
+                  General {currentTab === 'general' && <Check size={10} />}
+                </button>
+                {q.tab_sections!.map(s => (
+                  <button key={s.id} onClick={() => assignQuestionToTab(q.id, question.id, s.id)}
+                    className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-stone-50 flex items-center justify-between ${currentTab === s.id ? 'text-emerald-600 font-medium' : 'text-stone-600'}`}>
+                    {s.label} {currentTab === s.id && <Check size={10} />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Inline editor */}
         {isEditing && (
           <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100">
             <QuestionEditor
@@ -297,6 +374,144 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               />
             )}
           </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderQuestionsPanel = (q: QuestionnaireConfig) => {
+    const hasTabs = q.tab_sections && q.tab_sections.length > 0;
+    const filter = activeTabFilter[q.id] || null;
+    const filteredQuestions = getFilteredQuestions(q);
+    const assignedIds = hasTabs ? new Set(q.tab_sections!.flatMap(s => s.question_ids)) : new Set<string>();
+    const generalCount = hasTabs ? q.questions.filter(qq => !assignedIds.has(qq.id)).length : q.questions.length;
+
+    return (
+      <div className="border-t border-stone-100">
+        {/* Sticky toolbar: tabs + add question */}
+        <div className="sticky top-14 z-20 bg-white border-b border-stone-100">
+          {/* Tab bar */}
+          <div className="px-3 py-2 flex items-center gap-2 overflow-x-auto">
+            {/* All tab */}
+            <button
+              onClick={() => setActiveTabFilter(prev => ({ ...prev, [q.id]: null }))}
+              className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                !filter ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+              }`}
+            >
+              All ({q.questions.length})
+            </button>
+
+            {hasTabs && (
+              <>
+                <button
+                  onClick={() => setActiveTabFilter(prev => ({ ...prev, [q.id]: 'general' }))}
+                  className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                    filter === 'general' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  }`}
+                >
+                  General ({generalCount})
+                </button>
+                {q.tab_sections!.map(section => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveTabFilter(prev => ({ ...prev, [q.id]: section.id }))}
+                    className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                      filter === section.id ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                    }`}
+                  >
+                    {section.label} ({section.question_ids.length})
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-stone-200 shrink-0" />
+
+            {/* Add tab */}
+            <button
+              onClick={() => {
+                const sections = [...(q.tab_sections || []), { id: crypto.randomUUID(), label: `Tab ${(q.tab_sections?.length || 0) + 1}`, question_ids: [] }];
+                updateQuestionnaire(q.id, { tab_sections: sections });
+              }}
+              className="shrink-0 px-2 py-1 rounded-full text-[10px] font-medium text-stone-400 border border-dashed border-stone-300 hover:border-emerald-400 hover:text-emerald-500 transition-colors"
+            >
+              + Tab
+            </button>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Add question */}
+            <CustomDropdown
+              options={[
+                { value: '', label: '+ Add Question' },
+                ...QUESTION_TYPE_DEFINITIONS.map(def => ({ value: def.type, label: def.label }))
+              ]}
+              value=""
+              onChange={(value) => value && addQuestion(q.id, value)}
+              placeholder="+ Add Question"
+              buttonStyle={{ backgroundColor: '#10b981', color: 'white', borderRadius: '9999px', fontSize: '11px', padding: '4px 12px' }}
+              className="w-auto shrink-0"
+            />
+          </div>
+
+          {/* Tab editing strip - only show when tabs exist */}
+          {hasTabs && (
+            <div className="px-3 pb-2 flex items-center gap-1.5 overflow-x-auto">
+              {q.tab_sections!.map((section, si) => (
+                <div key={section.id} className="flex items-center gap-1 px-2 py-0.5 rounded-lg border border-stone-200 bg-stone-50 text-[10px] shrink-0">
+                  <input type="text" value={section.label}
+                    onChange={(e) => {
+                      const sections = [...(q.tab_sections || [])];
+                      sections[si] = { ...sections[si], label: e.target.value };
+                      updateQuestionnaire(q.id, { tab_sections: sections });
+                    }}
+                    className="bg-transparent border-none outline-none w-16 text-[10px] text-stone-600 font-medium"
+                  />
+                  <button onClick={() => {
+                    const sections = (q.tab_sections || []).filter((_, i) => i !== si);
+                    updateQuestionnaire(q.id, { tab_sections: sections });
+                    // Reset filter if we deleted the active tab
+                    if (activeTabFilter[q.id] === section.id) {
+                      setActiveTabFilter(prev => ({ ...prev, [q.id]: null }));
+                    }
+                  }} className="text-red-400 hover:text-red-600">
+                    <X size={9} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Question list */}
+        {filteredQuestions.length === 0 ? (
+          <div className="text-center py-10 px-4">
+            <FileText className="mx-auto text-stone-200 mb-2" size={28} />
+            <p className="text-[12px] text-stone-400">
+              {q.questions.length === 0 ? 'No questions yet. Add your first question above.' : `No questions in this tab. Use the folder icon to assign questions.`}
+            </p>
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={(result) => handleQuestionDragEnd(q.id, result)}>
+            <Droppable droppableId={`questions-${q.id}-filtered`}>
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-stone-100">
+                  {filteredQuestions.map((question: any, qIdx: number) => {
+                    const globalIdx = q.questions.indexOf(question);
+                    return (
+                      <Draggable key={question.id} draggableId={question.id} index={qIdx}>
+                        {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, globalIdx)}
+                      </Draggable>
+                    );
+                  })}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
       </div>
     );
@@ -394,11 +609,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 )}
                                 {participantTypes.length > 0 && (
                                   <span className="text-[11px] text-blue-500 flex items-center gap-1">
-                                    <Users size={10} /> 
-                                    {q.assigned_participant_types.length === 0 
-                                      ? 'No types' 
-                                      : q.assigned_participant_types.length === participantTypes.length 
-                                        ? 'All types' 
+                                    <Users size={10} />
+                                    {q.assigned_participant_types.length === 0
+                                      ? 'No types'
+                                      : q.assigned_participant_types.length === participantTypes.length
+                                        ? 'All types'
                                         : `${q.assigned_participant_types.length} type${q.assigned_participant_types.length > 1 ? 's' : ''}`}
                                   </span>
                                 )}
@@ -457,7 +672,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
-                              {/* Schedule */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
                                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Clock size={11} /> Schedule</h5>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -476,7 +690,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
-                              {/* Notifications */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
                                 <div className="flex items-center justify-between">
@@ -493,7 +706,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 )}
                               </div>
 
-                              {/* DND */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><BellOff size={11} /> Do Not Disturb</h5>
                                 <div className="flex items-center justify-between">
@@ -507,7 +719,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 )}
                               </div>
 
-                              {/* Participant Types */}
                               {participantTypes.length > 0 && (
                                 <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> Assigned Types</h5>
@@ -538,149 +749,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                           )}
 
                           {/* Questions Panel */}
-                          {openSection === 'questions' && (
-                            <div className="border-t border-stone-100">
-                              {/* Add Question Bar */}
-                              <div className="px-4 py-2 bg-stone-50/50 flex items-center justify-between">
-                                <span className="text-[11px] text-stone-400">{q.questions.length} question{q.questions.length !== 1 ? 's' : ''}</span>
-                                <CustomDropdown
-                                  options={[
-                                    { value: '', label: '+ Add Question' },
-                                    ...QUESTION_TYPE_DEFINITIONS.map(def => ({ value: def.type, label: def.label }))
-                                  ]}
-                                  value=""
-                                  onChange={(value) => value && addQuestion(q.id, value)}
-                                  placeholder="+ Add Question"
-                                  buttonStyle={{ backgroundColor: '#10b981', color: 'white', borderRadius: '9999px', fontSize: '12px', padding: '4px 12px' }}
-                                  className="w-auto"
-                                />
-                              </div>
-
-                              {/* Tab Sections — available for all questionnaire types */}
-                              <div className="px-4 py-2 border-t border-stone-100 space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Sections / Tabs</span>
-                                  <button onClick={() => {
-                                    const sections = [...(q.tab_sections || []), { id: crypto.randomUUID(), label: `Section ${(q.tab_sections?.length || 0) + 1}`, question_ids: [] }];
-                                    updateQuestionnaire(q.id, { tab_sections: sections });
-                                  }} className="text-[10px] text-emerald-500 hover:text-emerald-600 font-medium">
-                                    + Add Tab
-                                  </button>
-                                </div>
-                                {(q.tab_sections && q.tab_sections.length > 0) && (
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {q.tab_sections.map((section, si) => (
-                                      <div key={section.id} className="flex items-center gap-1 px-2 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-[10px]">
-                                        <input type="text" value={section.label}
-                                          onChange={(e) => {
-                                            const sections = [...(q.tab_sections || [])];
-                                            sections[si] = { ...sections[si], label: e.target.value };
-                                            updateQuestionnaire(q.id, { tab_sections: sections });
-                                          }}
-                                          className="bg-transparent border-none outline-none w-16 text-[10px] text-emerald-700 font-medium" />
-                                        <span className="text-[9px] text-emerald-400">{section.question_ids.length}q</span>
-                                        <button onClick={() => {
-                                          const sections = (q.tab_sections || []).filter((_, i) => i !== si);
-                                          updateQuestionnaire(q.id, { tab_sections: sections });
-                                        }} className="text-red-400 hover:text-red-600">
-                                          <X size={8} />
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                                {(q.tab_sections && q.tab_sections.length > 0) && (
-                                  <p className="text-[9px] text-stone-400 italic">Drag questions below to assign them to tabs. Unassigned questions go to "General".</p>
-                                )}
-                              </div>
-
-                              {q.questions.length === 0 ? (
-                                <div className="text-center py-10 px-4">
-                                  <FileText className="mx-auto text-stone-200 mb-2" size={28} />
-                                  <p className="text-[12px] text-stone-400">No questions yet. Add your first question above.</p>
-                                </div>
-                              ) : (
-                                <DragDropContext onDragEnd={(result) => handleQuestionDragEnd(q.id, result)}>
-                                  {q.tab_sections && q.tab_sections.length > 0 ? (
-                                    // Render questions grouped by tab sections
-                                    <div className="divide-y divide-stone-100">
-                                      {/* General (unassigned) section */}
-                                      {(() => {
-                                        const assignedIds = new Set(q.tab_sections!.flatMap(s => s.question_ids));
-                                        const generalQuestions = q.questions.filter(qq => !assignedIds.has(qq.id));
-                                        return (
-                                          <div>
-                                            <div className="px-4 py-1.5 bg-stone-50 border-b border-stone-100">
-                                              <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">📋 General ({generalQuestions.length})</span>
-                                            </div>
-                                            <Droppable droppableId={`questions-${q.id}-general`}>
-                                              {(provided, dropSnapshot) => (
-                                                <div ref={provided.innerRef} {...provided.droppableProps}
-                                                  className={`min-h-[32px] transition-colors ${dropSnapshot.isDraggingOver ? 'bg-emerald-50/30' : ''}`}>
-                                                  {generalQuestions.map((question: any, qIdx: number) => (
-                                                    <Draggable key={question.id} draggableId={question.id} index={qIdx}>
-                                                      {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, q.questions.indexOf(question))}
-                                                    </Draggable>
-                                                  ))}
-                                                  {provided.placeholder}
-                                                  {generalQuestions.length === 0 && !dropSnapshot.isDraggingOver && (
-                                                    <p className="text-[10px] text-stone-300 italic text-center py-2">Drop questions here</p>
-                                                  )}
-                                                </div>
-                                              )}
-                                            </Droppable>
-                                          </div>
-                                        );
-                                      })()}
-                                      {/* Named tab sections */}
-                                      {q.tab_sections!.map(section => {
-                                        const sectionQuestions = section.question_ids
-                                          .map(id => q.questions.find(qq => qq.id === id))
-                                          .filter(Boolean) as any[];
-                                        return (
-                                          <div key={section.id}>
-                                            <div className="px-4 py-1.5 bg-emerald-50/50 border-b border-stone-100">
-                                              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">📑 {section.label} ({sectionQuestions.length})</span>
-                                            </div>
-                                            <Droppable droppableId={`questions-${q.id}-${section.id}`}>
-                                              {(provided, dropSnapshot) => (
-                                                <div ref={provided.innerRef} {...provided.droppableProps}
-                                                  className={`min-h-[32px] transition-colors ${dropSnapshot.isDraggingOver ? 'bg-emerald-50/30' : ''}`}>
-                                                  {sectionQuestions.map((question: any, qIdx: number) => (
-                                                    <Draggable key={question.id} draggableId={question.id} index={qIdx}>
-                                                      {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, q.questions.indexOf(question))}
-                                                    </Draggable>
-                                                  ))}
-                                                  {provided.placeholder}
-                                                  {sectionQuestions.length === 0 && !dropSnapshot.isDraggingOver && (
-                                                    <p className="text-[10px] text-stone-300 italic text-center py-2">Drop questions here</p>
-                                                  )}
-                                                </div>
-                                              )}
-                                            </Droppable>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  ) : (
-                                    // Flat list (no tab sections)
-                                    <Droppable droppableId={`questions-${q.id}-general`}>
-                                      {(provided) => (
-                                        <div ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-stone-100">
-                                          {q.questions.map((question: any, qIdx: number) => (
-                                            <Draggable key={question.id} draggableId={question.id} index={qIdx}>
-                                              {(dragProvided, dragSnapshot) => renderQuestionRow(dragProvided, dragSnapshot, question, q, qIdx)}
-                                            </Draggable>
-                                          ))}
-                                          {provided.placeholder}
-                                        </div>
-                                      )}
-                                    </Droppable>
-                                  )}
-                                </DragDropContext>
-                              )}
-                            </div>
-                          )}
+                          {openSection === 'questions' && renderQuestionsPanel(q)}
                         </div>
                       )}
                     </Draggable>
