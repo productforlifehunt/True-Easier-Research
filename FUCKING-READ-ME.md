@@ -24,18 +24,22 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 
 
 
-## 6. RESEARCH PROJECT 
+## 5. RESEARCH PROJECT 
 
 Every study lives in the `research_project` table. and all layout information is stored in research_project.app_layout, no other file used or should be used
 
+## 6. USER PROFILE
+
+User role is defined in profile table
+
+
 ## 7. USER ROLE
 
-user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can only sumbit or can only join a research, a user can be both researcher and a participant (join other's research), the actual dashboard display logic is defined by user what he wants to get displayed
+user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can sumbit or can join a research, a user can be both researcher and a participant (join another researcher's research), the actual dashboard display logic is defined by user setting what he wants to get displayed
 
 
 
-
-## 8. QUESTIONNAIRE — A PROPER DATABASE TABLE
+## 8. QUESTIONNAIRE 
 
 Each questionnaire is a row in the `questionnaire` table in the `care_connector` schema. It belongs to one project and has a type field that determines its purpose:
 
@@ -43,11 +47,11 @@ Each questionnaire is a row in the `questionnaire` table in the `care_connector`
 - **consent** — A consent form with consent text and consent URL fields. The participant must agree before proceeding.
 - **screening** — A screening questionnaire containing questions that determine participant eligibility. Questions can have a disqualify value in their config that auto-rejects participants.
 
+REMEMBER NOT to use a seperate consent of screening table,they are also defined as questionnaire in this project
+
 Questionnaires are linked to participant types through the `questionnaire_participant_type` junction table — a many-to-many relationship. A questionnaire can be assigned to multiple participant types, and a participant type can have multiple questionnaires.
 
-Questions within a questionnaire are standard `survey_question` rows with their `questionnaire_id` FK pointing to the parent questionnaire.
 
----
 
 ## 9. QUESTIONS
 
@@ -62,7 +66,7 @@ Each question can have multiple options in the `question_option` table — used 
 
 ---
 
-## 10. PARTICIPANT TYPES — A PROPER DATABASE TABLE
+## 10. PARTICIPANT TYPES 
 
 Each participant type is a row in the `participant_type` table. It belongs to one project and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
