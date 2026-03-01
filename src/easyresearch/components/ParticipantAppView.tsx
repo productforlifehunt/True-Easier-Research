@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -34,6 +34,50 @@ const ParticipantAppView: React.FC = () => {
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
   const [selectedTimelineDay, setSelectedTimelineDay] = useState(2);
+  const [completedTodoIds, setCompletedTodoIds] = useState<Set<string>>(new Set());
+  const [submittedQuestionnaireIds, setSubmittedQuestionnaireIds] = useState<Set<string>>(new Set());
+
+  // Load persisted todo completions
+  useEffect(() => {
+    if (!projectId) return;
+    const stored = localStorage.getItem(`todo_completed_${projectId}`);
+    if (stored) {
+      try { setCompletedTodoIds(new Set(JSON.parse(stored))); } catch {}
+    }
+  }, [projectId]);
+
+  // Persist todo completions
+  const persistTodos = useCallback((ids: Set<string>) => {
+    setCompletedTodoIds(ids);
+    if (projectId) localStorage.setItem(`todo_completed_${projectId}`, JSON.stringify([...ids]));
+  }, [projectId]);
+
+  const handleToggleTodo = useCallback((cardId: string) => {
+    setCompletedTodoIds(prev => {
+      const next = new Set(prev);
+      if (next.has(cardId)) next.delete(cardId); else next.add(cardId);
+      if (projectId) localStorage.setItem(`todo_completed_${projectId}`, JSON.stringify([...next]));
+      return next;
+    });
+  }, [projectId]);
+
+  // Auto-complete todos linked to submitted questionnaires
+  useEffect(() => {
+    if (!layout || submittedQuestionnaireIds.size === 0) return;
+    const allElements = layout.tabs.flatMap(t => t.elements);
+    const todoElements = allElements.filter(e => e.type === 'todo_list');
+    let changed = false;
+    const next = new Set(completedTodoIds);
+    for (const el of todoElements) {
+      for (const card of (el.config.todo_cards || [])) {
+        if (card.completion_trigger === 'questionnaire_complete' && card.questionnaire_id && submittedQuestionnaireIds.has(card.questionnaire_id) && !next.has(card.id)) {
+          next.add(card.id);
+          changed = true;
+        }
+      }
+    }
+    if (changed) persistTodos(next);
+  }, [submittedQuestionnaireIds, layout]);
 
   useEffect(() => {
     if (projectId) loadProjectData();
@@ -174,6 +218,7 @@ const ParticipantAppView: React.FC = () => {
       }
 
       toast.success('Response submitted!');
+      setSubmittedQuestionnaireIds(prev => new Set([...prev, questionnaireId]));
       setActiveQuestionnaireId(null);
       setCurrentPageIndex(0);
 
@@ -268,6 +313,8 @@ const ParticipantAppView: React.FC = () => {
           if (!qConfig) return null;
           return renderQuestionnaireCard(qId);
         }}
+        completedTodoIds={completedTodoIds}
+        onToggleTodo={handleToggleTodo}
       />
     );
   };

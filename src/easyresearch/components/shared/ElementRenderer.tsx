@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import type { LayoutElement } from '../LayoutBuilder';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
+import TodoListElement from './TodoListElement';
 
 interface ElementRendererProps {
   el: LayoutElement;
@@ -19,6 +20,10 @@ interface ElementRendererProps {
   renderQuestionnaireCard: (qId: string, title: string) => React.ReactNode;
   /** Whether to stop event propagation */
   stopPropagation?: boolean;
+  /** Set of completed todo card IDs */
+  completedTodoIds?: Set<string>;
+  /** Toggle a todo card's completion */
+  onToggleTodo?: (cardId: string) => void;
 }
 
 /**
@@ -30,6 +35,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
   activeQuestionnaireId, compact = false,
   onOpenQuestionnaire, onSelectTimelineDay, renderQuestionnaireCard,
   stopPropagation = false,
+  completedTodoIds = new Set(), onToggleTodo,
 }) => {
   if (el.config.visible === false) return null;
 
@@ -336,43 +342,18 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       );
     }
 
-    case 'todo_list': {
-      const cards = el.config.todo_cards || [];
+    case 'todo_list':
       return (
-        <div className="space-y-2">
-          <h4 className={`${txt} font-semibold text-stone-800`}>✅ {el.config.title || 'To-Do'}</h4>
-          {cards.length === 0 ? (
-            <p className={`${txtSm} text-stone-400 italic`}>No tasks{compact ? ' configured' : ''}</p>
-          ) : (
-            <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}>
-              {cards.map((card, ci) => {
-                const isFirst = ci === 0;
-                const qTitle = card.type === 'questionnaire' ? (questionnaires?.find(q => q.id === card.questionnaire_id)?.title || 'Survey') : card.title;
-                return (
-                  <div key={card.id} className={`shrink-0 w-[85%] ${compact ? 'p-3.5' : 'p-4'} rounded-xl border shadow-sm transition-all`}
-                    style={{ scrollSnapAlign: 'start', backgroundColor: isFirst ? '#f0fdf4' : 'white', borderColor: isFirst ? '#86efac' : '#e7e5e4' }}
-                    onClick={card.type === 'questionnaire' && card.questionnaire_id ? wrap(() => onOpenQuestionnaire(card.questionnaire_id!)) : undefined}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`${compact ? 'text-[12px]' : 'text-[13px]'} font-semibold text-stone-800`}>{qTitle || 'Task'}</span>
-                      <span className={`${txtXx} ${compact ? 'px-1.5' : 'px-2'} py-0.5 rounded-full`} style={{ backgroundColor: isFirst ? '#dcfce7' : '#f5f5f4', color: isFirst ? '#16a34a' : '#a8a29e' }}>
-                        {isFirst ? 'Current' : compact && card.completion_trigger === 'time' ? 'Timed' : 'Upcoming'}
-                      </span>
-                    </div>
-                    {card.description && <p className={`${txtXs} text-stone-400`}>{card.description}</p>}
-                    {compact && card.type === 'questionnaire' && (
-                      <div className="mt-2 flex items-center gap-1">
-                        <ChevronRight size={10} className="text-emerald-500" />
-                        <span className="text-[10px] text-emerald-600 font-medium">Start</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <TodoListElement
+          el={el}
+          questionnaires={questionnaires}
+          compact={compact}
+          completedTodoIds={completedTodoIds}
+          onToggleTodo={onToggleTodo}
+          onOpenQuestionnaire={onOpenQuestionnaire}
+          stopPropagation={stopPropagation}
+        />
       );
-    }
 
     case 'text_block':
       return (

@@ -52,6 +52,8 @@ export interface LayoutElement {
       description?: string;
       completion_trigger?: 'manual' | 'time' | 'questionnaire_complete';
     }>;
+    todo_layout?: 'horizontal' | 'vertical';
+    todo_auto_scroll?: boolean;
     // Questionnaire tab sections
     tab_sections?: Array<{
       id: string;
@@ -542,6 +544,23 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             }} className="w-full py-1.5 text-[11px] text-emerald-600 border border-dashed border-emerald-300 rounded-lg hover:bg-emerald-50">
               + Add Card
             </button>
+
+            <label className="block text-[11px] font-medium text-stone-400 mt-3">Layout Direction</label>
+            <div className="flex gap-1.5">
+              {(['horizontal', 'vertical'] as const).map(dir => (
+                <button key={dir} onClick={() => updateElement(el.id, { todo_layout: dir })}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors ${(el.config.todo_layout || 'horizontal') === dir ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'border-stone-200 text-stone-400 hover:bg-stone-50'}`}>
+                  {dir === 'horizontal' ? 'Horizontal Scroll' : 'Vertical Stack'}
+                </button>
+              ))}
+            </div>
+
+            <label className="flex items-center gap-2 mt-2 text-[11px] text-stone-500 cursor-pointer">
+              <input type="checkbox" checked={el.config.todo_auto_scroll ?? false}
+                onChange={(e) => updateElement(el.id, { todo_auto_scroll: e.target.checked })}
+                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Auto-scroll to next unchecked
+            </label>
           </div>
         )}
 
