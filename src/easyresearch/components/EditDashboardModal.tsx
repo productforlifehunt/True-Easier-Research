@@ -40,14 +40,14 @@ const EditDashboardModal: React.FC<Props> = ({
   const visibleCount = config.tabs.filter(t => t.visible).length;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ pointerEvents: 'none' }}>
       {/* Click-away — transparent, no overlay */}
-      <div className="absolute inset-0" onClick={onClose} />
+      <div className="absolute inset-0" onClick={onClose} style={{ pointerEvents: 'auto' }} />
 
       {/* Card */}
       <div
-        className="relative w-full max-w-sm bg-white rounded-2xl max-h-[80vh] overflow-y-auto"
-        style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)' }}
+        className="relative w-full max-w-sm mx-4 bg-white rounded-2xl max-h-[80vh] overflow-y-auto"
+        style={{ boxShadow: '0 12px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04)', pointerEvents: 'auto' }}
       >
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 flex items-center justify-between px-5 pt-4 pb-3 border-b border-stone-100">
