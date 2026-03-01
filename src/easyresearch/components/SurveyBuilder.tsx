@@ -723,6 +723,7 @@ const SurveyBuilder: React.FC = () => {
             tab_sections: qc.tab_sections || null,
             display_mode: qc.display_mode || 'one_per_page',
             questions_per_page: qc.questions_per_page ?? null,
+            ai_chatbot_enabled: qc.ai_chatbot_enabled ?? false,
           };
           await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
 
