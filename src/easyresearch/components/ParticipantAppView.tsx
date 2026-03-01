@@ -358,7 +358,7 @@ const ParticipantAppView: React.FC = () => {
     const activeTab = layout?.tabs.find(t => t.id === currentTabId);
 
     return (
-      <div className="space-y-4 pb-6">
+      <div className="space-y-4 pb-2">
         <button type="button" onClick={() => { setActiveQuestionnaireId(null); setCurrentPageIndex(0); setActiveSectionId(null); }}
           className="flex items-center gap-1 text-[13px] text-stone-500 hover:text-stone-700">
           <ChevronLeft size={16} /> Back to {activeTab?.label || 'Home'}
@@ -795,9 +795,9 @@ const ParticipantAppView: React.FC = () => {
         })}
       </div>
 
-      <div className="px-4">
+      <div className="px-4 pb-4">
         {activeQuestionnaireId ? (
-          <div className="max-w-lg mx-auto py-4">
+          <div className="max-w-lg mx-auto py-3">
             {renderQuestionnaireExpanded(activeQuestionnaireId)}
           </div>
         ) : (

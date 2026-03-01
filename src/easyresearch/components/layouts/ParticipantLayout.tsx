@@ -71,7 +71,7 @@ const ParticipantLayout: React.FC = () => {
   // Default tabs for hub pages
   const defaultTabs = [
     { id: 'home', path: '/easyresearch/home', icon: Home, label: 'Home' },
-    { id: 'survey', path: projectId ? `/easyresearch/participant/${projectId}` : '/easyresearch/home', icon: FileText, label: 'Survey' },
+    { id: 'join', path: '/easyresearch/participant/join', icon: FileText, label: 'Join Study' },
     { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, label: 'Settings' }
   ];
 

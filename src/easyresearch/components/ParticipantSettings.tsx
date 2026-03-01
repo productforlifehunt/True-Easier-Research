@@ -122,11 +122,11 @@ const ParticipantSettings: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen pb-20 bg-stone-50/50">
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Settings</h1>
-          <p className="text-[13px] text-stone-400 font-light mt-1">Manage your profile and preferences</p>
+    <div className="pb-4 bg-stone-50/50">
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-stone-800 tracking-tight">Settings</h1>
+          <p className="text-[13px] text-stone-400 font-light mt-0.5">Manage your profile and preferences</p>
         </div>
 
         <SectionCard icon={User} title="Account">

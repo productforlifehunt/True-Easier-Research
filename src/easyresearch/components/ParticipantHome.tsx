@@ -199,12 +199,12 @@ const ParticipantHome: React.FC = () => {
 
   return (
     <>
-    <div className="min-h-screen pb-20 md:pb-8 bg-stone-50/50">
-      <div className="max-w-3xl mx-auto px-4 py-6">
+    <div className="pb-4 md:pb-8 bg-stone-50/50">
+      <div className="max-w-3xl mx-auto px-4 py-4">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Easier</h1>
-          <p className="text-[13px] text-stone-400 font-light mt-1">Participate in research or manage your studies</p>
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-stone-800 tracking-tight">Research Hub</h1>
+          <p className="text-[13px] text-stone-400 font-light mt-0.5">Participate in studies or create your own</p>
         </div>
 
         {/* Tabs */}
