@@ -447,6 +447,7 @@ const SurveyBuilder: React.FC = () => {
             disqualify_logic: qr.disqualify_logic,
             tab_sections: qr.tab_sections || undefined,
             display_mode: qr.display_mode || 'one_per_page',
+            questions_per_page: qr.questions_per_page ?? null,
           }));
 
           if (questionsData && mounted) {
@@ -695,6 +696,7 @@ const SurveyBuilder: React.FC = () => {
             disqualify_logic: qc.disqualify_logic || {},
             tab_sections: qc.tab_sections || null,
             display_mode: qc.display_mode || 'one_per_page',
+            questions_per_page: qc.questions_per_page ?? null,
           };
           await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
 
