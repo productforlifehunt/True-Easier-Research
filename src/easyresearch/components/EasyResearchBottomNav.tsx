@@ -8,17 +8,17 @@ const EasyResearchBottomNav: React.FC = () => {
   const location = useLocation();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
-  // Don't render for researcher dashboard pages
-  if (location.pathname.includes('/easyresearch/dashboard') || 
+  const shouldHide = location.pathname.includes('/easyresearch/dashboard') || 
       (location.pathname.includes('/easyresearch/project/') && !location.pathname.includes('/mobile/edit/') && !location.pathname.includes('/responses')) ||
       location.pathname === '/easyresearch/responses' ||
       location.pathname.includes('/easyresearch/analytics') ||
       (location.pathname === '/easyresearch/settings') ||
-      (location.pathname === '/easyresearch/create')) {
-    return null;
-  }
+      (location.pathname === '/easyresearch/create') ||
+      // Hide when ParticipantAppView renders its own layout-based nav
+      !!location.pathname.match(/\/easyresearch\/participant\/[^\/]+$/);
 
   useEffect(() => {
+    if (shouldHide) return;
     const getActiveProject = async () => {
       const urlProjectId = location.pathname.match(/\/participant\/([^\/]+)/)?.[1];
       if (urlProjectId) { setActiveProjectId(urlProjectId); return; }
@@ -29,7 +29,9 @@ const EasyResearchBottomNav: React.FC = () => {
       }
     };
     getActiveProject();
-  }, [location]);
+  }, [location, shouldHide]);
+
+  if (shouldHide) return null;
 
   const tabs = [
     { id: 'home', path: '/easyresearch', icon: Home, label: 'Home' },

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase, authClient } from '../../lib/supabase';
-import OneTimeSurveyView from './OneTimeSurveyView';
-import LongitudinalSurveyView from './LongitudinalSurveyView';
+import ParticipantAppView from './ParticipantAppView';
 import ParticipantSurveyView from './ParticipantSurveyView';
 import ConsentModal from './ConsentModal';
 
@@ -175,11 +174,10 @@ const SurveyViewRouter: React.FC = () => {
     if (instanceId) {
       return <ParticipantSurveyView />;
     }
-    // Otherwise show the timeline/dashboard view
-    return <LongitudinalSurveyView />;
   }
 
-  return <OneTimeSurveyView />;
+  // Use the layout-based app view for all project types
+  return <ParticipantAppView />;
 };
 
 export default SurveyViewRouter;
