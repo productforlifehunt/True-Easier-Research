@@ -25,11 +25,12 @@ const LandingPage: React.FC = () => {
   ];
 
   const aiFeatures = [
-    { icon: Sparkles, title: t('ai.projectBuilder'), desc: t('ai.projectBuilder.desc'), color: 'violet' },
-    { icon: Wand2, title: t('ai.autoAnswer'), desc: t('ai.autoAnswer.desc'), color: 'purple' },
-    { icon: Bot, title: t('ai.chatbot'), desc: t('ai.chatbot.desc'), color: 'indigo' },
-    { icon: Mic, title: t('ai.voiceInput'), desc: t('ai.voiceInput.desc'), color: 'orange' },
-    { icon: MessageCircle, title: t('ai.assist'), desc: t('ai.assist.desc'), color: 'blue' },
+    { icon: Sparkles, title: 'Create with AI', desc: 'Describe your research in plain language and AI builds the entire project — questionnaires, questions, options, and logic — in seconds. No manual setup needed.' },
+    { icon: Wand2, title: 'Edit with AI', desc: 'Chat with AI to restructure surveys, add questions, change types, or rewrite options. Just say "add 5 demographic questions" and it\'s done.' },
+    { icon: Bot, title: 'AI Survey Chatbot', desc: 'Participants chat naturally with an AI assistant that understands the entire questionnaire and fills answers from the conversation — like a guided interview.' },
+    { icon: Mic, title: 'Voice-Powered Input', desc: 'Speak answers instead of typing. Perfect for accessibility, elderly participants, or mobile-first studies. Works with all question types.' },
+    { icon: MessageCircle, title: 'AI Assist & Auto-Answer', desc: 'AI predicts likely responses for participants to review. Contextual help explains questions. Text answers get enhanced for clarity and detail.' },
+    { icon: PieChart, title: 'AI-Ready Analytics', desc: 'Collect richer, more complete data with AI assistance. Higher completion rates, fewer blank fields, and natural language responses that are easier to analyze.' },
   ];
 
   const useCases = [
@@ -134,18 +135,18 @@ const LandingPage: React.FC = () => {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-600 text-[12px] font-semibold mb-4">
-              <Sparkles size={12} /> AI-Powered
+              <Sparkles size={12} /> AI-Powered Research
             </div>
             <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
-              {t('landing.ai.title')}
+              Create, edit, and analyze — all with AI
             </h2>
-            <p className="text-[17px] text-stone-400 max-w-md mx-auto font-light">
-              {t('landing.ai.subtitle')}
+            <p className="text-[17px] text-stone-400 max-w-lg mx-auto font-light">
+              From building your research to collecting responses, AI handles the heavy lifting. Researchers design with AI. Participants answer with AI. Everyone saves time.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {aiFeatures.map((f, i) => (
-              <div key={i} className={`rounded-2xl p-6 bg-white/80 border border-stone-100 hover:border-violet-200 hover:shadow-md hover:shadow-violet-50 transition-all group cursor-default ${i === 0 ? 'sm:col-span-2 lg:col-span-1' : ''}`}>
+              <div key={i} className="rounded-2xl p-6 bg-white/80 border border-stone-100 hover:border-violet-200 hover:shadow-md hover:shadow-violet-50 transition-all group cursor-default">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 flex items-center justify-center mb-4 group-hover:from-violet-100 group-hover:to-purple-100 transition-colors">
                   <f.icon size={18} className="text-violet-600" strokeWidth={1.5} />
                 </div>
@@ -153,6 +154,14 @@ const LandingPage: React.FC = () => {
                 <p className="text-[13px] text-stone-400 leading-relaxed font-light">{f.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-10">
+            <button
+              onClick={() => navigate('/easyresearch/auth')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[14px] font-medium rounded-full hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-violet-200/50"
+            >
+              <Sparkles size={14} /> Try AI-Powered Research
+            </button>
           </div>
         </div>
       </section>

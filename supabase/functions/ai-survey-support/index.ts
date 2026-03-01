@@ -317,6 +317,98 @@ ${currentProject ? `\nCurrent project data:\n${JSON.stringify(currentProject, nu
         )
       }
 
+      case 'ai_edit_project': {
+        // Researcher AI editor — modifies questionnaires/questions via chat
+        if (!messages || !Array.isArray(messages)) {
+          throw new Error('Missing messages for ai_edit_project action')
+        }
+        const projectStructure = body.projectStructure
+
+        const structureSummary = (projectStructure?.questionnaires || []).map((q: any, qi: number) => {
+          const qSummary = (q.questions || []).map((qu: any, i: number) => {
+            const opts = qu.options?.join(', ')
+            return `  Q${i + 1} [id:${qu.id}] (${qu.question_type}${qu.required ? ', required' : ''}): "${qu.question_text}"${opts ? ` | Options: [${opts}]` : ''}`
+          }).join('\n')
+          return `Questionnaire "${q.title}" [id:${q.id}] (${q.type || 'survey'}):\n${qSummary || '  (no questions)'}`
+        }).join('\n\n')
+
+        systemPrompt = `You are an expert research editor AI. You help researchers modify their existing research projects through natural language instructions.
+
+PROJECT: "${projectStructure?.title || 'Untitled'}"
+
+CURRENT STRUCTURE:
+${structureSummary || 'Empty project'}
+
+YOUR CAPABILITIES:
+When you want to make changes, include a JSON block:
+<<<EDIT_COMMANDS>>>
+[
+  {"action": "add_question", "questionnaire_id": "uuid", "data": {"question_text": "...", "question_type": "text_short|single_choice|multiple_choice|likert_scale|nps|rating|slider|yes_no|number|date|dropdown|text_long|checkbox_group|bipolar_scale|matrix|ranking", "required": true, "options": ["opt1", "opt2"], "question_config": {}}},
+  {"action": "edit_question", "question_id": "uuid", "data": {"question_text": "new text", "question_type": "new_type", "required": true, "options": ["new opts"]}},
+  {"action": "delete_question", "question_id": "uuid"},
+  {"action": "add_questionnaire", "data": {"title": "...", "description": "...", "type": "survey", "questions": [...]}},
+  {"action": "edit_questionnaire", "questionnaire_id": "uuid", "data": {"title": "new title", "description": "new desc"}}
+]
+<<<END_EDIT>>>
+
+RULES:
+- Always explain what you're doing in natural language BEFORE the edit block.
+- Use real question IDs from the structure above when editing/deleting.
+- When adding questions, target the correct questionnaire_id.
+- You can make multiple edits at once.
+- For choice questions, always include options array.
+- For likert_scale, set question_config.scale_type (e.g., "1-5", "1-7").
+- For slider, set question_config.min_value, max_value, step.
+- Be specific about changes and confirm them.
+- If the user's instruction is ambiguous, ask for clarification.`
+
+        const fullMsgs = [{ role: 'system', content: systemPrompt }, ...messages]
+
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://easierresearch.app',
+            'X-Title': 'Easier Research AI'
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3-27b-it',
+            messages: fullMsgs,
+            temperature: 0.7,
+            max_tokens: 4000
+          })
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('OpenRouter API error:', errorText)
+          throw new Error(`OpenRouter API failed: ${response.status}`)
+        }
+
+        const aiResponse = await response.json()
+        const aiMessage = aiResponse.choices?.[0]?.message?.content?.trim() || ''
+
+        let editCommands: any[] = []
+        const editMatch = aiMessage.match(/<<<EDIT_COMMANDS>>>([\s\S]*?)<<<END_EDIT>>>/)
+        if (editMatch) {
+          try {
+            editCommands = JSON.parse(editMatch[1].trim())
+          } catch (e) {
+            console.error('Failed to parse edit commands:', e)
+          }
+        }
+
+        const displayMessage = aiMessage
+          .replace(/<<<EDIT_COMMANDS>>>[\s\S]*?<<<END_EDIT>>>/g, '')
+          .trim()
+
+        return new Response(
+          JSON.stringify({ response: displayMessage, editCommands }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         throw new Error(`Unknown action: ${action}`)
     }
