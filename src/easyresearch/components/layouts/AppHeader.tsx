@@ -34,19 +34,20 @@ const AppHeader: React.FC = () => {
     return location.pathname === path;
   };
 
-  const navItems: Array<{ path: string; label: string }> = [
-    { path: '/easyresearch/templates', label: 'Templates' },
-  ];
+  const navItems: Array<{ path: string; label: string }> = [];
   if (user) {
-    navItems.unshift({ path: '/easyresearch/dashboard', label: 'Projects' });
     navItems.push({ path: '/easyresearch/home', label: 'My Studies' });
+    navItems.push({ path: '/easyresearch/participant/join', label: 'Discover' });
+    navItems.push({ path: '/easyresearch/templates', label: 'Templates' });
+  } else {
+    navItems.push({ path: '/easyresearch/templates', label: 'Templates' });
   }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
-          <Link to={user ? '/easyresearch/dashboard' : '/easyresearch'} className="flex items-center gap-2.5 group">
+          <Link to={user ? '/easyresearch/home' : '/easyresearch'} className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
               <span className="text-white text-sm font-bold tracking-tight">E</span>
             </div>
@@ -78,19 +79,14 @@ const AppHeader: React.FC = () => {
                   <div className="absolute top-full right-0 mt-1.5 w-52 bg-white rounded-xl shadow-lg shadow-stone-200/60 border border-stone-100 py-1.5">
                     <div className="px-3.5 py-2.5 border-b border-stone-100">
                       <p className="text-[13px] font-medium text-stone-800 truncate">{user.email}</p>
-                      <p className="text-[11px] text-stone-400 mt-0.5">Researcher</p>
                     </div>
-                    <Link to="/easyresearch/dashboard" onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
-                      Dashboard
-                    </Link>
                     <Link to="/easyresearch/home" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
                       My Studies
                     </Link>
                     <Link to="/easyresearch/participant/join" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
-                      Discover Studies
+                      Discover
                     </Link>
                     <Link to="/easyresearch/settings" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
