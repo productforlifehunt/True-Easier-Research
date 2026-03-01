@@ -29,7 +29,7 @@ const EasyResearchAuth: React.FC = () => {
           if (data || currentUser.user_metadata?.role === 'researcher') {
             navigate('/easyresearch/dashboard', { replace: true });
           } else {
-            navigate('/easyresearch/home', { replace: true });
+            navigate('/easyresearch/dashboard', { replace: true });
           }
         });
     }
@@ -79,7 +79,7 @@ const EasyResearchAuth: React.FC = () => {
         if (researcher || user.user_metadata?.role === 'researcher') {
           navigate(redirectTarget ?? '/easyresearch/dashboard', { replace: true });
         } else {
-          navigate(redirectTarget ?? '/easyresearch', { replace: true });
+          navigate(redirectTarget ?? '/easyresearch/dashboard', { replace: true });
         }
       }
     } catch (err: any) { setError(err.message); }

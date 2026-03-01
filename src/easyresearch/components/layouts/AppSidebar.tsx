@@ -22,7 +22,7 @@ const AppSidebar: React.FC = () => {
     { path: '/easyresearch/participants', label: 'Participants', icon: Users },
     { path: '/easyresearch/responses', label: 'Responses', icon: FileText },
     { path: '/easyresearch/settings', label: 'Settings', icon: Settings },
-    { path: '/easyresearch/home', label: 'Browse & Participate', icon: Search },
+    { path: '/easyresearch/participant/join', label: 'Browse & Participate', icon: Search },
   ];
 
   const isActive = (path: string) => {

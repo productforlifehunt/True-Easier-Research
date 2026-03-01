@@ -137,7 +137,7 @@ const ParticipantJoin: React.FC = () => {
                 className="flex-1 px-5 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all">
                 {joining ? <Loader2 className="animate-spin" size={16} /> : <><CheckCircle size={16} /> Accept & Join</>}
               </button>
-              <button onClick={() => navigate('/easyresearch/home')}
+              <button onClick={() => navigate('/easyresearch/dashboard')}
                 className="px-5 py-3 rounded-xl text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
                 Decline
               </button>

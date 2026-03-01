@@ -29,14 +29,16 @@ const AppHeader: React.FC = () => {
 
   const isActive = (path: string) => {
     if (path === '/easyresearch/dashboard') {
-      return location.pathname === path || location.pathname.startsWith('/easyresearch/project/');
+      return location.pathname === path || 
+        location.pathname === '/easyresearch/home' ||
+        location.pathname.startsWith('/easyresearch/project/');
     }
     return location.pathname === path;
   };
 
   const navItems: Array<{ path: string; label: string }> = [];
   if (user) {
-    navItems.push({ path: '/easyresearch/home', label: 'My Studies' });
+    navItems.push({ path: '/easyresearch/dashboard', label: 'My Studies' });
     navItems.push({ path: '/easyresearch/participant/join', label: 'Discover' });
     navItems.push({ path: '/easyresearch/templates', label: 'Templates' });
   } else {
@@ -47,7 +49,7 @@ const AppHeader: React.FC = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
-          <Link to={user ? '/easyresearch/home' : '/easyresearch'} className="flex items-center gap-2.5 group">
+          <Link to={user ? '/easyresearch/dashboard' : '/easyresearch'} className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
               <span className="text-white text-sm font-bold tracking-tight">E</span>
             </div>
@@ -80,7 +82,7 @@ const AppHeader: React.FC = () => {
                     <div className="px-3.5 py-2.5 border-b border-stone-100">
                       <p className="text-[13px] font-medium text-stone-800 truncate">{user.email}</p>
                     </div>
-                    <Link to="/easyresearch/home" onClick={() => setShowUserMenu(false)}
+                    <Link to="/easyresearch/dashboard" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
                       My Studies
                     </Link>
