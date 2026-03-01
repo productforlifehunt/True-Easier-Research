@@ -50,10 +50,8 @@ const AppHeader: React.FC = () => {
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to={user ? '/easyresearch/dashboard' : '/easyresearch'} className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-              <span className="text-white text-sm font-bold tracking-tight">E</span>
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight text-stone-800">Easier</span>
+            <img src="/favicon.svg" alt="Easier Research" className="w-7 h-7" />
+            <span className="text-[15px] font-semibold tracking-tight text-stone-800">Easier Research</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">

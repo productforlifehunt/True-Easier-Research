@@ -31,11 +31,9 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
     <div className="min-h-screen md:flex" style={{ backgroundColor: '#f9faf8' }}>
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-            <span className="text-white text-[11px] font-bold">E</span>
-          </div>
-          <span className="font-bold text-stone-800">Easier</span>
+          <div className="flex items-center gap-2">
+          <img src="/favicon.svg" alt="Easier Research" className="w-6 h-6" />
+          <span className="font-bold text-stone-800">Easier Research</span>
         </div>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -78,11 +76,9 @@ const EasierResearchLayout: React.FC<{ children: React.ReactNode }> = ({ childre
       <div className="hidden md:flex w-64 bg-white shadow-sm flex-col" style={{ borderRight: '1px solid rgba(16,185,129,0.08)' }}>
         <div className="p-6 flex flex-col flex-1">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-              <span className="text-white text-sm font-bold">E</span>
-            </div>
+            <img src="/favicon.svg" alt="Easier Research" className="w-8 h-8" />
             <div>
-              <h2 className="font-bold text-lg text-stone-800">Easier</h2>
+              <h2 className="font-bold text-lg text-stone-800">Easier Research</h2>
               <p className="text-xs text-stone-400">Research Platform</p>
             </div>
           </div>
