@@ -16789,6 +16789,7 @@ export type Database = {
           promotion_ends_at: string | null
           rating_average: number | null
           rating_count: number | null
+          refund_conditions: string | null
           slug: string
           sold_through_us: boolean | null
           specific_attributes: Json | null
@@ -16832,6 +16833,7 @@ export type Database = {
           promotion_ends_at?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          refund_conditions?: string | null
           slug: string
           sold_through_us?: boolean | null
           specific_attributes?: Json | null
@@ -16875,6 +16877,7 @@ export type Database = {
           promotion_ends_at?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          refund_conditions?: string | null
           slug?: string
           sold_through_us?: boolean | null
           specific_attributes?: Json | null
