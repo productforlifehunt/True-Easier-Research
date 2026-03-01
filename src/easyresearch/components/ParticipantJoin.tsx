@@ -86,10 +86,10 @@ const ParticipantJoin: React.FC = () => {
 
   if (project) {
     return (
-      <div className="min-h-screen bg-stone-50/50">
-        <div className="max-w-lg mx-auto p-6 pt-16">
-          <div className="bg-white rounded-2xl border border-stone-100 p-8 shadow-sm">
-            <div className="text-center mb-8">
+      <div className="bg-stone-50/50">
+        <div className="max-w-lg mx-auto p-4 pt-4">
+          <div className="bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">
+            <div className="text-center mb-6">
               <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
                 <Users size={24} className="text-emerald-500" />
               </div>
@@ -117,9 +117,9 @@ const ParticipantJoin: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50/50">
-      <div className="max-w-sm mx-auto p-6 pt-16">
-        <div className="bg-white rounded-2xl border border-stone-100 p-8 shadow-sm">
+    <div className="bg-stone-50/50">
+      <div className="max-w-sm mx-auto p-4 pt-4">
+        <div className="bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
               <KeyRound size={24} className="text-emerald-500" />
