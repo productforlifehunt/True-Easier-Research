@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { useDashboardConfig } from '../hooks/useDashboardConfig';
+import EditDashboardModal from './EditDashboardModal';
 
 interface StudyItem {
   id: string;
@@ -21,7 +23,22 @@ const ParticipantHome: React.FC = () => {
   const { user } = useAuth();
   const [studies, setStudies] = useState<StudyItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'owner' | 'participant'>('all');
+  const [editOpen, setEditOpen] = useState(false);
+
+  const {
+    config, roles, visibleTabs,
+    reorderTabs, toggleTabVisibility, toggleNewStudyButton,
+    updateRoles, resetConfig,
+  } = useDashboardConfig();
+
+  const [activeTab, setActiveTab] = useState<string>('all');
+
+  // Ensure activeTab is always a visible tab
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.find(t => t.id === activeTab)) {
+      setActiveTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab]);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
@@ -30,14 +47,12 @@ const ParticipantHome: React.FC = () => {
 
   const loadAllStudies = async () => {
     try {
-      // First look up the researcher profile ID for this auth user
       const { data: researcher } = await supabase
         .from('researcher')
         .select('id')
         .eq('user_id', user!.id)
         .maybeSingle();
 
-      // Load owned projects (using researcher profile id) and enrollments in parallel
       const [ownedRes, enrolledRes] = await Promise.all([
         researcher
           ? supabase
@@ -55,12 +70,10 @@ const ParticipantHome: React.FC = () => {
 
       const items: StudyItem[] = [];
 
-      // Add owned projects
       if (ownedRes.data) {
         for (const p of ownedRes.data) {
           items.push({
-            id: p.id,
-            project_id: p.id,
+            id: p.id, project_id: p.id,
             title: p.title || 'Untitled Study',
             description: p.description || '',
             project_type: p.project_type || 'survey',
@@ -71,28 +84,23 @@ const ParticipantHome: React.FC = () => {
         }
       }
 
-      // Add enrolled studies (skip if also owner)
       if (enrolledRes.data && enrolledRes.data.length > 0) {
         const ownedIds = new Set(items.map(i => i.project_id));
         const enrolledProjectIds = Array.from(
           new Set((enrolledRes.data as any[]).map(e => e.project_id).filter((id: string) => !ownedIds.has(id)))
         );
-
         if (enrolledProjectIds.length > 0) {
           const { data: projects } = await supabase
             .from('research_project')
             .select('id, title, description, project_type, study_duration, status')
             .in('id', enrolledProjectIds);
-
           const projectMap = new Map((projects || []).map((p: any) => [p.id, p]));
-
           for (const e of enrolledRes.data as any[]) {
             if (ownedIds.has(e.project_id)) continue;
             const p = projectMap.get(e.project_id);
             if (!p) continue;
             items.push({
-              id: e.id,
-              project_id: e.project_id,
+              id: e.id, project_id: e.project_id,
               title: p.title || 'Untitled Study',
               description: p.description || '',
               project_type: p.project_type || 'survey',
@@ -113,6 +121,26 @@ const ParticipantHome: React.FC = () => {
     }
   };
 
+  const filtered = useMemo(() => {
+    switch (activeTab) {
+      case 'drafts':
+        return studies.filter(s => s.role === 'owner' && s.status === 'draft');
+      case 'published':
+        return studies.filter(s => s.role === 'owner' && s.status !== 'draft');
+      case 'joined':
+        return studies.filter(s => s.role === 'participant');
+      default:
+        return studies;
+    }
+  }, [studies, activeTab]);
+
+  const tabCounts = useMemo(() => ({
+    all: studies.length,
+    drafts: studies.filter(s => s.role === 'owner' && s.status === 'draft').length,
+    published: studies.filter(s => s.role === 'owner' && s.status !== 'draft').length,
+    joined: studies.filter(s => s.role === 'participant').length,
+  }), [studies]);
+
   const handleStudyClick = (study: StudyItem) => {
     if (study.role === 'owner') {
       navigate(`/easyresearch/project/${study.project_id}`);
@@ -130,10 +158,8 @@ const ParticipantHome: React.FC = () => {
           </div>
           <h1 className="text-lg font-bold text-stone-800 mb-1">Sign in to get started</h1>
           <p className="text-[13px] text-stone-400 mb-5">Create or join research studies</p>
-          <button
-            onClick={() => navigate('/easyresearch/auth')}
-            className="px-6 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
-          >
+          <button onClick={() => navigate('/easyresearch/auth')}
+            className="px-6 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500">
             Sign In
           </button>
         </div>
@@ -149,14 +175,10 @@ const ParticipantHome: React.FC = () => {
     );
   }
 
-  const filtered = filter === 'all' ? studies : studies.filter(s => s.role === filter);
-  const ownerCount = studies.filter(s => s.role === 'owner').length;
-  const participantCount = studies.filter(s => s.role === 'participant').length;
-
   return (
     <div className="bg-stone-50/50">
       <div className="max-w-lg mx-auto px-4 py-4">
-        {/* Header with Create button */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-bold text-stone-800 tracking-tight">My Studies</h1>
@@ -164,31 +186,40 @@ const ParticipantHome: React.FC = () => {
               {studies.length} {studies.length === 1 ? 'study' : 'studies'}
             </p>
           </div>
-          <button
-            onClick={() => navigate('/easyresearch/create-survey')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200 hover:shadow-md transition-all"
-          >
-            <Plus size={14} /> New Study
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-medium text-stone-500 bg-white border border-stone-100 hover:border-stone-200 transition-all"
+            >
+              <SlidersHorizontal size={13} /> Edit
+            </button>
+            {config.showNewStudyButton && (
+              <button
+                onClick={() => navigate('/easyresearch/create-survey')}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200 hover:shadow-md transition-all"
+              >
+                <Plus size={14} /> New Study
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Role filter pills */}
-        <div className="flex gap-1.5 mb-4">
-          {[
-            { key: 'all' as const, label: 'All', count: studies.length },
-            { key: 'owner' as const, label: 'Owner', count: ownerCount },
-            { key: 'participant' as const, label: 'Participant', count: participantCount },
-          ].map(f => (
+        {/* Configurable tabs */}
+        <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar">
+          {visibleTabs.map(tab => (
             <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${
-                filter === f.key
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors whitespace-nowrap ${
+                activeTab === tab.id
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-100'
               }`}
             >
-              {f.label} <span className="ml-0.5 opacity-60">{f.count}</span>
+              {tab.label}
+              <span className="ml-1 opacity-60">
+                {tabCounts[tab.id as keyof typeof tabCounts] ?? 0}
+              </span>
             </button>
           ))}
         </div>
@@ -205,14 +236,9 @@ const ParticipantHome: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-[14px] font-semibold text-stone-800 truncate">
-                        {study.title}
-                      </h3>
-                      {/* Role badge */}
+                      <h3 className="text-[14px] font-semibold text-stone-800 truncate">{study.title}</h3>
                       <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                        study.role === 'owner'
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'bg-amber-50 text-amber-600'
+                        study.role === 'owner' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
                       }`}>
                         {study.role === 'owner' ? (
                           <span className="flex items-center gap-0.5"><FlaskConical size={9} /> Owner</span>
@@ -237,9 +263,7 @@ const ParticipantHome: React.FC = () => {
                   }`}>
                     {study.status}
                   </span>
-                  <span className="text-[10px] text-stone-400">
-                    {study.project_type}
-                  </span>
+                  <span className="text-[10px] text-stone-400">{study.project_type}</span>
                   {study.study_duration && (
                     <span className="text-[10px] text-stone-400 flex items-center gap-0.5">
                       <Clock size={9} /> {study.study_duration}d
@@ -255,20 +279,33 @@ const ParticipantHome: React.FC = () => {
               <Search size={22} className="text-stone-300" />
             </div>
             <h2 className="text-[14px] font-semibold text-stone-700 mb-1">
-              {filter === 'all' ? 'No studies yet' : `No ${filter} studies`}
+              {activeTab === 'all' ? 'No studies yet' : `No ${visibleTabs.find(t => t.id === activeTab)?.label?.toLowerCase() || 'studies'}`}
             </h2>
             <p className="text-[12px] text-stone-400 font-light mb-4">
-              {filter === 'participant' ? 'Join studies from the Discover tab' : 'Create your first research study'}
+              {activeTab === 'joined' ? 'Join studies from the Discover tab' : 'Create your first research study'}
             </p>
             <button
-              onClick={() => filter === 'participant' ? navigate('/easyresearch/participant/join') : navigate('/easyresearch/create-survey')}
+              onClick={() => activeTab === 'joined' ? navigate('/easyresearch/participant/join') : navigate('/easyresearch/create-survey')}
               className="px-5 py-2 rounded-full text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
             >
-              {filter === 'participant' ? 'Find Studies' : 'Create Study'}
+              {activeTab === 'joined' ? 'Find Studies' : 'Create Study'}
             </button>
           </div>
         )}
       </div>
+
+      {/* Edit Dashboard Modal */}
+      <EditDashboardModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        config={config}
+        roles={roles}
+        onToggleTab={toggleTabVisibility}
+        onReorder={reorderTabs}
+        onToggleNewStudy={toggleNewStudyButton}
+        onUpdateRoles={updateRoles}
+        onReset={resetConfig}
+      />
     </div>
   );
 };
