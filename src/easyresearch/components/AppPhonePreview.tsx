@@ -353,10 +353,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   };
 
   // ── The phone frame ──
-  const bottomNavHeight = 56;
+  // Match ParticipantAppView: top horizontal tabs, no bottom nav
+  const tabBarHeight = layout.bottom_nav.length > 1 ? 36 : 0;
   const headerHeight = layout.show_header ? 44 : 0;
   const notchHeight = 28;
-  const contentHeight = frameHeight - bottomNavHeight - headerHeight - notchHeight;
 
   const phoneContent = (
     <div className="rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
@@ -372,6 +372,29 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           </h1>
         </div>
       )}
+      {/* Top horizontal tab bar — matches ParticipantAppView */}
+      {layout.bottom_nav.length > 1 && (
+        <div className="flex-shrink-0 bg-white/95 backdrop-blur-sm border-b border-stone-100">
+          <div className="flex gap-0.5 px-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {layout.bottom_nav.map(nav => {
+              const IconComp = ICON_MAP[nav.icon] || Home;
+              const isActive = currentTabId === nav.tab_id;
+              return (
+                <button key={nav.tab_id} type="button"
+                  onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
+                  className="flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium transition-all shrink-0 border-b-2"
+                  style={{
+                    borderColor: isActive ? primaryColor : 'transparent',
+                    color: isActive ? primaryColor : '#a8a29e',
+                  }}>
+                  <IconComp size={13} />
+                  {nav.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {/* Content */}
       <div className="flex-1 px-4 overflow-y-auto" style={{ minHeight: 0 }}>
         {activeQuestionnaireId ? (
@@ -381,20 +404,6 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         ) : (
           renderElements()
         )}
-      </div>
-      {/* Bottom Nav */}
-      <div className="flex-shrink-0 border-t border-stone-200/50 flex items-center justify-around px-4 bg-white" style={{ height: `${bottomNavHeight}px` }}>
-        {layout.bottom_nav.map(nav => {
-          const IconComp = ICON_MAP[nav.icon] || Home;
-          const isActive = currentTabId === nav.tab_id;
-          return (
-            <button key={nav.tab_id} type="button" onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-              className="flex flex-col items-center gap-0.5 cursor-pointer">
-              <IconComp size={18} style={{ color: isActive ? primaryColor : '#a8a29e' }} />
-              <span className="text-[9px] font-medium" style={{ color: isActive ? primaryColor : '#a8a29e' }}>{nav.label}</span>
-            </button>
-          );
-        })}
       </div>
     </div>
   );
