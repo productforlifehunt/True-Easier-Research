@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
 // EasyResearch Platform Components
@@ -8,7 +8,7 @@ import ParticipantLayout from './components/ParticipantLayout';
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const ParticipantHome = lazy(() => import('./components/ParticipantHome'));
-const ResearcherDashboard = lazy(() => import('./components/ResearcherDashboard'));
+// ResearcherDashboard removed - unified into ParticipantHome
 const SurveyBuilder = lazy(() => import('./components/SurveyBuilder'));
 const MobileSurveyEditor = lazy(() => import('./components/MobileSurveyEditor'));
 const ParticipantSurveyView = lazy(() => import('./components/ParticipantSurveyView'));
@@ -45,8 +45,8 @@ function App() {
               <Route path="/landing" element={<LandingPage />} />
               <Route path="/auth" element={<EasyResearchAuth />} />
               
-              {/* Researcher Routes */}
-              <Route path="/dashboard" element={<ResearcherDashboard />} />
+              {/* Redirect old dashboard to unified home */}
+              <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               <Route path="/project/:projectId" element={<SurveyBuilder />} />
               <Route path="/mobile/edit/:projectId" element={<MobileSurveyEditor />} />
               <Route path="/create" element={<ResearcherDashboard />} />
