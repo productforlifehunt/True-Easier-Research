@@ -177,7 +177,7 @@ function App() {
               }>
                 <Routes>
                   {/* Dementia Caregiver Survey Routes */}
-                  <Route path="/" element={<Homepage />} />
+                  <Route path="/" element={<Navigate to="/easyresearch" replace />} />
                   <Route path="/home" element={<Homepage />} />
                   <Route path="/survey" element={<Timeline />} />
                   <Route path="/timeline" element={<Timeline />} />
