@@ -16760,6 +16760,7 @@ export type Database = {
           affiliate_enabled: boolean | null
           affiliate_percentage: number | null
           category_id: string | null
+          company_detail: string | null
           compare_to: string | null
           created_at: string
           current_price: number | null
@@ -16802,6 +16803,7 @@ export type Database = {
           affiliate_enabled?: boolean | null
           affiliate_percentage?: number | null
           category_id?: string | null
+          company_detail?: string | null
           compare_to?: string | null
           created_at?: string
           current_price?: number | null
@@ -16844,6 +16846,7 @@ export type Database = {
           affiliate_enabled?: boolean | null
           affiliate_percentage?: number | null
           category_id?: string | null
+          company_detail?: string | null
           compare_to?: string | null
           created_at?: string
           current_price?: number | null
