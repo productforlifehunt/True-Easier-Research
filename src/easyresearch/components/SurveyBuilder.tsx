@@ -519,15 +519,35 @@ const SurveyBuilder: React.FC = () => {
 
         // Load questionnaire configs from template (in-memory only, saved to tables on save)
         const templateQConfigs = settings?.questionnaire_configs || [];
-        let qConfigs: QuestionnaireConfig[] = templateQConfigs.map((c: any) => ({ ...c, questionnaire_type: c.questionnaire_type || 'survey' }));
+
+        // CRITICAL: Template uses string IDs like 'esm-hourly-log' but DB requires UUIDs.
+        // Build a mapping from template string IDs → proper UUIDs.
+        const templateIdToUuid = new Map<string, string>();
+        templateQConfigs.forEach((c: any) => {
+          templateIdToUuid.set(c.id, crypto.randomUUID());
+        });
+
+        let qConfigs: QuestionnaireConfig[] = templateQConfigs.map((c: any) => ({
+          ...c,
+          id: templateIdToUuid.get(c.id) || crypto.randomUUID(), // Replace string ID with UUID
+          questionnaire_type: c.questionnaire_type || 'survey',
+        }));
+
         if (qConfigs.length > 0 && builtQuestions.length > 0) {
           const qMap = new Map<string, any[]>();
           qConfigs.forEach(qc => qMap.set(qc.id, []));
+
           for (const q of builtQuestions) {
-            const qId = q.question_config?.questionnaire_id;
-            if (qId && qMap.has(qId)) {
-              qMap.get(qId)!.push(q);
+            // Match question to questionnaire using the TEMPLATE string ID, then remap to UUID
+            const templateQId = q.question_config?.questionnaire_id;
+            const realQId = templateQId ? templateIdToUuid.get(templateQId) : undefined;
+            if (realQId && qMap.has(realQId)) {
+              // Update question_config to use the real UUID
+              q.question_config = { ...q.question_config, questionnaire_id: realQId };
+              qMap.get(realQId)!.push(q);
             } else {
+              // Fallback: assign to first questionnaire
+              q.question_config = { ...q.question_config, questionnaire_id: qConfigs[0].id };
               qMap.get(qConfigs[0].id)!.push(q);
             }
           }
@@ -558,12 +578,37 @@ const SurveyBuilder: React.FC = () => {
           setQuestionnaireConfigs([defaultQ]);
         }
 
-        // Load template participant types and app layout (in-memory, saved to tables on save)
+        // Load template participant types — remap string IDs to UUIDs
+        const ptIdMap = new Map<string, string>();
         if (settings?.participant_types) {
-          setParticipantTypes(settings.participant_types);
+          const remappedPTs = settings.participant_types.map((pt: any) => {
+            const newId = crypto.randomUUID();
+            ptIdMap.set(pt.id, newId);
+            return { ...pt, id: newId };
+          });
+          setParticipantTypes(remappedPTs);
+
+          // Also remap assigned_participant_types in questionnaire configs
+          setQuestionnaireConfigs(prev => prev.map(qc => ({
+            ...qc,
+            assigned_participant_types: (qc.assigned_participant_types || []).map(
+              ptId => ptIdMap.get(ptId) || ptId
+            ),
+          })));
         }
         if (settings?.app_layout) {
-          setAppLayout(settings.app_layout);
+          // Remap questionnaire_id references in app layout elements
+          const layout = JSON.parse(JSON.stringify(settings.app_layout));
+          if (layout.tabs) {
+            for (const tab of layout.tabs) {
+              for (const el of (tab.elements || [])) {
+                if (el.config?.questionnaire_id && templateIdToUuid.has(el.config.questionnaire_id)) {
+                  el.config.questionnaire_id = templateIdToUuid.get(el.config.questionnaire_id);
+                }
+              }
+            }
+          }
+          setAppLayout(layout);
         }
       });
       setLoading(false);
