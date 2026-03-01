@@ -83,5 +83,8 @@ mobile header: left: Site logo, name; right: language switcher profile button (d
 
 mobile footer: 4 tabs: research, discover, inbox and setting.   1)research is the unified research project hub for researchers and participants to find or manage their researches, with edit button to dynamic display tabs for researchers or participants; 2) discover is for discovering research projects to join; 3) inbox is the unified inbox page to show both notifications and direct-message between and researcher and participant; 4) setting is the setting page for basic profile information and notification
 
+## 12. Notification 
+
+questionaire notification is set at questionaire level, making each questionaire able to send a custom notification, e.g. an hourly log questionaire can be set to send a notification from 8am-10pm each day. Do not disturb is also set at questionaire level, if allowed, participant can set multiple dnd period per questionaire, e.g. 8am-9am, 1pm-3pm, and the notification for this questionaire will be blocked during. 
 
 ---
