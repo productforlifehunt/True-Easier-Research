@@ -58,12 +58,6 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 
 Each question is a row in the `survey_question` table. It belongs to one project and optionally to one questionnaire via the `questionnaire_id` FK column.
 
-- **Core fields:** question type (one of 21 types), question text, optional description, sort order, required flag
-- **Config:** The `question_config` JSONB holds type-specific settings — max length for text, min/max for sliders, scale labels for Likert, disqualify values for screening, and so on
-- **Validation and Logic:** `validation_rule` and `logic_rule` JSONB columns for custom validation and conditional branching
-- **AI and Voice:** `allow_voice` and `allow_ai_assist` boolean columns
-
-Each question can have multiple options in the `question_option` table — used by choice-type questions. Options have display text, stored value, sort order, and an "is other" flag for free-text fallback.
 
 ---
 
@@ -71,9 +65,11 @@ Each question can have multiple options in the `question_option` table — used 
 
 Each participant type is a row in the `participant_type` table. It belongs to one project and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
-- **Fields:** name, description, relation options (as a text array), UI color, sort order
-- **Consent and screening** are stored as separate questionnaire rows with type `consent` or `screening`, linked to participant types through the junction table. This means a consent form or screening set can be shared across multiple participant types.
+all questionaires and questions can be configured to be shown to what participant type
 
-The `ParticipantTypeManager.tsx` UI still shows consent forms and screening questions inline under each participant type, but the data is saved as questionnaire table rows.
+## 11. Layout and design
+
+There are only two layouts for this project, 1) desktop layout, for all desktop screen sizes, whether small or large; and we are using only one header, one footer, one siderbar for the entire desktop layout, the header and footer should be displayed on all public pages, and the sidebar should be displayed on all dashboard pages, 2) mobile layout, for all mobile and tablet screen sizes; and we are using only one mobile header, one mobile footer for all mobile pages, and they should persist on all pages, whether it's a research project or not
+
 
 ---
