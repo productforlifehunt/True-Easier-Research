@@ -87,12 +87,7 @@ const DesktopHome: React.FC = () => {
   };
 
   const handleEnrolledSurveyClick = (enrollment: Enrollment) => {
-    const project = enrollment.research_project;
-    if (project.project_type === 'longitudinal') {
-      navigate(`/easyresearch/participant/${enrollment.project_id}/timeline`);
-    } else {
-      navigate(`/easyresearch/participant/${enrollment.project_id}/dashboard`);
-    }
+    navigate(`/easyresearch/participant/${enrollment.project_id}`);
   };
 
   if (loading) {

@@ -263,7 +263,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             // If longitudinal survey and enrolled, redirect to timeline ONLY if no instance specified
             const instanceParam = searchParams.get('instance') || propInstanceId;
             if (project.project_type === 'longitudinal' && !instanceParam) {
-              window.location.href = `/easyresearch/participant/${projectId}/timeline`;
+              window.location.href = `/easyresearch/participant/${projectId}`;
               return;
             }
           } else {
@@ -735,7 +735,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       }
       
       if (project?.project_type === 'longitudinal') {
-        window.location.href = `/easyresearch/participant/${projectId}/timeline`;
+        window.location.href = `/easyresearch/participant/${projectId}`;
       } else {
         navigate(`/easyresearch/survey/${projectId}/complete`);
       }
