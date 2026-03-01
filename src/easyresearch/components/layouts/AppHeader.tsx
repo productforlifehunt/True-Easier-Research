@@ -39,7 +39,7 @@ const AppHeader: React.FC = () => {
   ];
   if (user) {
     navItems.unshift({ path: '/easyresearch/dashboard', label: 'Projects' });
-    navItems.push({ path: '/easyresearch/home', label: 'Participate' });
+    navItems.push({ path: '/easyresearch/home', label: 'My Studies' });
   }
 
   return (
@@ -86,7 +86,11 @@ const AppHeader: React.FC = () => {
                     </Link>
                     <Link to="/easyresearch/home" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
-                      Browse & Participate
+                      My Studies
+                    </Link>
+                    <Link to="/easyresearch/participant/join" onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
+                      Discover Studies
                     </Link>
                     <Link to="/easyresearch/settings" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">

@@ -2,8 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { Users, KeyRound, ArrowRight, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, KeyRound, ArrowRight, Loader2, AlertCircle, CheckCircle, Clock, ChevronRight, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+interface Survey {
+  id: string;
+  title: string;
+  description: string;
+  project_type: string;
+  study_duration: number;
+  survey_code?: string;
+  status?: string;
+}
 
 const ParticipantJoin: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -14,12 +24,29 @@ const ParticipantJoin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [surveyCode, setSurveyCode] = useState('');
   const [joining, setJoining] = useState(false);
+  const [availableSurveys, setAvailableSurveys] = useState<Survey[]>([]);
+  const [browsing, setBrowsing] = useState(false);
   const token = searchParams.get('token');
   const projectId = searchParams.get('project');
 
   useEffect(() => {
     if (token && projectId) { setLoading(true); validateInvite(); }
   }, [token, projectId]);
+
+  useEffect(() => { loadAvailable(); }, []);
+
+  const loadAvailable = async () => {
+    setBrowsing(true);
+    try {
+      const { data } = await supabase
+        .from('research_project')
+        .select('id, title, description, project_type, study_duration, survey_code, status')
+        .in('status', ['published', 'active'])
+        .order('created_at', { ascending: false });
+      if (data) setAvailableSurveys(data);
+    } catch (err) { console.error(err); }
+    finally { setBrowsing(false); }
+  };
 
   const validateInvite = async () => {
     try {
@@ -47,15 +74,19 @@ const ParticipantJoin: React.FC = () => {
     if (!surveyCode.trim()) { toast.error('Please enter a survey code'); return; }
     setJoining(true); setError(null);
     try {
-      const { data: projectData, error: projectError } = await supabase.from('research_project').select('*').eq('survey_code', surveyCode.toUpperCase().trim()).in('status', ['published', 'active']).maybeSingle();
+      const { data: projectData, error: projectError } = await supabase
+        .from('research_project').select('*')
+        .eq('survey_code', surveyCode.toUpperCase().trim())
+        .in('status', ['published', 'active']).maybeSingle();
       if (projectError || !projectData) { setError('No study found with this code.'); setJoining(false); return; }
       if (user) {
-        const profileId = user.id;
-        const { data: existingEnrollment } = await supabase.from('enrollment').select('id').eq('project_id', projectData.id).eq('participant_id', profileId).maybeSingle();
-        if (existingEnrollment) { localStorage.setItem(`enrollment_${projectData.id}`, existingEnrollment.id); toast.success('You are already enrolled!'); navigate(`/easyresearch/participant/${projectData.id}`); return; }
-        const { data: newEnrollment, error: enrollError } = await supabase.from('enrollment').insert({ project_id: projectData.id, participant_id: profileId, participant_email: user.email, status: 'active', enrollment_token: crypto.randomUUID() }).select('id').single();
+        const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectData.id).eq('participant_id', user.id).maybeSingle();
+        if (existing) { toast.success('You are already enrolled!'); navigate(`/easyresearch/participant/${projectData.id}`); return; }
+        const { data: newEnrollment, error: enrollError } = await supabase.from('enrollment').insert({
+          project_id: projectData.id, participant_id: user.id, participant_email: user.email,
+          status: 'active', enrollment_token: crypto.randomUUID()
+        }).select('id').single();
         if (enrollError) throw enrollError;
-        if (newEnrollment?.id) localStorage.setItem(`enrollment_${projectData.id}`, newEnrollment.id);
         toast.success('Successfully joined the study!');
         navigate(`/easyresearch/participant/${projectData.id}`);
       } else {
@@ -78,12 +109,13 @@ const ParticipantJoin: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
-        <Loader2 className="animate-spin text-emerald-500" size={32} />
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin text-emerald-500" size={28} />
       </div>
     );
   }
 
+  // Invitation flow
   if (project) {
     return (
       <div className="bg-stone-50/50">
@@ -93,7 +125,7 @@ const ParticipantJoin: React.FC = () => {
               <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
                 <Users size={24} className="text-emerald-500" />
               </div>
-              <h1 className="text-xl font-bold text-stone-800 mb-1">Research Invitation</h1>
+              <h1 className="text-xl font-bold text-stone-800 mb-1">Study Invitation</h1>
               <p className="text-[13px] text-stone-400 font-light">You've been invited to participate</p>
             </div>
             <div className="p-5 rounded-xl bg-stone-50 mb-6">
@@ -103,9 +135,9 @@ const ParticipantJoin: React.FC = () => {
             <div className="flex gap-3">
               <button onClick={acceptInvitation} disabled={joining}
                 className="flex-1 px-5 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all">
-                {joining ? <Loader2 className="animate-spin" size={16} /> : <><CheckCircle size={16} /> Accept & Start</>}
+                {joining ? <Loader2 className="animate-spin" size={16} /> : <><CheckCircle size={16} /> Accept & Join</>}
               </button>
-              <button onClick={() => navigate('/easyresearch')}
+              <button onClick={() => navigate('/easyresearch/home')}
                 className="px-5 py-3 rounded-xl text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
                 Decline
               </button>
@@ -116,51 +148,87 @@ const ParticipantJoin: React.FC = () => {
     );
   }
 
+  // Main join/discover page
   return (
     <div className="bg-stone-50/50">
-      <div className="max-w-sm mx-auto p-4 pt-4">
-        <div className="bg-white rounded-2xl border border-stone-100 p-6 shadow-sm">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-              <KeyRound size={24} className="text-emerald-500" />
-            </div>
-            <h1 className="text-xl font-bold text-stone-800 mb-1">Join a Study</h1>
-            <p className="text-[13px] text-stone-400 font-light">Enter the code from your researcher</p>
-          </div>
+      <div className="max-w-lg mx-auto px-4 py-4">
+        {/* Join by Code */}
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-stone-800 tracking-tight">Join a Study</h1>
+          <p className="text-[13px] text-stone-400 font-light mt-0.5">Enter a code or browse open studies</p>
+        </div>
 
-          <form id="join-form" onSubmit={handleJoinByCode} className="space-y-4">
+        <form id="join-form" onSubmit={handleJoinByCode} className="mb-6">
+          <div className="flex gap-2">
             <input
               type="text"
               value={surveyCode}
               onChange={(e) => setSurveyCode(e.target.value.toUpperCase())}
-              placeholder="e.g., ABC123"
-              className="w-full px-4 py-3.5 rounded-xl border border-stone-200 text-lg font-mono tracking-wider text-center focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50 transition-all"
+              placeholder="Enter study code"
+              className="flex-1 px-4 py-3 rounded-xl border border-stone-200 text-[14px] font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white transition-all"
               maxLength={10}
-              autoFocus
             />
-
-            {error && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 text-red-500 text-[12px]">
-                <AlertCircle size={14} />
-                <span>{error}</span>
-              </div>
-            )}
-
             <button type="submit" disabled={joining || !surveyCode.trim()}
-              className="w-full px-5 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-50">
-              {joining ? <Loader2 className="animate-spin" size={16} /> : <>Join Study <ArrowRight size={16} /></>}
+              className="px-5 py-3 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 disabled:opacity-40 transition-all shrink-0">
+              {joining ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
             </button>
-          </form>
-
-          <div className="mt-6 pt-5 border-t border-stone-100">
-            <p className="text-[12px] text-center text-stone-400">
-              Don't have a code?{' '}
-              <button onClick={() => navigate('/easyresearch/home')} className="font-medium text-emerald-500 hover:text-emerald-600">
-                Browse available studies
-              </button>
-            </p>
           </div>
+          {error && (
+            <div className="flex items-center gap-2 mt-2 p-2.5 rounded-xl bg-red-50 text-red-500 text-[12px]">
+              <AlertCircle size={13} /> <span>{error}</span>
+            </div>
+          )}
+        </form>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex-1 h-px bg-stone-200" />
+          <span className="text-[11px] text-stone-400 font-medium">or browse open studies</span>
+          <div className="flex-1 h-px bg-stone-200" />
         </div>
+
+        {/* Available Studies */}
+        {browsing ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="animate-spin text-emerald-400" size={22} />
+          </div>
+        ) : availableSurveys.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-stone-100 p-8 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-3">
+              <Search size={20} className="text-stone-300" />
+            </div>
+            <h2 className="text-[14px] font-semibold text-stone-700 mb-1">No open studies right now</h2>
+            <p className="text-[12px] text-stone-400 font-light">Ask your researcher for a study code</p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {availableSurveys.map(survey => (
+              <button
+                key={survey.id}
+                onClick={() => navigate(`/easyresearch/participant/${survey.id}`)}
+                className="w-full bg-white rounded-2xl border border-stone-100 p-4 text-left hover:shadow-md hover:shadow-stone-100/80 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">{survey.title}</h3>
+                    <p className="text-[12px] text-stone-400 font-light mt-0.5 line-clamp-2">{survey.description}</p>
+                  </div>
+                  <ChevronRight size={16} className="text-stone-300 group-hover:text-emerald-400 transition-colors ml-2 shrink-0" />
+                </div>
+                <div className="flex items-center gap-2 mt-2.5">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-stone-50 text-stone-500">
+                    {survey.project_type}
+                  </span>
+                  {survey.study_duration && (
+                    <span className="text-[10px] text-stone-400 flex items-center gap-0.5">
+                      <Clock size={9} /> {survey.study_duration}d
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
