@@ -46,6 +46,8 @@ const lazyImports = {
   ParticipantsPage: () => import('./easyresearch/components/ParticipantsPage'),
   ParticipantLibrary: () => import('./easyresearch/components/ParticipantLibrary'),
   SurveyViewRouter: () => import('./easyresearch/components/SurveyViewRouter'),
+  InboxPage: () => import('./easyresearch/components/InboxPage'),
+  ConversationView: () => import('./easyresearch/components/ConversationView'),
 };
 
 const LandingPage = React.lazy(lazyImports.LandingPage);
@@ -66,6 +68,8 @@ const PricingPage = React.lazy(lazyImports.PricingPage);
 const ParticipantsPage = React.lazy(lazyImports.ParticipantsPage);
 const ParticipantLibrary = React.lazy(lazyImports.ParticipantLibrary);
 const SurveyViewRouter = React.lazy(lazyImports.SurveyViewRouter);
+const InboxPage = React.lazy(lazyImports.InboxPage);
+const ConversationView = React.lazy(lazyImports.ConversationView);
 
 // Preload all EasyResearch chunks after initial paint
 if (typeof window !== 'undefined') {
@@ -256,6 +260,10 @@ function App() {
                     
                     {/* Participant Library */}
                     <Route path="/easyresearch/participant-library" element={<ParticipantLibrary />} />
+                    
+                    {/* Inbox & Messaging */}
+                    <Route path="/easyresearch/inbox" element={<InboxPage />} />
+                    <Route path="/easyresearch/inbox/:conversationId" element={<ConversationView />} />
                     
                     {/* Participant routes */}
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />

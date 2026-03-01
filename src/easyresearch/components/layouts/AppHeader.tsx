@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, LogOut, Settings, Users, BarChart3 } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, Settings, MessageSquare, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
 import { useI18n } from '../../hooks/useI18n';
@@ -42,7 +42,7 @@ const AppHeader: React.FC = () => {
   if (user) {
     navItems.push({ path: '/easyresearch/dashboard', labelKey: 'nav.myStudies' });
     navItems.push({ path: '/easyresearch/participant/join', labelKey: 'nav.discover' });
-    navItems.push({ path: '/easyresearch/participant-library', labelKey: 'nav.participants' });
+    navItems.push({ path: '/easyresearch/inbox', labelKey: 'nav.inbox' });
     navItems.push({ path: '/easyresearch/templates', labelKey: 'nav.templates' });
   } else {
     navItems.push({ path: '/easyresearch/templates', labelKey: 'nav.templates' });
@@ -93,9 +93,9 @@ const AppHeader: React.FC = () => {
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
                       {t('nav.discover')}
                     </Link>
-                    <Link to="/easyresearch/participant-library" onClick={() => setShowUserMenu(false)}
+                    <Link to="/easyresearch/inbox" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">
-                      <Users className="w-3.5 h-3.5" /> {t('nav.participants')}
+                      <MessageSquare className="w-3.5 h-3.5" /> {t('nav.inbox')}
                     </Link>
                     <Link to="/easyresearch/settings" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-stone-500 hover:bg-stone-50 hover:text-stone-700 transition-colors">

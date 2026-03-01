@@ -70,6 +70,7 @@ const translations: TranslationDict = {
   'nav.myStudies': { en: 'My Studies', zh: '我的研究', es: 'Mis Estudios', fr: 'Mes Études', de: 'Meine Studien', ja: 'マイスタディ', ko: '내 연구', pt: 'Meus Estudos', ar: 'دراساتي', hi: 'मेरे अध्ययन', ru: 'Мои исследования', it: 'I miei studi' },
   'nav.discover': { en: 'Discover', zh: '发现', es: 'Descubrir', fr: 'Découvrir', de: 'Entdecken', ja: '探す', ko: '탐색', pt: 'Descobrir', ar: 'اكتشف', hi: 'खोजें', ru: 'Обзор', it: 'Scopri' },
   'nav.participants': { en: 'Participants', zh: '参与者', es: 'Participantes', fr: 'Participants', de: 'Teilnehmer', ja: '参加者', ko: '참여자', pt: 'Participantes', ar: 'المشاركون', hi: 'प्रतिभागी', ru: 'Участники', it: 'Partecipanti' },
+  'nav.inbox': { en: 'Inbox', zh: '收件箱', es: 'Bandeja', fr: 'Boîte', de: 'Posteingang', ja: '受信箱', ko: '받은편지함', pt: 'Caixa', ar: 'البريد', hi: 'इनबॉक्स', ru: 'Входящие', it: 'Posta' },
   'nav.templates': { en: 'Templates', zh: '模板', es: 'Plantillas', fr: 'Modèles', de: 'Vorlagen', ja: 'テンプレート', ko: '템플릿', pt: 'Modelos', ar: 'القوالب', hi: 'टेम्पलेट', ru: 'Шаблоны', it: 'Modelli' },
   'nav.settings': { en: 'Settings', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ja: '設定', ko: '설정', pt: 'Configurações', ar: 'الإعدادات', hi: 'सेटिंग्स', ru: 'Настройки', it: 'Impostazioni' },
 
