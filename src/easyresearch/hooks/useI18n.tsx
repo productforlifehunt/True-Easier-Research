@@ -73,6 +73,9 @@ const translations: TranslationDict = {
   'nav.inbox': { en: 'Inbox', zh: '收件箱', es: 'Bandeja', fr: 'Boîte', de: 'Posteingang', ja: '受信箱', ko: '받은편지함', pt: 'Caixa', ar: 'البريد', hi: 'इनबॉक्स', ru: 'Входящие', it: 'Posta' },
   'nav.templates': { en: 'Templates', zh: '模板', es: 'Plantillas', fr: 'Modèles', de: 'Vorlagen', ja: 'テンプレート', ko: '템플릿', pt: 'Modelos', ar: 'القوالب', hi: 'टेम्पलेट', ru: 'Шаблоны', it: 'Modelli' },
   'nav.settings': { en: 'Settings', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ja: '設定', ko: '설정', pt: 'Configurações', ar: 'الإعدادات', hi: 'सेटिंग्स', ru: 'Настройки', it: 'Impostazioni' },
+  'nav.research': { en: 'Research', zh: '研究', es: 'Investigación', fr: 'Recherche', de: 'Forschung', ja: '研究', ko: '연구', pt: 'Pesquisa', ar: 'البحث', hi: 'अनुसंधान', ru: 'Исследования', it: 'Ricerca' },
+  'nav.dashboard': { en: 'Dashboard', zh: '仪表盘', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ja: 'ダッシュボード', ko: '대시보드', pt: 'Painel', ar: 'لوحة القيادة', hi: 'डैशबोर्ड', ru: 'Панель', it: 'Dashboard' },
+  'nav.features': { en: 'Features', zh: '功能', es: 'Funciones', fr: 'Fonctionnalités', de: 'Funktionen', ja: '機能', ko: '기능', pt: 'Recursos', ar: 'الميزات', hi: 'सुविधाएँ', ru: 'Функции', it: 'Funzionalità' },
 
   // Feature names for landing page
   'feature.questionTypes': { en: '13+ Question Types', zh: '13+题型', es: '13+ Tipos de Preguntas', fr: '13+ Types de Questions', de: '13+ Fragetypen', ja: '13以上の質問タイプ', ko: '13+ 질문 유형', pt: '13+ Tipos de Perguntas', ar: '13+ نوع من الأسئلة', hi: '13+ प्रश्न प्रकार', ru: '13+ типов вопросов', it: '13+ Tipi di Domande' },

@@ -1,35 +1,45 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
-import {
-  LayoutDashboard, Plus, Settings,
-  LogOut, FileText, Search, MessageSquare
-} from 'lucide-react';
+import { authClient } from '../../../lib/supabase';
+import { FlaskConical, Search, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { useI18n } from '../../hooks/useI18n';
 
+/**
+ * Desktop sidebar — 4 tabs matching mobile footer:
+ * Research, Discover, Inbox, Settings
+ */
 const AppSidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const handleLogout = async () => {
-    await logout();
+    await authClient.auth.signOut();
     navigate('/easyresearch');
   };
 
   const navItems = [
-    { path: '/easyresearch/dashboard', label: 'Projects', icon: LayoutDashboard },
-    { path: '/easyresearch/dashboard?create=true', label: 'New Project', icon: Plus },
-    { path: '/easyresearch/inbox', label: 'Inbox', icon: MessageSquare },
-    { path: '/easyresearch/responses', label: 'Responses', icon: FileText },
-    { path: '/easyresearch/settings', label: 'Settings', icon: Settings },
-    { path: '/easyresearch/participant/join', label: 'Browse & Participate', icon: Search },
+    { path: '/easyresearch/dashboard', label: t('nav.research'), icon: FlaskConical },
+    { path: '/easyresearch/participant/join', label: t('nav.discover'), icon: Search },
+    { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare },
+    { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings },
   ];
 
   const isActive = (path: string) => {
     if (path === '/easyresearch/dashboard') {
-      return location.pathname === path || location.pathname.startsWith('/easyresearch/project/');
+      return (
+        location.pathname === path ||
+        location.pathname.startsWith('/easyresearch/project/') ||
+        location.pathname === '/easyresearch/create-survey' ||
+        location.pathname === '/easyresearch/create' ||
+        location.pathname === '/easyresearch/responses' ||
+        location.pathname === '/easyresearch/participants' ||
+        location.pathname.startsWith('/easyresearch/mobile/edit/')
+      );
     }
-    return location.pathname === path || location.pathname.startsWith(path.split('?')[0]);
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   return (
@@ -39,7 +49,7 @@ const AppSidebar: React.FC = () => {
     >
       <div className="flex-1 flex flex-col py-2 overflow-y-auto">
         <nav className="flex-1 px-3 py-2 space-y-0.5">
-          {navItems.map(item => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
 
@@ -53,7 +63,11 @@ const AppSidebar: React.FC = () => {
                     : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
                 }`}
               >
-                <Icon size={18} strokeWidth={active ? 2 : 1.5} className={active ? 'text-emerald-600' : ''} />
+                <Icon
+                  size={18}
+                  strokeWidth={active ? 2 : 1.5}
+                  className={active ? 'text-emerald-600' : ''}
+                />
                 <span>{item.label}</span>
               </Link>
             );
@@ -74,7 +88,7 @@ const AppSidebar: React.FC = () => {
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-[13px] font-medium text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors"
           >
             <LogOut size={18} strokeWidth={1.5} />
-            <span>Sign Out</span>
+            <span>{t('common.signOut')}</span>
           </button>
         </div>
       </div>
