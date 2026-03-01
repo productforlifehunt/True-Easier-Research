@@ -18,6 +18,7 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 - **State:** React hooks and local state only (no Redux or React Query)
 - **Drag-and-drop:** `@hello-pangea/dnd` and `@dnd-kit/core`
 - **Entry point:** Routes defined in `src/App.tsx` under the EASYRESEARCH PLATFORM ROUTES section
+- **Development stage ai api key: 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 use google/gemma-3-27b-it to save my fucking money
 
 ---
 
@@ -25,7 +26,7 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 
 ## 6. RESEARCH PROJECT 
 
-Every study lives in the `research_project` table. and all layout information is stored in care_connector.research_project.app_layout, no other file used or should be used
+Every study lives in the `research_project` table. and all layout information is stored in research_project.app_layout, no other file used or should be used
 
 ## 7. USER ROLE
 
