@@ -34,6 +34,7 @@ export interface QuestionnaireConfig {
     question_ids: string[];
     questions_per_page?: number | null; // per-tab override: null = unlimited, number = paginate by N
   }>;
+  ai_chatbot_enabled?: boolean;
 }
 
 interface QuestionnaireListProps {
@@ -776,6 +777,17 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {q.dnd_allowed && (
                                   <p className="text-[11px] text-stone-400">Participants can configure their own quiet hours from the app settings.</p>
                                 )}
+
+                                {/* AI Chatbot Toggle */}
+                                <div className="flex items-center justify-between pt-2 border-t border-stone-100">
+                                  <div>
+                                    <span className="text-[12px] text-stone-600 flex items-center gap-1.5">🤖 AI Survey Chatbot</span>
+                                    <p className="text-[10px] text-stone-400 mt-0.5">Floating AI assistant that helps participants complete the survey conversationally</p>
+                                  </div>
+                                  <button onClick={() => updateQuestionnaire(q.id, { ai_chatbot_enabled: !q.ai_chatbot_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_chatbot_enabled ? 'bg-violet-500' : 'bg-stone-200'}`}>
+                                    <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.ai_chatbot_enabled ? '22px' : '2px' }} />
+                                  </button>
+                                </div>
                               </div>
 
                               {participantTypes.length > 0 && (

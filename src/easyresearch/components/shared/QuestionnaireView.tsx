@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import QuestionRenderer from './QuestionRenderer';
 import AIQuestionWrapper from './AIQuestionWrapper';
+import AIChatbotPopup from './AIChatbotPopup';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
 
 interface QuestionnaireViewProps {
@@ -189,6 +190,17 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
               </button>
             )}
           </div>
+        )}
+        {/* AI Chatbot Popup */}
+        {qConfig.ai_chatbot_enabled && (
+          <AIChatbotPopup
+            questionnaireTitle={qConfig.title}
+            questions={qs}
+            responses={responses}
+            onResponse={onResponse}
+            primaryColor={primaryColor}
+            compact={compact}
+          />
         )}
       </div>
     );

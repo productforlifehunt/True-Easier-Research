@@ -18,14 +18,13 @@ serve(async (req) => {
     }
 
     const body = await req.json()
-    const { action, question, questionType, options, currentAnswer, questionConfig, messages } = body
+    const { action, question, questionType, options, currentAnswer, questionConfig, messages, questionnaire } = body
 
     let systemPrompt = ''
     let userMessage = ''
 
     switch (action) {
       case 'ai_auto_answer': {
-        // AI predicts what a typical participant would answer
         const optionsStr = options?.length
           ? `\nAvailable options:\n${options.map((o: any, i: number) => `${i + 1}. ${typeof o === 'string' ? o : o.option_text || o.text}`).join('\n')}`
           : ''
@@ -49,21 +48,18 @@ Rules:
       }
 
       case 'ai_assist': {
-        // Help participant understand or improve their answer
         systemPrompt = `You are a helpful survey assistant. Help the participant understand the question and provide a better answer. Be concise (2-3 sentences max). If they have a current answer, suggest improvements. Be supportive and clear.`
         userMessage = `Question: "${question}"\nQuestion type: ${questionType}\nCurrent answer: ${currentAnswer || 'None yet'}\n\nHelp me answer this question.`
         break
       }
 
       case 'ai_enhance': {
-        // Enhance/improve a text answer
         systemPrompt = `You are a writing assistant. Improve the participant's survey answer by making it clearer, more detailed, and better written. Return ONLY the improved text, nothing else. Keep the same meaning and voice.`
         userMessage = `Question: "${question}"\nOriginal answer: "${currentAnswer}"\n\nImprove this answer:`
         break
       }
 
       case 'chat': {
-        // Free-form chat about the survey question
         if (!messages || !Array.isArray(messages)) {
           throw new Error('Missing messages for chat action')
         }
@@ -102,6 +98,116 @@ Question type: ${questionType || 'unknown'}`
 
         return new Response(
           JSON.stringify({ response: aiMessage }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'questionnaire_chatbot': {
+        // Full questionnaire-aware chatbot that can fill answers
+        if (!messages || !Array.isArray(messages)) {
+          throw new Error('Missing messages for questionnaire_chatbot action')
+        }
+        if (!questionnaire) {
+          throw new Error('Missing questionnaire context')
+        }
+
+        const { title, questions: allQuestions, responses: currentResponses } = questionnaire
+
+        // Build question summary for context
+        const questionSummary = (allQuestions || []).map((q: any, i: number) => {
+          const qType = q.question_type || 'unknown'
+          const opts = q.options?.map((o: any) => typeof o === 'string' ? o : o.option_text || o.text).join(', ')
+          const currentAns = currentResponses?.[q.id]
+          const ansStr = currentAns !== undefined && currentAns !== null && currentAns !== ''
+            ? `Current answer: ${typeof currentAns === 'object' ? JSON.stringify(currentAns) : currentAns}`
+            : 'Not answered yet'
+          const reqStr = q.required ? ' (REQUIRED)' : ''
+          return `Q${i + 1} [id:${q.id}] (${qType}${reqStr}): "${q.question_text}"${opts ? ` | Options: [${opts}]` : ''} | ${ansStr}`
+        }).join('\n')
+
+        // Find unanswered required questions
+        const unanswered = (allQuestions || []).filter((q: any) => {
+          const isRequired = q.required || q.response_required === 'force' || q.question_config?.response_required === 'force'
+          const hasAnswer = currentResponses?.[q.id] !== undefined && currentResponses?.[q.id] !== null && currentResponses?.[q.id] !== ''
+          return isRequired && !hasAnswer
+        })
+
+        const unansweredStr = unanswered.length > 0
+          ? `\n\nUNANSWERED REQUIRED QUESTIONS (${unanswered.length}):\n${unanswered.map((q: any) => `- "${q.question_text}" [id:${q.id}]`).join('\n')}`
+          : '\n\nAll required questions have been answered! ✅'
+
+        systemPrompt = `You are an intelligent AI assistant helping a participant complete the questionnaire "${title || 'Untitled'}". You have full context of all questions and current answers.
+
+YOUR CAPABILITIES:
+1. Answer questions conversationally - when the user discusses a topic, you can suggest filling specific survey questions.
+2. When you want to fill/update a survey answer, include a JSON block in your response using this format:
+   <<<FILL_ANSWERS>>>
+   [{"question_id": "uuid-here", "value": "the answer value"}]
+   <<<END_FILL>>>
+3. For choice questions, the value must be the exact option text.
+4. For multiple_choice/checkbox_group, the value should be a JSON array of selected option texts.
+5. For number/rating/likert/nps/slider, the value should be a number.
+6. For yes_no, the value should be "Yes" or "No".
+7. Inform the user about unanswered required questions when relevant.
+8. Be conversational, friendly, and helpful. Explain what you're filling and why.
+9. Always let the user know they can correct any AI-filled answer.
+
+QUESTIONNAIRE QUESTIONS:
+${questionSummary}
+${unansweredStr}
+
+RULES:
+- When you fill answers, always explain what you're doing in natural language BEFORE the fill block.
+- You can fill multiple questions at once if the conversation warrants it.
+- If the user says something like "I'm 25 years old and male", find the relevant age and gender questions and fill them.
+- If asked about progress, summarize which questions are answered and which aren't.
+- Be proactive about mentioning unanswered required questions.`
+
+        const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages]
+        
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://easierresearch.app',
+            'X-Title': 'Easier Research AI'
+          },
+          body: JSON.stringify({
+            model: 'google/gemma-3-27b-it',
+            messages: fullMessages,
+            temperature: 0.7,
+            max_tokens: 2000
+          })
+        })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('OpenRouter API error:', errorText)
+          throw new Error(`OpenRouter API failed: ${response.status}`)
+        }
+
+        const aiResponse = await response.json()
+        const aiMessage = aiResponse.choices?.[0]?.message?.content?.trim() || ''
+
+        // Parse any fill commands from the response
+        let fillCommands: any[] = []
+        const fillMatch = aiMessage.match(/<<<FILL_ANSWERS>>>([\s\S]*?)<<<END_FILL>>>/)
+        if (fillMatch) {
+          try {
+            fillCommands = JSON.parse(fillMatch[1].trim())
+          } catch (e) {
+            console.error('Failed to parse fill commands:', e)
+          }
+        }
+
+        // Clean the display message (remove the fill block)
+        const displayMessage = aiMessage
+          .replace(/<<<FILL_ANSWERS>>>[\s\S]*?<<<END_FILL>>>/g, '')
+          .trim()
+
+        return new Response(
+          JSON.stringify({ response: displayMessage, fillCommands }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
