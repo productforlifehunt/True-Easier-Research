@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
   GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  ChevronRight, Sparkles, Bot, Mic, Wand2, MessageCircle
+  ChevronRight, Sparkles, Bot, Mic, Wand2, MessageCircle, BarChart3
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useI18n } from '../hooks/useI18n';
@@ -24,15 +24,6 @@ const LandingPage: React.FC = () => {
     { icon: Sparkles, titleKey: 'feature.templates', descKey: 'feature.templates.desc' },
   ];
 
-  const aiFeatures = [
-    { icon: Sparkles, titleKey: 'ai.projectBuilder', descKey: 'ai.projectBuilder.desc' },
-    { icon: Wand2, titleKey: 'ai.autoAnswer', descKey: 'ai.autoAnswer.desc' },
-    { icon: Bot, titleKey: 'ai.chatbot', descKey: 'ai.chatbot.desc' },
-    { icon: Mic, titleKey: 'ai.voiceInput', descKey: 'ai.voiceInput.desc' },
-    { icon: MessageCircle, titleKey: 'ai.assist', descKey: 'ai.assist.desc' },
-    { icon: PieChart, titleKey: 'feature.analytics', descKey: 'feature.analytics.desc' },
-  ];
-
   const useCases = [
     { icon: GraduationCap, nameKey: 'useCase.academic', descKey: 'useCase.academic.desc' },
     { icon: Stethoscope, nameKey: 'useCase.healthcare', descKey: 'useCase.healthcare.desc' },
@@ -50,9 +41,19 @@ const LandingPage: React.FC = () => {
 
   const trustedKeys = ['trusted.universities', 'trusted.healthcare', 'trusted.uxTeams', 'trusted.marketResearch', 'trusted.hr', 'trusted.startups'];
 
+  // AI highlights for hero sub-section
+  const aiHighlights = [
+    { icon: Sparkles, labelKey: 'ai.projectBuilder' },
+    { icon: Wand2, labelKey: 'ai.autoAnswer' },
+    { icon: Bot, labelKey: 'ai.chatbot' },
+    { icon: Mic, labelKey: 'ai.voiceInput' },
+    { icon: MessageCircle, labelKey: 'ai.assist' },
+    { icon: PieChart, labelKey: 'feature.analytics' },
+  ];
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#fafbf9' }}>
-      {/* Hero */}
+      {/* Hero — with AI description integrated */}
       <section className="pt-32 lg:pt-44 pb-24 lg:pb-36 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-emerald-50/80 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-emerald-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -70,9 +71,22 @@ const LandingPage: React.FC = () => {
                 {t('landing.hero.title2')}
               </span>
             </h1>
-            <p className="text-lg lg:text-[19px] text-stone-400 max-w-md mx-auto mb-12 leading-relaxed font-light">
+            <p className="text-lg lg:text-[19px] text-stone-400 max-w-lg mx-auto mb-6 leading-relaxed font-light">
               {t('landing.hero.subtitle')}
             </p>
+
+            {/* AI capabilities — integrated into hero */}
+            <p className="text-[15px] text-stone-500 max-w-lg mx-auto mb-8 leading-relaxed">
+              {t('landing.ai.fullDesc')}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {aiHighlights.map((h, i) => (
+                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[12px] font-medium border border-emerald-100">
+                  <h.icon size={12} /> {t(h.labelKey)}
+                </span>
+              ))}
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => navigate('/easyresearch/auth')}
@@ -126,42 +140,6 @@ const LandingPage: React.FC = () => {
                 <p className="text-[13px] text-stone-400 leading-relaxed font-light">{t(f.descKey)}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* AI Features */}
-      <section className="py-28 lg:py-36" style={{ backgroundColor: 'rgba(139,92,246,0.03)' }}>
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-600 text-[12px] font-semibold mb-4">
-              <Sparkles size={12} /> {t('landing.ai.title')}
-            </div>
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
-              {t('landing.ai.cta')}
-            </h2>
-            <p className="text-[17px] text-stone-400 max-w-lg mx-auto font-light">
-              {t('landing.ai.fullDesc')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {aiFeatures.map((f, i) => (
-              <div key={i} className="rounded-2xl p-6 bg-white/80 border border-stone-100 hover:border-violet-200 hover:shadow-md hover:shadow-violet-50 transition-all group cursor-default">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 flex items-center justify-center mb-4 group-hover:from-violet-100 group-hover:to-purple-100 transition-colors">
-                  <f.icon size={18} className="text-violet-600" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{t(f.titleKey)}</h3>
-                <p className="text-[13px] text-stone-400 leading-relaxed font-light">{t(f.descKey)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <button
-              onClick={() => navigate('/easyresearch/auth')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[14px] font-medium rounded-full hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-violet-200/50"
-            >
-              <Sparkles size={14} /> {t('landing.ai.tryButton')}
-            </button>
           </div>
         </div>
       </section>
@@ -239,10 +217,10 @@ const LandingPage: React.FC = () => {
       <footer className="py-8" style={{ borderTop: '1px solid rgba(16,185,129,0.06)' }}>
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/favicon.svg" alt="Easier Research" className="w-6 h-6" />
-            <span className="text-[14px] font-semibold text-stone-800">Easier Research</span>
+            <BarChart3 size={20} className="text-emerald-500" />
+            <span className="text-[14px] font-semibold text-stone-800">{t('brand.name')}</span>
           </div>
-          <p className="text-[12px] text-stone-300">© 2026 Easier Research. All rights reserved.</p>
+          <p className="text-[12px] text-stone-300">{t('brand.copyright')}</p>
         </div>
       </footer>
     </div>
