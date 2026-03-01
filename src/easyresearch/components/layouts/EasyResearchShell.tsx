@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Search, Settings } from 'lucide-react';
+import { Home, Search, Settings, Users } from 'lucide-react';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import ResearcherFooter from '../ResearcherFooter';
 import { useAuth } from '../../../hooks/useAuth';
-import { I18nProvider } from '../../hooks/useI18n';
+import { I18nProvider, useI18n } from '../../hooks/useI18n';
 
 /**
  * Unified shell for ALL /easyresearch/* routes.
@@ -13,8 +13,8 @@ import { I18nProvider } from '../../hooks/useI18n';
  * - Desktop sidebar for researcher routes
  * - GPU-accelerated CSS transitions for native-feel page switches
  */
-const EasyResearchShell: React.FC = () => {
-  const location = useLocation();
+const EasyResearchShellInner: React.FC = () => {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { user } = useAuth();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -80,9 +80,10 @@ const EasyResearchShell: React.FC = () => {
 
   // Bottom nav tabs
   const tabs = useMemo(() => [
-    { id: 'home', path: '/easyresearch/dashboard', icon: Home, label: 'My Studies' },
-    { id: 'discover', path: '/easyresearch/participant/join', icon: Search, label: 'Discover' },
-    { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, label: 'Settings' },
+    { id: 'home', path: '/easyresearch/dashboard', icon: Home, labelKey: 'nav.myStudies' },
+    { id: 'discover', path: '/easyresearch/participant/join', icon: Search, labelKey: 'nav.discover' },
+    { id: 'participants', path: '/easyresearch/participant-library', icon: Users, labelKey: 'nav.participants' },
+    { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, labelKey: 'nav.settings' },
   ], []);
 
   const isTabActive = useCallback((tabPath: string) => {
@@ -99,7 +100,6 @@ const EasyResearchShell: React.FC = () => {
   const showSidebar = user && isResearcherRoute;
 
   return (
-    <I18nProvider>
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9faf8' }}>
       <AppHeader />
 
@@ -160,7 +160,7 @@ const EasyResearchShell: React.FC = () => {
                     className="text-[10px] font-semibold"
                     style={{ color: active ? '#10b981' : '#a8a29e', transition: 'color 120ms ease' }}
                   >
-                    {tab.label}
+                    {t(tab.labelKey)}
                   </span>
                 </button>
               );
@@ -169,8 +169,13 @@ const EasyResearchShell: React.FC = () => {
         </nav>
       )}
     </div>
-    </I18nProvider>
   );
 };
+
+const EasyResearchShell: React.FC = () => (
+  <I18nProvider>
+    <EasyResearchShellInner />
+  </I18nProvider>
+);
 
 export default EasyResearchShell;

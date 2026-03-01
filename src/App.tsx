@@ -41,6 +41,7 @@ const ResponsesPage = React.lazy(() => import('./easyresearch/components/Respons
 const TemplateLibrary = React.lazy(() => import('./easyresearch/components/TemplateLibrary'));
 const PricingPage = React.lazy(() => import('./easyresearch/components/PricingPage'));
 const ParticipantsPage = React.lazy(() => import('./easyresearch/components/ParticipantsPage'));
+const ParticipantLibrary = React.lazy(() => import('./easyresearch/components/ParticipantLibrary'));
 const SurveyViewRouter = React.lazy(() => import('./easyresearch/components/SurveyViewRouter'));
 import { notificationService } from './utils/notifications'
 import { mobileService } from './utils/mobile'
@@ -219,6 +220,9 @@ function App() {
                     <Route path="/easyresearch/responses" element={<RequireResearcher><ResponsesPage /></RequireResearcher>} />
                     <Route path="/easyresearch/settings" element={<RequireResearcher><ResearcherSettings /></RequireResearcher>} />
                     <Route path="/easyresearch/participants" element={<RequireResearcher><ParticipantsPage /></RequireResearcher>} />
+                    
+                    {/* Participant Library */}
+                    <Route path="/easyresearch/participant-library" element={<ParticipantLibrary />} />
                     
                     {/* Participant routes */}
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
