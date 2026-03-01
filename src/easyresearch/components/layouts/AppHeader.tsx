@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, LogOut, Settings, Users } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, Settings, Users, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
 import { useI18n } from '../../hooks/useI18n';
@@ -53,13 +53,10 @@ const AppHeader: React.FC = () => {
       <div className="max-w-full mx-auto px-5 sm:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to={user ? '/easyresearch/dashboard' : '/easyresearch'} className="flex items-center gap-2.5 group">
-            <svg className="w-7 h-7" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="30" r="12" fill="#34d399" opacity="0.85"/>
-              <circle cx="40" cy="30" r="12" fill="#14b8a6" opacity="0.85"/>
-              <ellipse cx="32" cy="22" rx="9" ry="12" fill="#10b981"/>
-              <rect x="30.5" y="34" width="3" height="12" rx="1.5" fill="#10b981"/>
-            </svg>
-            <span className="text-[15px] font-semibold tracking-tight text-stone-800">Easier Research</span>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+              <BarChart3 size={16} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-stone-800">{t('brand.name')}</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">

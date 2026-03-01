@@ -64,10 +64,12 @@ const EasyResearchShellInner: React.FC = () => {
       p === '/easyresearch/templates';
   }, [location.pathname]);
 
-  // Dashboard routes where footer should NOT show
+  // Routes where the shell footer should NOT show (has own footer or is dashboard)
   const isDashboardRoute = useMemo(() => {
     const p = location.pathname;
-    return p === '/easyresearch/dashboard' ||
+    return p === '/easyresearch' ||
+      p === '/easyresearch/landing' ||
+      p === '/easyresearch/dashboard' ||
       p === '/easyresearch/home' ||
       p.startsWith('/easyresearch/project/') ||
       p === '/easyresearch/create-survey' ||
