@@ -4,11 +4,14 @@ import {
   ArrowRight,
   Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
   GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  ChevronRight, Sparkles
+  ChevronRight, Sparkles, Bot, Mic, Wand2, MessageCircle
 } from 'lucide-react';
+import LanguageSelector from './LanguageSelector';
+import { useI18n } from '../hooks/useI18n';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const features = [
     { icon: Layers, title: '13+ Question Types', desc: 'From choice to NPS, Likert, sliders, and more.' },
@@ -21,6 +24,14 @@ const LandingPage: React.FC = () => {
     { icon: Sparkles, title: '14 Templates', desc: 'Start fast with ready-made templates.' },
   ];
 
+  const aiFeatures = [
+    { icon: Sparkles, title: t('ai.projectBuilder'), desc: t('ai.projectBuilder.desc'), color: 'violet' },
+    { icon: Wand2, title: t('ai.autoAnswer'), desc: t('ai.autoAnswer.desc'), color: 'purple' },
+    { icon: Bot, title: t('ai.chatbot'), desc: t('ai.chatbot.desc'), color: 'indigo' },
+    { icon: Mic, title: t('ai.voiceInput'), desc: t('ai.voiceInput.desc'), color: 'orange' },
+    { icon: MessageCircle, title: t('ai.assist'), desc: t('ai.assist.desc'), color: 'blue' },
+  ];
+
   const useCases = [
     { icon: GraduationCap, name: 'Academic', desc: 'Thesis & longitudinal studies' },
     { icon: Stethoscope, name: 'Healthcare', desc: 'Patient outcomes & clinical' },
@@ -31,7 +42,7 @@ const LandingPage: React.FC = () => {
   ];
 
   const steps = [
-    { n: '01', title: 'Design', desc: 'Build your survey with our intuitive drag-and-drop builder.' },
+    { n: '01', title: 'Design', desc: 'Build your survey with our intuitive drag-and-drop builder — or let AI do it.' },
     { n: '02', title: 'Distribute', desc: 'Share via link or survey code. Works on any device.' },
     { n: '03', title: 'Analyze', desc: 'View real-time analytics and export your data.' },
   ];
@@ -44,17 +55,22 @@ const LandingPage: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-emerald-50/80 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-emerald-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
         
+        {/* Language selector */}
+        <div className="absolute top-6 right-6">
+          <LanguageSelector />
+        </div>
+
         <div className="max-w-4xl mx-auto px-6 relative">
           <div className="text-center">
             <h1 className="text-5xl sm:text-6xl lg:text-[72px] font-bold leading-[1.05] tracking-[-0.035em] text-stone-800 mb-6">
-              Research made
+              {t('landing.hero.title1')}
               <br />
               <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
-                easier
+                {t('landing.hero.title2')}
               </span>
             </h1>
             <p className="text-lg lg:text-[19px] text-stone-400 max-w-md mx-auto mb-12 leading-relaxed font-light">
-              Create surveys, collect quality data, and analyze results — all in one place.
+              {t('landing.hero.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
@@ -104,6 +120,34 @@ const LandingPage: React.FC = () => {
               <div key={i} className="rounded-2xl p-6 bg-white/70 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all group cursor-default">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-4 group-hover:from-emerald-100 group-hover:to-teal-100 transition-colors">
                   <f.icon size={18} className="text-emerald-600" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{f.title}</h3>
+                <p className="text-[13px] text-stone-400 leading-relaxed font-light">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Features */}
+      <section className="py-28 lg:py-36" style={{ backgroundColor: 'rgba(139,92,246,0.03)' }}>
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-100 text-violet-600 text-[12px] font-semibold mb-4">
+              <Sparkles size={12} /> AI-Powered
+            </div>
+            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
+              {t('landing.ai.title')}
+            </h2>
+            <p className="text-[17px] text-stone-400 max-w-md mx-auto font-light">
+              {t('landing.ai.subtitle')}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {aiFeatures.map((f, i) => (
+              <div key={i} className={`rounded-2xl p-6 bg-white/80 border border-stone-100 hover:border-violet-200 hover:shadow-md hover:shadow-violet-50 transition-all group cursor-default ${i === 0 ? 'sm:col-span-2 lg:col-span-1' : ''}`}>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 flex items-center justify-center mb-4 group-hover:from-violet-100 group-hover:to-purple-100 transition-colors">
+                  <f.icon size={18} className="text-violet-600" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{f.title}</h3>
                 <p className="text-[13px] text-stone-400 leading-relaxed font-light">{f.desc}</p>
