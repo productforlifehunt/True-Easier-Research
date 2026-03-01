@@ -408,19 +408,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   </div>
                 )}
 
-                {/* Display mode */}
-                <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Mode</label>
-                  <select
-                    value={q.display_mode || 'one_per_page'}
-                    onChange={(e) => onUpdateQuestionnaire(q.id, { display_mode: e.target.value as any })}
-                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white"
-                  >
-                    <option value="one_per_page">One question per page</option>
-                    <option value="all_at_once">All at once (scroll)</option>
-                    <option value="section_per_page">Section per page</option>
-                  </select>
-                </div>
               </div>
             )}
           </>

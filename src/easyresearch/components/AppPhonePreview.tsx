@@ -113,8 +113,25 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           : qs;
       
       const displayQs = filteredQs.length > 0 ? filteredQs : qs;
-      const currentQ = displayQs[currentQuestionIndex >= displayQs.length ? 0 : currentQuestionIndex];
-      const progress = displayQs.length > 0 ? ((Math.min(currentQuestionIndex, displayQs.length - 1) + 1) / displayQs.length) * 100 : 0;
+
+      // Determine questions_per_page: per-tab override > questionnaire default > null (unlimited)
+      const activeSection = activeSectionId ? tabSections?.find(s => s.id === activeSectionId) : null;
+      const perPage = activeSection?.questions_per_page ?? qConfig?.questions_per_page ?? null;
+      const isUnlimited = perPage === null;
+
+      // currentQuestionIndex is now a PAGE index when paginated
+      const totalPages = isUnlimited ? 1 : Math.ceil(displayQs.length / perPage);
+      const pageIndex = isUnlimited ? 0 : Math.min(currentQuestionIndex, totalPages - 1);
+      const pageQs = isUnlimited
+        ? displayQs
+        : displayQs.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
+      const progress = displayQs.length > 0
+        ? (isUnlimited ? 100 : (((pageIndex + 1) * perPage >= displayQs.length ? displayQs.length : (pageIndex + 1) * perPage) / displayQs.length) * 100)
+        : 0;
+      const progressLabel = isUnlimited
+        ? `${displayQs.length} questions`
+        : `Page ${pageIndex + 1}/${totalPages} · Q${pageIndex * perPage + 1}-${Math.min((pageIndex + 1) * perPage, displayQs.length)}/${displayQs.length}`;
+
       return (
         <div className="space-y-3">
           <button type="button" onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
@@ -140,43 +157,46 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           )}
           <div>
             <div className="flex justify-between text-[11px] text-stone-400 mb-1">
-              <span>{qTitle} — Q{Math.min(currentQuestionIndex, displayQs.length - 1) + 1}/{displayQs.length}</span>
+              <span>{qTitle} — {progressLabel}</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
             </div>
           </div>
-          {currentQ && (
-            <div className="space-y-3">
-              {normalizeLegacyQuestionType(currentQ.question_type) === 'section_header' ? (
-                <div className="py-2 border-b border-stone-200 mb-2">
-                  <h3 className="text-[15px] font-bold text-stone-800">{currentQ.question_text}</h3>
-                  {currentQ.question_description && <p className="text-[12px] text-stone-400 mt-1">{currentQ.question_description}</p>}
-                </div>
-              ) : (
-                <>
-                  <h3 className="text-[14px] font-semibold text-stone-800">
-                    {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
-                  </h3>
-                  {currentQ.question_description && <p className="text-[12px] text-stone-400">{currentQ.question_description}</p>}
-                  {renderQuestionInput(currentQ)}
-                </>
-              )}
-            </div>
-          )}
-          {qs.length === 0 && (
+          {/* Render page of questions */}
+          <div className={`space-y-4 ${isUnlimited ? 'max-h-[50vh] overflow-y-auto pr-1' : ''}`} style={isUnlimited ? { scrollbarWidth: 'thin' } : undefined}>
+            {pageQs.map((currentQ, idx) => (
+              <div key={currentQ.id} className="space-y-2">
+                {normalizeLegacyQuestionType(currentQ.question_type) === 'section_header' ? (
+                  <div className="py-2 border-b border-stone-200 mb-2">
+                    <h3 className="text-[15px] font-bold text-stone-800">{currentQ.question_text}</h3>
+                    {currentQ.question_description && <p className="text-[12px] text-stone-400 mt-1">{currentQ.question_description}</p>}
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-[14px] font-semibold text-stone-800">
+                      {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
+                    </h3>
+                    {currentQ.question_description && <p className="text-[12px] text-stone-400">{currentQ.question_description}</p>}
+                    {renderQuestionInput(currentQ)}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+          {displayQs.length === 0 && (
             <p className="text-[12px] text-stone-400 italic py-4 text-center">No questions added yet.</p>
           )}
-          {qs.length > 0 && (
+          {displayQs.length > 0 && (
             <div className="flex justify-between pt-3 border-t border-stone-100">
               <button type="button"
-                onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1)); }}
-                disabled={currentQuestionIndex === 0}
+                onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(Math.max(0, pageIndex - 1)); }}
+                disabled={pageIndex === 0}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer">
                 <ChevronLeft size={12} /> Back
               </button>
-              {currentQuestionIndex === qs.length - 1 ? (
+              {pageIndex >= totalPages - 1 ? (
                 <button type="button"
                   onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
@@ -185,7 +205,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 </button>
               ) : (
                 <button type="button"
-                  onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(currentQuestionIndex + 1); }}
+                  onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(pageIndex + 1); }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
                   style={{ backgroundColor: primaryColor }}>
                   Next <ChevronRight size={12} />
