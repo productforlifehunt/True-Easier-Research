@@ -113,7 +113,8 @@ Consent forms, screening sets, and surveys are **all stored as questionnaire row
 All tables live in the `care_connector` schema on Supabase.
 
 - **`organization`** — Team/org records with `plan` tier, `ai_credit` balance, `ai_credits_monthly`, `ai_credits_used`, `ai_features_enabled`, `voice_features_enabled`, Stripe fields, and a `setting` JSONB for org-level config
-- **`researcher`** — Links an auth user (`user_id`) to an organization with `role`, `permission` (JSONB), `first_name`, `last_name`, `email`, and notification prefs (`email_notifications`, `response_alerts`, `weekly_digest`). Note: a `researchers` (plural) table also exists with similar columns — the save code uses `researcher` (singular), but the `research_project.researcher_id` FK points to `researchers` (plural)
+- **`researcher of a project: defined by — research_project.researcher_id
+-    participant of a project: defined by - enrollment.participant_id
 - **`research_project`** — The core project record. All fields are proper typed columns (no JSONB blobs except `app_layout`). Includes: title, type, status, feature flags, consent fields, screening toggle, participant config, schedule, compensation, sampling fields, notification fields, ecogram fields, display/behavior toggles, and app layout.
 - **`profile_question`** — Profile questions shown during participant onboarding. Belongs to a project. Has question text, type, options, required flag, and sort order.
 - **`logic_rule`** — Conditional skip/branching rules. Belongs to a project. References source question, condition, value, action, and target question.
