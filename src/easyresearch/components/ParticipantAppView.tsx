@@ -36,7 +36,7 @@ const ParticipantAppView: React.FC = () => {
     if (projectId) loadProjectData();
   }, [projectId]);
 
-  // Sync tab selection from URL search params (set by ParticipantLayout's bottom nav)
+  // Sync tab selection from URL search params if provided
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam && layout?.tabs?.length) {
@@ -44,7 +44,7 @@ const ParticipantAppView: React.FC = () => {
       setActiveQuestionnaireId(null);
       setCurrentPageIndex(0);
     }
-  }, [searchParams, layout]);
+  }, [searchParams]);
 
   const loadProjectData = async () => {
     try {
@@ -775,25 +775,29 @@ const ParticipantAppView: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Desktop horizontal tab bar */}
-      <div className="hidden md:flex gap-1 px-4 pt-3 bg-transparent">
-        {layout.bottom_nav.map(nav => {
-          const IconComp = ICON_MAP[nav.icon] || Home;
-          const isActive = currentTabId === nav.tab_id;
-          return (
-            <button key={nav.tab_id} type="button"
-              onClick={() => navigate(`/easyresearch/participant/${projectId}?tab=${nav.tab_id}`)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all"
-              style={{
-                backgroundColor: isActive ? primaryColor + '15' : 'transparent',
-                color: isActive ? primaryColor : '#a8a29e',
-              }}>
-              <IconComp size={16} />
-              {nav.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Inline horizontal tab bar — always visible for project tabs */}
+      {layout.bottom_nav.length > 1 && (
+        <div className="sticky top-14 z-30 bg-white/95 backdrop-blur-sm border-b border-stone-100">
+          <div className="max-w-lg mx-auto flex gap-0.5 px-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {layout.bottom_nav.map(nav => {
+              const IconComp = ICON_MAP[nav.icon] || Home;
+              const isActive = currentTabId === nav.tab_id;
+              return (
+                <button key={nav.tab_id} type="button"
+                  onClick={() => { setCurrentTabId(nav.tab_id); setActiveQuestionnaireId(null); setCurrentPageIndex(0); }}
+                  className="flex items-center gap-1.5 px-3 py-2.5 text-[13px] font-medium transition-all shrink-0 border-b-2"
+                  style={{
+                    borderColor: isActive ? primaryColor : 'transparent',
+                    color: isActive ? primaryColor : '#a8a29e',
+                  }}>
+                  <IconComp size={15} />
+                  {nav.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="px-4 pb-4">
         {activeQuestionnaireId ? (
