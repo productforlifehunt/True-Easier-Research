@@ -30,13 +30,22 @@ const ParticipantHome: React.FC = () => {
 
   const loadAllStudies = async () => {
     try {
-      // Load owned projects and enrollments in parallel
+      // First look up the researcher profile ID for this auth user
+      const { data: researcher } = await supabase
+        .from('researcher')
+        .select('id')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+
+      // Load owned projects (using researcher profile id) and enrollments in parallel
       const [ownedRes, enrolledRes] = await Promise.all([
-        supabase
-          .from('research_project')
-          .select('id, title, description, project_type, study_duration, status')
-          .eq('researcher_id', user!.id)
-          .order('created_at', { ascending: false }),
+        researcher
+          ? supabase
+              .from('research_project')
+              .select('id, title, description, project_type, study_duration, status')
+              .eq('researcher_id', researcher.id)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [], error: null }),
         supabase
           .from('enrollment')
           .select('id, project_id, created_at, status')
