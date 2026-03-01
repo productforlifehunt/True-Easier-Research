@@ -24,7 +24,7 @@ const EntryDetail = lazy(() => import('./pages/EntryDetail'));
 
 // EasyResearch Platform Components
 import EasyResearchAuth from './easyresearch/components/EasyResearchAuth';
-import { PublicLayout, ResearcherLayout, ParticipantLayout } from './easyresearch/components/layouts';
+import { EasyResearchShell } from './easyresearch/components/layouts';
 const LandingPage = React.lazy(() => import('./easyresearch/components/LandingPage'));
 const ParticipantHome = React.lazy(() => import('./easyresearch/components/ParticipantHome'));
 const ResearcherDashboard = React.lazy(() => import('./easyresearch/components/ResearcherDashboard'));
@@ -195,37 +195,35 @@ function App() {
                   
                   {/* ============================================ */}
                   {/* EASYRESEARCH PLATFORM ROUTES                */}
+                  {/* All wrapped in a single persistent shell    */}
                   {/* ============================================ */}
                   
-                  {/* PUBLIC ROUTES - Header Only (No Sidebar) */}
-                  <Route element={<PublicLayout />}>
+                  <Route element={<EasyResearchShell />}>
+                    {/* Public routes */}
                     <Route path="/easyresearch" element={<LandingPage />} />
                     <Route path="/easyresearch/landing" element={<Navigate to="/easyresearch" replace />} />
                     <Route path="/easyresearch/auth" element={<EasyResearchAuth />} />
                     <Route path="/easyresearch/templates" element={<TemplateLibrary />} />
                     <Route path="/easyresearch/pricing" element={<PricingPage />} />
-                  </Route>
-                  
-                  {/* RESEARCHER ROUTES - Header + Sidebar (Protected) */}
-                  <Route element={<RequireResearcher><ResearcherLayout /></RequireResearcher>}>
-                    <Route path="/easyresearch/dashboard" element={<ResearcherDashboard />} />
-                    <Route path="/easyresearch/create-survey" element={<SurveyBuilder />} />
-                    <Route path="/easyresearch/project/:projectId" element={<SurveyBuilder />} />
-                    <Route path="/easyresearch/project/:projectId/responses" element={<SurveyResponses />} />
-                    <Route path="/easyresearch/mobile/edit/:projectId" element={<MobileSurveyEditor />} />
-                    <Route path="/easyresearch/create" element={<ResearcherDashboard />} />
-                    <Route path="/easyresearch/responses" element={<ResponsesPage />} />
-                    {/* Analytics merged into Responses */}
-                    <Route path="/easyresearch/settings" element={<ResearcherSettings />} />
-                    <Route path="/easyresearch/participants" element={<ParticipantsPage />} />
-                  </Route>
-                  
-                  {/* PARTICIPANT ROUTES - all share ParticipantLayout (AppHeader + bottom nav) */}
-                  <Route element={<ParticipantLayout />}>
-                    <Route path="/easyresearch/home" element={<ParticipantHome />} />
-                    <Route path="/easyresearch/participant/home" element={<Navigate to="/easyresearch/home" replace />} />
+                    
+                    {/* Unified dashboard - shows both owned & enrolled studies */}
+                    <Route path="/easyresearch/dashboard" element={<ParticipantHome />} />
+                    <Route path="/easyresearch/home" element={<Navigate to="/easyresearch/dashboard" replace />} />
+                    
+                    {/* Researcher routes (protected) */}
+                    <Route path="/easyresearch/create-survey" element={<RequireResearcher><SurveyBuilder /></RequireResearcher>} />
+                    <Route path="/easyresearch/project/:projectId" element={<RequireResearcher><SurveyBuilder /></RequireResearcher>} />
+                    <Route path="/easyresearch/project/:projectId/responses" element={<RequireResearcher><SurveyResponses /></RequireResearcher>} />
+                    <Route path="/easyresearch/mobile/edit/:projectId" element={<RequireResearcher><MobileSurveyEditor /></RequireResearcher>} />
+                    <Route path="/easyresearch/create" element={<RequireResearcher><ResearcherDashboard /></RequireResearcher>} />
+                    <Route path="/easyresearch/responses" element={<RequireResearcher><ResponsesPage /></RequireResearcher>} />
+                    <Route path="/easyresearch/settings" element={<RequireResearcher><ResearcherSettings /></RequireResearcher>} />
+                    <Route path="/easyresearch/participants" element={<RequireResearcher><ParticipantsPage /></RequireResearcher>} />
+                    
+                    {/* Participant routes */}
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
                     <Route path="/easyresearch/participant/join" element={<ParticipantJoin />} />
+                    <Route path="/easyresearch/participant/home" element={<Navigate to="/easyresearch/dashboard" replace />} />
                     <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />
                     <Route path="/easyresearch/participant/:projectId/dashboard" element={<SurveyViewRouter />} />
                     <Route path="/easyresearch/participant/:projectId/timeline" element={<SurveyViewRouter />} />
