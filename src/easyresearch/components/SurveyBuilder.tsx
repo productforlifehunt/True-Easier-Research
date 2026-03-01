@@ -11,6 +11,7 @@ import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
 import ComponentBuilder from './ComponentBuilder';
+import AIEditChatbot from './AIEditChatbot';
 
 import toast from 'react-hot-toast';
 
@@ -1078,6 +1079,14 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
       </div>
+
+      {/* AI Edit Chatbot */}
+      <AIEditChatbot
+        questionnaires={questionnaireConfigs}
+        projectTitle={project.title || 'Untitled'}
+        projectId={projectId}
+        onUpdate={setQuestionnaireConfigs}
+      />
     </div>
   );
 };
