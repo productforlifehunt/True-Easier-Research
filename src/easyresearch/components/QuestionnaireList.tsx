@@ -27,10 +27,12 @@ export interface QuestionnaireConfig {
   consent_required?: boolean;
   disqualify_logic?: any;
   display_mode?: 'all_at_once' | 'one_per_page' | 'section_per_page';
+  questions_per_page?: number | null; // null = unlimited (all at once), number = paginate by N
   tab_sections?: Array<{
     id: string;
     label: string;
     question_ids: string[];
+    questions_per_page?: number | null; // per-tab override: null = unlimited, number = paginate by N
   }>;
 }
 
@@ -604,7 +606,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <FileText size={10} /> {q.questions.length} question{q.questions.length !== 1 ? 's' : ''}
                                 </span>
                                 <span className="text-[11px] text-stone-400 flex items-center gap-1">
-                                  <LayoutList size={10} /> {q.display_mode === 'all_at_once' ? 'All at once' : q.display_mode === 'section_per_page' ? 'By section' : 'One per page'}
+                                  <LayoutList size={10} /> {q.questions_per_page == null ? '∞/page' : `${q.questions_per_page}/page`}
                                 </span>
                                 {q.notification_enabled && (
                                   <span className="text-[11px] text-emerald-500 flex items-center gap-1">
@@ -677,25 +679,55 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               </div>
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> Display Mode</h5>
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> Questions Per Page</h5>
                                 <div>
-                                  <CustomDropdown
-                                    options={[
-                                      { value: 'one_per_page', label: 'One question per page' },
-                                      { value: 'all_at_once', label: 'All questions on one page' },
-                                      { value: 'section_per_page', label: 'One section per page' },
-                                    ]}
-                                    value={q.display_mode || 'one_per_page'}
-                                    onChange={(v) => updateQuestionnaire(q.id, { display_mode: v as any })}
-                                    placeholder="Select display mode"
-                                  />
-                                  <p className="text-[10px] text-stone-400 mt-1.5">
-                                    {(q.display_mode || 'one_per_page') === 'all_at_once'
-                                      ? 'All questions shown on a single scrollable page.'
-                                      : (q.display_mode || 'one_per_page') === 'section_per_page'
-                                        ? 'Questions grouped by tab sections, one section per page.'
-                                        : 'One question at a time with back/next navigation.'}
-                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      value={q.questions_per_page ?? ''}
+                                      onChange={(e) => {
+                                        const val = e.target.value === '' ? null : Math.max(1, parseInt(e.target.value) || 1);
+                                        updateQuestionnaire(q.id, { questions_per_page: val });
+                                      }}
+                                      placeholder="∞"
+                                      className="w-20 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                                    />
+                                    <span className="text-[11px] text-stone-400">
+                                      {q.questions_per_page === null || q.questions_per_page === undefined
+                                        ? 'Unlimited — all questions on one page'
+                                        : q.questions_per_page === 1
+                                          ? '1 question per page (paginated)'
+                                          : `${q.questions_per_page} questions per page`}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-stone-400 mt-1.5">Leave empty for unlimited (all on one page). Set to 1 for one-at-a-time navigation.</p>
+                                  {q.tab_sections && q.tab_sections.length > 0 && (
+                                    <div className="mt-3 space-y-2">
+                                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">Per-tab overrides:</p>
+                                      {q.tab_sections.map((section, si) => (
+                                        <div key={section.id} className="flex items-center gap-2">
+                                          <span className="text-[11px] text-stone-500 w-20 truncate" title={section.label}>{section.label}</span>
+                                          <input
+                                            type="number"
+                                            min={1}
+                                            value={section.questions_per_page ?? ''}
+                                            onChange={(e) => {
+                                              const val = e.target.value === '' ? undefined : Math.max(1, parseInt(e.target.value) || 1);
+                                              const sections = [...(q.tab_sections || [])];
+                                              sections[si] = { ...sections[si], questions_per_page: val ?? undefined };
+                                              updateQuestionnaire(q.id, { tab_sections: sections });
+                                            }}
+                                            placeholder="Default"
+                                            className="w-20 px-2 py-1 rounded-lg text-[11px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                                          />
+                                          <span className="text-[10px] text-stone-400">
+                                            {section.questions_per_page == null ? '(uses default)' : `${section.questions_per_page}/page`}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 

@@ -84,7 +84,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [lastAnsweredId, setLastAnsweredId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [isRecording, setIsRecording] = useState<string | null>(null);
-  const [displayMode, setDisplayMode] = useState<'one_per_page' | 'all_at_once' | 'section_per_page'>('one_per_page');
+  const [questionsPerPage, setQuestionsPerPage] = useState<number | null>(1); // null = unlimited
 
   useEffect(() => {
     if (projectId) {
@@ -226,11 +226,11 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           if (questionnaireId) {
             const { data: qRow } = await supabase
               .from('questionnaire')
-              .select('display_mode')
+              .select('questions_per_page')
               .eq('id', questionnaireId)
               .maybeSingle();
-            if (qRow?.display_mode) {
-              setDisplayMode(qRow.display_mode);
+            if (qRow) {
+              setQuestionsPerPage(qRow.questions_per_page ?? null);
             }
           }
         }
@@ -569,8 +569,8 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const handleSubmit = async () => {
     if (submitting) return;
 
-    // In all-at-once mode, validate all questions before submitting
-    if (displayMode === 'all_at_once') {
+    // When showing multiple questions per page, validate all visible before submitting
+    if (questionsPerPage === null || questionsPerPage > 1) {
       const { errors } = validateSurveyResponse(orderedVisibleQuestions, responses);
       const hasErrors = Object.values(errors).some(e => e.length > 0);
       if (hasErrors) {
@@ -1665,119 +1665,98 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           </div>
         )}
 
-        {/* All-at-once mode: show all questions on one scrollable page */}
-        {displayMode === 'all_at_once' ? (
-          <>
-            <div className="space-y-6 mb-8">
-              {orderedVisibleQuestions.map((q, idx) => (
-                <div key={q.id} id={`question-${q.id}`} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
-                  <div className="mb-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{idx + 1}. </span>
-                        {q.question_text}
-                        {q.required && <span className="text-red-500 ml-1">*</span>}
-                      </h2>
-                    </div>
-                    {q.question_description && (
-                      <p style={{ color: 'var(--text-secondary)' }}>{q.question_description}</p>
-                    )}
-                  </div>
-                  {renderQuestion(q, responses[q.id])}
-                  {fieldErrors[q.id]?.length > 0 && (
-                    <div className="mt-4 text-sm text-red-600">
-                      {fieldErrors[q.id].map((err, eIdx) => <div key={eIdx}>{err}</div>)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            {(!isCompleted || editMode) && (
-              <div className="flex justify-center mb-8">
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: 'var(--color-green)' }}
-                >
-                  {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
-                  <Check size={20} />
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            {/* One-per-page mode (default) */}
-            <div className="space-y-6 mb-8">
-              {currentQuestion && (
-                <div key={currentQuestion.id} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
-                  <div className="mb-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{currentQuestionIndex + 1}. </span>
-                        {currentQuestion.question_text}
-                        {currentQuestion.required && (
-                          <span className="text-red-500 ml-1">*</span>
+        {/* Questions rendering based on questionsPerPage */}
+        {(() => {
+          const isUnlimited = questionsPerPage === null;
+          const perPage = questionsPerPage || orderedVisibleQuestions.length;
+          const totalPages = Math.ceil(orderedVisibleQuestions.length / perPage);
+          const currentPage = Math.floor(currentQuestionIndex / perPage);
+          const pageStart = currentPage * perPage;
+          const pageQuestions = isUnlimited
+            ? orderedVisibleQuestions
+            : orderedVisibleQuestions.slice(pageStart, pageStart + perPage);
+          const isLastPage = isUnlimited || currentPage >= totalPages - 1;
+
+          return (
+            <>
+              <div className="space-y-6 mb-8">
+                {pageQuestions.map((q, idx) => {
+                  const globalIdx = isUnlimited ? idx : pageStart + idx;
+                  return (
+                    <div key={q.id} id={`question-${q.id}`} className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
+                      <div className="mb-6">
+                        <div className="flex items-start justify-between mb-2">
+                          <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{globalIdx + 1}. </span>
+                            {q.question_text}
+                            {q.required && <span className="text-red-500 ml-1">*</span>}
+                          </h2>
+                        </div>
+                        {q.question_description && (
+                          <p style={{ color: 'var(--text-secondary)' }}>{q.question_description}</p>
                         )}
-                      </h2>
+                      </div>
+                      {renderQuestion(q, responses[q.id])}
+                      {fieldErrors[q.id]?.length > 0 && (
+                        <div className="mt-4 text-sm text-red-600">
+                          {fieldErrors[q.id].map((err, eIdx) => <div key={eIdx}>{err}</div>)}
+                        </div>
+                      )}
                     </div>
-                    {currentQuestion.question_description && (
-                      <p style={{ color: 'var(--text-secondary)' }}>
-                        {currentQuestion.question_description}
-                      </p>
-                    )}
-                  </div>
+                  );
+                })}
+              </div>
 
-                  {renderQuestion(currentQuestion, responses[currentQuestion.id])}
-
-                  {fieldErrors[currentQuestion.id]?.length > 0 && (
-                    <div className="mt-4 text-sm text-red-600">
-                      {fieldErrors[currentQuestion.id].map((err, idx) => (
-                        <div key={idx}>{err}</div>
-                      ))}
-                    </div>
+              {/* Navigation — only show when paginated */}
+              {!isUnlimited && totalPages > 1 && (
+                <div className="flex items-center justify-between mb-8">
+                  <button
+                    onClick={() => {
+                      if (project?.disable_backtracking) return;
+                      setCurrentQuestionIndex(Math.max(0, pageStart - perPage));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={currentPage === 0 || project?.disable_backtracking}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
+                    style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
+                  >
+                    <ChevronLeft size={16} /> Back
+                  </button>
+                  <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  {!isLastPage && (
+                    <button
+                      onClick={() => {
+                        setCurrentQuestionIndex(pageStart + perPage);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
+                      style={{ backgroundColor: 'var(--color-green)' }}
+                    >
+                      Next <ChevronRight size={16} />
+                    </button>
                   )}
                 </div>
               )}
-            </div>
 
-            <div className="flex items-center justify-between mb-8">
-              <button
-                onClick={handlePreviousQuestion}
-                disabled={currentQuestionIndex === 0 || project?.disable_backtracking}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-              >
-                <ChevronLeft size={16} /> Back
-              </button>
-              {currentQuestionIndex < orderedVisibleQuestions.length - 1 ? (
-                <button
-                  onClick={handleNextQuestion}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white"
-                  style={{ backgroundColor: 'var(--color-green)' }}
-                >
-                  Next <ChevronRight size={16} />
-                </button>
-              ) : null}
-            </div>
-
-            {/* Submit Button */}
-            {(!isCompleted || editMode) && currentQuestionIndex >= orderedVisibleQuestions.length - 1 && (
-              <div className="flex justify-center">
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: 'var(--color-green)' }}
-                >
-                  {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
-                  <Check size={20} />
-                </button>
-              </div>
-            )}
-          </>
-        )}
+              {/* Submit Button — show on last page */}
+              {(!isCompleted || editMode) && isLastPage && (
+                <div className="flex justify-center mb-8">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="flex items-center gap-2 px-8 py-4 rounded-lg font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: 'var(--color-green)' }}
+                  >
+                    {submitting ? (isCompleted ? 'Saving...' : 'Submitting...') : (isCompleted ? 'Save' : 'Submit Survey')}
+                    <Check size={20} />
+                  </button>
+                </div>
+              )}
+            </>
+          );
+        })()}
           </>
         )}
         
