@@ -23,9 +23,13 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 
 
 
-## 6. RESEARCH PROJECT — THE CORE 
+## 6. RESEARCH PROJECT 
 
 Every study lives in the `research_project` table. 
+
+## 7. USER ROLE
+
+user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can only sumbit or can only join a research, a user can be both researcher and a participant (join other's research), the actual dashboard display logic is defined by user what he wants to get displayed
 
 
 
