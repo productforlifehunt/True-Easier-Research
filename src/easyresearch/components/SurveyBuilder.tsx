@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Save, ArrowLeft, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -161,6 +161,30 @@ const SurveyBuilder: React.FC = () => {
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
   const [participantTypes, setParticipantTypes] = useState<ParticipantType[]>([]);
   const [appLayout, setAppLayout] = useState<AppLayout>(getDefaultLayout([]));
+  const appLayoutInitializedRef = useRef(false);
+
+  // Auto-save app_layout to DB whenever it changes (debounced)
+  const layoutSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    // Skip the initial mount and the first load from DB
+    if (!appLayoutInitializedRef.current) return;
+    if (!projectId) return;
+
+    if (layoutSaveTimerRef.current) clearTimeout(layoutSaveTimerRef.current);
+    layoutSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await supabase
+          .from('research_project')
+          .update({ app_layout: appLayout })
+          .eq('id', projectId);
+        console.log('[AutoSave] app_layout persisted');
+      } catch (err) {
+        console.error('[AutoSave] Failed to persist app_layout:', err);
+      }
+    }, 1500);
+
+    return () => { if (layoutSaveTimerRef.current) clearTimeout(layoutSaveTimerRef.current); };
+  }, [appLayout, projectId]);
 
   const projectStatus = (project as any)?.status || 'draft';
 
@@ -360,6 +384,8 @@ const SurveyBuilder: React.FC = () => {
           if (projectData.app_layout && Object.keys(projectData.app_layout).length > 0) {
             setAppLayout(projectData.app_layout);
           }
+          // Mark layout as initialized so auto-save kicks in only after DB load
+          setTimeout(() => { appLayoutInitializedRef.current = true; }, 100);
 
           // Load logic rules from logic_rule table
           const { data: logicRows } = await supabase
