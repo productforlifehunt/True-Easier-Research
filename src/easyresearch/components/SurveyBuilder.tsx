@@ -871,25 +871,24 @@ const SurveyBuilder: React.FC = () => {
       {/* Header */}
       <div className="border-b border-stone-200/60 bg-white/80 backdrop-blur-sm sticky top-14 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <button
                 onClick={() => navigate('/easyresearch/dashboard')}
-                className="p-2 rounded-xl hover:bg-stone-100 transition-colors"
+                className="p-1.5 sm:p-2 rounded-xl hover:bg-stone-100 transition-colors shrink-0"
               >
                 <ArrowLeft size={18} className="text-stone-500" />
               </button>
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
                   <input
                     type="text"
                     value={project.title || ''}
                     onChange={(e) => setProject({ ...project, title: e.target.value })}
                     placeholder="Untitled Project"
-                    className="text-lg font-semibold bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-stone-800 placeholder:text-stone-300"
-                    style={{ minWidth: '200px' }}
+                    className="text-base sm:text-lg font-semibold bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-stone-800 placeholder:text-stone-300 min-w-0 w-full truncate"
                   />
-                  <Pencil size={13} className="text-stone-400" />
+                  <Pencil size={13} className="text-stone-400 shrink-0" />
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
@@ -903,12 +902,12 @@ const SurveyBuilder: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {projectId && (
                 <button
                   onClick={() => updatePublishStatus(projectStatus === 'published' ? 'draft' : 'published')}
                   disabled={saving}
-                  className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-all ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[12px] sm:text-[13px] font-medium border transition-all ${
                     projectStatus === 'published'
                       ? 'border-stone-200 text-stone-600 hover:bg-stone-50'
                       : 'border-emerald-400 bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
@@ -920,10 +919,11 @@ const SurveyBuilder: React.FC = () => {
               <button
                 onClick={saveProject}
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[13px] font-medium hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
+                className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[12px] sm:text-[13px] font-medium hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
               >
                 <Save size={14} />
-                {saving ? 'Saving...' : 'Save'}
+                <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
+                <span className="sm:hidden">{saving ? '...' : 'Save'}</span>
               </button>
             </div>
           </div>
