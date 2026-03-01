@@ -220,25 +220,27 @@ function App() {
                     <Route path="/easyresearch/participants" element={<ParticipantsPage />} />
                   </Route>
                   
-                  {/* PARTICIPANT ROUTES - Header + Bottom Nav */}
+                  {/* PARTICIPANT HUB ROUTES - with ParticipantLayout (header + bottom nav) */}
                   <Route element={<ParticipantLayout />}>
                     <Route path="/easyresearch/home" element={<ParticipantHome />} />
                     <Route path="/easyresearch/participant/home" element={<Navigate to="/easyresearch/home" replace />} />
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
                     <Route path="/easyresearch/participant/join" element={<ParticipantJoin />} />
-                    <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />
-                    <Route path="/easyresearch/participant/:projectId/dashboard" element={<SurveyViewRouter />} />
-                    <Route path="/easyresearch/participant/:projectId/timeline" element={<SurveyViewRouter />} />
-                    <Route path="/easyresearch/participant/:projectId/settings" element={<ParticipantSettings />} />
-                    <Route path="/easyresearch/survey/:projectId/complete" element={
-                      <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'var(--bg-primary)'}}>
-                        <div className="text-center">
-                          <h1 className="text-3xl font-bold mb-4" style={{color: 'var(--text-primary)'}}>Thank You!</h1>
-                          <p style={{color: 'var(--text-secondary)'}}>Your response has been recorded.</p>
-                        </div>
-                      </div>
-                    } />
                   </Route>
+
+                  {/* PROJECT ROUTES - standalone, ParticipantAppView has its own layout-driven nav */}
+                  <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />
+                  <Route path="/easyresearch/participant/:projectId/dashboard" element={<SurveyViewRouter />} />
+                  <Route path="/easyresearch/participant/:projectId/timeline" element={<SurveyViewRouter />} />
+                  <Route path="/easyresearch/participant/:projectId/settings" element={<ParticipantSettings />} />
+                  <Route path="/easyresearch/survey/:projectId/complete" element={
+                    <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'var(--bg-primary)'}}>
+                      <div className="text-center">
+                        <h1 className="text-3xl font-bold mb-4" style={{color: 'var(--text-primary)'}}>Thank You!</h1>
+                        <p style={{color: 'var(--text-secondary)'}}>Your response has been recorded.</p>
+                      </div>
+                    </div>
+                  } />
                   
                   {/* EasyResearch catch-all — stay within platform */}
                   <Route path="/easyresearch/*" element={<Navigate to="/easyresearch" replace />} />
