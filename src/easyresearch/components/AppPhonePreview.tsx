@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, 
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionRenderer from './shared/QuestionRenderer';
+import QuestionnaireView from './shared/QuestionnaireView';
+import ElementRenderer from './shared/ElementRenderer';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
@@ -73,494 +75,52 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     />
   );
 
-  // ── Questionnaire card/expanded view ──
+  // ── Questionnaire card/expanded view (shared) ──
   const renderQuestionnaireCard = (qId: string, qTitle: string) => {
-    const qs = getQuestionsForQuestionnaire(qId);
     const qConfig = questionnaires?.find(q => q.id === qId);
-
-    if (activeQuestionnaireId === qId) {
-      const tabSections = qConfig?.tab_sections;
-      const hasTabSections = tabSections && tabSections.length > 0;
-      
-      const filteredQs = hasTabSections && activeSectionId
-        ? qs.filter(q => tabSections.find(s => s.id === activeSectionId)?.question_ids.includes(q.id))
-        : hasTabSections
-          ? qs.filter(q => !tabSections.some(s => s.question_ids.includes(q.id)))
-          : qs;
-      
-      const displayQs = filteredQs.length > 0 ? filteredQs : qs;
-
-      // Determine questions_per_page: per-tab override > questionnaire default > null (unlimited)
-      const activeSection = activeSectionId ? tabSections?.find(s => s.id === activeSectionId) : null;
-      const perPage = activeSection?.questions_per_page ?? qConfig?.questions_per_page ?? null;
-      const isUnlimited = perPage === null;
-
-      // currentQuestionIndex is now a PAGE index when paginated
-      const totalPages = isUnlimited ? 1 : Math.ceil(displayQs.length / perPage);
-      const pageIndex = isUnlimited ? 0 : Math.min(currentQuestionIndex, totalPages - 1);
-      const pageQs = isUnlimited
-        ? displayQs
-        : displayQs.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
-      const progress = displayQs.length > 0
-        ? (isUnlimited ? 100 : (((pageIndex + 1) * perPage >= displayQs.length ? displayQs.length : (pageIndex + 1) * perPage) / displayQs.length) * 100)
-        : 0;
-      const progressLabel = isUnlimited
-        ? `${displayQs.length} questions`
-        : `Page ${pageIndex + 1}/${totalPages} · Q${pageIndex * perPage + 1}-${Math.min((pageIndex + 1) * perPage, displayQs.length)}/${displayQs.length}`;
-
-      return (
-        <div className="space-y-3">
-          <button type="button" onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-            className="flex items-center gap-1 text-[12px] text-stone-500 hover:text-stone-700 cursor-pointer">
-            <ChevronLeft size={14} /> Back to {activeTab?.label || 'Home'}
-          </button>
-          {/* Tab section navigation */}
-          {hasTabSections && (
-            <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <button onClick={(e) => { e.stopPropagation(); setActiveSectionId(null); setCurrentQuestionIndex(0); }}
-                className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all shrink-0"
-                style={{ backgroundColor: !activeSectionId ? primaryColor : '#f5f5f4', color: !activeSectionId ? 'white' : '#a8a29e' }}>
-                General
-              </button>
-              {tabSections.map(s => (
-                <button key={s.id} onClick={(e) => { e.stopPropagation(); setActiveSectionId(s.id); setCurrentQuestionIndex(0); }}
-                  className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all shrink-0"
-                  style={{ backgroundColor: activeSectionId === s.id ? primaryColor : '#f5f5f4', color: activeSectionId === s.id ? 'white' : '#a8a29e' }}>
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          )}
-          <div>
-            <div className="flex justify-between text-[11px] text-stone-400 mb-1">
-              <span>{qTitle} — {progressLabel}</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
-            </div>
-          </div>
-          {/* Render page of questions */}
-          <div className={`space-y-4 ${isUnlimited ? 'max-h-[50vh] overflow-y-auto pr-1' : ''}`} style={isUnlimited ? { scrollbarWidth: 'thin' } : undefined}>
-            {pageQs.map((currentQ, idx) => (
-              <div key={currentQ.id} className="space-y-2">
-                {normalizeLegacyQuestionType(currentQ.question_type) === 'section_header' ? (
-                  <div className="py-2 border-b border-stone-200 mb-2">
-                    <h3 className="text-[15px] font-bold text-stone-800">{currentQ.question_text}</h3>
-                    {currentQ.question_description && <p className="text-[12px] text-stone-400 mt-1">{currentQ.question_description}</p>}
-                  </div>
-                ) : (
-                  <>
-                    <h3 className="text-[14px] font-semibold text-stone-800">
-                      {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
-                    </h3>
-                    {currentQ.question_description && <p className="text-[12px] text-stone-400">{currentQ.question_description}</p>}
-                    {renderQuestionInput(currentQ)}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-          {displayQs.length === 0 && (
-            <p className="text-[12px] text-stone-400 italic py-4 text-center">No questions added yet.</p>
-          )}
-          {displayQs.length > 0 && (
-            <div className="flex justify-between pt-3 border-t border-stone-100">
-              <button type="button"
-                onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(Math.max(0, pageIndex - 1)); }}
-                disabled={pageIndex === 0}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer">
-                <ChevronLeft size={12} /> Back
-              </button>
-              {pageIndex >= totalPages - 1 ? (
-                <button type="button"
-                  onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
-                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
-                  style={{ backgroundColor: primaryColor }}>
-                  Submit <Check size={12} />
-                </button>
-              ) : (
-                <button type="button"
-                  onClick={(e) => { e.stopPropagation(); setCurrentQuestionIndex(pageIndex + 1); }}
-                  className="flex items-center gap-1 px-4 py-1.5 rounded-full text-[12px] font-medium text-white cursor-pointer hover:opacity-90"
-                  style={{ backgroundColor: primaryColor }}>
-                  Next <ChevronRight size={12} />
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Card view
+    if (!qConfig) return null;
     return (
-      <button type="button"
-        onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(qId); setCurrentQuestionIndex(0); }}
-        className="w-full p-3.5 rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left cursor-pointer">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-[13px] font-semibold text-stone-800">{qTitle}</h4>
-            <p className="text-[11px] text-stone-400 mt-0.5">
-              {qs.length} questions · {qConfig?.estimated_duration || 5} min{qConfig?.frequency ? ` · ${qConfig.frequency}` : ''}
-            </p>
-          </div>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: primaryColor }}>
-            <ChevronRight size={14} className="text-white" />
-          </div>
-        </div>
-      </button>
+      <QuestionnaireView
+        qConfig={qConfig}
+        activeQuestionnaireId={activeQuestionnaireId}
+        activeSectionId={activeSectionId}
+        currentPageIndex={currentQuestionIndex}
+        responses={responses}
+        primaryColor={primaryColor}
+        backLabel={activeTab?.label || 'Home'}
+        compact={true}
+        stopPropagation={true}
+        onOpenQuestionnaire={(id) => { setActiveQuestionnaireId(id); setCurrentQuestionIndex(0); }}
+        onCloseQuestionnaire={() => { setActiveQuestionnaireId(null); setCurrentQuestionIndex(0); }}
+        onSetSection={(sId) => { setActiveSectionId(sId); }}
+        onSetPage={setCurrentQuestionIndex}
+        onResponse={handleResponse}
+      />
     );
   };
 
-  // ── Render any layout element ──
+  // ── Render any layout element (shared) ──
   const renderElement = (el: LayoutElement) => {
     if (el.config.visible === false) return null;
     // Filter by participant type if a filter is active
     if (filterParticipantTypeId && el.config.participant_types && el.config.participant_types.length > 0) {
       if (!el.config.participant_types.includes(filterParticipantTypeId)) return null;
     }
-
-    switch (el.type) {
-      case 'progress': {
-        const progressStyle = el.config.progress_style || 'bar';
-        // Calculate real progress from study duration and questionnaire counts
-        const totalQuestionnaires = questionnaires?.filter(q => q.questionnaire_type === 'survey').length || 1;
-        const totalSurveySlots = totalQuestionnaires * studyDuration;
-        const dayNum = Math.min(Math.ceil(studyDuration * 0.4), studyDuration); // Simulated current day based on study config
-        const completedSlots = Math.floor(dayNum * totalQuestionnaires * 0.7); // ~70% completion rate simulation
-        const progressPercent = totalSurveySlots > 0 ? Math.round((completedSlots / totalSurveySlots) * 100) : 0;
-        const todayEntries = Math.min(totalQuestionnaires, Math.ceil(totalQuestionnaires * 0.6));
-        
-        if (progressStyle === 'ring') {
-          const radius = 28;
-          const circumference = 2 * Math.PI * radius;
-          const dashoffset = circumference * (1 - progressPercent / 100);
-          return (
-            <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
-              <div className="flex items-center gap-4">
-                <div className="relative shrink-0">
-                  <svg width="72" height="72" viewBox="0 0 72 72">
-                    <circle cx="36" cy="36" r={radius} fill="none" stroke="#e7e5e4" strokeWidth="5" />
-                    <circle cx="36" cy="36" r={radius} fill="none" stroke={primaryColor} strokeWidth="5"
-                      strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashoffset}
-                      transform="rotate(-90 36 36)" />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[12px] font-bold" style={{ color: primaryColor }}>
-                    {progressPercent}%
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
-                  <p className="text-[10px] text-stone-400 mt-0.5">Day {dayNum} of {studyDuration}</p>
-                  <p className="text-[10px] text-stone-400">{todayEntries} entries today · {completedSlots} total</p>
-                </div>
-              </div>
-            </div>
-          );
-        }
-        
-        if (progressStyle === 'steps') {
-          return (
-            <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
-                <span className="text-[11px] text-stone-400">Day {dayNum} of {studyDuration}</span>
-              </div>
-              <div className="flex gap-1">
-                {Array.from({ length: studyDuration }, (_, i) => (
-                  <div key={i} className="flex-1 h-2 rounded-full transition-all"
-                    style={{ backgroundColor: i < dayNum ? primaryColor : '#e7e5e4' }} />
-                ))}
-              </div>
-              <div className="flex justify-between mt-2 text-[10px] text-stone-400">
-                <span>{todayEntries} entries today</span><span>{completedSlots} total</span>
-              </div>
-            </div>
-          );
-        }
-        
-        // Default: bar
-        return (
-          <div className="p-4 rounded-xl" style={{ backgroundColor: primaryColor + '12' }}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>{el.config.title || 'Study Progress'}</span>
-              <span className="text-[11px] text-stone-400">Day {dayNum} of {studyDuration}</span>
-            </div>
-            <div className="h-2 bg-white/60 rounded-full overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${progressPercent}%`, backgroundColor: primaryColor }} />
-            </div>
-            <div className="flex justify-between mt-2 text-[10px] text-stone-400">
-              <span>{todayEntries} entries today</span><span>{completedSlots} total</span>
-            </div>
-          </div>
-        );
-      }
-      case 'questionnaire':
-        if (el.config.questionnaire_id) {
-          const q = questionnaires?.find(qc => qc.id === el.config.questionnaire_id);
-          return renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire');
-        }
-        return null;
-      case 'consent': {
-        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
-        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
-        }
-        return (
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🛡️</span>
-              <h4 className="text-[13px] font-semibold text-amber-800">{el.config.title || 'Consent Form'}</h4>
-            </div>
-            {linkedQ ? (
-              <>
-                <p className="text-[11px] text-amber-600">{linkedQ.description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
-                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
-                  className="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-medium hover:bg-amber-600 transition-colors">
-                  Review & Sign
-                </button>
-              </>
-            ) : (
-              <p className="text-[11px] text-amber-600 italic">No consent form linked</p>
-            )}
-          </div>
-        );
-      }
-      case 'screening': {
-        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
-        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
-        }
-        return (
-          <div className="p-4 rounded-xl bg-orange-50 border border-orange-200">
-            <h4 className="text-[13px] font-semibold text-orange-800">📝 {el.config.title || 'Screening'}</h4>
-            {linkedQ ? (
-              <>
-                <p className="text-[11px] text-orange-600 mt-1">{linkedQ.questions?.length || 0} screening questions</p>
-                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
-                  className="mt-2 px-3 py-1.5 rounded-lg bg-orange-500 text-white text-[11px] font-medium hover:bg-orange-600 transition-colors">
-                  Start Screening
-                </button>
-              </>
-            ) : (
-              <p className="text-[11px] text-orange-600 mt-1 italic">No screening linked</p>
-            )}
-          </div>
-        );
-      }
-      case 'profile': {
-        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
-        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
-        }
-        return (
-          <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
-            <h4 className="text-[13px] font-semibold text-stone-800">👤 {el.config.title || 'Profile'}</h4>
-            {linkedQ ? (
-              <>
-                <p className="text-[11px] text-stone-400 mt-1">{linkedQ.questions?.length || 0} profile fields</p>
-                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
-                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
-                  Edit Profile
-                </button>
-              </>
-            ) : (
-              <div className="mt-2 space-y-2">
-                <div className="h-2.5 bg-stone-100 rounded-full w-3/4" />
-                <div className="h-2.5 bg-stone-100 rounded-full w-1/2" />
-                <p className="text-[10px] text-stone-400 italic">No profile linked</p>
-              </div>
-            )}
-          </div>
-        );
-      }
-      case 'ecogram': {
-        const ecogramEnabled = true; // Rendered if placed in layout
-        return (
-          <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
-            <h4 className="text-[13px] font-semibold text-violet-800">🔗 {el.config.title || 'Ecogram'}</h4>
-            <p className="text-[10px] text-violet-500 mt-1">Interactive care network diagram</p>
-            <div className="flex justify-center mt-3">
-              <div className="relative">
-                <div className="w-12 h-12 rounded-full bg-violet-300 border-3 border-violet-400 flex items-center justify-center text-[10px] text-white font-bold">You</div>
-                {[45, 135, 225, 315].map((angle, i) => (
-                  <div key={i} className="absolute w-6 h-6 rounded-full bg-violet-200 border border-violet-300"
-                    style={{ top: `${24 - 28 * Math.cos(angle * Math.PI / 180)}px`, left: `${24 + 28 * Math.sin(angle * Math.PI / 180)}px` }} />
-                ))}
-              </div>
-            </div>
-            <p className="text-[9px] text-center text-violet-400 mt-2">Tap to edit your network</p>
-          </div>
-        );
-      }
-      case 'timeline': {
-        const days = el.config.timeline_days || studyDuration || 7;
-        const startH = el.config.timeline_start_hour ?? 0;
-        const endH = el.config.timeline_end_hour ?? 23;
-        const allHours: number[] = [];
-        for (let h = startH; h <= endH; h++) allHours.push(h);
-        return (
-          <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
-            <h4 className="text-[13px] font-semibold text-stone-800">📅 {el.config.title || 'Study Timeline'}</h4>
-            <div className="flex gap-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              {Array.from({ length: Math.min(days, 30) }, (_, i) => i + 1).map(d => (
-                <button key={d} onClick={(e) => { e.stopPropagation(); setSelectedTimelineDay(d); }}
-                  className="px-2 py-1 rounded-lg text-[10px] font-medium transition-all shrink-0"
-                  style={{ backgroundColor: d === selectedTimelineDay ? primaryColor : 'transparent', color: d === selectedTimelineDay ? 'white' : '#a8a29e' }}>
-                  D{d}
-                </button>
-              ))}
-              {days > 30 && <span className="text-[9px] text-stone-400 self-center ml-1">+{days - 30}</span>}
-            </div>
-            <div className="space-y-0.5 max-h-48 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-              {allHours.map(h => {
-                const hasQ = h % 2 === 0 && h >= 8 && h <= 20;
-                const isCompleted = hasQ && h <= 10 && selectedTimelineDay <= 2;
-                const isMissed = hasQ && h >= 18 && selectedTimelineDay < 2;
-                const isScheduled = hasQ && !isCompleted && !isMissed;
-                const targetQ = questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0];
-                return (
-                  <div key={h} className="flex items-center gap-2">
-                    <span className="text-[9px] text-stone-300 w-7 text-right shrink-0 font-mono">{String(h).padStart(2, '0')}:00</span>
-                    <div className={`flex-1 rounded-md transition-all ${hasQ ? 'py-1.5 px-2 cursor-pointer hover:opacity-80' : 'h-px bg-stone-50'}`}
-                      onClick={hasQ && targetQ ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(targetQ.id); setCurrentQuestionIndex(0); } : undefined}
-                      style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : undefined }}>
-                      {hasQ && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-medium" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                            {targetQ?.title || 'Survey'}
-                          </span>
-                          <span className="text-[9px]" style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                            {isCompleted ? '✓' : isMissed ? '✗' : '○'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-3">
-              <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> Done</span>
-              <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
-              <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-red-300 inline-block" /> Missed</span>
-            </div>
-          </div>
-        );
-      }
-      case 'help': {
-        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
-        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
-        }
-        return (
-          <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
-            <h4 className="text-[13px] font-semibold text-stone-800">❓ {el.config.title || 'Help & FAQ'}</h4>
-            {linkedQ ? (
-              <>
-                <p className="text-[11px] text-stone-400 mt-1">{linkedQ.questions?.length || 0} help items</p>
-                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
-                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">
-                  View Help
-                </button>
-              </>
-            ) : (
-              <p className="text-[11px] text-stone-400 mt-1">Common questions and support contact</p>
-            )}
-          </div>
-        );
-      }
-      case 'custom': {
-        const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
-        if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-          return renderQuestionnaireCard(linkedQ.id, linkedQ.title);
-        }
-        return (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-            <h4 className="text-[13px] font-semibold text-emerald-800">🧩 {el.config.title || 'Custom Component'}</h4>
-            {linkedQ ? (
-              <>
-                <p className="text-[11px] text-emerald-600 mt-1">{linkedQ.questions?.length || 0} fields</p>
-                <button onClick={(e) => { e.stopPropagation(); setActiveQuestionnaireId(linkedQ.id); setCurrentQuestionIndex(0); }}
-                  className="mt-2 px-3 py-1.5 rounded-lg text-[11px] font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors">
-                  Open
-                </button>
-              </>
-            ) : (
-              <p className="text-[11px] text-emerald-600 mt-1 italic">No component linked</p>
-            )}
-          </div>
-        );
-      }
-      case 'text_block':
-        return (
-          <div className="p-3 rounded-xl bg-stone-50">
-            <p className="text-[12px] text-stone-600">{el.config.content || el.config.title || 'Text content...'}</p>
-          </div>
-        );
-      case 'spacer':
-        return <div style={{ height: el.config.style?.height || '16px' }} />;
-      case 'divider':
-        return <div className="border-t border-stone-200 my-2" />;
-      case 'button':
-        return (
-          <button className="w-full py-3 rounded-xl text-[13px] font-semibold text-white" style={{ backgroundColor: primaryColor }}>
-            {el.config.button_label || el.config.title || 'Button'}
-          </button>
-        );
-      case 'image':
-        return el.config.image_url ? (
-          <img src={el.config.image_url} alt="" className="w-full rounded-xl" />
-        ) : (
-          <div className="rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center h-24">
-            <span className="text-[11px] text-stone-400">🖼️ No image set</span>
-          </div>
-        );
-      case 'todo_list': {
-        const cards = el.config.todo_cards || [];
-        return (
-          <div className="space-y-2">
-            <h4 className="text-[13px] font-semibold text-stone-800">✅ {el.config.title || 'To-Do'}</h4>
-            {cards.length === 0 ? (
-              <p className="text-[11px] text-stone-400 italic">No tasks configured</p>
-            ) : (
-              <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}>
-                {cards.map((card, ci) => {
-                  const isFirst = ci === 0;
-                  const qTitle = card.type === 'questionnaire' ? (questionnaires?.find(q => q.id === card.questionnaire_id)?.title || 'Survey') : card.title;
-                  return (
-                    <div key={card.id} className="shrink-0 w-[85%] p-3.5 rounded-xl border shadow-sm transition-all"
-                      style={{ scrollSnapAlign: 'start', backgroundColor: isFirst ? '#f0fdf4' : 'white', borderColor: isFirst ? '#86efac' : '#e7e5e4' }}
-                      onClick={card.type === 'questionnaire' && card.questionnaire_id ? (e) => { e.stopPropagation(); setActiveQuestionnaireId(card.questionnaire_id!); setCurrentQuestionIndex(0); } : undefined}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[12px] font-semibold text-stone-800">{qTitle || 'Task'}</span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: isFirst ? '#dcfce7' : '#f5f5f4', color: isFirst ? '#16a34a' : '#a8a29e' }}>
-                          {isFirst ? 'Current' : card.completion_trigger === 'time' ? 'Timed' : 'Upcoming'}
-                        </span>
-                      </div>
-                      {card.description && <p className="text-[10px] text-stone-400">{card.description}</p>}
-                      {card.type === 'questionnaire' && (
-                        <div className="mt-2 flex items-center gap-1">
-                          <ChevronRight size={10} className="text-emerald-500" />
-                          <span className="text-[10px] text-emerald-600 font-medium">Start</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      }
-      default:
-        return (
-          <div className="p-3 rounded-xl bg-stone-50 border border-stone-100">
-            <span className="text-[11px] text-stone-400">{el.type}</span>
-          </div>
-        );
-    }
+    return (
+      <ElementRenderer
+        el={el}
+        questionnaires={questionnaires}
+        primaryColor={primaryColor}
+        studyDuration={studyDuration}
+        selectedTimelineDay={selectedTimelineDay}
+        activeQuestionnaireId={activeQuestionnaireId}
+        compact={true}
+        stopPropagation={true}
+        onOpenQuestionnaire={(id) => { setActiveQuestionnaireId(id); setCurrentQuestionIndex(0); }}
+        onSelectTimelineDay={setSelectedTimelineDay}
+        renderQuestionnaireCard={renderQuestionnaireCard}
+      />
+    );
   };
 
   // ── Resize logic ──
