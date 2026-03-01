@@ -25,7 +25,7 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 
 ## 6. RESEARCH PROJECT 
 
-Every study lives in the `research_project` table. 
+Every study lives in the `research_project` table. and all layout information is stored in care_connector.research_project.app_layout, no other file used or should be used
 
 ## 7. USER ROLE
 
