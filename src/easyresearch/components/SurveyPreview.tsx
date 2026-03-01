@@ -15,11 +15,12 @@ interface SurveyPreviewProps {
   questionnaires?: QuestionnaireConfig[];
   participantTypes?: ParticipantType[];
   studyDuration?: number;
+  onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
 
 const SurveyPreview: React.FC<SurveyPreviewProps> = ({
   questions, projectTitle, projectDescription,
-  appLayout, questionnaires, participantTypes, studyDuration = 7,
+  appLayout, questionnaires, participantTypes, studyDuration = 7, onUpdateQuestionnaire,
 }) => {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('mobile');
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
@@ -156,11 +157,79 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
           />
         </div>
 
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
-          <h3 className="text-[14px] font-semibold text-stone-800 mb-1">Live Preview</h3>
-          <p className="text-[13px] text-stone-400 font-light">
-            This preview renders exactly what participants will see. Use the role filter to see what each participant type sees. Responses are not saved.
-          </p>
+        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 space-y-4">
+          <h3 className="text-[14px] font-semibold text-stone-800 mb-1">Display Settings</h3>
+          {onUpdateQuestionnaire && questionnaires && questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 ? (
+            <div className="space-y-3">
+              {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
+                <div key={q.id} className="p-3 bg-stone-50 rounded-xl border border-stone-100 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-stone-700">{q.title}</span>
+                    <span className="text-[10px] text-stone-400">{q.questions?.length || 0} questions</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Questions/Page</label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number" min={1} max={50}
+                          value={q.questions_per_page ?? ''}
+                          placeholder="∞"
+                          onChange={(e) => {
+                            const val = e.target.value ? parseInt(e.target.value) : null;
+                            onUpdateQuestionnaire(q.id, { questions_per_page: val });
+                          }}
+                          className="w-16 px-2 py-1 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        />
+                        <span className="text-[10px] text-stone-400">{q.questions_per_page ? 'paginated' : 'all at once'}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Mode</label>
+                      <select
+                        value={q.display_mode || 'one_per_page'}
+                        onChange={(e) => onUpdateQuestionnaire(q.id, { display_mode: e.target.value as any })}
+                        className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 bg-white"
+                      >
+                        <option value="one_per_page">One/page</option>
+                        <option value="all_at_once">All at once</option>
+                        <option value="section_per_page">Section/page</option>
+                      </select>
+                    </div>
+                  </div>
+                  {/* Per-tab overrides */}
+                  {q.tab_sections && q.tab_sections.length > 0 && (
+                    <div className="pt-2 border-t border-stone-200 space-y-1">
+                      <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider">Tab Overrides</label>
+                      {q.tab_sections.map(section => (
+                        <div key={section.id} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-stone-600 flex-1 truncate">{section.label}</span>
+                          <input
+                            type="number" min={1} max={50}
+                            value={section.questions_per_page ?? ''}
+                            placeholder={q.questions_per_page ? String(q.questions_per_page) : '∞'}
+                            onChange={(e) => {
+                              const val = e.target.value ? parseInt(e.target.value) : null;
+                              const updatedSections = q.tab_sections!.map(s =>
+                                s.id === section.id ? { ...s, questions_per_page: val } : s
+                              );
+                              onUpdateQuestionnaire(q.id, { tab_sections: updatedSections });
+                            }}
+                            className="w-14 px-2 py-1 rounded-lg text-[11px] border border-stone-200"
+                          />
+                          <span className="text-[9px] text-stone-400">/pg</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-stone-400 font-light">
+              This preview renders exactly what participants will see. Use the role filter to see what each participant type sees.
+            </p>
+          )}
         </div>
       </div>
     );
