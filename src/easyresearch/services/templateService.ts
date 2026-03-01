@@ -633,7 +633,7 @@ export async function createSurveyFromTemplate(
       if (pt.consent_forms) {
         for (const cf of pt.consent_forms) {
           const cfQId = crypto.randomUUID();
-          await supabase.from('questionnaire').insert({
+          const { error: cfError } = await supabase.from('questionnaire').insert({
             id: cfQId,
             project_id: project.id,
             questionnaire_type: 'consent',
@@ -644,6 +644,7 @@ export async function createSurveyFromTemplate(
             consent_required: cf.required ?? true,
             order_index: 0,
           });
+          if (cfError) console.error('❌ Consent questionnaire insert error:', cfError);
           await supabase.from('questionnaire_participant_type').insert({
             questionnaire_id: cfQId,
             participant_type_id: ptId,
@@ -688,7 +689,7 @@ export async function createSurveyFromTemplate(
     for (const qc of templateQConfigs) {
       const qcId = crypto.randomUUID();
       insertedQIdMap.set(qc.id, qcId);
-      await supabase.from('questionnaire').insert({
+      const { error: qInsertError } = await supabase.from('questionnaire').insert({
         id: qcId,
         project_id: project.id,
         questionnaire_type: 'survey',
@@ -704,6 +705,11 @@ export async function createSurveyFromTemplate(
         dnd_default_end: qc.dnd_default_end || '08:00',
         order_index: qc.order_index ?? 0,
       });
+      if (qInsertError) {
+        console.error('❌ Questionnaire insert error for', qc.title, ':', qInsertError);
+      } else {
+        console.log('✅ Questionnaire inserted:', qc.title, qcId);
+      }
       // Link to participant types
       if (qc.assigned_participant_types) {
         for (const oldPtId of qc.assigned_participant_types) {
