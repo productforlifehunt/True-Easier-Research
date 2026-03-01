@@ -34,7 +34,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className="hidden md:flex flex-col bg-white/80 backdrop-blur-sm fixed left-0 top-14 bottom-0 w-56 z-40"
+      className="hidden lg:flex flex-col bg-white/80 backdrop-blur-sm fixed left-0 top-14 bottom-0 w-56 z-40"
       style={{ borderRight: '1px solid rgba(16,185,129,0.08)' }}
     >
       <div className="flex-1 flex flex-col py-2 overflow-y-auto">

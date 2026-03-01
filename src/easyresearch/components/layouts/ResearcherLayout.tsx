@@ -12,7 +12,7 @@ const ResearcherLayout: React.FC<ResearcherLayoutProps> = ({ children }) => {
     <div className="min-h-screen" style={{ backgroundColor: '#f9faf8' }}>
       <AppHeader />
       <AppSidebar />
-      <main className="pt-14 md:pl-56">
+      <main className="pt-14 lg:pl-56">
         <div className="p-4 sm:p-6 lg:p-8">
           {children || <Outlet />}
         </div>
