@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionRenderer from './shared/QuestionRenderer';
+import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import QuestionnaireView from './shared/QuestionnaireView';
 import ElementRenderer from './shared/ElementRenderer';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
@@ -236,13 +237,24 @@ const ParticipantAppView: React.FC = () => {
 
   // ── Question Input Renderer (shared) ──
   const renderQuestionInput = (question: any) => (
-    <QuestionRenderer
+    <AIQuestionWrapper
       question={question}
       value={responses[question.id]}
       onResponse={handleResponse}
-      primaryColor={layout?.theme?.primary_color || '#10b981'}
-      compact={false}
-    />
+      aiConfig={{
+        allow_ai_assist: question.question_config?.allow_ai_assist || question.allow_ai_assist,
+        allow_ai_auto_answer: question.question_config?.allow_ai_auto_answer,
+        allow_voice: question.question_config?.allow_voice || question.allow_voice,
+      }}
+    >
+      <QuestionRenderer
+        question={question}
+        value={responses[question.id]}
+        onResponse={handleResponse}
+        primaryColor={layout?.theme?.primary_color || '#10b981'}
+        compact={false}
+      />
+    </AIQuestionWrapper>
   );
 
   // ── Shared questionnaire helpers ──
