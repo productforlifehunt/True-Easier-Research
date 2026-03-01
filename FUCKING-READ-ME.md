@@ -71,6 +71,16 @@ all questionaires and questions can be configured to be shown to what participan
 
 There are only two layouts for this project, 1) desktop layout, for all desktop screen sizes, whether small or large; and we are using only one header, one footer, one siderbar for the entire desktop layout, the header and footer should be displayed on all public pages, and the sidebar should be displayed on all dashboard pages, 2) mobile layout, for all mobile and tablet screen sizes; and we are using only one mobile header, one mobile footer for all mobile pages, and they should persist on all pages, whether it's a research project or not
 
+desktop/mobile homepage: homepage only serves as a static homepage, log in will direct to /dashboard and log out back to homepage
+
+desktop footer: basic company info, not navigation footer
+
+desktop sidebar: 4 sidebars: research, discover, inbox and setting. the same logic and function as mobile footer.
+
+desktop header: left: Site logo, name; right: language switcher profile button (dropdown to handle auth, and a button to go to dashboard, no other bullshit)
+
+mobile header: left: Site logo, name; right: language switcher profile button (dropdown to handle auth, no other bullshit)
+
 mobile footer: 4 tabs: research, discover, inbox and setting.   1)research is the unified research project hub for researchers and participants to find or manage their researches, with edit button to dynamic display tabs for researchers or participants; 2) discover is for discovering research projects to join; 3) inbox is the unified inbox page to show both notifications and direct-message between and researcher and participant; 4) setting is the setting page for basic profile information and notification
 
 
