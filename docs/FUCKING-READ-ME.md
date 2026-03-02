@@ -89,7 +89,7 @@ mobile header: left: Site logo, name; participants, right: language switcher pro
 
 mobile footer: 4 tabs: research, discover, inbox and setting. 1)research is the unified research project hub for researchers and participants to find or manage their researches, with edit button to dynamic display tabs for researchers or participants; 2) discover is for discovering research projects to join; 3) inbox is the unified inbox page to show both notifications and direct-message between and researcher and participant; 4) setting is the setting page for basic profile information and notification
 
-remember: mobile footer should never be shown on public pages, only /dashboard routes, and make sure the app either shows sidebar (on large screens), or mobile footer (on tablet/phone), it's one or the other, never neither or both
+remember: mobile footer should never be shown on public pages, to be precise, it should only show on /dashboard routes, and make sure the app either shows sidebar (on large screens), or mobile footer (on tablet/phone), it's one or the other, never neither or both
 
 ## 12. Notification 
 
