@@ -4,6 +4,7 @@ import CustomDropdown from './CustomDropdown';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
 import EcogramBuilder from './EcogramBuilder';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
+import IncentiveConfig from './IncentiveConfig';
 import { type SurveyProject } from './SurveyBuilder';
 
 interface QuestionnaireRef {
@@ -558,6 +559,13 @@ const ProfileQuestionsBuilder: React.FC<{
           </button>
         ))}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      {settingsContent}
+      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };

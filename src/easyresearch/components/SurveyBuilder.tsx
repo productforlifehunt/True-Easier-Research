@@ -7,6 +7,7 @@ import SurveySettings from './SurveySettings';
 import SurveyLogic from './SurveyLogic';
 import SurveyPreview from './SurveyPreview';
 import ProjectResponsesTab from './ProjectResponsesTab';
+import ProjectParticipantsTab from './ProjectParticipantsTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
@@ -112,7 +113,7 @@ export interface SurveyProject {
   help_information?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'responses';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -900,6 +901,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'logic', label: t('project.logic') },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
+    ...(projectId ? [{ id: 'participants' as TabId, label: t('project.participants') }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1011,6 +1013,11 @@ const SurveyBuilder: React.FC = () => {
             onUpdate={setQuestionnaireConfigs}
             project={project}
           />
+        )}
+
+        {/* Participants Tab */}
+        {activeTab === 'participants' && projectId && (
+          <ProjectParticipantsTab projectId={projectId} />
         )}
 
         {/* Participants tab removed - now in Settings */}
