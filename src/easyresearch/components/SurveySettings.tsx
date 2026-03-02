@@ -160,6 +160,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         <div className="divide-y divide-stone-100">
           <Toggle enabled={project.voice_enabled} onChange={(v) => onUpdateProject({ ...project, voice_enabled: v })} label="Voice Input" desc="Allow participants to respond via voice" />
           <Toggle enabled={project.notification_enabled} onChange={(v) => onUpdateProject({ ...project, notification_enabled: v })} label="Notifications" desc="Send reminders to participants" />
+          <Toggle enabled={(project as any).messaging_enabled || false} onChange={(v) => onUpdateProject({ ...project, messaging_enabled: v } as any)} label="Messaging" desc="Enable direct messaging between researcher and participants" />
         </div>
       </SectionCard>
 

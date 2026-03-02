@@ -1,12 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowRight,
-  Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
-  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  ChevronRight, Sparkles, Bot, Mic, Wand2, MessageCircle, BarChart3
+  ArrowRight, ChevronRight, BarChart3,
+  Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download, Sparkles,
+  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain
 } from 'lucide-react';
-import LanguageSelector from './LanguageSelector';
 import { useI18n } from '../hooks/useI18n';
 
 const LandingPage: React.FC = () => {
@@ -39,102 +37,65 @@ const LandingPage: React.FC = () => {
     { n: '03', titleKey: 'step.analyze', descKey: 'step.analyze.desc' },
   ];
 
-  const trustedKeys = ['trusted.universities', 'trusted.healthcare', 'trusted.uxTeams', 'trusted.marketResearch', 'trusted.hr', 'trusted.startups'];
-
-  // AI highlights for hero sub-section
-  const aiHighlights = [
-    { icon: Sparkles, labelKey: 'ai.projectBuilder' },
-    { icon: Wand2, labelKey: 'ai.autoAnswer' },
-    { icon: Bot, labelKey: 'ai.chatbot' },
-    { icon: Mic, labelKey: 'ai.voiceInput' },
-    { icon: MessageCircle, labelKey: 'ai.assist' },
-    { icon: PieChart, labelKey: 'feature.analytics' },
-  ];
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fafbf9' }}>
-      {/* Hero — with AI description integrated */}
-      <section className="pt-32 lg:pt-44 pb-24 lg:pb-36 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-emerald-50/80 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-emerald-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
-        
-        {/* Language selector removed — already in header */}
-
-        <div className="max-w-4xl mx-auto px-6 relative">
-          <div className="text-center">
-            <h1 className="text-5xl sm:text-6xl lg:text-[72px] font-bold leading-[1.05] tracking-[-0.035em] text-stone-800 mb-6">
-              {t('landing.hero.title1')}
-              <br />
-              <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
-                {t('landing.hero.title2')}
-              </span>
-            </h1>
-            <p className="text-lg lg:text-[19px] text-stone-400 max-w-lg mx-auto mb-6 leading-relaxed font-light">
-              {t('landing.hero.subtitle')}
-            </p>
-
-            {/* AI capabilities — integrated into hero */}
-            <p className="text-[15px] text-stone-500 max-w-lg mx-auto mb-8 leading-relaxed">
-              {t('landing.ai.fullDesc')}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
-              {aiHighlights.map((h, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[12px] font-medium border border-emerald-100">
-                  <h.icon size={12} /> {t(h.labelKey)}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => navigate('/easyresearch/auth')}
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[15px] font-medium rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-200/50"
-              >
-                {t('landing.getStarted')} <ArrowRight size={16} strokeWidth={2} />
-              </button>
-              <button
-                onClick={() => navigate('/easyresearch/templates')}
-                className="inline-flex items-center justify-center px-7 py-3.5 text-[15px] font-medium text-stone-500 rounded-full border border-stone-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all"
-              >
-                {t('landing.browseTemplates')}
-              </button>
-            </div>
-            <p className="text-[13px] text-stone-300 mt-6 font-light">
-              {t('landing.freeForever')}
-            </p>
+    <div className="min-h-screen bg-[#fafbf9]">
+      {/* Hero — clean, modern, no gradients or blobs */}
+      <section className="pt-28 sm:pt-36 lg:pt-44 pb-20 lg:pb-32">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          {/* Pill badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-stone-200 bg-white mb-8">
+            <Sparkles size={12} className="text-emerald-500" />
+            <span className="text-[12px] font-medium text-stone-500">{t('landing.ai.fullDesc')?.slice(0, 50) || 'AI-powered research platform'}</span>
           </div>
-        </div>
-      </section>
 
-      {/* Trusted by */}
-      <section className="py-10" style={{ borderTop: '1px solid rgba(16,185,129,0.06)', borderBottom: '1px solid rgba(16,185,129,0.06)' }}>
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex flex-wrap justify-center gap-x-10 gap-y-3">
-            {trustedKeys.map(key => (
-              <span key={key} className="text-[12px] font-medium text-stone-300 tracking-widest uppercase">{t(key)}</span>
-            ))}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-[-0.04em] text-stone-900 mb-5">
+            {t('landing.hero.title1')}
+            <br />
+            <span className="text-emerald-500">
+              {t('landing.hero.title2')}
+            </span>
+          </h1>
+
+          <p className="text-base sm:text-lg text-stone-400 max-w-md mx-auto mb-10 leading-relaxed font-light">
+            {t('landing.hero.subtitle')}
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => navigate('/easyresearch/auth')}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-stone-900 text-white text-[14px] font-medium rounded-lg hover:bg-stone-800 transition-colors"
+            >
+              {t('landing.getStarted')} <ArrowRight size={15} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => navigate('/easyresearch/templates')}
+              className="inline-flex items-center justify-center px-6 py-3 text-[14px] font-medium text-stone-600 rounded-lg border border-stone-200 hover:border-stone-300 hover:bg-white transition-colors"
+            >
+              {t('landing.browseTemplates')}
+            </button>
           </div>
+          <p className="text-[12px] text-stone-300 mt-5">
+            {t('landing.freeForever')}
+          </p>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-28 lg:py-36">
+      <section id="features" className="py-20 lg:py-28 border-t border-stone-100">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 mb-3">
               {t('landing.features.title')}
             </h2>
-            <p className="text-[17px] text-stone-400 max-w-sm mx-auto font-light">
+            <p className="text-[15px] text-stone-400 max-w-sm mx-auto font-light">
               {t('landing.features.subtitle')}
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-stone-100 rounded-2xl overflow-hidden border border-stone-100">
             {features.map((f, i) => (
-              <div key={i} className="rounded-2xl p-6 bg-white/70 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all group cursor-default">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-4 group-hover:from-emerald-100 group-hover:to-teal-100 transition-colors">
-                  <f.icon size={18} className="text-emerald-600" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{t(f.titleKey)}</h3>
+              <div key={i} className="bg-[#fafbf9] p-6 hover:bg-white transition-colors">
+                <f.icon size={20} className="text-emerald-500 mb-4" strokeWidth={1.5} />
+                <h3 className="text-[14px] font-semibold text-stone-800 mb-1">{t(f.titleKey)}</h3>
                 <p className="text-[13px] text-stone-400 leading-relaxed font-light">{t(f.descKey)}</p>
               </div>
             ))}
@@ -143,20 +104,18 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* How it works */}
-      <section className="py-28" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
+      <section className="py-20 lg:py-28 border-t border-stone-100">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800">
-              {t('landing.howItWorks')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 text-center mb-14">
+            {t('landing.howItWorks')}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {steps.map((s, i) => (
               <div key={i} className="text-center">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[13px] font-semibold flex items-center justify-center mx-auto mb-5 shadow-md shadow-emerald-200/50">
+                <div className="w-10 h-10 rounded-lg bg-stone-900 text-white text-[13px] font-semibold flex items-center justify-center mx-auto mb-4">
                   {s.n}
                 </div>
-                <h3 className="text-[15px] font-semibold text-stone-800 mb-2">{t(s.titleKey)}</h3>
+                <h3 className="text-[14px] font-semibold text-stone-800 mb-1.5">{t(s.titleKey)}</h3>
                 <p className="text-[13px] text-stone-400 leading-relaxed font-light">{t(s.descKey)}</p>
               </div>
             ))}
@@ -165,26 +124,22 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Use cases */}
-      <section className="py-28 lg:py-36">
+      <section className="py-20 lg:py-28 border-t border-stone-100">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
-              {t('landing.useCases.title')}
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 text-center mb-14">
+            {t('landing.useCases.title')}
+          </h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {useCases.map((uc, i) => (
               <button
                 key={i}
                 onClick={() => navigate('/easyresearch/templates')}
-                className="rounded-2xl p-6 border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all text-left group bg-white/70"
+                className="rounded-xl p-5 border border-stone-100 hover:border-stone-200 hover:bg-white transition-all text-left group"
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center mb-4 group-hover:from-emerald-100 group-hover:to-teal-100 transition-colors">
-                  <uc.icon size={18} className="text-emerald-600" />
-                </div>
+                <uc.icon size={20} className="text-emerald-500 mb-3" strokeWidth={1.5} />
                 <h3 className="text-[14px] font-semibold text-stone-800 mb-0.5">{t(uc.nameKey)}</h3>
                 <p className="text-[12px] text-stone-400 font-light mb-2">{t(uc.descKey)}</p>
-                <span className="text-[12px] text-emerald-500 font-medium inline-flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[12px] text-stone-400 group-hover:text-emerald-500 font-medium inline-flex items-center gap-0.5 transition-colors">
                   {t('nav.templates')} <ChevronRight size={12} />
                 </span>
               </button>
@@ -194,31 +149,33 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-28" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight text-stone-800 mb-4">
+      <section className="py-20 border-t border-stone-100">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 mb-4">
             {t('landing.cta.title')}
           </h2>
-          <p className="text-[17px] text-stone-400 mb-10 font-light">
+          <p className="text-[15px] text-stone-400 mb-8 font-light">
             {t('landing.cta.subtitle')}
           </p>
           <button
             onClick={() => navigate('/easyresearch/auth')}
-            className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[15px] font-medium rounded-full hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-200/50"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-stone-900 text-white text-[14px] font-medium rounded-lg hover:bg-stone-800 transition-colors"
           >
-            {t('landing.cta.button')} <ArrowRight size={16} />
+            {t('landing.cta.button')} <ArrowRight size={15} />
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8" style={{ borderTop: '1px solid rgba(16,185,129,0.06)' }}>
+      <footer className="py-6 border-t border-stone-100">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <BarChart3 size={20} className="text-emerald-500" />
-            <span className="text-[14px] font-semibold text-stone-800">{t('brand.name')}</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-stone-900 flex items-center justify-center">
+              <BarChart3 size={13} className="text-white" />
+            </div>
+            <span className="text-[13px] font-semibold text-stone-800">{t('brand.name')}</span>
           </div>
-          <p className="text-[12px] text-stone-300">{t('brand.copyright')}</p>
+          <p className="text-[11px] text-stone-300">{t('brand.copyright')}</p>
         </div>
       </footer>
     </div>

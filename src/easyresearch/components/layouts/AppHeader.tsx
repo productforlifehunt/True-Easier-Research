@@ -54,7 +54,7 @@ const AppHeader: React.FC = () => {
               to={user ? '/easyresearch/dashboard' : '/easyresearch'}
               className="flex items-center gap-2 group"
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
+              <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
                 <BarChart3 size={15} className="text-white" strokeWidth={2.5} />
               </div>
               <span className="text-[14px] font-semibold tracking-tight text-stone-800">

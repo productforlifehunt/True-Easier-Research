@@ -120,6 +120,8 @@ export interface SurveyProject {
   incentive_description?: string;
   incentive_payment_method?: string;
   incentive_payment_instructions?: string;
+  // Messaging
+  messaging_enabled?: boolean;
 }
 
 type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses';
@@ -267,6 +269,8 @@ const SurveyBuilder: React.FC = () => {
     incentive_description: row.incentive_description ?? '',
     incentive_payment_method: row.incentive_payment_method ?? 'manual',
     incentive_payment_instructions: row.incentive_payment_instructions ?? '',
+    // Messaging
+    messaging_enabled: row.messaging_enabled ?? false,
   });
 
   // Frontend state → DB row for upsert. Direct column mapping, no JSONB merging.
@@ -333,6 +337,8 @@ const SurveyBuilder: React.FC = () => {
     incentive_description: (p as any).incentive_description ?? '',
     incentive_payment_method: (p as any).incentive_payment_method ?? 'manual',
     incentive_payment_instructions: (p as any).incentive_payment_instructions ?? '',
+    // Messaging
+    messaging_enabled: p.messaging_enabled ?? false,
   });
 
   const generateSurveyCode = async () => {
@@ -492,6 +498,9 @@ const SurveyBuilder: React.FC = () => {
             time_windows: qr.time_windows || [{ start: '09:00', end: '21:00' }],
             notification_enabled: qr.notification_enabled || false,
             notification_minutes_before: qr.notification_minutes_before || 5,
+            notification_title: qr.notification_title || 'Time for your survey!',
+            notification_body: qr.notification_body || 'Please complete your questionnaire now.',
+            notification_type: qr.notification_type || 'push',
             dnd_allowed: qr.dnd_allowed || false,
             dnd_default_start: qr.dnd_default_start || '22:00',
             dnd_default_end: qr.dnd_default_end || '08:00',
@@ -742,6 +751,9 @@ const SurveyBuilder: React.FC = () => {
             time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
             notification_enabled: qc.notification_enabled || false,
             notification_minutes_before: qc.notification_minutes_before || 5,
+            notification_title: qc.notification_title || 'Time for your survey!',
+            notification_body: qc.notification_body || 'Please complete your questionnaire now.',
+            notification_type: qc.notification_type || 'push',
             dnd_allowed: qc.dnd_allowed || false,
             dnd_default_start: qc.dnd_default_start || '22:00',
             dnd_default_end: qc.dnd_default_end || '08:00',

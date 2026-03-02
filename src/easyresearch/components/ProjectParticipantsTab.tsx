@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ExternalLink, Hash, Network } from 'lucide-react';
+import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ExternalLink, Hash, Network, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
@@ -38,6 +39,7 @@ interface Props {
 const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   const { user } = useAuth();
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [subView, setSubView] = useState<SubView>('manage');
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,39 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   const [countryFilter, setCountryFilter] = useState('');
 
   useEffect(() => { loadEnrollments(); }, [projectId]);
+
+  const startConversation = async (enrollment: Enrollment) => {
+    if (!user || !enrollment.participant_id) {
+      toast.error('Cannot message: participant has not joined yet');
+      return;
+    }
+    try {
+      // Check for existing conversation
+      const { data: existing } = await supabase.from('conversations')
+        .select('id')
+        .eq('project_id', projectId)
+        .eq('researcher_user_id', user.id)
+        .eq('participant_user_id', enrollment.participant_id)
+        .maybeSingle();
+      if (existing) {
+        navigate(`/easyresearch/inbox/${existing.id}`);
+        return;
+      }
+      // Create new conversation
+      const { data: newConv, error } = await supabase.from('conversations').insert({
+        project_id: projectId,
+        researcher_user_id: user.id,
+        participant_user_id: enrollment.participant_id,
+        last_message_at: new Date().toISOString(),
+        last_message_preview: null,
+      }).select('id').single();
+      if (error) throw error;
+      navigate(`/easyresearch/inbox/${newConv.id}`);
+    } catch (err) {
+      console.error('Error starting conversation:', err);
+      toast.error('Failed to start conversation');
+    }
+  };
   useEffect(() => { if (subView === 'find') loadLibrary(); }, [subView]);
 
   const loadEnrollments = async () => {
@@ -290,7 +325,16 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
                         <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
                         <td className="px-4 py-3 text-[12px] text-stone-400">{new Date(enrollment.created_at).toLocaleDateString()}</td>
                         <td className="px-4 py-3">
-                          <Eye size={14} className="text-stone-300 hover:text-emerald-500 transition-colors" />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); startConversation(enrollment); }}
+                              className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors" title="Message participant"
+                            >
+                              <MessageSquare size={14} className="text-emerald-500" />
+                            </button>
+                            <Eye size={14} className="text-stone-300 hover:text-emerald-500 transition-colors cursor-pointer"
+                              onClick={(e) => { e.stopPropagation(); setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }} />
+                          </div>
                         </td>
                       </tr>
                     ))}
