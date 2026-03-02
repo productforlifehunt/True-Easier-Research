@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboardConfig } from '../hooks/useDashboardConfig';
 import EditDashboardModal from './EditDashboardModal';
-
+import { useI18n } from '../hooks/useI18n';
 interface StudyItem {
   id: string;
   project_id: string;
@@ -21,6 +21,7 @@ interface StudyItem {
 const ParticipantHome: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [studies, setStudies] = useState<StudyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
@@ -156,11 +157,11 @@ const ParticipantHome: React.FC = () => {
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
             <FileText size={28} className="text-emerald-400" />
           </div>
-          <h1 className="text-lg font-bold text-stone-800 mb-1">Sign in to get started</h1>
-          <p className="text-[13px] text-stone-400 mb-5">Create or join research studies</p>
+          <h1 className="text-lg font-bold text-stone-800 mb-1">{t('dashboard.signInToStart')}</h1>
+          <p className="text-[13px] text-stone-400 mb-5">{t('dashboard.createOrJoin')}</p>
           <button onClick={() => navigate('/easyresearch/auth')}
             className="px-6 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500">
-            Sign In
+            {t('common.signIn')}
           </button>
         </div>
       </div>
@@ -181,9 +182,9 @@ const ParticipantHome: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold text-stone-800 tracking-tight">My Studies</h1>
+            <h1 className="text-xl font-bold text-stone-800 tracking-tight">{t('dashboard.myStudies')}</h1>
             <p className="text-[13px] text-stone-400 font-light mt-0.5">
-              {studies.length} {studies.length === 1 ? 'study' : 'studies'}
+              {studies.length} {studies.length === 1 ? t('dashboard.study') : t('dashboard.studies')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -191,14 +192,14 @@ const ParticipantHome: React.FC = () => {
               onClick={() => setEditOpen(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-medium text-stone-500 bg-white border border-stone-100 hover:border-stone-200 transition-all"
             >
-              <SlidersHorizontal size={13} /> Edit
+              <SlidersHorizontal size={13} /> {t('dashboard.edit')}
             </button>
             {config.showNewStudyButton && (
               <button
                 onClick={() => navigate('/easyresearch/create-survey')}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200 hover:shadow-md transition-all"
               >
-                <Plus size={14} /> New Study
+                <Plus size={14} /> {t('dashboard.newStudy')}
               </button>
             )}
           </div>
@@ -241,14 +242,14 @@ const ParticipantHome: React.FC = () => {
                         study.role === 'owner' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
                       }`}>
                         {study.role === 'owner' ? (
-                          <span className="flex items-center gap-0.5"><FlaskConical size={9} /> Owner</span>
+                          <span className="flex items-center gap-0.5"><FlaskConical size={9} /> {t('dashboard.owner')}</span>
                         ) : (
-                          <span className="flex items-center gap-0.5"><Users size={9} /> Participant</span>
+                          <span className="flex items-center gap-0.5"><Users size={9} /> {t('dashboard.participant')}</span>
                         )}
                       </span>
                     </div>
                     <p className="text-[12px] text-stone-400 font-light line-clamp-1">
-                      {study.description || 'No description'}
+                      {study.description || t('dashboard.noDescription')}
                     </p>
                   </div>
                   <ChevronRight size={16} className="text-stone-300 group-hover:text-emerald-400 transition-colors ml-2 shrink-0" />

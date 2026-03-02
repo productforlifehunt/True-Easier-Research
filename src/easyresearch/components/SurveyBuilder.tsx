@@ -12,6 +12,7 @@ import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeM
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
+import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
 
@@ -115,6 +116,7 @@ type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' |
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -883,14 +885,22 @@ const SurveyBuilder: React.FC = () => {
     }
   };
 
+  // Count responses for the tab label
+  const [responseCount, setResponseCount] = useState(0);
+  useEffect(() => {
+    if (!projectId) return;
+    supabase.from('survey_respons').select('id', { count: 'exact', head: true }).eq('project_id', projectId)
+      .then(({ count }) => setResponseCount(count || 0));
+  }, [projectId]);
+
   const tabs: { id: TabId; label: string }[] = [
-    { id: 'settings', label: 'Settings' },
-    { id: 'questionnaires', label: 'Questionnaires' },
-    { id: 'components', label: 'Components' },
-    { id: 'logic', label: 'Logic' },
-    { id: 'layout', label: 'Layout' },
-    { id: 'preview', label: 'Preview' },
-    ...(projectId ? [{ id: 'responses' as TabId, label: 'Responses' }] : []),
+    { id: 'settings', label: t('project.settings') },
+    { id: 'questionnaires', label: t('project.questionnaires') },
+    { id: 'components', label: t('project.components') },
+    { id: 'logic', label: t('project.logic') },
+    { id: 'layout', label: t('project.layout') },
+    { id: 'preview', label: t('project.preview') },
+    ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
 
@@ -941,7 +951,7 @@ const SurveyBuilder: React.FC = () => {
                       : 'border-emerald-400 bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                   }`}
                 >
-                  {projectStatus === 'published' ? 'Unpublish' : 'Publish'}
+                  {projectStatus === 'published' ? t('project.unpublish') : t('project.publish')}
                 </button>
               )}
               <button

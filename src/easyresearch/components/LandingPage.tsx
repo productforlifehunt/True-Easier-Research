@@ -58,9 +58,7 @@ const LandingPage: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-b from-emerald-50/80 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 right-0 w-[300px] h-[300px] bg-gradient-to-bl from-emerald-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
         
-        <div className="absolute top-6 right-6">
-          <LanguageSelector />
-        </div>
+        {/* Language selector removed — already in header */}
 
         <div className="max-w-4xl mx-auto px-6 relative">
           <div className="text-center">
