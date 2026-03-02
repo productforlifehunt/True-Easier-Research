@@ -18,6 +18,9 @@ export interface QuestionnaireConfig {
   time_windows: { start: string; end: string }[];
   notification_enabled: boolean;
   notification_minutes_before: number;
+  notification_title?: string;
+  notification_body?: string;
+  notification_type?: string;
   dnd_allowed: boolean;
   dnd_default_start: string;
   dnd_default_end: string;
@@ -28,12 +31,12 @@ export interface QuestionnaireConfig {
   consent_required?: boolean;
   disqualify_logic?: any;
   display_mode?: 'all_at_once' | 'one_per_page' | 'section_per_page';
-  questions_per_page?: number | null; // null = unlimited (all at once), number = paginate by N
+  questions_per_page?: number | null;
   tab_sections?: Array<{
     id: string;
     label: string;
     question_ids: string[];
-    questions_per_page?: number | null; // per-tab override: null = unlimited, number = paginate by N
+    questions_per_page?: number | null;
   }>;
   ai_chatbot_enabled?: boolean;
 }
@@ -88,6 +91,9 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       time_windows: [{ start: '09:00', end: '21:00' }],
       notification_enabled: true,
       notification_minutes_before: 5,
+      notification_title: 'Time for your survey!',
+      notification_body: 'Please complete your questionnaire now.',
+      notification_type: 'push',
       dnd_allowed: true,
       dnd_default_start: '22:00',
       dnd_default_end: '08:00',
@@ -798,9 +804,33 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   </button>
                                 </div>
                                 {q.notification_enabled && (
-                                  <div className="flex items-center gap-2">
-                                    <label className="text-[11px] text-stone-400">Minutes before:</label>
-                                    <input type="number" value={q.notification_minutes_before} onChange={(e) => updateQuestionnaire(q.id, { notification_minutes_before: parseInt(e.target.value) || 5 })} className="w-20 px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <label className="text-[11px] text-stone-400">Minutes before:</label>
+                                      <input type="number" value={q.notification_minutes_before} onChange={(e) => updateQuestionnaire(q.id, { notification_minutes_before: parseInt(e.target.value) || 5 })} className="w-20 px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[11px] text-stone-400 mb-1">Notification Title</label>
+                                      <input type="text" value={q.notification_title || ''} onChange={(e) => updateQuestionnaire(q.id, { notification_title: e.target.value })}
+                                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                        placeholder="Time for your survey!" />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[11px] text-stone-400 mb-1">Notification Body</label>
+                                      <textarea value={q.notification_body || ''} onChange={(e) => updateQuestionnaire(q.id, { notification_body: e.target.value })}
+                                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
+                                        rows={2} placeholder="Please complete your questionnaire now." />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <label className="text-[11px] text-stone-400">Type:</label>
+                                      <select value={q.notification_type || 'push'} onChange={(e) => updateQuestionnaire(q.id, { notification_type: e.target.value })}
+                                        className="px-2 py-1 rounded-lg text-[12px] border border-stone-200 bg-white">
+                                        <option value="push">Push Notification</option>
+                                        <option value="email">Email</option>
+                                        <option value="sms">SMS</option>
+                                        <option value="push_email">Push + Email</option>
+                                      </select>
+                                    </div>
                                   </div>
                                 )}
                               </div>
