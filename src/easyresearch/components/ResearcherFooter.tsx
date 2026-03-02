@@ -7,13 +7,13 @@ const ResearcherFooter: React.FC = () => {
 
   return (
     <footer className="bg-white/80 backdrop-blur-sm border-t border-stone-100 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-              <BarChart3 size={14} className="text-white" strokeWidth={2.5} />
+            <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
+              <BarChart3 size={15} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-[13px] font-semibold text-stone-700">{t('brand.name')}</span>
+            <span className="text-[14px] font-semibold tracking-tight text-stone-800">{t('brand.name')}</span>
           </div>
           <p className="text-[12px] text-stone-400 font-light">
             {t('brand.copyright')}
