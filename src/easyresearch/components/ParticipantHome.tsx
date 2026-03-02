@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users, SlidersHorizontal } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users, SlidersHorizontal, Bookmark } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboardConfig } from '../hooks/useDashboardConfig';
 import EditDashboardModal from './EditDashboardModal';
 import { useI18n } from '../hooks/useI18n';
+import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 interface StudyItem {
   id: string;
   project_id: string;
@@ -206,7 +207,7 @@ const ParticipantHome: React.FC = () => {
         </div>
 
         {/* Configurable tabs */}
-        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-0.5 -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-0.5 -mx-4 px-4" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' as any }}>
           {visibleTabs.map(tab => (
             <button
               key={tab.id}
@@ -223,10 +224,22 @@ const ParticipantHome: React.FC = () => {
               </span>
             </button>
           ))}
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors whitespace-nowrap shrink-0 flex items-center gap-1 ${
+              activeTab === 'templates'
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-100'
+            }`}
+          >
+            <Bookmark size={11} /> {t('project.myTemplates')}
+          </button>
         </div>
 
-        {/* Study cards */}
-        {filtered.length > 0 ? (
+        {/* Templates tab */}
+        {activeTab === 'templates' ? (
+          <TemplateMarketplaceEmbed mode="my_templates" />
+        ) : filtered.length > 0 ? (
           <div className="space-y-2.5">
             {filtered.map(study => (
               <button

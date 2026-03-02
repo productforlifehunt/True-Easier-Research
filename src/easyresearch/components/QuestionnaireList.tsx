@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList } from 'lucide-react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList, Layers } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
 import QuestionEditor from './QuestionEditor';
+import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 
 export interface QuestionnaireConfig {
   id: string;
@@ -65,6 +66,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   const [activeTabFilter, setActiveTabFilter] = useState<Record<string, string | null>>({});
   // Which question is showing its "assign to tab" dropdown
   const [assigningQuestionId, setAssigningQuestionId] = useState<string | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const toggleSection = (qId: string, section: 'settings' | 'questions') => {
     setOpenSections(prev => ({
@@ -523,17 +525,54 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
   return (
     <div className="space-y-4">
+      {showTemplates ? (
+        <TemplateMarketplaceEmbed
+          mode="browse"
+          onAddTemplate={(questions, title) => {
+            // Create a new questionnaire with the template questions
+            const newQ: QuestionnaireConfig = {
+              id: crypto.randomUUID(),
+              questionnaire_type: 'survey',
+              title: title || `Questionnaire ${questionnaires.length + 1}`,
+              description: '',
+              questions: questions.map((q, i) => ({ ...q, order_index: i })),
+              estimated_duration: Math.ceil(questions.length * 0.5),
+              frequency: 'once',
+              time_windows: [{ start: '09:00', end: '21:00' }],
+              notification_enabled: false,
+              notification_minutes_before: 5,
+              dnd_allowed: false,
+              dnd_default_start: '22:00',
+              dnd_default_end: '08:00',
+              assigned_participant_types: [],
+              order_index: questionnaires.length,
+            };
+            onUpdate([...questionnaires, newQ]);
+            setShowTemplates(false);
+          }}
+          onClose={() => setShowTemplates(false)}
+        />
+      ) : (
+      <>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-[16px] font-semibold text-stone-800">Questionnaires</h3>
           <p className="text-[12px] text-stone-400 mt-0.5">Each questionnaire has its own questions, schedule, and settings</p>
         </div>
-        <button
-          onClick={addQuestionnaire}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
-        >
-          <Plus size={14} /> Add Questionnaire
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors"
+          >
+            <Layers size={14} /> From Templates
+          </button>
+          <button
+            onClick={addQuestionnaire}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
+          >
+            <Plus size={14} /> Add Questionnaire
+          </button>
+        </div>
       </div>
 
       {questionnaires.length === 0 ? (
@@ -831,6 +870,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
             )}
           </Droppable>
         </DragDropContext>
+      )}
+      </>
       )}
     </div>
   );
