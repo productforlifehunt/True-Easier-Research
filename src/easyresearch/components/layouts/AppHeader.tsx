@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import easierLogo from '@/assets/easier-logo-v2.png';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
 import { useI18n } from '../../hooks/useI18n';
@@ -51,11 +52,11 @@ const AppHeader: React.FC = () => {
           {/* Left: Logo + Nav */}
           <div className="flex items-center gap-5">
             <Link
-              to="/easyresearch"
+              to={user ? '/easyresearch/dashboard' : '/easyresearch'}
               className="flex items-center gap-2 group"
             >
-              <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
-                <BarChart3 size={15} className="text-white" strokeWidth={2.5} />
+              <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg overflow-hidden">
+                <img src={easierLogo} alt="Easier" className="w-full h-full object-cover" />
               </div>
               <span className="text-[14px] font-semibold tracking-tight text-stone-800">
                 {t('brand.name')}
