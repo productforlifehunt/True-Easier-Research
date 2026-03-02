@@ -58,14 +58,13 @@ const EasyResearchShellInner: React.FC = () => {
       p === '/easyresearch/pricing' ||
       p === '/easyresearch/templates' ||
       p === '/easyresearch/participant-library' ||
-      p === '/easyresearch/features'
+      p === '/easyresearch/features' ||
+      p === '/easyresearch/participant/join'
     );
   }, [location.pathname]);
 
-  // Sidebar shows on ALL non-public routes for logged-in users (desktop only)
+  // Sidebar + bottom nav only on non-public (dashboard) routes for logged-in users
   const showSidebar = !!user && !isPublicRoute;
-
-  // Mobile bottom nav shows for logged-in users on non-public (dashboard) routes only
   const showBottomNav = !!user && !isPublicRoute;
 
   // Bottom nav tabs — same 4 as sidebar
