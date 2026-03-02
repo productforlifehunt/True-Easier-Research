@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Save, ArrowLeft, Pencil } from 'lucide-react';
+import { Save, ArrowLeft, Pencil, Bookmark } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import SurveySettings from './SurveySettings';
@@ -13,6 +13,7 @@ import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeM
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
+import SaveTemplateModal from './SaveTemplateModal';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -159,6 +160,7 @@ const SurveyBuilder: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'settings');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [logicRules, setLogicRules] = useState<any[]>([]);
 
   // New state for multi-questionnaire architecture
@@ -943,6 +945,15 @@ const SurveyBuilder: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {projectId && questionnaireConfigs.some(q => q.questions.length > 0) && (
+                <button
+                  onClick={() => setShowSaveTemplate(true)}
+                  className="p-1.5 sm:p-2 rounded-full border border-stone-200 text-stone-400 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 transition-all"
+                  title={t('project.saveAsTemplate')}
+                >
+                  <Bookmark size={15} />
+                </button>
+              )}
               {projectId && (
                 <button
                   onClick={() => updatePublishStatus(projectStatus === 'published' ? 'draft' : 'published')}
@@ -1104,6 +1115,15 @@ const SurveyBuilder: React.FC = () => {
         projectId={projectId}
         onUpdate={setQuestionnaireConfigs}
       />
+
+      {/* Save as Template Modal */}
+      {showSaveTemplate && (
+        <SaveTemplateModal
+          questionnaires={questionnaireConfigs}
+          projectTitle={project.title}
+          onClose={() => setShowSaveTemplate(false)}
+        />
+      )}
     </div>
   );
 };

@@ -373,6 +373,9 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           </div>
         )}
       </div>
+
+      {/* Incentives */}
+      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };
@@ -559,13 +562,6 @@ const ProfileQuestionsBuilder: React.FC<{
           </button>
         ))}
       </div>
-    </div>
-  );
-
-  return (
-    <div className="space-y-6">
-      {settingsContent}
-      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };
