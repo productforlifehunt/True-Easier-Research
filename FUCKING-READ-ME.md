@@ -81,7 +81,7 @@ desktop footer: basic company info, not navigation footer
 
 desktop sidebar: 4 sidebars: research, discover, inbox and setting. the same logic and function as mobile footer.
 
-desktop header: left: Site logo, name; participants, features, templetes right: language switcher profile button (dropdown to handle auth, and a button to go to dashboard, no other bullshit)
+desktop header: left: Site logo, name; join studies (just for participants finding existing researches, and inform they may get paid, also display the money for each research), participants, features, templetes right: language switcher profile button (dropdown to handle auth, and a button to go to dashboard, no other bullshit)
 
 mobile header: left: Site logo, name; participants, right: language switcher profile button (dropdown to handle auth, no other bullshit)
 
