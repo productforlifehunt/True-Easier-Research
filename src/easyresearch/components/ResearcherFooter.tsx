@@ -1,6 +1,6 @@
 import React from 'react';
-import { BarChart3 } from 'lucide-react';
 import { useI18n } from '../hooks/useI18n';
+import easierLogo from '@/assets/easier-logo-v2.png';
 
 const ResearcherFooter: React.FC = () => {
   const { t } = useI18n();
@@ -10,8 +10,8 @@ const ResearcherFooter: React.FC = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
-              <BarChart3 size={15} className="text-white" strokeWidth={2.5} />
+            <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg overflow-hidden">
+              <img src={easierLogo} alt="Easier" className="w-full h-full object-cover" />
             </div>
             <span className="text-[14px] font-semibold tracking-tight text-stone-800">{t('brand.name')}</span>
           </div>

@@ -96,19 +96,12 @@ const EasyResearchAuth: React.FC = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f9faf8' }}>
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
-        <div className="max-w-7xl mx-auto px-5 py-3">
-          <Link to="/easyresearch" className="flex items-center gap-2 text-stone-400 hover:text-stone-600 transition-colors">
-            <ArrowLeft size={16} />
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-                <span className="text-white text-[11px] font-bold">E</span>
-              </div>
-              <span className="text-[14px] font-semibold text-stone-800">Easier</span>
-            </div>
-          </Link>
-        </div>
+      {/* Back link */}
+      <div className="px-5 py-4">
+        <Link to="/easyresearch" className="inline-flex items-center gap-1.5 text-stone-400 hover:text-stone-600 transition-colors text-[13px] font-medium">
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </Link>
       </div>
 
       <div className="flex items-center justify-center px-4 py-16">
