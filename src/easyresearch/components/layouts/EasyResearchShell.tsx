@@ -57,7 +57,8 @@ const EasyResearchShellInner: React.FC = () => {
       p === '/easyresearch/auth' ||
       p === '/easyresearch/pricing' ||
       p === '/easyresearch/templates' ||
-      p === '/easyresearch/participant-library'
+      p === '/easyresearch/participant-library' ||
+      p === '/easyresearch/features'
     );
   }, [location.pathname]);
 

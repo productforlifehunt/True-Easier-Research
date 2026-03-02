@@ -32,7 +32,7 @@ const AppHeader: React.FC = () => {
   const desktopNavLinks = [
     { path: '/easyresearch/participant/join', label: t('nav.joinStudies') },
     { path: '/easyresearch/participant-library', label: t('nav.participants') },
-    { path: '/easyresearch#features', label: t('nav.features') },
+    { path: '/easyresearch/features', label: t('nav.features') },
     { path: '/easyresearch/templates', label: t('nav.templates') },
   ];
 
@@ -41,7 +41,6 @@ const AppHeader: React.FC = () => {
   ];
 
   const isNavActive = (path: string) => {
-    if (path.includes('#')) return false;
     return location.pathname === path;
   };
 
