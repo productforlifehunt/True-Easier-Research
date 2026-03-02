@@ -21,8 +21,8 @@ export interface UserRoles {
 const DEFAULT_TABS: DashboardTab[] = [
   { id: 'all', label: 'All Studies', visible: true },
   { id: 'drafts', label: 'My Drafts', visible: true },
-  { id: 'published', label: 'My Published', visible: true },
-  { id: 'joined', label: 'My Joined', visible: true },
+  { id: 'published', label: 'My Published Studies', visible: true },
+  { id: 'joined', label: 'My Joined Studies', visible: true },
 ];
 
 const DEFAULT_CONFIG: DashboardConfig = {
