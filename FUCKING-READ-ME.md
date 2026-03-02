@@ -77,7 +77,7 @@ There are only two layouts for this project, 1) desktop layout, for all desktop 
 
 desktop/mobile homepage: homepage only serves as a static homepage, log in will direct to /dashboard and log out back to homepage
 
-desktop footer: basic company info, not navigation footer
+desktop footer: basic company info, not navigation footer, and make sure the footer is using the exact same size of icon, app name as the header, and position alighed with the header's icon, app name
 
 desktop sidebar: 4 sidebars: research, discover, inbox and setting. the same logic and function as mobile footer.
 
