@@ -27,7 +27,11 @@ EasyResearch (branded "Easier") is a sub-app living under `/easyresearch/*` with
 
 ## 5. RESEARCH PROJECT 
 
-Every study lives in the `research_project` table. and all layout information is stored in research_project.app_layout, no other file used or should be used
+Every study lives in the `research_project` table. and all layout information is stored in research_project.app_layout, no other file used or should be used. 
+
+A research project can have multiple questionaires, because we are also supporting longitudual surveys that may take several days and use multiple questionaires, e.g. an hourly questionaire to be filled every hour, a daily questionaire to be filled every day. Each questionaire can have multiple questions. We also allow user to use components, components are also questionaires from a data point, but they are displayed as components for users, because sections like profile questions, faqs, etc, are more intuiative for user to configure as "components", but they use the same model as questionaires. 
+
+Research project, questionaire and question can all be set as templetes (either private or public) and imported from the private templete library or public templete library
 
 ## 6. USER PROFILE
 
