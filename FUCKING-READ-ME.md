@@ -79,6 +79,8 @@ desktop/mobile homepage: homepage only serves as a static homepage, log in will 
 
 desktop footer: basic company info, not navigation footer, and make sure the footer is using the exact same size of icon, app name as the header, and position alighed with the header's icon, app name
 
+desktop footer should also always be displayed on all publish pages (not fixed, just shown at bottom) on all screen sizes, including even mobile screen
+
 desktop sidebar: 4 sidebars: research, discover, inbox and setting. the same logic and function as mobile footer.
 
 desktop header: left: Site logo, name; join studies (just for participants finding existing researches, and inform they may get paid, also display the money for each research), participants, features, templetes right: language switcher profile button (dropdown to handle auth, and a button to go to dashboard, no other bullshit)
