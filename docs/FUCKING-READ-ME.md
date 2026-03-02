@@ -1,100 +1,69 @@
-1. both the hourly log and daily log can be submited so long as one field in the entire form is filled, no bullshit checks 
-2. the hourly log uses the care_connector.survey_entries table and the daily log uses the care_connector.end_of_day_surveys Do not mess up. 
+FUCKING READ ME
+FUCKING READ ME AND KEEP IN YOUR CONTEXT IF POSSIBLE.
+WHEN IN DOUBT, FUCKING READ ME.
+NEVER FUCKING GUESS.
+THESE ARE THINGS YOU FREQUENTLY GUESSED WRONG ALMOST EACH AND EVERY TIME.
+NEVER FUCKING GUESS. FUCKING READ ME!!! This file is designed as a transferable system prompt to be fully pasted to any ai workspace. Only write in brief bullet point paragraphs!
 
----
+1. WHAT IS EASYRESEARCH
+EasyResearch (branded "Easier") is a sub-app living under /easyresearch/* within the larger True-Easier-Research platform. It is a full-stack ESM/EMA research platform where researchers create surveys, manage participants, collect longitudinal data, and analyze responses. It supports one-time surveys AND multi-day longitudinal/ESM studies with scheduled prompts, consent flows, screening, participant types, and a configurable mobile app layout.
 
-## 3. Hourly Notification
+Stack: React 18, TypeScript, Vite, TailwindCSS
+Backend: Supabase (PostgreSQL, Auth, Edge Functions) — all tables live in the care_connector schema
+Mobile: Capacitor for native iOS/Android push notifications
+State: React hooks and local state only (no Redux or React Query)
+Drag-and-drop: @hello-pangea/dnd and @dnd-kit/core
+Entry point: Routes defined in src/App.tsx under the EASYRESEARCH PLATFORM ROUTES section
+**Development stage ai api key: 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 use google/gemma-3-27b-it to save my fucking money
+5. RESEARCH PROJECT
+Every study lives in the research_project table. and all layout information is stored in research_project.app_layout, no other file used or should be used.
 
-Reminds the participant to fill out their hourly survey log.
+A research project can have multiple questionaires, because we are also supporting longitudual surveys that may take several days and use multiple questionaires, e.g. an hourly questionaire to be filled every hour, a daily questionaire to be filled every day. Each questionaire can have multiple questions. We also allow user to use components, components are also questionaires from a data point, but they are displayed as components for users, because sections like profile questions, faqs, etc, are more intuiative for user to configure as "components", but they use the same model as questionaires.
 
-**When it fires:** Every hour on the hour, **8 AM to 10 PM** local time only. Outside this window, it silently skips. Also skips if inside any active DND period.
+Research project, questionaire and question can all be set as templetes (either private or public) and imported from the private templete library or public templete library
 
-**Where it's set:** `Settings > Notification Settings > Hourly Survey Reminders` toggle.
+6. USER PROFILE
+User role is defined in profile table
 
-**Data model:**
-- `profiles.hourly_reminders_enabled` (boolean, default `true`) — the on/off toggle.
-- Content is hardcoded in `src/utils/notificationScheduler.ts`, bilingual EN/ZH.
-- Delivery is client-side via the browser `Notification` API (no server push).
+7. USER ROLE
+user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can sumbit or can join a research, a user can be both researcher and a participant (join another researcher's research), the actual dashboard display logic is defined by user setting what he wants to get displayed
 
-**Gates:** Requires `push_notifications_enabled = true` (master toggle) AND `Notification.permission = 'granted'`.
+8. QUESTIONNAIRE
+Each questionnaire is a row in the questionnaire table in the care_connector schema. It belongs to one project and has a type field that determines its purpose:
 
-**Scheduler logic:** `startHourlySchedule()` computes ms until the next `:00` minute mark, then fires `setInterval` every 60 minutes. Each tick calls `checkAndNotifyHourly()` which checks: hourly enabled → push enabled → 8AM–10PM window → DND periods → send.
+survey — A regular questionnaire with questions, schedule, frequency (once, daily, hourly, etc.), active time window, estimated duration, notification toggle, and Do Not Disturb settings.
+consent — A consent form with consent text and consent URL fields. The participant must agree before proceeding.
+screening — A screening questionnaire containing questions that determine participant eligibility. Questions can have a disqualify value in their config that auto-rejects participants.
+REMEMBER NOT to use a seperate consent of screening table,they are also defined as questionnaire in this project
 
-**8 AM morning greeting:** The first notification of the day (8 AM) has special content — a "Good Morning!" greeting that also reminds the user to log any care activities, thoughts, or observations from overnight before starting the day's hourly survey. All other hours use the standard "Survey Reminder" text.
+Questionnaires are linked to participant types through the questionnaire_participant_type junction table — a many-to-many relationship. A questionnaire can be assigned to multiple participant types, and a participant type can have multiple questionnaires.
 
----
+9. QUESTIONS
+Each question is a row in the survey_question table. It belongs to one project and optionally to one questionnaire via the questionnaire_id FK column.
 
-## 4. Daily Notification
+10. PARTICIPANT TYPES
+Each participant type is a row in the participant_type table. It belongs to one project and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
-Reminds the participant once per day to complete their daily survey.
+all questionaires and questions can be configured to be shown to what participant type
 
-**When it fires:** Once per day at the user-chosen time. Default is **10 PM (22:00)** local time. The user can change the time via a time picker in Settings. If the app is opened after the configured time and today's reminder hasn't fired yet, it sends immediately (catch-up).
+11. Layout and design
+There are only two layouts for this project, 1) desktop layout, for all desktop screen sizes, whether small or large; and we are using only one header, one footer, one siderbar for the entire desktop layout, the header and footer should be displayed on all public pages, and the sidebar should be displayed on all dashboard pages, 2) mobile layout, for all mobile and tablet screen sizes; and we are using only one mobile header, one mobile footer for all mobile pages, and they should persist on all pages, whether it's a research project or not
 
-**Where it's set:** `Settings > Daily Reminders` toggle + `Reminder Time` time picker (visible when toggle is ON).
+desktop/mobile homepage: homepage only serves as a static homepage, log in will direct to /dashboard and log out back to homepage
 
-**Data model:**
-- `profiles.daily_reminders_enabled` (boolean, default `true`) — the on/off toggle.
-- `profiles.daily_reminder_time` (time, default `22:00:00`) — the user-chosen local time.
-- Content is hardcoded in `src/utils/notificationScheduler.ts`, bilingual EN/ZH.
-- Deduplication: `localStorage` key `last_daily_reminder_date` stores the date string (`YYYY-MM-DD`) of the last sent reminder. Prevents duplicates within the same calendar day.
+desktop footer: basic company info, not navigation footer, and make sure the footer is using the exact same size of icon, app name as the header, and position alighed with the header's icon, app name
 
-**Gates:** Requires `push_notifications_enabled = true` AND `Notification.permission = 'granted'`. Also respects DND periods.
+desktop footer should also always be displayed on all publish pages (not fixed, just shown at bottom) on all screen sizes, including even mobile screen
 
-**Scheduler logic:** `startDailySchedule()` computes ms until the configured hour/minute, sets a `setTimeout`. When it fires, calls `checkAndNotifyDaily()` which checks: daily enabled → push enabled → already sent today → DND → send. Then recursively re-schedules for the next day.
+desktop sidebar: 4 sidebars: research, discover, inbox and setting. the same logic and function as mobile footer.
 
----
+desktop header: left: Site logo, name; join studies (just for participants finding existing researches, and inform they may get paid, also display the money for each research), participants, features, templetes right: language switcher profile button (dropdown to handle auth, and a button to go to dashboard, no other bullshit)
 
-## 5. Research Notification
+mobile header: left: Site logo, name; participants, right: language switcher profile button (dropdown to handle auth, no other bullshit)
 
-All research-related notifications sent by the researcher: interview time schedules, study progress updates, milestone announcements, custom messages.
+mobile footer: 4 tabs: research, discover, inbox and setting. 1)research is the unified research project hub for researchers and participants to find or manage their researches, with edit button to dynamic display tabs for researchers or participants; 2) discover is for discovering research projects to join; 3) inbox is the unified inbox page to show both notifications and direct-message between and researcher and participant; 4) setting is the setting page for basic profile information and notification
 
-**When it fires:** At the time the **researcher decides**. The researcher sets `scheduled_at` when creating the notification. `NULL` means send immediately.
+remember: mobile footer should never be shown on public pages, only /dashboard routes, and make sure the app either shows sidebar (on large screens), or mobile footer (on tablet/phone), it's one or the other, never neither or both
 
-**Where it's set:** `Settings > Research Notifications` toggle controls whether the participant receives these. The researcher creates them via the `notification_messages` table (future: researcher dashboard UI).
-
-**Data model — two tables:**
-
-### `notification_messages` (researcher-authored content)
-| Column | Purpose |
-|--------|---------|
-| `id` | Primary key |
-| `created_by` | The researcher (FK → auth.users) |
-| `title_en`, `title_zh` | Bilingual notification title |
-| `body_en`, `body_zh` | Bilingual notification body |
-| `notification_type` | `research_update`, `interview_schedule`, `milestone`, `announcement`, `custom` |
-| `scheduled_at` | When to send (researcher decides). NULL = immediately |
-| `sent_at` | When it was actually sent |
-| `status` | `draft` → `scheduled` → `sent` / `cancelled` |
-| `target_user_ids` | UUID array of specific participants. NULL = all participants |
-| `navigate_to` | Where clicking the notification goes (default `/survey`) |
-| `metadata` | JSONB for extra data (interview link, meeting room, etc.) |
-
-### `user_notifications` (per-user delivery log)
-| Column | Purpose |
-|--------|---------|
-| `id` | Primary key |
-| `user_id` | The recipient |
-| `notification_id` | FK → notification_messages (NULL for system-generated hourly/daily) |
-| `source` | `research`, `hourly_reminder`, `daily_reminder`, `system` |
-| `title`, `body` | Inline content (for system-generated that have no notification_messages row) |
-| `delivered_at` | When delivered |
-| `read_at` | When read (NULL = unread) |
-| `dismissed_at` | When dismissed |
-
-**Gate:** Participant must have `profiles.research_updates_enabled = true` AND `push_notifications_enabled = true`.
-
-**Unique constraint:** `(user_id, notification_id)` — prevents duplicate delivery of the same message.
-
----
-
-## 6. Master Controls
-
-| Control | Column | Effect |
-|---------|--------|--------|
-| **Push Notifications** toggle | `profiles.push_notifications_enabled` | Master gate. When OFF, ALL browser notifications (hourly, daily, research) are suppressed. |
-| **Notification Permission** | `profiles.notification_permission_status` | Tracks browser permission: `default`, `granted`, `denied`. Nothing fires unless `granted`. |
-| **Do Not Disturb** | `dnd_periods` table (multiple rows per user) | Quiet periods. Each has `start_time`, `end_time`, `label`, `is_active`. Supports overnight spans. If current time falls in ANY active DND period, hourly and daily notifications are suppressed. |
-
-## 7 consent
-
-Consent form is harcoded in Consent.tsx, not stored in db, signed state is defined by onsent_signed_at colomn at table care_connector.enrollment, null=not signed
+12. Notification
+questionaire notification is set at questionaire level, making each questionaire able to send a custom notification, e.g. an hourly log questionaire can be set to send a notification from 8am-10pm each day. Do not disturb is also set at questionaire level, if allowed, participant can set multiple dnd period per questionaire, e.g. 8am-9am, 1pm-3pm, and the notification for this questionaire will be blocked during.ctor.enrollment, null=not signed
