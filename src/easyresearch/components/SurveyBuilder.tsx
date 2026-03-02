@@ -112,6 +112,14 @@ export interface SurveyProject {
   app_layout?: any;
   // Help
   help_information?: string;
+  // Incentives
+  incentive_enabled?: boolean;
+  incentive_type?: string;
+  incentive_amount?: number;
+  incentive_currency?: string;
+  incentive_description?: string;
+  incentive_payment_method?: string;
+  incentive_payment_instructions?: string;
 }
 
 type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses';
@@ -251,6 +259,14 @@ const SurveyBuilder: React.FC = () => {
     recruitment_criteria_text: row.recruitment_criteria_text,
     app_layout: row.app_layout || {},
     help_information: row.help_information,
+    // Incentive fields
+    incentive_enabled: row.incentive_enabled ?? false,
+    incentive_type: row.incentive_type ?? 'fixed',
+    incentive_amount: row.incentive_amount ?? 0,
+    incentive_currency: row.incentive_currency ?? 'USD',
+    incentive_description: row.incentive_description ?? '',
+    incentive_payment_method: row.incentive_payment_method ?? 'manual',
+    incentive_payment_instructions: row.incentive_payment_instructions ?? '',
   });
 
   // Frontend state → DB row for upsert. Direct column mapping, no JSONB merging.
@@ -309,6 +325,14 @@ const SurveyBuilder: React.FC = () => {
     recruitment_criteria_text: p.recruitment_criteria_text,
     app_layout: appLayout,
     help_information: p.help_information,
+    // Incentive fields
+    incentive_enabled: (p as any).incentive_enabled ?? false,
+    incentive_type: (p as any).incentive_type ?? 'fixed',
+    incentive_amount: (p as any).incentive_amount ?? 0,
+    incentive_currency: (p as any).incentive_currency ?? 'USD',
+    incentive_description: (p as any).incentive_description ?? '',
+    incentive_payment_method: (p as any).incentive_payment_method ?? 'manual',
+    incentive_payment_instructions: (p as any).incentive_payment_instructions ?? '',
   });
 
   const generateSurveyCode = async () => {
