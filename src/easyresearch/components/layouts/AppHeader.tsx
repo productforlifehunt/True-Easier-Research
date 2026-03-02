@@ -51,7 +51,7 @@ const AppHeader: React.FC = () => {
           {/* Left: Logo + Nav */}
           <div className="flex items-center gap-5">
             <Link
-              to={user ? '/easyresearch/dashboard' : '/easyresearch'}
+              to="/easyresearch"
               className="flex items-center gap-2 group"
             >
               <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-sm shadow-emerald-200/40">
