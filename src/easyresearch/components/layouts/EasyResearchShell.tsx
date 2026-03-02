@@ -64,8 +64,8 @@ const EasyResearchShellInner: React.FC = () => {
   // Sidebar shows on ALL non-public routes for logged-in users (desktop only)
   const showSidebar = !!user && !isPublicRoute;
 
-  // Mobile bottom nav shows for all logged-in users on ALL pages
-  const showBottomNav = !!user;
+  // Mobile bottom nav shows for logged-in users on non-public (dashboard) routes only
+  const showBottomNav = !!user && !isPublicRoute;
 
   // Bottom nav tabs — same 4 as sidebar
   const tabs = useMemo(
