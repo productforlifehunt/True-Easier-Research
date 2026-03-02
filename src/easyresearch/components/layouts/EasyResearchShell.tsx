@@ -64,8 +64,8 @@ const EasyResearchShellInner: React.FC = () => {
   // Sidebar shows on ALL non-public routes for logged-in users (desktop only)
   const showSidebar = !!user && !isPublicRoute;
 
-  // Mobile bottom nav shows for all logged-in users on non-public routes
-  const showBottomNav = !!user && !isPublicRoute;
+  // Mobile bottom nav shows for all logged-in users on ALL pages
+  const showBottomNav = !!user;
 
   // Bottom nav tabs — same 4 as sidebar
   const tabs = useMemo(
@@ -124,8 +124,8 @@ const EasyResearchShellInner: React.FC = () => {
         )}
       </div>
 
-      {/* Desktop footer — ALWAYS visible, basic company info */}
-      <div className={`hidden lg:block ${showSidebar ? 'lg:pl-56' : ''}`}>
+      {/* Footer — ALWAYS visible on ALL pages, ALL screen sizes (not fixed, just at bottom) */}
+      <div className={`${showSidebar ? 'lg:pl-56' : ''} ${showBottomNav ? 'mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0' : ''}`}>
         <ResearcherFooter />
       </div>
 
