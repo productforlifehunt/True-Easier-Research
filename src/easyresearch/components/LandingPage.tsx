@@ -90,7 +90,7 @@ const LandingPage: React.FC = () => {
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
                 <Sparkles size={12} className="text-white" />
               </div>
-              <span className="text-[13px] font-semibold text-stone-700 tracking-tight">{t('landing.ai.title')}</span>
+              <span className="text-[13px] font-semibold text-emerald-600 tracking-tight">{t('landing.ai.title')}</span>
             </div>
             <p className="text-[14px] sm:text-[15px] text-stone-500 leading-relaxed mb-2">
               {t('landing.ai.fullDesc')}
