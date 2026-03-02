@@ -97,7 +97,7 @@ const LandingPage: React.FC = () => {
             </p>
             <p className="text-[14px] sm:text-[15px] text-stone-500 leading-relaxed mb-6 flex items-center gap-2">
               <Mic size={14} className="text-emerald-500 shrink-0" />
-              <span>Voice-powered answering — participants can speak every answer, get chatbot assistance, and complete surveys without typing a single word.</span>
+              <span>{t('landing.ai.voiceDesc')}</span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {aiCapabilities.map((cap, i) => (
