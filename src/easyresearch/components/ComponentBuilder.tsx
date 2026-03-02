@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronRight, Copy, GripVertical, Edit2, Shield, ClipboardCheck, User, HelpCircle, X } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Copy, GripVertical, Edit2, Shield, ClipboardCheck, User, HelpCircle, X, Layers } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
 import QuestionEditor from './QuestionEditor';
+import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 
 type ComponentType = 'consent' | 'screening' | 'profile' | 'help' | 'custom';
@@ -26,6 +27,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<ComponentType>>(new Set());
   const [openComponentId, setOpenComponentId] = useState<string | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
 
@@ -283,11 +285,48 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
     );
   };
 
+  if (showTemplates) {
+    return (
+      <TemplateMarketplaceEmbed
+        mode="browse"
+        onAddTemplate={(questions, title) => {
+          // Create a new custom component with these questions
+          const newQ: QuestionnaireConfig = {
+            id: crypto.randomUUID(),
+            questionnaire_type: 'custom',
+            title: title || 'Imported Template',
+            description: '',
+            questions,
+            estimated_duration: 5,
+            frequency: 'once',
+            time_windows: [{ start: '09:00', end: '21:00' }],
+            notification_enabled: false,
+            notification_minutes_before: 5,
+            dnd_allowed: false,
+            dnd_default_start: '22:00',
+            dnd_default_end: '08:00',
+            assigned_participant_types: participantTypes.map(pt => pt.id),
+            order_index: questionnaires.length,
+          };
+          onUpdate([...questionnaires, newQ]);
+          setShowTemplates(false);
+        }}
+        onClose={() => setShowTemplates(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-[16px] font-semibold text-stone-800">Components</h3>
-        <p className="text-[12px] text-stone-400 mt-0.5">Build consent forms, screening, profiles, and help — all using the unified questionnaire system</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-semibold text-stone-800">Components</h3>
+          <p className="text-[12px] text-stone-400 mt-0.5">Build consent forms, screening, profiles, and help — all using the unified questionnaire system</p>
+        </div>
+        <button onClick={() => setShowTemplates(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium text-violet-600 bg-violet-50 border border-violet-200 hover:bg-violet-100 transition-colors">
+          <Layers size={13} /> From Templates
+        </button>
       </div>
 
       {/* Each type is a section with its instances inline */}
