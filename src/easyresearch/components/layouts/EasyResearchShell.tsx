@@ -48,24 +48,29 @@ const EasyResearchShellInner: React.FC = () => {
     }
   }, [location.pathname]);
 
-  // Public routes — no sidebar, no bottom nav
-  const isPublicRoute = useMemo(() => {
+  // Dashboard routes — whitelist approach (safer than blacklisting public routes)
+  const isDashboardRoute = useMemo(() => {
     const p = location.pathname;
     return (
-      p === '/easyresearch' ||
-      p === '/easyresearch/landing' ||
-      p === '/easyresearch/auth' ||
-      p === '/easyresearch/pricing' ||
-      p === '/easyresearch/templates' ||
-      p === '/easyresearch/participant-library' ||
-      p === '/easyresearch/features' ||
-      p === '/easyresearch/participant/join'
+      p === '/easyresearch/dashboard' ||
+      p === '/easyresearch/home' ||
+      p.startsWith('/easyresearch/project/') ||
+      p === '/easyresearch/create-survey' ||
+      p === '/easyresearch/create' ||
+      p === '/easyresearch/responses' ||
+      p === '/easyresearch/participants' ||
+      p.startsWith('/easyresearch/mobile/edit/') ||
+      (p.startsWith('/easyresearch/participant/') && !p.includes('/join')) ||
+      p === '/easyresearch/inbox' ||
+      p.startsWith('/easyresearch/inbox/') ||
+      p === '/easyresearch/user/settings' ||
+      p.startsWith('/easyresearch/user/')
     );
   }, [location.pathname]);
 
-  // Sidebar + bottom nav only on non-public (dashboard) routes for logged-in users
-  const showSidebar = !!user && !isPublicRoute;
-  const showBottomNav = !!user && !isPublicRoute;
+  // Sidebar (desktop lg+) and bottom nav (mobile <lg) only on dashboard routes
+  const showSidebar = !!user && isDashboardRoute;
+  const showBottomNav = !!user && isDashboardRoute;
 
   // Bottom nav tabs — same 4 as sidebar
   const tabs = useMemo(
