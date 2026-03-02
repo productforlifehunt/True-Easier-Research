@@ -214,18 +214,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-6 border-t border-stone-100">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-              <BarChart3 size={13} className="text-white" />
-            </div>
-            <span className="text-[13px] font-semibold text-stone-700">{t('brand.name')}</span>
-          </div>
-          <p className="text-[11px] text-stone-300">{t('brand.copyright')}</p>
-        </div>
-      </footer>
     </div>
   );
 };
