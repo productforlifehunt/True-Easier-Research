@@ -33,8 +33,8 @@ const AnalyticsPage: React.FC = () => {
       }
 
       const { data: enrollments } = await supabase.from('enrollment').select('id, participant_id, participant_email, status, project_id').in('project_id', projectIds);
-      const { count: totalResponseCount } = await supabase.from('survey_respons').select('id', { count: 'exact', head: true }).in('project_id', projectIds);
-      const { data: responses } = await supabase.from('survey_respons').select('id, created_at, question_id, enrollment_id, response_text, response_value')
+      const { count: totalResponseCount } = await supabase.from('survey_response').select('id', { count: 'exact', head: true }).in('project_id', projectIds);
+      const { data: responses } = await supabase.from('survey_response').select('id, created_at, question_id, enrollment_id, response_text, response_value')
         .in('project_id', projectIds).order('created_at', { ascending: false }).limit(10);
 
       const recent = (responses || []) as any[];
@@ -42,14 +42,14 @@ const AnalyticsPage: React.FC = () => {
       const enrollmentIds = Array.from(new Set(recent.map((r: any) => r.enrollment_id).filter(Boolean)));
 
       const [{ data: questionsData }, { data: enrollmentsForRecent }] = await Promise.all([
-        questionIds.length ? supabase.from('survey_question').select('id, question_text, question_type').in('id', questionIds) : Promise.resolve({ data: [] as any[] } as any),
+        questionIds.length ? supabase.from('question').select('id, question_text, question_type').in('id', questionIds) : Promise.resolve({ data: [] as any[] } as any),
         enrollmentIds.length ? supabase.from('enrollment').select('id, participant_email').in('id', enrollmentIds) : Promise.resolve({ data: [] as any[] } as any)
       ]);
 
       const questionById = new Map((questionsData || []).map((q: any) => [q.id, q]));
       const enrollmentById = new Map((enrollmentsForRecent || []).map((e: any) => [e.id, e]));
       const enrichedRecent = recent.map((r: any) => ({
-        ...r, survey_question: questionById.get(r.question_id), enrollment: enrollmentById.get(r.enrollment_id)
+        ...r, question: questionById.get(r.question_id), enrollment: enrollmentById.get(r.enrollment_id)
       }));
 
       const activeParticipants = new Set((enrollments || []).map((e: any) => e.participant_id || e.participant_email).filter(Boolean)).size;
@@ -94,10 +94,10 @@ const AnalyticsPage: React.FC = () => {
               <div key={response.id} className="px-5 py-3.5 hover:bg-stone-50/50 transition-colors">
                 <div className="flex justify-between items-start mb-1">
                   <p className="text-[13px] font-medium text-stone-800">
-                    {response.survey_question?.question_text || 'Question'}
+                    {response.question?.question_text || 'Question'}
                   </p>
                   <span className="shrink-0 ml-3 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
-                    {response.survey_question?.question_type || 'response'}
+                    {response.question?.question_type || 'response'}
                   </span>
                 </div>
                 <p className="text-[13px] text-stone-500 mb-1 font-light">

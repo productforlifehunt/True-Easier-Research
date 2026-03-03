@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronUp, Users, Shield, ClipboardCheck, X } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Users, Shield, ClipboardCheck, X, Hash } from 'lucide-react';
 
 export interface ConsentForm {
   id: string;
@@ -28,6 +28,8 @@ export interface ParticipantType {
   screening_questions: ScreeningQuestion[];
   color: string;
   order_index: number;
+  numbering_enabled: boolean;
+  number_prefix: string; // e.g. 'CG' for Caregiver → CG001, CG002...
 }
 
 interface QuestionnaireRef {
@@ -60,6 +62,8 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
       screening_questions: [],
       color: COLORS[(num - 1) % COLORS.length],
       order_index: participantTypes.length,
+      numbering_enabled: true,
+      number_prefix: `P${num}`,
     };
     onUpdate([...participantTypes, newType]);
     setExpandedId(newType.id);
@@ -189,6 +193,38 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                         rows={2}
                         placeholder="Description of this participant type..."
                       />
+                    </div>
+
+                    {/* Auto-Numbering */}
+                    <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
+                      <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                        <Hash size={12} /> Auto-Numbering
+                      </h5>
+                      <div className="flex items-center justify-between py-1">
+                        <div>
+                          <p className="text-[12px] font-medium text-stone-700">Auto-Number Participants</p>
+                          <p className="text-[11px] text-stone-400">Assign sequential IDs when participants enroll (e.g., {pt.number_prefix || 'P1'}001)</p>
+                        </div>
+                        <button
+                          onClick={() => updateType(pt.id, { numbering_enabled: !pt.numbering_enabled })}
+                          className={`relative w-9 h-[18px] rounded-full transition-colors shrink-0 ${pt.numbering_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}
+                        >
+                          <span className="absolute top-[1px] w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: pt.numbering_enabled ? '20px' : '1px' }} />
+                        </button>
+                      </div>
+                      {pt.numbering_enabled && (
+                        <div className="pl-3 border-l-2 border-indigo-200">
+                          <label className="block text-[11px] font-medium text-stone-400 mb-1">Number Prefix</label>
+                          <input
+                            type="text"
+                            value={pt.number_prefix || ''}
+                            onChange={(e) => updateType(pt.id, { number_prefix: e.target.value })}
+                            className="w-32 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            placeholder="e.g. CG"
+                          />
+                          <p className="text-[10px] text-stone-400 mt-1">Preview: {pt.number_prefix || 'P1'}001, {pt.number_prefix || 'P1'}002, ...</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Relations */}

@@ -31,9 +31,9 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
     try {
       setLoading(true);
       const [{ data: responseData }, { data: enrollmentData }, { data: questionData }] = await Promise.all([
-        supabase.from('survey_respons').select('*').eq('project_id', projectId).order('created_at', { ascending: false }),
+        supabase.from('survey_response').select('*').eq('project_id', projectId).order('created_at', { ascending: false }),
         supabase.from('enrollment').select('id, participant_email, participant_id, status, created_at').eq('project_id', projectId),
-        supabase.from('survey_question').select('*').eq('project_id', projectId).order('order_index', { ascending: true }),
+        supabase.from('question').select('*').eq('project_id', projectId).order('order_index', { ascending: true }),
       ]);
       setResponses(responseData || []);
       setEnrollments(enrollmentData || []);

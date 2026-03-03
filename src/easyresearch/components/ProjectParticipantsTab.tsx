@@ -11,10 +11,11 @@ interface Enrollment {
   project_id: string;
   participant_id: string | null;
   participant_email: string;
+  participant_number?: string | null;
+  participant_type_id?: string | null;
   status: 'invited' | 'active' | 'completed' | 'withdrawn';
   created_at: string;
   profile_data?: any;
-  enrollment_data?: any;
   study_start_date?: string;
 }
 
@@ -98,7 +99,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.from('enrollment')
-        .select('id, project_id, participant_id, participant_email, status, created_at, profile_data, enrollment_data, study_start_date')
+        .select('id, project_id, participant_id, participant_email, participant_number, participant_type_id, status, created_at, study_start_date')
         .eq('project_id', projectId).order('created_at', { ascending: false });
       if (error) throw error;
       setEnrollments((data || []) as Enrollment[]);
@@ -121,16 +122,16 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   const loadEnrollmentResponses = async (enrollmentId: string) => {
     setResponsesLoading(true);
     try {
-      const { data: responsesData } = await supabase.from('survey_respons')
+      const { data: responsesData } = await supabase.from('survey_response')
         .select('id, question_id, response_text, response_value, created_at, instance_id')
         .eq('enrollment_id', enrollmentId).order('created_at', { ascending: false });
       const questionIds = Array.from(new Set((responsesData || []).map((r: any) => r.question_id).filter(Boolean)));
       let questionsMap = new Map();
       if (questionIds.length > 0) {
-        const { data: questionsData } = await supabase.from('survey_question').select('id, question_text, question_type, order_index').in('id', questionIds);
+        const { data: questionsData } = await supabase.from('question').select('id, question_text, question_type, order_index').in('id', questionIds);
         questionsMap = new Map((questionsData || []).map((q: any) => [q.id, q]));
       }
-      setEnrollmentResponses((responsesData || []).map((r: any) => ({ ...r, survey_question: questionsMap.get(r.question_id) })));
+      setEnrollmentResponses((responsesData || []).map((r: any) => ({ ...r, question: questionsMap.get(r.question_id) })));
     } catch (error) { console.error('Error loading responses:', error); }
     finally { setResponsesLoading(false); }
   };
@@ -176,7 +177,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
 
   const filteredEnrollments = enrollments.filter(e => {
     const matchesSearch = !searchQuery || e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.enrollment_data?.participant_number?.toLowerCase().includes(searchQuery.toLowerCase());
+      (e.participant_number || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -196,7 +197,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
     if (filteredEnrollments.length === 0) return;
     const headers = ['Email', 'Participant #', 'Role', 'Status', 'Enrolled At', 'Study Start'];
     const csvData = filteredEnrollments.map(e => [
-      e.participant_email, e.enrollment_data?.participant_number || '', e.enrollment_data?.participant_relation || '',
+      e.participant_email, e.participant_number || '',
       e.status, new Date(e.created_at).toLocaleString(), e.study_start_date || ''
     ]);
     const csv = [headers.join(','), ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
@@ -312,13 +313,10 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
                         <td className="px-4 py-3 text-[13px] font-medium text-stone-800">{enrollment.participant_email}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
-                            {enrollment.enrollment_data?.participant_number && (
+                            {enrollment.participant_number && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
-                                {enrollment.enrollment_data.participant_number}
+                                {enrollment.participant_number}
                               </span>
-                            )}
-                            {enrollment.enrollment_data?.participant_relation && (
-                              <span className="text-[11px] text-stone-400">{enrollment.enrollment_data.participant_relation}</span>
                             )}
                           </div>
                         </td>
@@ -454,7 +452,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
                 <div className="space-y-2">
                   {enrollmentResponses.map((r: any) => (
                     <div key={r.id} className="p-3 rounded-xl bg-stone-50">
-                      <p className="text-[12px] font-medium text-stone-700">{r.survey_question?.question_text || 'Question'}</p>
+                      <p className="text-[12px] font-medium text-stone-700">{r.question?.question_text || 'Question'}</p>
                       <p className="text-[12px] text-stone-500 mt-1">{r.response_text || (r.response_value != null ? String(r.response_value) : 'No response')}</p>
                     </div>
                   ))}

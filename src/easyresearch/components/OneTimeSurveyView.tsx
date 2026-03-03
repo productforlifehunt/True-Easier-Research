@@ -5,6 +5,7 @@ import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
 import { Mic, ChevronRight, ChevronLeft, Check, X, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { hydrateQuestionRows } from '../utils/questionConfigSync';
 
 interface SurveyProject {
   id: string;
@@ -75,13 +76,13 @@ const OneTimeSurveyView: React.FC = () => {
         setProject(project as any);
 
         const { data: questions } = await supabase
-          .from('survey_question')
+          .from('question')
           .select('*, options:question_option(*)')
           .eq('project_id', projectId)
           .order('order_index');
 
         if (questions) {
-          setQuestions(questions);
+          setQuestions(hydrateQuestionRows(questions));
         }
 
         const existingEnrollmentId = localStorage.getItem(`enrollment_${projectId}`);
@@ -338,7 +339,7 @@ const OneTimeSurveyView: React.FC = () => {
       
       if (responseInserts.length > 0) {
         await supabase
-          .from('survey_respons')
+          .from('survey_response')
           .insert(responseInserts);
       }
       

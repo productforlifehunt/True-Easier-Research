@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { X, Globe, Lock, Save, Loader2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { saveProjectAsTemplate, saveQuestionnaireAsTemplate } from '../services/templateService';
 import toast from 'react-hot-toast';
 
 interface Props {
+  projectId: string;
   questionnaires: Array<{
     id: string;
     title: string;
@@ -15,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-const SaveTemplateModal: React.FC<Props> = ({ questionnaires, projectTitle, onClose }) => {
+const SaveTemplateModal: React.FC<Props> = ({ projectId, questionnaires, projectTitle, onClose }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState(projectTitle || '');
   const [description, setDescription] = useState('');
@@ -30,60 +31,29 @@ const SaveTemplateModal: React.FC<Props> = ({ questionnaires, projectTitle, onCl
     if (!user || !title.trim()) return;
     setSaving(true);
     try {
-      let templateData: any;
-      if (selectedQId === 'all') {
-        // Save all questionnaires
-        templateData = {
-          questionnaires: surveyQuestionnaires.map(q => ({
-            title: q.title,
-            questionnaire_type: q.questionnaire_type,
-            questions: q.questions.map(qq => ({
-              type: qq.question_type,
-              text: qq.question_text,
-              question_description: qq.question_description,
-              required: qq.required,
-              config: qq.question_config,
-              options: qq.options?.map((o: any) => ({ text: o.option_text, is_other: o.is_other })) || [],
-            })),
-          })),
-          questions: surveyQuestionnaires.flatMap(q => q.questions.map(qq => ({
-            type: qq.question_type,
-            text: qq.question_text,
-            question_description: qq.question_description,
-            required: qq.required,
-            config: qq.question_config,
-            options: qq.options?.map((o: any) => ({ text: o.option_text, is_other: o.is_other })) || [],
-          }))),
-        };
-      } else {
-        const q = surveyQuestionnaires.find(q => q.id === selectedQId);
-        if (!q) throw new Error('Questionnaire not found');
-        templateData = {
-          questions: q.questions.map(qq => ({
-            type: qq.question_type,
-            text: qq.question_text,
-            question_description: qq.question_description,
-            required: qq.required,
-            config: qq.question_config,
-            options: qq.options?.map((o: any) => ({ text: o.option_text, is_other: o.is_other })) || [],
-          })),
-        };
-      }
-
-      const { error } = await supabase.from('user_template').insert({
-        user_id: user.id,
+      const opts = {
         title: title.trim(),
         description: description.trim(),
-        template_type: selectedQId === 'all' ? 'research' : 'questionnaire',
-        is_public: isPublic,
+        isPublic,
         category,
-        template_data: templateData,
-        tags: [],
-      });
+      };
 
-      if (error) throw error;
-      toast.success('Template saved!');
-      onClose();
+      let result: { templateId: string } | { error: string };
+
+      if (selectedQId === 'all') {
+        // Save entire project as template
+        result = await saveProjectAsTemplate(projectId, user.id, opts);
+      } else {
+        // Save single questionnaire as template
+        result = await saveQuestionnaireAsTemplate(selectedQId, projectId, user.id, opts);
+      }
+
+      if ('error' in result) {
+        toast.error(result.error);
+      } else {
+        toast.success('Template saved!');
+        onClose();
+      }
     } catch (err: any) {
       toast.error(err.message || 'Failed to save template');
     } finally {
@@ -117,7 +87,7 @@ const SaveTemplateModal: React.FC<Props> = ({ questionnaires, projectTitle, onCl
               <label className="block text-[12px] font-medium text-stone-500 mb-1.5">What to Save</label>
               <select value={selectedQId} onChange={e => setSelectedQId(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                <option value="all">All Questionnaires ({surveyQuestionnaires.length})</option>
+                <option value="all">Entire Project ({surveyQuestionnaires.length} questionnaires)</option>
                 {surveyQuestionnaires.map(q => (
                   <option key={q.id} value={q.id}>{q.title} ({q.questions.length} questions)</option>
                 ))}
@@ -152,7 +122,7 @@ const SaveTemplateModal: React.FC<Props> = ({ questionnaires, projectTitle, onCl
 
           <div className="flex items-center gap-2 text-[11px] text-stone-400 bg-stone-50 rounded-xl p-3">
             {isPublic ? <Globe size={14} className="text-emerald-500 shrink-0" /> : <Lock size={14} className="text-stone-400 shrink-0" />}
-            <span>{isPublic ? 'This template will be visible to all researchers on the marketplace' : 'Only you can see and use this template'}</span>
+            <span>{isPublic ? 'This template will be visible to all researchers' : 'Only you can see and use this template'}</span>
           </div>
         </div>
 

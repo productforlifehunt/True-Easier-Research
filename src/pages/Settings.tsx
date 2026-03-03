@@ -15,6 +15,7 @@ import MobileHeader from '../components/MobileHeader';
 import AuthModal from '../components/AuthModal';
 import Ecogram from '../components/Ecogram';
 import MyCaringWeek from '../components/MyCaringWeek';
+import { loadEcogramData } from '../easyresearch/utils/enrollmentSync';
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -47,6 +48,7 @@ const SettingsPage: React.FC = () => {
   });
   const [testingNotification, setTestingNotification] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [ecogramDataState, setEcogramDataState] = useState<{ members: any[]; lastUpdated: string | null }>({ members: [], lastUpdated: null });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     full_name: '',
@@ -159,6 +161,9 @@ const SettingsPage: React.FC = () => {
     try {
       const profileData = await dataService.getUserProfile(user.id);
       setProfile(profileData);
+      // Load ecogram from flat table instead of JSONB
+      const flatEcogram = await loadEcogramData({ profileId: user.id });
+      setEcogramDataState(flatEcogram);
       setProfileForm({
         full_name: profileData.full_name || '',
         introduction: profileData.introduction || '',
@@ -304,15 +309,8 @@ const SettingsPage: React.FC = () => {
             setDailyReminderTime(prefs.daily_reminder_time.substring(0, 5));
           }
           
-          // Start scheduler with full preferences
-          notificationScheduler.start({
-            hourly_reminders_enabled: prefs.hourly_reminders_enabled || false,
-            daily_reminders_enabled: prefs.daily_reminders_enabled ?? true,
-            daily_reminder_time: prefs.daily_reminder_time || '22:00:00',
-            push_notifications_enabled: prefs.push_notifications_enabled ?? true,
-            dnd_periods: prefs.dnd_periods || [],
-            notification_permission_status: prefs.notification_permission_status || 'default'
-          }, language);
+          // Start questionnaire-aware scheduler (reads configs from DB)
+          notificationScheduler.loadAndStart(user.id, language);
         }
       } catch (error) {
         console.error('Error loading notification preferences:', error);
@@ -622,17 +620,9 @@ const SettingsPage: React.FC = () => {
         [dbColumnMap[type]]: newValue
       });
       
-      // Update scheduler when daily reminders or push notifications change
-      if (type === 'dailyReminders' || type === 'pushNotifications') {
-        const updatedNotifs = { ...notifications, [type]: newValue };
-        notificationScheduler.updatePreferences({
-          hourly_reminders_enabled: hourlyReminders,
-          daily_reminders_enabled: updatedNotifs.dailyReminders,
-          daily_reminder_time: dailyReminderTime + ':00',
-          push_notifications_enabled: updatedNotifs.pushNotifications,
-          dnd_periods: dndPeriods,
-          notification_permission_status: 'granted'
-        }, language);
+      // Update scheduler master kill switch when push notifications toggle changes
+      if (type === 'pushNotifications') {
+        notificationScheduler.setMasterEnabled(newValue);
       }
     } catch (error) {
       console.error(`Error updating ${type}:`, error);
@@ -651,15 +641,7 @@ const SettingsPage: React.FC = () => {
         daily_reminder_time: newTime + ':00'
       });
       
-      // Update scheduler with new time
-      notificationScheduler.updatePreferences({
-        hourly_reminders_enabled: hourlyReminders,
-        daily_reminders_enabled: notifications.dailyReminders,
-        daily_reminder_time: newTime + ':00',
-        push_notifications_enabled: notifications.pushNotifications,
-        dnd_periods: dndPeriods,
-        notification_permission_status: 'granted'
-      }, language);
+      // Daily reminder time is stored in DB; scheduler reads from questionnaire config
     } catch (error) {
       console.error('Error updating daily reminder time:', error);
       setDailyReminderTime(previousTime);
@@ -696,17 +678,7 @@ const SettingsPage: React.FC = () => {
         hourly_reminders_enabled: newValue
       });
       
-      if (updated) {
-        // Update scheduler
-        notificationScheduler.updatePreferences({
-          hourly_reminders_enabled: newValue,
-          daily_reminders_enabled: notifications.dailyReminders,
-          daily_reminder_time: dailyReminderTime + ':00',
-          push_notifications_enabled: notifications.pushNotifications,
-          dnd_periods: dndPeriods,
-          notification_permission_status: updated.notification_permission_status || 'default'
-        }, language);
-      }
+      // Hourly reminders preference saved to DB; scheduler reads questionnaire configs
     } catch (error) {
       console.error('Error updating hourly reminders:', error);
       setHourlyReminders(!newValue);
@@ -729,15 +701,7 @@ const SettingsPage: React.FC = () => {
         setDndPeriods(updatedPeriods);
         setNewDndPeriod({ start_time: '22:00', end_time: '08:00', label: '', is_active: true });
         
-        // Update scheduler
-        notificationScheduler.updatePreferences({
-          hourly_reminders_enabled: hourlyReminders,
-          daily_reminders_enabled: notifications.dailyReminders,
-          daily_reminder_time: dailyReminderTime + ':00',
-          push_notifications_enabled: notifications.pushNotifications,
-          dnd_periods: updatedPeriods,
-          notification_permission_status: 'granted'
-        }, language);
+        // DND periods saved to DB; per-questionnaire DND is in enrollment_dnd_period table
       }
     } catch (error) {
       console.error('Error adding DND period:', error);
@@ -752,15 +716,7 @@ const SettingsPage: React.FC = () => {
       const updatedPeriods = dndPeriods.filter(p => p.id !== periodId);
       setDndPeriods(updatedPeriods);
       
-      // Update scheduler
-      notificationScheduler.updatePreferences({
-        hourly_reminders_enabled: hourlyReminders,
-        daily_reminders_enabled: notifications.dailyReminders,
-        daily_reminder_time: dailyReminderTime + ':00',
-        push_notifications_enabled: notifications.pushNotifications,
-        dnd_periods: updatedPeriods,
-        notification_permission_status: 'granted'
-      }, language);
+      // DND saved to DB; per-questionnaire DND is in enrollment_dnd_period table
     } catch (error) {
       console.error('Error deleting DND period:', error);
     }
@@ -776,15 +732,7 @@ const SettingsPage: React.FC = () => {
       );
       setDndPeriods(updatedPeriods);
       
-      // Update scheduler
-      notificationScheduler.updatePreferences({
-        hourly_reminders_enabled: hourlyReminders,
-        daily_reminders_enabled: notifications.dailyReminders,
-        daily_reminder_time: dailyReminderTime + ':00',
-        push_notifications_enabled: notifications.pushNotifications,
-        dnd_periods: updatedPeriods,
-        notification_permission_status: 'granted'
-      }, language);
+      // DND saved to DB; per-questionnaire DND is in enrollment_dnd_period table
     } catch (error) {
       console.error('Error toggling DND period:', error);
     }
@@ -1763,7 +1711,7 @@ const SettingsPage: React.FC = () => {
                         <Ecogram
                           userId={user?.id || ''}
                           language={language}
-                          initialData={profile?.ecogram_data}
+                          initialData={ecogramDataState}
                           primaryCaregiverCode={profile?.primary_caregiver_code}
                           isPrimaryCaregiver={profileForm.is_primary_caregiver}
                         />
@@ -2282,7 +2230,7 @@ const SettingsPage: React.FC = () => {
                             <Ecogram 
                               userId={user?.id} 
                               language={language}
-                              initialData={profile?.ecogram_data}
+                              initialData={ecogramDataState}
                               primaryCaregiverCode={
                                 profileForm.is_primary_caregiver 
                                   ? profile?.participant_number 
@@ -2296,7 +2244,7 @@ const SettingsPage: React.FC = () => {
                           <div className="border rounded-xl p-3" style={{ borderColor: 'var(--border-light)', background: 'white' }}>
                             <MyCaringWeek 
                               language={language}
-                              networkMembers={profile?.ecogram_data?.members?.map((m: any) => ({ id: m.id, name: m.name })) || []}
+                              networkMembers={ecogramDataState?.members?.map((m: any) => ({ id: m.id, name: m.name })) || []}
                             />
                           </div>
                         </div>

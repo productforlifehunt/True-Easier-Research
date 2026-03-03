@@ -8,6 +8,7 @@ import {
   Smartphone, Mic, Play, Plus, Trash2, Edit2
 } from 'lucide-react';
 import ParticipantNotificationSettings from './ParticipantNotificationSettings';
+import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import toast from 'react-hot-toast';
 import ParticipantSurveyView from './ParticipantSurveyView';
 import CompletedSurveyView from './CompletedSurveyView';
@@ -124,7 +125,7 @@ const ESMParticipantDashboard: React.FC = () => {
     try {
       // Delete associated responses first
       await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .delete()
         .eq('instance_id', instanceId);
       
@@ -218,24 +219,24 @@ const ESMParticipantDashboard: React.FC = () => {
         // Load completed responses for summary tab
         if (enrollmentData) {
           const { data: responsesData } = await supabase
-            .from('survey_respons')
+            .from('survey_response')
             .select('id, enrollment_id, instance_id, question_id, response_text, response_value, created_at')
             .eq('enrollment_id', enrollmentData.id)
             .order('created_at', { ascending: false });
           
           const { data: questionsData } = await supabase
-            .from('survey_question')
+            .from('question')
             .select('id, question_text, question_type, question_config, order_index')
             .eq('project_id', enrollmentData.project_id)
             .order('order_index', { ascending: true });
 
-          const questionById = new Map((questionsData || []).map((q: any) => [q.id, q]));
+          const questionById = new Map(hydrateQuestionRows(questionsData || []).map((q: any) => [q.id, q]));
 
           if (responsesData) {
             setCompletedResponses(
               (responsesData as any[]).map((r: any) => ({
                 ...r,
-                survey_question: questionById.get(r.question_id)
+                question: questionById.get(r.question_id)
               }))
             );
           } else {
@@ -740,7 +741,7 @@ const ESMParticipantDashboard: React.FC = () => {
       try {
         for (const [questionId, value] of Object.entries(editedResponses)) {
           await supabase
-            .from('survey_respons')
+            .from('survey_response')
             .update({ 
               response_text: typeof value === 'string' ? value : JSON.stringify(value),
               response_value: typeof value === 'string' ? value : value
@@ -761,7 +762,7 @@ const ESMParticipantDashboard: React.FC = () => {
     };
 
     const getAnswerText = (response: any) => {
-      const question = response.survey_question;
+      const question = response.question;
       const fallback = (response.response_text && String(response.response_text).trim().length > 0)
         ? response.response_text
         : (response.response_value !== null && response.response_value !== undefined)
@@ -888,7 +889,7 @@ const ESMParticipantDashboard: React.FC = () => {
                 {responses.map((response: any) => (
                   <div key={response.id}>
                     <p className="font-medium text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {response.survey_question?.question_text || 'Question'}
+                      {response.question?.question_text || 'Question'}
                     </p>
                     {editingInstanceId === instance.id ? (
                       <input
@@ -1037,7 +1038,8 @@ const ESMParticipantDashboard: React.FC = () => {
       isOpen={showNotificationSettings}
       onClose={() => setShowNotificationSettings(false)}
       enrollmentId={enrollment?.id || ''}
-      currentSettings={enrollment?.dnd_setting}
+      projectId={projectId || ''}
+      currentSettings={undefined}
     />
 
     {/* Survey Modal - Centered Pop-up, No Overlay */}

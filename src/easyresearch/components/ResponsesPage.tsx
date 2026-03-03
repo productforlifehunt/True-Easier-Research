@@ -37,7 +37,7 @@ const ResponsesPage: React.FC = () => {
 
       // Get response counts and enrollment counts per project
       const [{ data: responseCounts }, { data: enrollmentCounts }] = await Promise.all([
-        supabase.from('survey_respons').select('project_id').in('project_id', projectIds),
+        supabase.from('survey_response').select('project_id').in('project_id', projectIds),
         supabase.from('enrollment').select('project_id, status').in('project_id', projectIds),
       ]);
 

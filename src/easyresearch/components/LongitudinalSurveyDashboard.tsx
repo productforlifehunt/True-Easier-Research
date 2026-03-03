@@ -27,7 +27,7 @@ const LongitudinalSurveyDashboard: React.FC = () => {
           const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
           if (projectData) {
             setProject(projectData);
-            const { data: responsesData } = await supabase.from('survey_respons').select('id, created_at').eq('enrollment_id', enrollmentId).order('created_at', { ascending: false });
+            const { data: responsesData } = await supabase.from('survey_response').select('id, created_at').eq('enrollment_id', enrollmentId).order('created_at', { ascending: false });
             if (responsesData) {
               const groupedSessions = groupResponsesIntoSessions(responsesData);
               setSessions(groupedSessions);

@@ -1,37 +1,129 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Bell, Moon } from 'lucide-react';
+import { X, Plus, Bell, Moon, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { notificationScheduler, QuestionnaireDNDPeriod } from '../../utils/notificationScheduler';
+import { loadDndSetting, saveDndSetting } from '../utils/enrollmentSync';
 
-interface DNDPeriod { start: string; end: string; }
-interface ParticipantNotificationSettingsProps { isOpen: boolean; onClose: () => void; enrollmentId: string; currentSettings?: any; }
+interface QuestionnaireInfo {
+  id: string;
+  title: string;
+  frequency: string;
+  notification_enabled: boolean;
+  notification_title: string;
+  notification_body: string;
+  time_windows: { start: string; end: string }[];
+  dnd_allowed: boolean;
+}
 
-const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsProps> = ({ isOpen, onClose, enrollmentId, currentSettings }) => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [dndPeriods, setDndPeriods] = useState<DNDPeriod[]>([{ start: '22:00', end: '07:00' }]);
+interface ParticipantNotificationSettingsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  enrollmentId: string;
+  projectId: string;
+  currentSettings?: any; // deprecated — DND now loaded from enrollment_dnd_period table
+}
+
+const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsProps> = ({
+  isOpen, onClose, enrollmentId, projectId, currentSettings,
+}) => {
+  const [questionnaires, setQuestionnaires] = useState<QuestionnaireInfo[]>([]);
+  // dndByQ: { [questionnaire_id]: { dnd_periods: [{start, end}] } }
+  const [dndByQ, setDndByQ] = useState<Record<string, { dnd_periods: QuestionnaireDNDPeriod[] }>>({});
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentSettings) {
-      setNotificationsEnabled(currentSettings.notifications_enabled ?? true);
-      if (currentSettings.dnd_periods && Array.isArray(currentSettings.dnd_periods)) setDndPeriods(currentSettings.dnd_periods);
-    }
-  }, [currentSettings]);
+    if (!isOpen) return;
+    const load = async () => {
+      setLoading(true);
+      // Load questionnaires with notifications enabled for this project
+      const { data } = await supabase
+        .from('questionnaire')
+        .select('id, title, frequency, notification_enabled, notification_title, notification_body, dnd_allowed')
+        .eq('project_id', projectId)
+        .eq('notification_enabled', true)
+        .order('order_index');
+      // Load time_windows from flat questionnaire_time_window table
+      const qIds = (data || []).map((q: any) => q.id);
+      let twByQ = new Map<string, { start: string; end: string }[]>();
+      if (qIds.length > 0) {
+        const { data: twRows } = await supabase
+          .from('questionnaire_time_window')
+          .select('questionnaire_id, start_time, end_time, order_index')
+          .in('questionnaire_id', qIds)
+          .order('order_index');
+        for (const tw of (twRows || [])) {
+          const arr = twByQ.get(tw.questionnaire_id) || [];
+          arr.push({ start: tw.start_time, end: tw.end_time });
+          twByQ.set(tw.questionnaire_id, arr);
+        }
+      }
+      setQuestionnaires((data || []).map((q: any) => ({ ...q, time_windows: twByQ.get(q.id) || [] })) as QuestionnaireInfo[]);
 
-  const handleAddDNDPeriod = () => { setDndPeriods([...dndPeriods, { start: '12:00', end: '13:00' }]); };
-  const handleRemoveDNDPeriod = (index: number) => { setDndPeriods(dndPeriods.filter((_, i) => i !== index)); };
-  const handleUpdateDNDPeriod = (index: number, field: 'start' | 'end', value: string) => { const n = [...dndPeriods]; n[index][field] = value; setDndPeriods(n); };
+      // Load DND from flat table
+      const existing = await loadDndSetting(enrollmentId);
+      const parsed: Record<string, { dnd_periods: QuestionnaireDNDPeriod[] }> = {};
+      for (const q of (data || [])) {
+        parsed[q.id] = existing[q.id] || { dnd_periods: [] };
+      }
+      setDndByQ(parsed);
+      setLoading(false);
+    };
+    load();
+  }, [isOpen, projectId, enrollmentId]);
+
+  const addDndPeriod = (qId: string) => {
+    setDndByQ(prev => ({
+      ...prev,
+      [qId]: { dnd_periods: [...(prev[qId]?.dnd_periods || []), { start: '22:00', end: '07:00' }] },
+    }));
+  };
+
+  const removeDndPeriod = (qId: string, index: number) => {
+    setDndByQ(prev => ({
+      ...prev,
+      [qId]: { dnd_periods: (prev[qId]?.dnd_periods || []).filter((_, i) => i !== index) },
+    }));
+  };
+
+  const updateDndPeriod = (qId: string, index: number, field: 'start' | 'end', value: string) => {
+    setDndByQ(prev => {
+      const periods = [...(prev[qId]?.dnd_periods || [])];
+      periods[index] = { ...periods[index], [field]: value };
+      return { ...prev, [qId]: { dnd_periods: periods } };
+    });
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase.from('enrollment').update({ dnd_setting: { notifications_enabled: notificationsEnabled, dnd_periods: dndPeriods } }).eq('id', enrollmentId);
-      if (error) throw error;
+      // Save DND to flat table instead of JSONB
+      // Merge with existing (preserve settings for questionnaires not shown here)
+      const existing = await loadDndSetting(enrollmentId);
+      const merged = { ...existing, ...dndByQ };
+      await saveDndSetting(enrollmentId, merged);
+
+      // Live-update scheduler DND without full reload
+      for (const [qId, val] of Object.entries(dndByQ)) {
+        notificationScheduler.updateQuestionnaireDND(qId, val.dnd_periods);
+      }
       onClose();
-    } catch (error) { console.error('Error saving:', error); }
-    finally { setSaving(false); }
+    } catch (error) {
+      console.error('Error saving DND:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!isOpen) return null;
+
+  const freqLabel = (f: string) => {
+    const map: Record<string, string> = {
+      hourly: 'Hourly', '2hours': 'Every 2h', '4hours': 'Every 4h',
+      daily: 'Daily', twice_daily: 'Twice daily', weekly: 'Weekly', once: 'One-time',
+    };
+    return map[f] || f;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -42,8 +134,8 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
               <Bell size={18} className="text-emerald-500" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-stone-800">Notifications</h2>
-              <p className="text-[12px] text-stone-400 font-light">Customize survey reminders</p>
+              <h2 className="text-[15px] font-semibold text-stone-800">Notification Settings</h2>
+              <p className="text-[12px] text-stone-400 font-light">Set Do Not Disturb per questionnaire</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
@@ -51,45 +143,67 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
           </button>
         </div>
 
-        <div className="space-y-5">
-          <div className="p-4 rounded-xl border border-stone-100">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={notificationsEnabled} onChange={(e) => setNotificationsEnabled(e.target.checked)}
-                className="w-4 h-4 rounded accent-emerald-500" />
-              <div>
-                <p className="text-[13px] font-medium text-stone-700">Enable Notifications</p>
-                <p className="text-[11px] text-stone-400 font-light">Receive reminders for surveys</p>
-              </div>
-            </label>
+        {loading ? (
+          <div className="py-8 text-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent mx-auto" />
           </div>
+        ) : questionnaires.length === 0 ? (
+          <p className="text-[13px] text-stone-400 text-center py-6">No questionnaires with notifications enabled in this study.</p>
+        ) : (
+          <div className="space-y-4">
+            {questionnaires.map(q => {
+              const periods = dndByQ[q.id]?.dnd_periods || [];
+              return (
+                <div key={q.id} className="p-4 rounded-xl border border-stone-100 space-y-3">
+                  {/* Questionnaire header — shows researcher-configured notification info */}
+                  <div>
+                    <h3 className="text-[13px] font-semibold text-stone-800">{q.title}</h3>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[11px] text-stone-400 flex items-center gap-1"><Clock size={10} /> {freqLabel(q.frequency)}</span>
+                      {q.time_windows?.[0] && (
+                        <span className="text-[11px] text-stone-400">{q.time_windows[0].start}–{q.time_windows[0].end}</span>
+                      )}
+                    </div>
+                    {q.notification_title && (
+                      <p className="text-[11px] text-emerald-600 mt-1">"{q.notification_title}"</p>
+                    )}
+                  </div>
 
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Moon size={14} className="text-emerald-500" />
-              <h3 className="text-[13px] font-semibold text-stone-800">Do Not Disturb</h3>
-            </div>
-            <div className="space-y-2">
-              {dndPeriods.map((period, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 rounded-xl border border-stone-100">
-                  <input type="time" value={period.start} onChange={(e) => handleUpdateDNDPeriod(index, 'start', e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
-                  <span className="text-[11px] text-stone-400">to</span>
-                  <input type="time" value={period.end} onChange={(e) => handleUpdateDNDPeriod(index, 'end', e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
-                  {dndPeriods.length > 1 && (
-                    <button onClick={() => handleRemoveDNDPeriod(index)} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
-                      <X size={14} />
-                    </button>
+                  {/* DND periods for this questionnaire */}
+                  {q.dnd_allowed && (
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Moon size={12} className="text-indigo-400" />
+                        <span className="text-[11px] font-medium text-stone-500">Do Not Disturb</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {periods.map((p, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <input type="time" value={p.start} onChange={(e) => updateDndPeriod(q.id, i, 'start', e.target.value)}
+                              className="flex-1 px-2 py-1.5 rounded-lg border border-stone-200 text-[12px]" />
+                            <span className="text-[10px] text-stone-400">to</span>
+                            <input type="time" value={p.end} onChange={(e) => updateDndPeriod(q.id, i, 'end', e.target.value)}
+                              className="flex-1 px-2 py-1.5 rounded-lg border border-stone-200 text-[12px]" />
+                            <button onClick={() => removeDndPeriod(q.id, i)} className="p-1 text-red-400 hover:bg-red-50 rounded">
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        <button onClick={() => addDndPeriod(q.id)}
+                          className="w-full py-2 rounded-lg border border-dashed border-stone-200 text-[11px] font-medium text-emerald-500 hover:bg-emerald-50/50 flex items-center justify-center gap-1">
+                          <Plus size={12} /> Add quiet period
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {!q.dnd_allowed && (
+                    <p className="text-[11px] text-stone-400 italic">DND not available for this questionnaire (set by researcher)</p>
                   )}
                 </div>
-              ))}
-              <button onClick={handleAddDNDPeriod}
-                className="w-full py-2.5 rounded-xl border border-dashed border-stone-200 text-[12px] font-medium text-emerald-500 hover:bg-emerald-50/50 transition-colors flex items-center justify-center gap-1.5">
-                <Plus size={14} /> Add Period
-              </button>
-            </div>
+              );
+            })}
           </div>
-        </div>
+        )}
 
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors">Cancel</button>

@@ -19210,7 +19210,7 @@ export type Database = {
             foreignKeyName: "question_options_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "survey_questions"
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]
@@ -22194,7 +22194,7 @@ export type Database = {
           },
         ]
       }
-      survey_questions: {
+      questions: {
         Row: {
           ai_config: Json | null
           allow_ai_assist: boolean | null
@@ -22266,7 +22266,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "survey_questions_project_id_fkey"
+            foreignKeyName: "questions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "research_projects"
@@ -22337,7 +22337,7 @@ export type Database = {
             foreignKeyName: "survey_responses_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "survey_questions"
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]

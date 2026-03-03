@@ -133,16 +133,23 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             )}
           </div>
 
-          {/* Participant Numbering */}
-          <div className="border-t border-stone-100 pt-3 space-y-2">
-            <Toggle enabled={project.participant_numbering || false} onChange={(v) => onUpdateProject({ ...project, participant_numbering: v })} label="Auto-Number Participants" desc="Assign sequential IDs (e.g., PP001, PP002)" />
-            {project.participant_numbering && (
-              <div className="pl-3 border-l-2 border-indigo-200">
-                <InputField label="Number Prefix" type="text" value={project.participant_number_prefix || 'PP'} 
-                  onChange={(e) => onUpdateProject({ ...project, participant_number_prefix: (e.target as HTMLInputElement).value })} placeholder="PP" />
-              </div>
-            )}
-          </div>
+          {/* Global Participant Numbering — fallback when no participant types defined */}
+          {participantTypes.length === 0 && (
+            <div className="border-t border-stone-100 pt-3 space-y-2">
+              <Toggle enabled={project.participant_numbering || false} onChange={(v) => onUpdateProject({ ...project, participant_numbering: v })} label="Auto-Number Participants" desc="Assign sequential IDs (e.g., PP001, PP002). When participant types are defined, numbering is configured per type." />
+              {project.participant_numbering && (
+                <div className="pl-3 border-l-2 border-indigo-200">
+                  <InputField label="Number Prefix" type="text" value={project.participant_number_prefix || 'PP'} 
+                    onChange={(e) => onUpdateProject({ ...project, participant_number_prefix: (e.target as HTMLInputElement).value })} placeholder="PP" />
+                </div>
+              )}
+            </div>
+          )}
+          {participantTypes.length > 0 && (
+            <div className="border-t border-stone-100 pt-3">
+              <p className="text-[12px] text-stone-400 font-light">Auto-numbering is configured per participant type below. Each type has its own prefix (e.g., CG001 for Caregivers, FM001 for Family Members).</p>
+            </div>
+          )}
 
           {/* Participant Type Manager */}
           <div className="border-t border-stone-100 pt-4">

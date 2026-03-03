@@ -10,6 +10,8 @@ import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import QuestionnaireView from './shared/QuestionnaireView';
 import ElementRenderer from './shared/ElementRenderer';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
+import { loadLayoutFromDb } from '../utils/layoutSync';
+import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 
 const ICON_MAP: Record<string, React.FC<any>> = {
@@ -106,10 +108,11 @@ const ParticipantAppView: React.FC = () => {
       if (!proj) { setLoading(false); return; }
       setProject(proj);
 
-      const appLayout = proj.app_layout as AppLayout | null;
-      if (appLayout?.tabs?.length) {
-        setLayout(appLayout);
-        setCurrentTabId(appLayout.tabs[0].id);
+      // Load layout from flat tables instead of JSONB
+      const flatLayout = await loadLayoutFromDb(projectId!);
+      if (flatLayout?.tabs?.length) {
+        setLayout(flatLayout);
+        setCurrentTabId(flatLayout.tabs[0].id);
       }
 
       // Load questionnaires
@@ -122,14 +125,15 @@ const ParticipantAppView: React.FC = () => {
       if (qData) {
         // Load questions for each questionnaire
         const { data: allQuestions } = await supabase
-          .from('survey_question')
+          .from('question')
           .select('*, options:question_option(*)')
           .eq('project_id', projectId)
           .order('order_index');
 
+        const hydratedQuestions = hydrateQuestionRows(allQuestions || []);
         const qConfigs: QuestionnaireConfig[] = qData.map((q: any) => ({
           ...q,
-          questions: (allQuestions || []).filter((sq: any) => sq.questionnaire_id === q.id),
+          questions: hydratedQuestions.filter((sq: any) => sq.questionnaire_id === q.id),
         }));
         setQuestionnaires(qConfigs);
       }
@@ -214,7 +218,7 @@ const ParticipantAppView: React.FC = () => {
       }
 
       if (responseInserts.length > 0) {
-        const { error: insertError } = await supabase.from('survey_respons').insert(responseInserts);
+        const { error: insertError } = await supabase.from('survey_response').insert(responseInserts);
         if (insertError) throw insertError;
       }
 

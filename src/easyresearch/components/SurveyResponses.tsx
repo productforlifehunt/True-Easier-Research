@@ -11,7 +11,7 @@ interface Response {
   response_value: any;
   created_at: string;
   instance_id?: string;
-  survey_question?: { question_text: string; question_type: string; order_index: number; };
+  question?: { question_text: string; question_type: string; order_index: number; };
   enrollment?: { participant_email?: string; };
 }
 
@@ -20,7 +20,7 @@ interface Project {
   title: string;
   description: string;
   project_type: string;
-  survey_questions?: any[];
+  questions?: any[];
 }
 
 const SurveyResponses: React.FC = () => {
@@ -38,19 +38,19 @@ const SurveyResponses: React.FC = () => {
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) setProject(projectData);
 
-      const { data: responsesData } = await supabase.from('survey_respons').select('id, enrollment_id, question_id, response_text, response_value, created_at, instance_id').eq('project_id', projectId).order('created_at', { ascending: false });
+      const { data: responsesData } = await supabase.from('survey_response').select('id, enrollment_id, question_id, response_text, response_value, created_at, instance_id').eq('project_id', projectId).order('created_at', { ascending: false });
       const rawResponses = (responsesData || []) as any[];
       const questionIds = Array.from(new Set(rawResponses.map(r => r.question_id).filter(Boolean)));
       const enrollmentIds = Array.from(new Set(rawResponses.map(r => r.enrollment_id).filter(Boolean)));
 
       const [{ data: questionsData }, { data: enrollmentsData }] = await Promise.all([
-        questionIds.length ? supabase.from('survey_question').select('id, question_text, question_type, order_index').in('id', questionIds) : Promise.resolve({ data: [] as any[] } as any),
+        questionIds.length ? supabase.from('question').select('id, question_text, question_type, order_index').in('id', questionIds) : Promise.resolve({ data: [] as any[] } as any),
         enrollmentIds.length ? supabase.from('enrollment').select('id, participant_email').in('id', enrollmentIds) : Promise.resolve({ data: [] as any[] } as any)
       ]);
 
       const questionById = new Map((questionsData || []).map((q: any) => [q.id, q]));
       const enrollmentById = new Map((enrollmentsData || []).map((e: any) => [e.id, e]));
-      setResponses(rawResponses.map(r => ({ ...r, survey_question: questionById.get(r.question_id), enrollment: enrollmentById.get(r.enrollment_id) })));
+      setResponses(rawResponses.map(r => ({ ...r, question: questionById.get(r.question_id), enrollment: enrollmentById.get(r.enrollment_id) })));
     } catch (error) { console.error('Error loading responses:', error); }
     finally { setLoading(false); }
   };
@@ -76,7 +76,7 @@ const SurveyResponses: React.FC = () => {
   const exportToCSV = () => {
     if (groupedResponses.length === 0) return;
     const allQuestions = new Map<string, string>();
-    responses.forEach(r => { if (r.question_id && r.survey_question?.question_text) allQuestions.set(r.question_id, r.survey_question.question_text); });
+    responses.forEach(r => { if (r.question_id && r.question?.question_text) allQuestions.set(r.question_id, r.question.question_text); });
     const questionIds = Array.from(allQuestions.keys()); const questionTexts = Array.from(allQuestions.values());
     const headers = ['Participant', 'Instance', 'Submitted At', ...questionTexts];
     const csvData = groupedResponses.map(group => {
@@ -171,7 +171,7 @@ const SurveyResponses: React.FC = () => {
               <div className="space-y-1.5">
                 {group.responses.slice(0, 3).map(r => (
                   <div key={r.id} className="text-[12px] p-2 rounded-lg bg-stone-50">
-                    <span className="font-medium text-stone-700">{r.survey_question?.question_text?.substring(0, 40) || 'Question'}:</span>{' '}
+                    <span className="font-medium text-stone-700">{r.question?.question_text?.substring(0, 40) || 'Question'}:</span>{' '}
                     <span className="text-stone-500">{getAnswerDisplay(r).substring(0, 80)}</span>
                   </div>
                 ))}
@@ -195,7 +195,7 @@ const SurveyResponses: React.FC = () => {
             </div>
             <div className="p-5 space-y-4">
               <div><p className="text-[12px] text-stone-400 mb-1">Submitted</p><p className="text-[13px] font-medium text-stone-800">{formatDate(selectedResponse.created_at)}</p></div>
-              {selectedResponse.survey_question && (<div><p className="text-[12px] text-stone-400 mb-1">Question</p><p className="text-[13px] font-medium text-stone-800">{selectedResponse.survey_question.question_text}</p></div>)}
+              {selectedResponse.question && (<div><p className="text-[12px] text-stone-400 mb-1">Question</p><p className="text-[13px] font-medium text-stone-800">{selectedResponse.question.question_text}</p></div>)}
               <div><p className="text-[12px] text-stone-400 mb-1">Answer</p><div className="p-3 rounded-xl bg-stone-50"><p className="text-[13px] text-stone-700">{getAnswerDisplay(selectedResponse)}</p></div></div>
             </div>
             <div className="px-5 pb-5">

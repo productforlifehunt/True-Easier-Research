@@ -11,6 +11,9 @@ import ProjectParticipantsTab from './ProjectParticipantsTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
+import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
+import { questionConfigToDbCols, validationRuleToDbCols, hydrateQuestionRows } from '../utils/questionConfigSync';
+import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
@@ -108,8 +111,12 @@ export interface SurveyProject {
   sampling_late_window_minutes?: number;
   // Recruitment
   recruitment_criteria_text?: string;
-  // App layout (JSONB — only remaining JSONB, legitimate use for deeply nested UI config)
-  app_layout?: any;
+  // Layout theme/header (flat columns on research_project — no more JSONB)
+  layout_show_header?: boolean;
+  layout_header_title?: string;
+  layout_theme_primary_color?: string;
+  layout_theme_background_color?: string;
+  layout_theme_card_style?: string;
   // Help
   help_information?: string;
   // Incentives
@@ -179,7 +186,7 @@ const SurveyBuilder: React.FC = () => {
   const [appLayout, setAppLayout] = useState<AppLayout>(getDefaultLayout([]));
   const appLayoutInitializedRef = useRef(false);
 
-  // Auto-save app_layout to DB whenever it changes (debounced)
+  // Auto-save layout to flat DB tables whenever it changes (debounced)
   const layoutSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     // Skip the initial mount and the first load from DB
@@ -189,13 +196,10 @@ const SurveyBuilder: React.FC = () => {
     if (layoutSaveTimerRef.current) clearTimeout(layoutSaveTimerRef.current);
     layoutSaveTimerRef.current = setTimeout(async () => {
       try {
-        await supabase
-          .from('research_project')
-          .update({ app_layout: appLayout })
-          .eq('id', projectId);
-        console.log('[AutoSave] app_layout persisted');
+        await saveLayoutToDb(projectId, appLayout);
+        console.log('[AutoSave] layout persisted to flat tables');
       } catch (err) {
-        console.error('[AutoSave] Failed to persist app_layout:', err);
+        console.error('[AutoSave] Failed to persist layout:', err);
       }
     }, 1500);
 
@@ -259,7 +263,11 @@ const SurveyBuilder: React.FC = () => {
     sampling_allow_late: row.sampling_allow_late ?? true,
     sampling_late_window_minutes: row.sampling_late_window_minutes ?? 60,
     recruitment_criteria_text: row.recruitment_criteria_text,
-    app_layout: row.app_layout || {},
+    layout_show_header: row.layout_show_header ?? true,
+    layout_header_title: row.layout_header_title || '',
+    layout_theme_primary_color: row.layout_theme_primary_color || '#10b981',
+    layout_theme_background_color: row.layout_theme_background_color || '#f5f5f4',
+    layout_theme_card_style: row.layout_theme_card_style || 'elevated',
     help_information: row.help_information,
     // Incentive fields
     incentive_enabled: row.incentive_enabled ?? false,
@@ -327,7 +335,11 @@ const SurveyBuilder: React.FC = () => {
     sampling_allow_late: p.sampling_allow_late,
     sampling_late_window_minutes: p.sampling_late_window_minutes,
     recruitment_criteria_text: p.recruitment_criteria_text,
-    app_layout: appLayout,
+    layout_show_header: p.layout_show_header,
+    layout_header_title: p.layout_header_title,
+    layout_theme_primary_color: p.layout_theme_primary_color,
+    layout_theme_background_color: p.layout_theme_background_color,
+    layout_theme_card_style: p.layout_theme_card_style,
     help_information: p.help_information,
     // Incentive fields
     incentive_enabled: (p as any).incentive_enabled ?? false,
@@ -417,8 +429,10 @@ const SurveyBuilder: React.FC = () => {
         }
         if (projectData && mounted) {
           setProject(toProjectState(projectData));
-          if (projectData.app_layout && Object.keys(projectData.app_layout).length > 0) {
-            setAppLayout(projectData.app_layout);
+          // Load layout from flat tables instead of JSONB
+          const flatLayout = await loadLayoutFromDb(projectId);
+          if (flatLayout && flatLayout.tabs.length > 0) {
+            setAppLayout(flatLayout);
           }
           // Mark layout as initialized so auto-save kicks in only after DB load
           setTimeout(() => { appLayoutInitializedRef.current = true; }, 100);
@@ -479,9 +493,14 @@ const SurveyBuilder: React.FC = () => {
             }
           }
 
+          // Load time_windows from flat questionnaire_time_window table
+          const twMap = questionnaireRows && questionnaireRows.length > 0
+            ? await loadTimeWindowsBatch(questionnaireRows.map((q: any) => q.id))
+            : new Map<string, { start: string; end: string }[]>();
+
           // Load questions from DB and distribute into questionnaires via questionnaire_id FK
           const { data: questionsData } = await supabase
-            .from('survey_question')
+            .from('question')
             .select('*, options:question_option(*)')
             .eq('project_id', projectId)
             .order('order_index');
@@ -495,7 +514,7 @@ const SurveyBuilder: React.FC = () => {
             questions: [],
             estimated_duration: qr.estimated_duration || 5,
             frequency: qr.frequency || 'once',
-            time_windows: qr.time_windows || [{ start: '09:00', end: '21:00' }],
+            time_windows: twMap.get(qr.id) || [{ start: '09:00', end: '21:00' }],
             notification_enabled: qr.notification_enabled || false,
             notification_minutes_before: qr.notification_minutes_before || 5,
             notification_title: qr.notification_title || 'Time for your survey!',
@@ -516,11 +535,13 @@ const SurveyBuilder: React.FC = () => {
           }));
 
           if (questionsData && mounted) {
+            // Hydrate question_config from flat cfg_* columns
+            const hydratedQuestions = hydrateQuestionRows(questionsData);
             if (qConfigs.length > 0) {
               const qMap = new Map<string, any[]>();
               qConfigs.forEach(qc => qMap.set(qc.id, []));
-              for (const q of questionsData) {
-                // Hydrate allow_other/allow_none from question_config (they're stored there, not as DB columns)
+              for (const q of hydratedQuestions) {
+                // Hydrate allow_other/allow_none from question_config
                 if (q.question_config) {
                   if (q.question_config.allow_other !== undefined) q.allow_other = q.question_config.allow_other;
                   if (q.question_config.allow_none !== undefined) q.allow_none = q.question_config.allow_none;
@@ -557,7 +578,7 @@ const SurveyBuilder: React.FC = () => {
         title: templateData.name || 'Untitled Project',
         description: templateData.description || ''
       }));
-      import('../services/templateService').then(({ getTemplateQuestions, getTemplateSettings }) => {
+      import('../services/templateService').then(async ({ getTemplateQuestions, getTemplateSettings }) => {
         const templateQuestions = getTemplateQuestions(templateData.id);
         const settings = getTemplateSettings(templateData.id);
         
@@ -663,19 +684,19 @@ const SurveyBuilder: React.FC = () => {
             ),
           })));
         }
-        if (settings?.app_layout) {
-          // Remap questionnaire_id references in app layout elements
-          const layout = JSON.parse(JSON.stringify(settings.app_layout));
-          if (layout.tabs) {
-            for (const tab of layout.tabs) {
+        // Load template layout from flat tables and remap questionnaire IDs
+        if (templateData.id) {
+          const templateLayout = await loadLayoutFromDb(templateData.id);
+          if (templateLayout && templateLayout.tabs.length > 0) {
+            for (const tab of templateLayout.tabs) {
               for (const el of (tab.elements || [])) {
                 if (el.config?.questionnaire_id && templateIdToUuid.has(el.config.questionnaire_id)) {
                   el.config.questionnaire_id = templateIdToUuid.get(el.config.questionnaire_id);
                 }
               }
             }
+            setAppLayout(templateLayout);
           }
-          setAppLayout(layout);
         }
       });
       setLoading(false);
@@ -720,6 +741,8 @@ const SurveyBuilder: React.FC = () => {
             relations: pt.relations || [],
             color: pt.color || '#10b981',
             order_index: pt.order_index ?? 0,
+            numbering_enabled: pt.numbering_enabled ?? true,
+            number_prefix: pt.number_prefix || '',
           };
           await supabase.from('participant_type').upsert(ptPayload, { onConflict: 'id' });
         }
@@ -735,7 +758,7 @@ const SurveyBuilder: React.FC = () => {
         if (removedQIds.length > 0) {
           await supabase.from('questionnaire_participant_type').delete().in('questionnaire_id', removedQIds);
           // Nullify questionnaire_id on orphaned questions (don't delete them — they still belong to project)
-          await supabase.from('survey_question').update({ questionnaire_id: null }).in('questionnaire_id', removedQIds);
+          await supabase.from('question').update({ questionnaire_id: null }).in('questionnaire_id', removedQIds);
           await supabase.from('questionnaire').delete().in('id', removedQIds);
         }
 
@@ -769,6 +792,9 @@ const SurveyBuilder: React.FC = () => {
           };
           await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
 
+          // Save time_windows to flat questionnaire_time_window table
+          await saveTimeWindows(qc.id, qc.time_windows || [{ start: '09:00', end: '21:00' }]);
+
           // Sync questionnaire<->participant_type assignments
           await supabase.from('questionnaire_participant_type').delete().eq('questionnaire_id', qc.id);
           if (qc.assigned_participant_types && qc.assigned_participant_types.length > 0) {
@@ -781,7 +807,7 @@ const SurveyBuilder: React.FC = () => {
         }
       };
 
-      // ── Sync questions to survey_question table (with proper questionnaire_id FK) ──
+      // ── Sync questions to question table (with proper questionnaire_id FK) ──
       const syncQuestions = async (targetProjectId: string) => {
         const allQuestions: Question[] = [];
         for (const qConfig of questionnaireConfigs) {
@@ -795,13 +821,20 @@ const SurveyBuilder: React.FC = () => {
         }
 
         const { data: existingQuestions } = await supabase
-          .from('survey_question').select('id').eq('project_id', targetProjectId);
+          .from('question').select('id').eq('project_id', targetProjectId);
         const existingIds = new Set((existingQuestions || []).map((q: any) => q.id));
         const currentIds = new Set(allQuestions.map(q => q.id));
         const removedIds = [...existingIds].filter(id => !currentIds.has(id));
         const questionPayload = allQuestions.map((question) => {
           const { options, ...questionData } = question;
-          // Only include columns that actually exist in the survey_question table
+          // Only include columns that actually exist in the question table
+          // Merge config with top-level overrides
+          const mergedConfig = {
+            ...((questionData as any).question_config || {}),
+            allow_other: (questionData as any).allow_other ?? (questionData as any).question_config?.allow_other ?? false,
+            allow_none: (questionData as any).allow_none ?? (questionData as any).question_config?.allow_none ?? false,
+            response_required: (questionData as any).response_required ?? (questionData as any).question_config?.response_required ?? 'optional',
+          };
           const dbQuestionData: any = {
             id: question.id,
             project_id: targetProjectId,
@@ -809,14 +842,11 @@ const SurveyBuilder: React.FC = () => {
             question_type: (questionData as any).question_type || 'text_short',
             question_text: (questionData as any).question_text || '',
             question_description: (questionData as any).question_description || '',
-            question_config: {
-              ...((questionData as any).question_config || {}),
-              // Store allow_other/allow_none/response_required inside question_config since they're not DB columns
-              allow_other: (questionData as any).allow_other ?? (questionData as any).question_config?.allow_other ?? false,
-              allow_none: (questionData as any).allow_none ?? (questionData as any).question_config?.allow_none ?? false,
-              response_required: (questionData as any).response_required ?? (questionData as any).question_config?.response_required ?? 'optional',
-            },
+            question_config: mergedConfig,
+            // Spread config into flat cfg_* columns for relational storage
+            ...questionConfigToDbCols(mergedConfig),
             validation_rule: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
+            ...validationRuleToDbCols((questionData as any).validation_rule ?? (questionData as any).validation_rules),
             logic_rule: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
             ai_config: (questionData as any).ai_config || {},
             order_index: (questionData as any).order_index ?? 0,
@@ -828,12 +858,12 @@ const SurveyBuilder: React.FC = () => {
           return dbQuestionData;
         });
         if (questionPayload.length > 0) {
-          const { error: upsertError } = await supabase.from('survey_question').upsert(questionPayload, { onConflict: 'id' });
+          const { error: upsertError } = await supabase.from('question').upsert(questionPayload, { onConflict: 'id' });
           if (upsertError) throw upsertError;
         }
         if (removedIds.length > 0) {
           await supabase.from('question_option').delete().in('question_id', removedIds);
-          await supabase.from('survey_question').delete().in('id', removedIds);
+          await supabase.from('question').delete().in('id', removedIds);
         }
 
         // Batch all options into a single upsert + single cleanup query
@@ -928,7 +958,7 @@ const SurveyBuilder: React.FC = () => {
   const [responseCount, setResponseCount] = useState(0);
   useEffect(() => {
     if (!projectId) return;
-    supabase.from('survey_respons').select('id', { count: 'exact', head: true }).eq('project_id', projectId)
+    supabase.from('survey_response').select('id', { count: 'exact', head: true }).eq('project_id', projectId)
       .then(({ count }) => setResponseCount(count || 0));
   }, [projectId]);
 
@@ -1046,6 +1076,7 @@ const SurveyBuilder: React.FC = () => {
               participantTypes={participantTypes.map(pt => ({ id: pt.id, name: pt.name }))}
               onUpdate={setQuestionnaireConfigs}
               project={project}
+              projectId={projectId}
               logicRules={logicRules}
               onUpdateLogic={setLogicRules}
             />
@@ -1059,6 +1090,7 @@ const SurveyBuilder: React.FC = () => {
             participantTypes={participantTypes.map(pt => ({ id: pt.id, name: pt.name }))}
             onUpdate={setQuestionnaireConfigs}
             project={project}
+            projectId={projectId}
           />
         )}
 
@@ -1155,6 +1187,7 @@ const SurveyBuilder: React.FC = () => {
       {/* Save as Template Modal */}
       {showSaveTemplate && (
         <SaveTemplateModal
+          projectId={projectId}
           questionnaires={questionnaireConfigs}
           projectTitle={project.title}
           onClose={() => setShowSaveTemplate(false)}

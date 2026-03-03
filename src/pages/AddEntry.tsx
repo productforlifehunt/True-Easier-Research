@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import IOSDropdown from '../components/ui/IOSDropdown';
 import { AISurveyAssistant } from '../components/AISurveyAssistant';
 import { useLanguage } from '../hooks/useLanguage';
+import { loadEcogramData } from '../easyresearch/utils/enrollmentSync';
 
 interface NetworkMember {
   id: string;
@@ -42,22 +43,14 @@ const AddEntry: React.FC = () => {
   const [customTime, setCustomTime] = useState('');
   const [customDate, setCustomDate] = useState('');
   
-  // Fetch network members from user's ecogram
+  // Fetch network members from flat ecogram_member table
   useEffect(() => {
     const fetchNetworkMembers = async () => {
       if (!user?.id) return;
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('ecogram_data')
-          .eq('id', user.id)
-          .single();
-        
-        // Silently skip if column doesn't exist
-        if (error) return;
-        
-        if (data?.ecogram_data?.members) {
-          setNetworkMembers(data.ecogram_data.members.map((m: any) => ({
+        const ecogram = await loadEcogramData({ profileId: user.id });
+        if (ecogram.members && ecogram.members.length > 0) {
+          setNetworkMembers(ecogram.members.map((m: any) => ({
             id: m.id,
             name: m.name,
             relationship: m.relationship,

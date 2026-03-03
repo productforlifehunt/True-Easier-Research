@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import CreateProjectDialog from './CreateProjectDialog';
 import AIProjectBuilder from './AIProjectBuilder';
+import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
 
 // Define interfaces
 interface Organization {
@@ -103,7 +104,7 @@ const ResearcherDashboard: React.FC = () => {
               .from('enrollment').select('id', { count: 'exact', head: true }).in('project_id', projectIds);
             enrollmentCount = ec || 0;
             const { count: rc } = await supabase
-              .from('survey_respons').select('id', { count: 'exact', head: true }).in('project_id', projectIds);
+              .from('survey_response').select('id', { count: 'exact', head: true }).in('project_id', projectIds);
             responseCount = rc || 0;
           }
           
@@ -146,13 +147,13 @@ const ResearcherDashboard: React.FC = () => {
   const handleDeleteProject = async (projectId: string) => {
     setActionLoading(true);
     try {
-      const { data: questions } = await supabase.from('survey_question').select('id').eq('project_id', projectId);
+      const { data: questions } = await supabase.from('question').select('id').eq('project_id', projectId);
       if (questions && questions.length > 0) {
         const questionIds = questions.map(q => q.id);
         await supabase.from('question_option').delete().in('question_id', questionIds);
       }
-      await supabase.from('survey_respons').delete().eq('project_id', projectId);
-      await supabase.from('survey_question').delete().eq('project_id', projectId);
+      await supabase.from('survey_response').delete().eq('project_id', projectId);
+      await supabase.from('question').delete().eq('project_id', projectId);
       await supabase.from('survey_instance').delete().eq('project_id', projectId);
       const { data: enrollments } = await supabase.from('enrollment').select('id').eq('project_id', projectId);
       if (enrollments && enrollments.length > 0) {
@@ -200,14 +201,14 @@ const ResearcherDashboard: React.FC = () => {
       if (error) throw error;
       if (newProject) {
         const { data: questions } = await supabase
-          .from('survey_question').select('*, options:question_option(*)').eq('project_id', project.id).order('order_index');
+          .from('question').select('*, options:question_option(*)').eq('project_id', project.id).order('order_index');
         
         if (questions && questions.length > 0) {
           for (const q of questions) {
             const { options, ...questionData } = q;
             const newQuestionId = crypto.randomUUID();
             const { error: qError } = await supabase
-              .from('survey_question').insert({ ...questionData, id: newQuestionId, project_id: newProject.id });
+              .from('question').insert({ ...questionData, id: newQuestionId, project_id: newProject.id });
             if (qError) { console.error('Error copying question:', qError); continue; }
             if (options && options.length > 0) {
               const newOptions = options.map((opt: any) => ({
@@ -216,6 +217,16 @@ const ResearcherDashboard: React.FC = () => {
               await supabase.from('question_option').insert(newOptions);
             }
           }
+        }
+        // Clone layout from flat tables
+        const sourceLayout = await loadLayoutFromDb(project.id);
+        if (sourceLayout && sourceLayout.tabs.length > 0) {
+          for (const tab of sourceLayout.tabs) {
+            tab.id = crypto.randomUUID();
+            for (const el of tab.elements) { el.id = crypto.randomUUID(); }
+          }
+          sourceLayout.bottom_nav = sourceLayout.tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id }));
+          await saveLayoutToDb(newProject.id, sourceLayout);
         }
         toast.success('Project duplicated');
         loadDashboardData();

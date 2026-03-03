@@ -9,6 +9,7 @@ import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../consta
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import ParticipantOnboarding from './ParticipantOnboarding';
+import { hydrateQuestionRows } from '../utils/questionConfigSync';
 
 interface SurveyProject {
   id: string;
@@ -127,7 +128,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       
       // Load existing responses for this specific instance
       const { data: existingResponses, error } = await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .select('question_id, response_text, response_value, created_at')
         .eq('instance_id', propInstanceId)
         .order('created_at', { ascending: false });
@@ -191,7 +192,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
         // Load questions
         const { data: questions, error: questionsError } = await supabase
-          .from('survey_question')
+          .from('question')
           .select('*, options:question_option(*)')
           .eq('project_id', projectId)
           .order('order_index');
@@ -201,8 +202,8 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         }
 
         if (questions) {
-          // Hydrate allow_other/allow_none/response_required from question_config (stored there, not as DB columns)
-          const hydrated = questions.map((q: any) => {
+          // Hydrate question_config from flat cfg_* columns + allow_other/allow_none/response_required
+          const hydrated = hydrateQuestionRows(questions).map((q: any) => {
             if (q.question_config) {
               if (q.question_config.allow_other !== undefined) q.allow_other = q.question_config.allow_other;
               if (q.question_config.allow_none !== undefined) q.allow_none = q.question_config.allow_none;
@@ -627,7 +628,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       // Delete existing responses for this instance if updating
       if (propInstanceId) {
         await supabase
-          .from('survey_respons')
+          .from('survey_response')
           .delete()
           .eq('instance_id', propInstanceId);
       }
@@ -709,7 +710,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       }
       
       const { error: responseError } = await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .insert(responseInserts);
 
       if (responseError) {
@@ -1617,7 +1618,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                   onClick={async () => {
                     if (confirm('Are you sure you want to delete this survey response? This cannot be undone.')) {
                       try {
-                        await supabase.from('survey_respons').delete().eq('instance_id', propInstanceId);
+                        await supabase.from('survey_response').delete().eq('instance_id', propInstanceId);
                         await supabase.from('survey_instance').update({ status: 'scheduled' }).eq('id', propInstanceId);
                         window.location.reload();
                       } catch (error) {

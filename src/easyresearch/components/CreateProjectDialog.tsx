@@ -152,7 +152,7 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
           { project_id: project.id, question_text: 'Any additional feedback?', question_type: 'long_text', required: false, order_index: 3 }
         ];
 
-        const { data: questions } = await supabase.from('survey_question').insert(defaultQuestions).select();
+        const { data: questions } = await supabase.from('question').insert(defaultQuestions).select();
 
         if (questions) {
           const mcQuestion = questions.find(q => q.question_type === 'multiple_choice');

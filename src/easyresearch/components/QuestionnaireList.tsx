@@ -46,6 +46,7 @@ interface QuestionnaireListProps {
   participantTypes: { id: string; name: string }[];
   onUpdate: (questionnaires: QuestionnaireConfig[]) => void;
   project: any;
+  projectId: string;
   logicRules?: any[];
   onUpdateLogic?: (rules: any[]) => void;
 }
@@ -61,7 +62,7 @@ const frequencyOptions = [
 ];
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
-  questionnaires, participantTypes, onUpdate, project, logicRules = [], onUpdateLogic,
+  questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
 }) => {
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
@@ -534,6 +535,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       {showTemplates ? (
         <TemplateMarketplaceEmbed
           mode="browse"
+          projectId={projectId}
           onAddTemplate={(questions, title) => {
             // Create a new questionnaire with the template questions
             const newQ: QuestionnaireConfig = {

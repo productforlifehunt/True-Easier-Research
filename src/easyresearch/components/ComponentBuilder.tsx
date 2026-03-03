@@ -13,6 +13,7 @@ interface ComponentBuilderProps {
   participantTypes: { id: string; name: string }[];
   onUpdate: (questionnaires: QuestionnaireConfig[]) => void;
   project: any;
+  projectId: string;
 }
 
 const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNode; desc: string; defaultTitle: string }[] = [
@@ -23,7 +24,7 @@ const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNo
   { type: 'custom', label: 'Custom', icon: <Plus size={16} className="text-emerald-500" />, desc: 'Create any custom component with your own name and fields', defaultTitle: 'Custom Component' },
 ];
 
-const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, participantTypes, onUpdate, project }) => {
+const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, participantTypes, onUpdate, project, projectId }) => {
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<ComponentType>>(new Set());
   const [openComponentId, setOpenComponentId] = useState<string | null>(null);
@@ -289,6 +290,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
     return (
       <TemplateMarketplaceEmbed
         mode="browse"
+        projectId={projectId}
         onAddTemplate={(questions, title) => {
           // Create a new custom component with these questions
           const newQ: QuestionnaireConfig = {

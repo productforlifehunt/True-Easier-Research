@@ -138,7 +138,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
         for (let qi = 0; qi < questions.length; qi++) {
           const q = questions[qi];
           const questionId = crypto.randomUUID();
-          await supabase.from('survey_question').insert({
+          await supabase.from('question').insert({
             id: questionId,
             project_id: project.id,
             questionnaire_id: qId,

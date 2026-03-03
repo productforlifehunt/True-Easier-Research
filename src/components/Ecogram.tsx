@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import IOSDropdown from './ui/IOSDropdown';
+import { saveEcogramData } from '../easyresearch/utils/enrollmentSync';
 
 export interface EcogramMember {
   id: string;
@@ -104,9 +105,11 @@ export default function Ecogram({ userId, language, initialData, primaryCaregive
     if (!userId) return;
     setSaving(true);
     try {
-      await supabase.from('profiles').update({ 
-        ecogram_data: { members, lastUpdated: new Date().toISOString() }
-      }).eq('id', userId);
+      // Save to flat ecogram_member table instead of JSONB
+      await saveEcogramData(
+        { profileId: userId },
+        { members, lastUpdated: new Date().toISOString() }
+      );
     } catch(e) { console.error(e); }
     setSaving(false);
   };

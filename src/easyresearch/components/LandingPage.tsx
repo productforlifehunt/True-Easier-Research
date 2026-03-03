@@ -39,20 +39,20 @@ const LandingPage: React.FC = () => {
   ];
 
   const aiCapabilities = [
-    { icon: Wand2, label: t('landing.ai.title') },
-    { icon: Bot, label: t('landing.ai.cta') },
-    { icon: MessageSquare, label: t('landing.ai.subtitle') },
+    { icon: Wand2, label: t('landing.ai.cap1') },
+    { icon: Mic, label: t('landing.ai.cap2') },
+    { icon: Bot, label: t('landing.ai.cap3') },
   ];
 
   return (
     <div className="min-h-screen bg-white">
       {/* ─── HERO ─── */}
-      <section className="relative pt-32 sm:pt-40 lg:pt-48 pb-24 lg:pb-36 overflow-hidden">
+      <section className="relative pt-16 sm:pt-20 lg:pt-24 pb-8 lg:pb-12 overflow-hidden">
         {/* Radial glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-radial from-emerald-50/80 via-transparent to-transparent rounded-full blur-3xl" />
 
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <h1 className="text-5xl sm:text-6xl lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.035em] text-stone-800 mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.1] tracking-[-0.03em] text-stone-800 mb-4">
             {t('landing.hero.title1')}
             <br />
             <span className="bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent">
@@ -60,7 +60,7 @@ const LandingPage: React.FC = () => {
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-stone-400 max-w-lg mx-auto mb-12 leading-relaxed font-light tracking-[-0.01em]">
+          <p className="text-base sm:text-lg text-stone-400 max-w-lg mx-auto mb-8 leading-relaxed font-light tracking-[-0.01em]">
             {t('landing.hero.subtitle')}
           </p>
 
@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
         </div>
 
         {/* AI features strip */}
-        <div className="relative max-w-3xl mx-auto px-6 mt-20">
+        <div className="relative max-w-3xl mx-auto px-6 mt-10">
           <div className="rounded-2xl border border-stone-100 bg-stone-50/50 backdrop-blur-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">

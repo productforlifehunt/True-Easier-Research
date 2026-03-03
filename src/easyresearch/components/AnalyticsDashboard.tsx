@@ -72,14 +72,14 @@ const AnalyticsDashboard: React.FC = () => {
       
       // Load responses with correct schema
       const { data: responses } = await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .select('id, created_at, enrollment_id, question_id, instance_id, response_text, response_value')
         .eq('project_id', selectedProject);
 
       const questionIds = Array.from(new Set((responses || []).map((r: any) => r.question_id).filter(Boolean)));
       const { data: questionsData } = questionIds.length
         ? await supabase
-            .from('survey_question')
+            .from('question')
             .select('id, question_text')
             .in('id', questionIds)
         : { data: [] as any[] };

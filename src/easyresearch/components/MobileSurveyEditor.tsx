@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { ChevronRight, ChevronLeft, Save, Plus, Trash2, GripVertical, Settings, Copy, ArrowLeft, Eye, EyeOff, List } from 'lucide-react';
 import { QUESTION_TYPE_DEFINITIONS, normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
+import { hydrateQuestionRows, questionConfigToDbCols } from '../utils/questionConfigSync';
 
 interface Question {
   id: string;
@@ -104,13 +105,13 @@ const MobileSurveyEditor: React.FC = () => {
       setProject(projectData);
 
       const { data: questionsData } = await supabase
-        .from('survey_question')
+        .from('question')
         .select('*, options:question_option(*)')
         .eq('project_id', projectId)
         .order('order_index');
 
       if (questionsData) {
-        setQuestions(questionsData.map(q => ({ ...q, question_type: normalizeLegacyQuestionType(q.question_type) })));
+        setQuestions(hydrateQuestionRows(questionsData).map(q => ({ ...q, question_type: normalizeLegacyQuestionType(q.question_type) })));
       }
     }
   };
@@ -192,20 +193,21 @@ const MobileSurveyEditor: React.FC = () => {
 
       // Delete existing questions
       await supabase
-        .from('survey_question')
+        .from('question')
         .delete()
         .eq('project_id', projectId);
 
       // Insert new questions
       for (const question of questions) {
         const { data: insertedQuestion } = await supabase
-          .from('survey_question')
+          .from('question')
           .insert({
             project_id: projectId,
             question_type: question.question_type,
             question_text: question.question_text,
             question_description: question.question_description,
             question_config: question.question_config || {},
+            ...questionConfigToDbCols(question.question_config || {}),
             validation_rule: question.validation_rule || {},
             logic_rule: {},
             ai_config: {},

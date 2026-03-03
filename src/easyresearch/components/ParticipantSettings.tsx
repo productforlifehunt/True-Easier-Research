@@ -5,6 +5,7 @@ import { Bell, Moon, User, LogOut, LogIn, FileText, Network } from 'lucide-react
 import toast from 'react-hot-toast';
 import EcogramBuilder, { EcogramMember } from './EcogramBuilder';
 import { scheduleStudyNotifications, requestNotificationPermission } from '../services/notificationService';
+import { loadDndSetting, saveDndSetting, loadProfileData, saveProfileData, loadEcogramData, saveEcogramData } from '../utils/enrollmentSync';
 
 interface ProfileQuestion { id: string; question_text: string; question_type: string; required: boolean; options?: any[]; }
 interface EnrollmentQuestion { id: string; project_id: string; question_text: string; question_type: string; options: any[] | null; required: boolean; order_index: number; }
@@ -55,10 +56,18 @@ const ParticipantSettings: React.FC = () => {
         const { data: enrollmentData } = await supabase.from('enrollment').select('*').eq('id', enrollmentId).maybeSingle();
         if (enrollmentData) { 
           setEnrollment(enrollmentData); 
-          setProfileData(enrollmentData.profile_data || {}); 
-          setEnrollmentResponses(enrollmentData.enrollment_data || {}); 
-          setDndSettings(enrollmentData.dnd_setting || { periods: [] }); 
-          setEcogramData(enrollmentData.ecogram_data || { members: [], lastUpdated: null });
+          // Load from flat tables instead of JSONB
+          const [flatProfile, flatDnd, flatEcogram] = await Promise.all([
+            loadProfileData(enrollmentId),
+            loadDndSetting(enrollmentId),
+            loadEcogramData({ enrollmentId }),
+          ]);
+          setProfileData(flatProfile);
+          // Load enrollment responses from flat table instead of JSONB
+          const flatEnrollment = await loadProfileData(enrollmentId, 'enrollment');
+          setEnrollmentResponses(flatEnrollment);
+          setDndSettings(flatDnd);
+          setEcogramData(flatEcogram);
         }
       }
     } catch (error) { console.error('Error loading settings:', error); }
@@ -69,12 +78,14 @@ const ParticipantSettings: React.FC = () => {
     if (!enrollment) return;
     setSaving(true);
     try {
-      await supabase.from('enrollment').update({ 
-        profile_data: profileData, 
-        enrollment_data: enrollmentResponses, 
-        dnd_setting: dndSettings,
-        ecogram_data: ecogramData 
-      }).eq('id', enrollment.id);
+      // Save to flat tables instead of JSONB
+      await Promise.all([
+        saveProfileData(enrollment.id, profileData),
+        saveDndSetting(enrollment.id, dndSettings),
+        saveEcogramData({ enrollmentId: enrollment.id }, ecogramData),
+      ]);
+      // Save enrollment responses to flat table instead of JSONB
+      await saveProfileData(enrollment.id, enrollmentResponses, 'enrollment');
 
       // Re-schedule notifications with updated DND if project has notifications enabled
       if (notificationEnabled && project?.notification_enabled && project?.project_type !== 'survey') {

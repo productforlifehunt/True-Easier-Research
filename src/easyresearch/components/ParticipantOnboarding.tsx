@@ -2,7 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { ChevronRight, Calendar, Clock, ChevronLeft, AlertCircle, ShieldCheck } from 'lucide-react';
+import { ChevronRight, Calendar, Clock, ChevronLeft, AlertCircle, ShieldCheck, Users } from 'lucide-react';
+import { saveProfileData } from '../utils/enrollmentSync';
+
+interface ParticipantTypeInfo {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  numbering_enabled: boolean;
+  number_prefix: string;
+}
 
 interface ProfileQuestion {
   id: string;
@@ -37,6 +47,9 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
   const [screeningResponses, setScreeningResponses] = useState<Record<string, any>>({});
   const [profileResponses, setProfileResponses] = useState<Record<string, any>>({});
   const [disqualified, setDisqualified] = useState(false);
+  const [participantTypes, setParticipantTypes] = useState<ParticipantTypeInfo[]>([]);
+  const [selectedParticipantTypeId, setSelectedParticipantTypeId] = useState<string>('');
+  const selectedType = participantTypes.find(pt => pt.id === selectedParticipantTypeId);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -58,7 +71,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         if (screeningQuestionnaires && screeningQuestionnaires.length > 0) {
           const sqIds = screeningQuestionnaires.map((q: any) => q.id);
           const { data: sqRows } = await supabase
-            .from('survey_question')
+            .from('question')
             .select('*')
             .in('questionnaire_id', sqIds)
             .order('order_index');
@@ -79,6 +92,25 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
           .select('*')
           .eq('project_id', projectId)
           .order('order_index');
+
+        // Load participant types
+        const { data: ptRows } = await supabase
+          .from('participant_type')
+          .select('id, name, description, color, numbering_enabled, number_prefix')
+          .eq('project_id', projectId)
+          .order('order_index');
+        if (ptRows && ptRows.length > 0) {
+          setParticipantTypes(ptRows.map((pt: any) => ({
+            id: pt.id,
+            name: pt.name,
+            description: pt.description || '',
+            color: pt.color || '#10b981',
+            numbering_enabled: pt.numbering_enabled ?? true,
+            number_prefix: pt.number_prefix || '',
+          })));
+          // Auto-select if only one type
+          if (ptRows.length === 1) setSelectedParticipantTypeId(ptRows[0].id);
+        }
 
         const screeningEnabled = projectData.screening_enabled || loadedScreeningQuestions.length > 0;
 
@@ -134,6 +166,8 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
 
   const handleInfoNext = () => {
     if (!email) return;
+    // Require participant type selection when multiple types exist
+    if (participantTypes.length > 1 && !selectedParticipantTypeId) return;
     if (hasProfileQuestions) {
       setStep('profile');
     } else {
@@ -144,9 +178,19 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
   const handleEnroll = async () => {
     if (!email) return;
     try {
-      // Generate participant number if numbering enabled
+      // Generate participant number per participant type if numbering enabled
       let assignedNumber = participantNumber;
-      if (project?.participant_numbering && !assignedNumber) {
+      if (selectedType?.numbering_enabled && !assignedNumber) {
+        const prefix = selectedType.number_prefix || 'P';
+        // Count existing enrollments of the same participant type for this project
+        const { count } = await supabase
+          .from('enrollment')
+          .select('id', { count: 'exact', head: true })
+          .eq('project_id', projectId)
+          .eq('participant_type_id', selectedParticipantTypeId);
+        assignedNumber = `${prefix}${String((count || 0) + 1).padStart(3, '0')}`;
+      } else if (project?.participant_numbering && !assignedNumber && !selectedType) {
+        // Fallback to global prefix if no participant types defined
         const prefix = project.participant_number_prefix || 'PP';
         const { count } = await supabase.from('enrollment').select('id', { count: 'exact', head: true }).eq('project_id', projectId);
         assignedNumber = `${prefix}${String((count || 0) + 1).padStart(3, '0')}`;
@@ -156,19 +200,19 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         project_id: projectId,
         participant_id: user?.id || null,
         participant_email: email,
+        participant_number: assignedNumber || null,
+        participant_type_id: selectedParticipantTypeId || null,
         status: 'active',
         consent_signed_at: new Date().toISOString(),
         study_start_date: new Date().toISOString().split('T')[0],
-        profile_data: Object.keys(profileResponses).length > 0 ? profileResponses : null,
-        enrollment_data: {
-          screening_responses: Object.keys(screeningResponses).length > 0 ? screeningResponses : null,
-          participant_number: assignedNumber || null,
-          participant_relation: participantRelation || null,
-        }
       }).select().single();
 
       if (enrollError) { console.error('Enrollment error:', enrollError); return; }
       if (enrollment) {
+        // Save profile responses to flat table instead of JSONB
+        if (Object.keys(profileResponses).length > 0) {
+          await saveProfileData(enrollment.id, profileResponses);
+        }
         localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
         if (project?.project_type === 'longitudinal') {
           window.location.href = `/easyresearch/participant/${projectId}?skip_consent=true`;
@@ -404,14 +448,45 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                     placeholder="Enter your email" required />
                 </div>
 
-                {project?.participant_numbering && (
+                {/* Participant Type Selection */}
+                {participantTypes.length > 1 && (
+                  <div>
+                    <label className="block text-[12px] font-medium text-stone-500 mb-1.5 flex items-center gap-1">
+                      <Users size={12} /> Select Your Participant Type <span className="text-red-500">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {participantTypes.map(pt => (
+                        <button key={pt.id} onClick={() => setSelectedParticipantTypeId(pt.id)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                            selectedParticipantTypeId === pt.id
+                              ? 'border-emerald-400 bg-emerald-50/50'
+                              : 'border-stone-200 hover:border-stone-300 bg-white'
+                          }`}>
+                          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: pt.color }} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-medium text-stone-800">{pt.name}</p>
+                            {pt.description && <p className="text-[11px] text-stone-400 truncate">{pt.description}</p>}
+                          </div>
+                          {selectedParticipantTypeId === pt.id && (
+                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Participant Number — auto from type or global */}
+                {(selectedType?.numbering_enabled || (project?.participant_numbering && participantTypes.length === 0)) && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5">
-                      Participant Number {project.participant_number_prefix && <span className="text-stone-400">(e.g., {project.participant_number_prefix}001)</span>}
+                      Participant Number <span className="text-stone-400">(e.g., {selectedType?.number_prefix || project?.participant_number_prefix || 'PP'}001)</span>
                     </label>
                     <input type="text" value={participantNumber} onChange={(e) => setParticipantNumber(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                      placeholder={`${project.participant_number_prefix || 'PP'}### (leave blank for auto-assign)`} />
+                      placeholder={`${selectedType?.number_prefix || project?.participant_number_prefix || 'PP'}### (leave blank for auto-assign)`} />
                   </div>
                 )}
 
@@ -426,7 +501,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                   </div>
                 )}
 
-                <button onClick={handleInfoNext} disabled={!email}
+                <button onClick={handleInfoNext} disabled={!email || (participantTypes.length > 1 && !selectedParticipantTypeId)}
                   className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
                   {hasProfileQuestions ? 'Continue to Profile' : (project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey')}
                   <ChevronRight size={16} />

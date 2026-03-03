@@ -4,20 +4,42 @@ import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { loadProfileData } from '../utils/enrollmentSync';
 
 interface Enrollment {
   id: string;
   project_id: string;
   participant_id: string | null;
   participant_email: string;
+  participant_number?: string | null;
+  participant_type_id?: string | null;
   status: 'invited' | 'active' | 'completed' | 'withdrawn';
   created_at: string;
   profile_data?: any;
-  enrollment_data?: any;
   study_start_date?: string;
 }
 
 interface Project { id: string; title: string; }
+
+// Inline component to load profile data from flat table
+const ProfileDataSection: React.FC<{ enrollmentId: string }> = ({ enrollmentId }) => {
+  const [data, setData] = useState<Record<string, any>>({});
+  useEffect(() => { loadProfileData(enrollmentId).then(setData); }, [enrollmentId]);
+  if (!data || Object.keys(data).length === 0) return null;
+  return (
+    <div>
+      <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Profile Data</h3>
+      <div className="space-y-1.5">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="p-2.5 rounded-lg bg-stone-50">
+            <p className="text-[11px] text-stone-400">{key}</p>
+            <p className="text-[13px] text-stone-700">{Array.isArray(value) ? (value as string[]).join(', ') : String(value)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ParticipantsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,7 +86,7 @@ const ParticipantsPage: React.FC = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.from('enrollment')
-        .select('id, project_id, participant_id, participant_email, status, created_at, profile_data, enrollment_data, study_start_date')
+        .select('id, project_id, participant_id, participant_email, participant_number, participant_type_id, status, created_at, study_start_date')
         .eq('project_id', selectedProject).order('created_at', { ascending: false });
       if (error) throw error;
       setEnrollments((data || []) as Enrollment[]);
@@ -75,18 +97,18 @@ const ParticipantsPage: React.FC = () => {
   const loadEnrollmentResponses = async (enrollmentId: string) => {
     setResponsesLoading(true);
     try {
-      const { data: responsesData } = await supabase.from('survey_respons')
+      const { data: responsesData } = await supabase.from('survey_response')
         .select('id, question_id, response_text, response_value, created_at, instance_id')
         .eq('enrollment_id', enrollmentId).order('created_at', { ascending: false });
       
       const questionIds = Array.from(new Set((responsesData || []).map((r: any) => r.question_id).filter(Boolean)));
       let questionsMap = new Map();
       if (questionIds.length > 0) {
-        const { data: questionsData } = await supabase.from('survey_question').select('id, question_text, question_type, order_index').in('id', questionIds);
+        const { data: questionsData } = await supabase.from('question').select('id, question_text, question_type, order_index').in('id', questionIds);
         questionsMap = new Map((questionsData || []).map((q: any) => [q.id, q]));
       }
       
-      setEnrollmentResponses((responsesData || []).map((r: any) => ({ ...r, survey_question: questionsMap.get(r.question_id) })));
+      setEnrollmentResponses((responsesData || []).map((r: any) => ({ ...r, question: questionsMap.get(r.question_id) })));
     } catch (error) { console.error('Error loading responses:', error); }
     finally { setResponsesLoading(false); }
   };
@@ -119,7 +141,7 @@ const ParticipantsPage: React.FC = () => {
 
   const filteredEnrollments = enrollments.filter(e => {
     const matchesSearch = !searchQuery || e.participant_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.enrollment_data?.participant_number?.toLowerCase().includes(searchQuery.toLowerCase());
+      (e.participant_number || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -128,7 +150,7 @@ const ParticipantsPage: React.FC = () => {
     if (filteredEnrollments.length === 0) return;
     const headers = ['Email', 'Participant #', 'Role', 'Status', 'Enrolled At', 'Study Start'];
     const csvData = filteredEnrollments.map(e => [
-      e.participant_email, e.enrollment_data?.participant_number || '', e.enrollment_data?.participant_relation || '',
+      e.participant_email, e.participant_number || '',
       e.status, new Date(e.created_at).toLocaleString(), e.study_start_date || ''
     ]);
     const csv = [headers.join(','), ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
@@ -234,13 +256,10 @@ const ParticipantsPage: React.FC = () => {
                       <td className="px-4 py-3 text-[13px] font-medium text-stone-800">{enrollment.participant_email}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          {enrollment.enrollment_data?.participant_number && (
+                          {enrollment.participant_number && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
-                              {enrollment.enrollment_data.participant_number}
+                              {enrollment.participant_number}
                             </span>
-                          )}
-                          {enrollment.enrollment_data?.participant_relation && (
-                            <span className="text-[11px] text-stone-400">{enrollment.enrollment_data.participant_relation}</span>
                           )}
                         </div>
                       </td>
@@ -310,16 +329,10 @@ const ParticipantsPage: React.FC = () => {
                   <p className="text-[11px] text-stone-400">Enrolled</p>
                   <p className="text-[13px] font-medium text-stone-700 mt-1">{new Date(selectedEnrollment.created_at).toLocaleDateString()}</p>
                 </div>
-                {selectedEnrollment.enrollment_data?.participant_number && (
+                {selectedEnrollment.participant_number && (
                   <div className="p-3 rounded-xl bg-indigo-50">
                     <p className="text-[11px] text-indigo-400">Participant #</p>
-                    <p className="text-[14px] font-bold text-indigo-600 mt-1">{selectedEnrollment.enrollment_data.participant_number}</p>
-                  </div>
-                )}
-                {selectedEnrollment.enrollment_data?.participant_relation && (
-                  <div className="p-3 rounded-xl bg-stone-50">
-                    <p className="text-[11px] text-stone-400">Role</p>
-                    <p className="text-[13px] font-medium text-stone-700 mt-1">{selectedEnrollment.enrollment_data.participant_relation}</p>
+                    <p className="text-[14px] font-bold text-indigo-600 mt-1">{selectedEnrollment.participant_number}</p>
                   </div>
                 )}
                 {selectedEnrollment.study_start_date && (
@@ -330,35 +343,8 @@ const ParticipantsPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Screening Responses */}
-              {selectedEnrollment.enrollment_data?.screening_responses && Object.keys(selectedEnrollment.enrollment_data.screening_responses).length > 0 && (
-                <div>
-                  <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Screening Responses</h3>
-                  <div className="space-y-1.5">
-                    {Object.entries(selectedEnrollment.enrollment_data.screening_responses).map(([key, value]) => (
-                      <div key={key} className="p-2.5 rounded-lg bg-orange-50/50 border border-orange-100">
-                        <p className="text-[11px] text-stone-400">{key}</p>
-                        <p className="text-[13px] text-stone-700">{String(value)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Profile Data */}
-              {selectedEnrollment.profile_data && Object.keys(selectedEnrollment.profile_data).length > 0 && (
-                <div>
-                  <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Profile Data</h3>
-                  <div className="space-y-1.5">
-                    {Object.entries(selectedEnrollment.profile_data).map(([key, value]) => (
-                      <div key={key} className="p-2.5 rounded-lg bg-stone-50">
-                        <p className="text-[11px] text-stone-400">{key}</p>
-                        <p className="text-[13px] text-stone-700">{Array.isArray(value) ? (value as string[]).join(', ') : String(value)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Profile Data — loaded from flat enrollment_profile_response table */}
+              <ProfileDataSection enrollmentId={selectedEnrollment.id} />
 
               {/* Survey Responses */}
               <div>
@@ -373,7 +359,7 @@ const ParticipantsPage: React.FC = () => {
                   <div className="space-y-1.5 max-h-60 overflow-y-auto">
                     {enrollmentResponses.slice(0, 50).map(r => (
                       <div key={r.id} className="p-2.5 rounded-lg bg-stone-50 text-[12px]">
-                        <span className="font-medium text-stone-600">{r.survey_question?.question_text?.substring(0, 50) || 'Q'}:</span>{' '}
+                        <span className="font-medium text-stone-600">{r.question?.question_text?.substring(0, 50) || 'Q'}:</span>{' '}
                         <span className="text-stone-500">{r.response_text?.substring(0, 100) || JSON.stringify(r.response_value)?.substring(0, 100) || '-'}</span>
                       </div>
                     ))}

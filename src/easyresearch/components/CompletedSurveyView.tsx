@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Edit2, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { hydrateQuestionRows } from '../utils/questionConfigSync';
 
 interface CompletedSurveyViewProps {
   instanceId: string;
@@ -13,7 +14,7 @@ interface SurveyResponse {
   response_text: string | null;
   response_value: any;
   created_at: string;
-  survey_question: {
+  question: {
     question_text: string;
     question_type: string;
     order_index: number;
@@ -44,7 +45,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
 
       // Try to get responses by enrollment_id to find project_id
       const { data: peek } = await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .select('project_id')
         .eq('enrollment_id', instanceId)
         .limit(1)
@@ -58,18 +59,18 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
 
       // Get all questions for this project
       const questionsResult = await supabase
-        .from('survey_question')
+        .from('question')
         .select('id, question_text, question_type, question_config, order_index')
         .eq('project_id', instance.project_id)
         .order('order_index', { ascending: true });
 
       // Get responses for this enrollment
       const responsesResult = await supabase
-        .from('survey_respons')
+        .from('survey_response')
         .select('*')
         .eq('enrollment_id', instanceId);
 
-      const projectQuestions = questionsResult.data || [];
+      const projectQuestions = hydrateQuestionRows(questionsResult.data || []);
       const allResponses = responsesResult.data || [];
 
       // Build response objects with questions
@@ -93,7 +94,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
             response_text: existingResponse?.response_text || '',
             response_value: existingResponse?.response_value ?? null,
             created_at: existingResponse?.created_at || new Date().toISOString(),
-            survey_question: {
+            question: {
               question_text: question.question_text,
               question_type: question.question_type,
               order_index: question.order_index,
@@ -114,7 +115,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
 
         // Convert response values to readable text for display
         responsesArray.forEach((r: SurveyResponse) => {
-          const question = r.survey_question;
+          const question = r.question;
           if (!question?.options || question.options.length === 0) return;
           if (r.response_text && String(r.response_text).trim().length > 0) return;
 
@@ -171,7 +172,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
           };
           
           await supabase
-            .from('survey_respons')
+            .from('survey_response')
             .update(updateData)
             .eq('id', response.id);
         }
@@ -214,8 +215,8 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
 
   // Sort questions by order_index
   const sortedQuestions = Object.entries(groupedResponses).sort((a, b) => {
-    const orderA = a[1][0]?.survey_question?.order_index || 0;
-    const orderB = b[1][0]?.survey_question?.order_index || 0;
+    const orderA = a[1][0]?.question?.order_index || 0;
+    const orderB = b[1][0]?.question?.order_index || 0;
     return orderA - orderB;
   });
 
@@ -285,7 +286,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
       <div className="space-y-4">
         {sortedQuestions.map(([questionId, questionResponses], index) => {
           const response = questionResponses[0];
-          const question = response.survey_question;
+          const question = response.question;
           const questionType = question.question_type;
           const options = question.options || [];
           
