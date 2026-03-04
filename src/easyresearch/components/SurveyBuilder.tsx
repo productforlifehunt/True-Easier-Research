@@ -13,6 +13,7 @@ import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeM
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
 import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
 import { questionConfigToDbCols, validationRuleToDbCols, hydrateQuestionRows } from '../utils/questionConfigSync';
+import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/logicEngine';
 import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
@@ -28,7 +29,6 @@ interface Question {
   question_description?: string;
   question_config: any;
   validation_rule: any;
-  logic_rule: any;
   ai_config: any;
   order_index: number;
   section_name?: string;
@@ -55,70 +55,28 @@ export interface SurveyProject {
   status?: string;
   project_type: string;
   methodology_type?: string;
+  survey_code?: string;
+  published_at?: string | null;
+  // Feature toggles
   ai_enabled: boolean;
   voice_enabled: boolean;
   notification_enabled: boolean;
-  // Consent (proper columns)
-  consent_required?: boolean;
-  consent_form_title?: string;
-  consent_form_text?: string;
-  consent_form_url?: string;
-  // Screening
-  screening_enabled?: boolean;
+  allow_participant_dnd?: boolean;
+  messaging_enabled?: boolean;
+  // Participant config
+  max_participant?: number;
   // Compensation
   compensation_amount?: number;
   compensation_type?: string;
-  // Participant config
-  max_participant?: number;
-  participant_numbering?: boolean;
-  participant_number_prefix?: string;
-  participant_relation_enabled?: boolean;
-  participant_relation_options?: string[];
   // Schedule
   start_at?: string;
   end_at?: string;
+  allow_start_date_selection?: boolean;
   study_duration?: number;
   survey_frequency?: string;
-  allow_participant_dnd?: boolean;
-  allow_start_date_selection?: boolean;
-  survey_code?: string;
-  published_at?: string | null;
   // Onboarding
   onboarding_required?: boolean;
   onboarding_instruction?: string;
-  // Display settings (proper columns)
-  show_progress_bar?: boolean;
-  disable_backtracking?: boolean;
-  randomize_questions?: boolean;
-  auto_advance?: boolean;
-  // Ecogram (proper columns)
-  ecogram_enabled?: boolean;
-  ecogram_center_label?: string;
-  ecogram_relationship_options?: string[];
-  ecogram_support_categories?: string[];
-  // Notification (proper columns)
-  notification_frequency?: string;
-  notification_times_per_day?: number;
-  notification_times?: string[];
-  notification_send_reminders?: boolean;
-  notification_timezone?: string;
-  // Sampling (proper columns)
-  sampling_type?: string;
-  sampling_prompts_per_day?: number;
-  sampling_start_hour?: number;
-  sampling_end_hour?: number;
-  sampling_allow_late?: boolean;
-  sampling_late_window_minutes?: number;
-  // Recruitment
-  recruitment_criteria_text?: string;
-  // Layout theme/header (flat columns on research_project — no more JSONB)
-  layout_show_header?: boolean;
-  layout_header_title?: string;
-  layout_theme_primary_color?: string;
-  layout_theme_background_color?: string;
-  layout_theme_card_style?: string;
-  // Help
-  help_information?: string;
   // Incentives
   incentive_enabled?: boolean;
   incentive_type?: string;
@@ -127,8 +85,12 @@ export interface SurveyProject {
   incentive_description?: string;
   incentive_payment_method?: string;
   incentive_payment_instructions?: string;
-  // Messaging
-  messaging_enabled?: boolean;
+  // Layout theme/header
+  layout_show_header?: boolean;
+  layout_header_title?: string;
+  layout_theme_primary_color?: string;
+  layout_theme_background_color?: string;
+  layout_theme_card_style?: string;
 }
 
 type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses';
@@ -178,7 +140,7 @@ const SurveyBuilder: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
-  const [logicRules, setLogicRules] = useState<any[]>([]);
+  const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
 
   // New state for multi-questionnaire architecture
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
@@ -218,58 +180,29 @@ const SurveyBuilder: React.FC = () => {
     status: row.status || 'draft',
     project_type: row.project_type || 'survey',
     methodology_type: row.methodology_type,
+    survey_code: row.survey_code,
+    published_at: row.published_at,
+    // Feature toggles
     ai_enabled: row.ai_enabled ?? false,
     voice_enabled: row.voice_enabled ?? false,
     notification_enabled: row.notification_enabled ?? true,
-    consent_required: row.consent_required ?? false,
-    consent_form_title: row.consent_form_title,
-    consent_form_text: row.consent_form_text,
-    consent_form_url: row.consent_form_url,
-    screening_enabled: row.screening_enabled ?? false,
+    allow_participant_dnd: row.allow_participant_dnd ?? false,
+    messaging_enabled: row.messaging_enabled ?? false,
+    // Participant config
+    max_participant: row.max_participant,
+    // Compensation
     compensation_amount: row.compensation_amount,
     compensation_type: row.compensation_type,
-    max_participant: row.max_participant,
-    participant_numbering: row.participant_numbering ?? false,
-    participant_number_prefix: row.participant_number_prefix || 'PP',
-    participant_relation_enabled: row.participant_relation_enabled ?? false,
-    participant_relation_options: row.participant_relation_options || [],
+    // Schedule
     start_at: row.start_at,
     end_at: row.end_at,
+    allow_start_date_selection: row.allow_start_date_selection ?? false,
     study_duration: row.study_duration,
     survey_frequency: row.survey_frequency,
-    allow_participant_dnd: row.allow_participant_dnd ?? false,
-    allow_start_date_selection: row.allow_start_date_selection ?? false,
-    survey_code: row.survey_code,
-    published_at: row.published_at,
+    // Onboarding
     onboarding_required: row.onboarding_required ?? false,
     onboarding_instruction: row.onboarding_instruction,
-    show_progress_bar: row.show_progress_bar ?? true,
-    disable_backtracking: row.disable_backtracking ?? false,
-    randomize_questions: row.randomize_questions ?? false,
-    auto_advance: row.auto_advance ?? false,
-    ecogram_enabled: row.ecogram_enabled ?? false,
-    ecogram_center_label: row.ecogram_center_label || 'Me',
-    ecogram_relationship_options: row.ecogram_relationship_options || [],
-    ecogram_support_categories: row.ecogram_support_categories || [],
-    notification_frequency: row.notification_frequency,
-    notification_times_per_day: row.notification_times_per_day,
-    notification_times: row.notification_times || [],
-    notification_send_reminders: row.notification_send_reminders ?? true,
-    notification_timezone: row.notification_timezone,
-    sampling_type: row.sampling_type,
-    sampling_prompts_per_day: row.sampling_prompts_per_day,
-    sampling_start_hour: row.sampling_start_hour ?? 8,
-    sampling_end_hour: row.sampling_end_hour ?? 21,
-    sampling_allow_late: row.sampling_allow_late ?? true,
-    sampling_late_window_minutes: row.sampling_late_window_minutes ?? 60,
-    recruitment_criteria_text: row.recruitment_criteria_text,
-    layout_show_header: row.layout_show_header ?? true,
-    layout_header_title: row.layout_header_title || '',
-    layout_theme_primary_color: row.layout_theme_primary_color || '#10b981',
-    layout_theme_background_color: row.layout_theme_background_color || '#f5f5f4',
-    layout_theme_card_style: row.layout_theme_card_style || 'elevated',
-    help_information: row.help_information,
-    // Incentive fields
+    // Incentives
     incentive_enabled: row.incentive_enabled ?? false,
     incentive_type: row.incentive_type ?? 'fixed',
     incentive_amount: row.incentive_amount ?? 0,
@@ -277,8 +210,12 @@ const SurveyBuilder: React.FC = () => {
     incentive_description: row.incentive_description ?? '',
     incentive_payment_method: row.incentive_payment_method ?? 'manual',
     incentive_payment_instructions: row.incentive_payment_instructions ?? '',
-    // Messaging
-    messaging_enabled: row.messaging_enabled ?? false,
+    // Layout theme/header
+    layout_show_header: row.layout_show_header ?? true,
+    layout_header_title: row.layout_header_title || '',
+    layout_theme_primary_color: row.layout_theme_primary_color || '#10b981',
+    layout_theme_background_color: row.layout_theme_background_color || '#f5f5f4',
+    layout_theme_card_style: row.layout_theme_card_style || 'elevated',
   });
 
   // Frontend state → DB row for upsert. Direct column mapping, no JSONB merging.
@@ -291,66 +228,41 @@ const SurveyBuilder: React.FC = () => {
     published_at: p.published_at,
     project_type: p.project_type,
     methodology_type: p.methodology_type,
+    survey_code: p.survey_code,
+    // Feature toggles
     ai_enabled: p.ai_enabled,
     voice_enabled: p.voice_enabled,
     notification_enabled: p.notification_enabled,
-    consent_required: p.consent_required,
-    consent_form_title: p.consent_form_title,
-    consent_form_text: p.consent_form_text,
-    consent_form_url: p.consent_form_url,
-    screening_enabled: p.screening_enabled,
+    allow_participant_dnd: p.allow_participant_dnd,
+    messaging_enabled: p.messaging_enabled ?? false,
+    // Participant config
+    max_participant: p.max_participant,
+    // Compensation
     compensation_amount: p.compensation_amount,
     compensation_type: p.compensation_type,
-    max_participant: p.max_participant,
-    participant_numbering: p.participant_numbering,
-    participant_number_prefix: p.participant_number_prefix,
-    participant_relation_enabled: p.participant_relation_enabled,
-    participant_relation_options: p.participant_relation_options,
+    // Schedule
     start_at: p.start_at,
     end_at: p.end_at,
+    allow_start_date_selection: p.allow_start_date_selection,
     study_duration: p.study_duration,
     survey_frequency: p.survey_frequency,
-    allow_participant_dnd: p.allow_participant_dnd,
-    allow_start_date_selection: p.allow_start_date_selection,
-    survey_code: p.survey_code,
+    // Onboarding
     onboarding_required: p.onboarding_required,
     onboarding_instruction: p.onboarding_instruction,
-    show_progress_bar: p.show_progress_bar,
-    disable_backtracking: p.disable_backtracking,
-    randomize_questions: p.randomize_questions,
-    auto_advance: p.auto_advance,
-    ecogram_enabled: p.ecogram_enabled,
-    ecogram_center_label: p.ecogram_center_label,
-    ecogram_relationship_options: p.ecogram_relationship_options,
-    ecogram_support_categories: p.ecogram_support_categories,
-    notification_frequency: p.notification_frequency,
-    notification_times_per_day: p.notification_times_per_day,
-    notification_times: p.notification_times,
-    notification_send_reminders: p.notification_send_reminders,
-    notification_timezone: p.notification_timezone,
-    sampling_type: p.sampling_type,
-    sampling_prompts_per_day: p.sampling_prompts_per_day,
-    sampling_start_hour: p.sampling_start_hour,
-    sampling_end_hour: p.sampling_end_hour,
-    sampling_allow_late: p.sampling_allow_late,
-    sampling_late_window_minutes: p.sampling_late_window_minutes,
-    recruitment_criteria_text: p.recruitment_criteria_text,
+    // Incentives
+    incentive_enabled: p.incentive_enabled ?? false,
+    incentive_type: p.incentive_type ?? 'fixed',
+    incentive_amount: p.incentive_amount ?? 0,
+    incentive_currency: p.incentive_currency ?? 'USD',
+    incentive_description: p.incentive_description ?? '',
+    incentive_payment_method: p.incentive_payment_method ?? 'manual',
+    incentive_payment_instructions: p.incentive_payment_instructions ?? '',
+    // Layout theme/header
     layout_show_header: p.layout_show_header,
     layout_header_title: p.layout_header_title,
     layout_theme_primary_color: p.layout_theme_primary_color,
     layout_theme_background_color: p.layout_theme_background_color,
     layout_theme_card_style: p.layout_theme_card_style,
-    help_information: p.help_information,
-    // Incentive fields
-    incentive_enabled: (p as any).incentive_enabled ?? false,
-    incentive_type: (p as any).incentive_type ?? 'fixed',
-    incentive_amount: (p as any).incentive_amount ?? 0,
-    incentive_currency: (p as any).incentive_currency ?? 'USD',
-    incentive_description: (p as any).incentive_description ?? '',
-    incentive_payment_method: (p as any).incentive_payment_method ?? 'manual',
-    incentive_payment_instructions: (p as any).incentive_payment_instructions ?? '',
-    // Messaging
-    messaging_enabled: p.messaging_enabled ?? false,
   });
 
   const generateSurveyCode = async () => {
@@ -437,21 +349,14 @@ const SurveyBuilder: React.FC = () => {
           // Mark layout as initialized so auto-save kicks in only after DB load
           setTimeout(() => { appLayoutInitializedRef.current = true; }, 100);
 
-          // Load logic rules from logic_rule table
+          // Load logic rules from research_logic table
           const { data: logicRows } = await supabase
-            .from('logic_rule')
+            .from('research_logic')
             .select('*')
             .eq('project_id', projectId)
             .order('order_index');
           if (logicRows && mounted) {
-            setLogicRules(logicRows.map((r: any) => ({
-              id: r.id,
-              questionId: r.question_id,
-              condition: r.condition,
-              value: r.value,
-              action: r.action,
-              targetQuestionId: r.target_question_id,
-            })));
+            setLogicRules(logicRows.map(dbRowToLogicRule));
           }
 
           // Load questionnaires from questionnaire table
@@ -472,8 +377,6 @@ const SurveyBuilder: React.FC = () => {
             setParticipantTypes(ptRows.map((pt: any) => ({
               ...pt,
               relations: pt.relations || [],
-              consent_forms: [],
-              screening_questions: [],
             })));
           }
 
@@ -525,10 +428,6 @@ const SurveyBuilder: React.FC = () => {
             dnd_default_end: qr.dnd_default_end || '08:00',
             assigned_participant_types: qptMap.get(qr.id) || [],
             order_index: qr.order_index || 0,
-            consent_text: qr.consent_text,
-            consent_url: qr.consent_url,
-            consent_required: qr.consent_required,
-            disqualify_logic: qr.disqualify_logic,
             tab_sections: qr.tab_sections || undefined,
             display_mode: qr.display_mode || 'one_per_page',
             questions_per_page: qr.questions_per_page ?? null,
@@ -590,7 +489,6 @@ const SurveyBuilder: React.FC = () => {
           question_description: '',
           question_config: q.config || {},
           validation_rule: {},
-          logic_rule: {},
           ai_config: {},
           order_index: index,
           required: q.required || false,
@@ -781,10 +679,6 @@ const SurveyBuilder: React.FC = () => {
             dnd_default_start: qc.dnd_default_start || '22:00',
             dnd_default_end: qc.dnd_default_end || '08:00',
             order_index: qc.order_index ?? 0,
-            consent_text: qc.consent_text || null,
-            consent_url: qc.consent_url || null,
-            consent_required: qc.consent_required ?? true,
-            disqualify_logic: qc.disqualify_logic || {},
             tab_sections: qc.tab_sections || null,
             display_mode: qc.display_mode || 'one_per_page',
             questions_per_page: qc.questions_per_page ?? null,
@@ -847,7 +741,6 @@ const SurveyBuilder: React.FC = () => {
             ...questionConfigToDbCols(mergedConfig),
             validation_rule: (questionData as any).validation_rule ?? (questionData as any).validation_rules ?? {},
             ...validationRuleToDbCols((questionData as any).validation_rule ?? (questionData as any).validation_rules),
-            logic_rule: (questionData as any).logic_rule ?? (questionData as any).logic_rules ?? {},
             ai_config: (questionData as any).ai_config || {},
             order_index: (questionData as any).order_index ?? 0,
             required: (questionData as any).required || false,
@@ -901,20 +794,14 @@ const SurveyBuilder: React.FC = () => {
         }
       };
 
-      // ── Sync logic rules to logic_rule table ──
+      // ── Sync logic rules to research_logic table ──
       const syncLogicRules = async (targetProjectId: string) => {
-        await supabase.from('logic_rule').delete().eq('project_id', targetProjectId);
+        await supabase.from('research_logic').delete().eq('project_id', targetProjectId);
         if (logicRules.length > 0) {
           const rows = logicRules.map((r, i) => ({
-            project_id: targetProjectId,
-            question_id: r.questionId || null,
-            condition: r.condition || 'equals',
-            value: r.value || '',
-            action: r.action || 'skip',
-            target_question_id: r.targetQuestionId || null,
-            order_index: i,
+            ...logicRuleToDbRow({ ...r, projectId: targetProjectId, orderIndex: i }),
           }));
-          await supabase.from('logic_rule').insert(rows);
+          await supabase.from('research_logic').insert(rows);
         }
       };
 
@@ -1103,7 +990,12 @@ const SurveyBuilder: React.FC = () => {
 
         {/* Logic Tab */}
         {activeTab === 'logic' && (
-          <SurveyLogic questions={questionnaireConfigs.flatMap(q => q.questions)} projectId={projectId} onUpdateLogic={(rules) => setLogicRules(rules)} />
+          <SurveyLogic
+            questionnaires={questionnaireConfigs}
+            projectId={projectId}
+            logicRules={logicRules}
+            onUpdateLogic={setLogicRules}
+          />
         )}
 
         {/* Layout Tab */}
@@ -1128,27 +1020,6 @@ const SurveyBuilder: React.FC = () => {
             participantTypes={participantTypes}
             onUpdateParticipantTypes={setParticipantTypes}
             questionnaires={questionnaireConfigs}
-            onAddQuestionnaire={(type) => {
-              const newQ = {
-                id: crypto.randomUUID(),
-                questionnaire_type: type,
-                title: type === 'consent' ? 'Consent Form' : 'Screening Questions',
-                description: '',
-                questions: [],
-                estimated_duration: 5,
-                frequency: 'once',
-                time_windows: [{ start: '09:00', end: '21:00' }],
-                notification_enabled: false,
-                notification_minutes_before: 5,
-                dnd_allowed: false,
-                dnd_default_start: '22:00',
-                dnd_default_end: '08:00',
-                assigned_participant_types: participantTypes.map(pt => pt.id),
-                order_index: questionnaireConfigs.length,
-              };
-              setQuestionnaireConfigs([...questionnaireConfigs, newQ]);
-              setActiveTab('questionnaires');
-            }}
           />
         )}
 

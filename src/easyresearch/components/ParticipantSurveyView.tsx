@@ -10,27 +10,19 @@ import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import ParticipantOnboarding from './ParticipantOnboarding';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
+import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions } from '../utils/logicEngine';
 
 interface SurveyProject {
   id: string;
   organization_id?: string;
   title: string;
   description: string;
-  consent_required?: boolean;
-  consent_form_title?: string;
-  consent_form_text?: string;
-  consent_form_url?: string;
   project_type?: string;
   onboarding_required?: boolean;
   onboarding_instruction?: string;
-  participant_numbering?: boolean;
   allow_participant_dnd?: boolean;
   study_duration?: number;
   survey_frequency?: string;
-  show_progress_bar?: boolean;
-  disable_backtracking?: boolean;
-  auto_advance?: boolean;
-  randomize_questions?: boolean;
 }
 
 interface SurveyQuestion {
@@ -73,8 +65,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [project, setProject] = useState<SurveyProject | null>(null);
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
   const [responses, setResponses] = useState<SurveyResponse>({});
-  const [logicRules, setLogicRules] = useState<any[]>([]);
-  const [showConsent, setShowConsent] = useState(true);
+  const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -95,10 +86,9 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     }
   }, [projectId]);
 
-  // If opened with instanceId (from timeline modal), skip all onboarding/consent
+  // If opened with instanceId (from timeline modal), skip onboarding
   useEffect(() => {
     if (propInstanceId && propEnrollmentId) {
-      setShowConsent(false);
       setShowOnboarding(false);
       setEnrollmentId(propEnrollmentId);
     }
@@ -173,21 +163,14 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         // All display/behavior settings are proper columns now — no JSONB normalization needed
         setProject(project);
         
-        // Load logic rules from logic_rule table
+        // Load logic rules from research_logic table
         const { data: logicRows } = await supabase
-          .from('logic_rule')
+          .from('research_logic')
           .select('*')
           .eq('project_id', projectId)
           .order('order_index');
         if (logicRows) {
-          setLogicRules(logicRows.map((r: any) => ({
-            id: r.id,
-            questionId: r.question_id,
-            condition: r.condition,
-            value: r.value,
-            action: r.action,
-            targetQuestionId: r.target_question_id,
-          })));
+          setLogicRules(logicRows.map(dbRowToLogicRule));
         }
 
         // Load questions
@@ -241,15 +224,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         // Check for existing enrollment
         const existingEnrollmentId = localStorage.getItem(`enrollment_${projectId}`);
         
-        // Skip consent if parameter is set (for enrolled users)
-        const skipConsent = searchParams.get('skip_consent') === 'true';
-        if (existingEnrollmentId && skipConsent) {
-          setShowConsent(false);
-          setEnrollmentId(existingEnrollmentId);
-        }
-        
         if (existingEnrollmentId) {
-          // Check if enrollment exists in database
           const { data: enrollment } = await supabase
             .from('enrollment')
             .select('*')
@@ -258,9 +233,6 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
           if (enrollment) {
             setEnrollmentId(enrollment.id);
-            const consentRequired = !!project.consent_required;
-            const hasConsent = !!(enrollment as any).consent_signed_at;
-            setShowConsent(consentRequired && !hasConsent);
             setShowOnboarding(false);
             
             // If longitudinal survey and enrolled, redirect to timeline ONLY if no instance specified
@@ -270,31 +242,17 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
               return;
             }
           } else {
-            // If onboarding is required for longitudinal studies
             if (project.project_type === 'longitudinal' && project.onboarding_required) {
               setShowOnboarding(true);
-              setShowConsent(false);
-            } else if (project.consent_required) {
-              setShowConsent(true);
-            } else if (project.project_type === 'longitudinal' && !existingEnrollmentId) {
+            } else if (project.project_type === 'longitudinal') {
               setShowOnboarding(true);
-              setShowConsent(false);
-            } else if (!project.consent_required) {
-              setShowConsent(false);
             }
           }
         } else {
-          // New participant - check if onboarding is required
           if (project.project_type === 'longitudinal' && project.onboarding_required) {
             setShowOnboarding(true);
-            setShowConsent(false);
-          } else if (project.consent_required) {
-            setShowConsent(true);
-          } else if (project.project_type === 'longitudinal' && !existingEnrollmentId) {
+          } else if (project.project_type === 'longitudinal') {
             setShowOnboarding(true);
-            setShowConsent(false);
-          } else if (!project.consent_required) {
-            setShowConsent(false);
           }
         }
       }
@@ -305,55 +263,6 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     }
   };
 
-  const handleConsentAccept = async () => {
-    try {
-      const consentRequired = !!project?.consent_required;
-      if (consentRequired) {
-        const now = new Date().toISOString();
-        let currentEnrollmentId = enrollmentId || localStorage.getItem(`enrollment_${projectId}`);
-
-        // For longitudinal onboarding flow, enrollment/consent is captured in onboarding.
-        if (!(project?.project_type === 'longitudinal' && project?.onboarding_required)) {
-          if (!currentEnrollmentId) {
-            const fallbackEmail = user?.email || `anonymous+${crypto.randomUUID()}@participant.local`;
-            const { data: enrollment, error } = await supabase
-              .from('enrollment')
-              .insert({
-                project_id: projectId,
-                participant_id: user?.id || null,
-                participant_email: fallbackEmail,
-                status: 'active',
-                consent_signed_at: now
-              })
-              .select()
-              .single();
-
-            if (error) throw error;
-            if (enrollment) {
-              currentEnrollmentId = enrollment.id;
-              setEnrollmentId(enrollment.id);
-              localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
-            }
-          } else {
-            await supabase
-              .from('enrollment')
-              .update({ consent_signed_at: now })
-              .eq('id', currentEnrollmentId);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error saving consent:', error);
-      toast.error('Failed to record consent. Please try again.');
-      return;
-    }
-
-    setShowConsent(false);
-    // For longitudinal studies with onboarding, show onboarding after consent
-    if (project?.project_type === 'longitudinal' && project?.onboarding_required) {
-      setShowOnboarding(true);
-    }
-  };
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
@@ -371,56 +280,8 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     }
   };
 
-  // Evaluate logic rules to determine which questions should be visible
-  const evaluateLogicRule = (rule: any): boolean => {
-    const sourceValue = responses[rule.questionId];
-    if (sourceValue === undefined || sourceValue === null) return false;
-    
-    const valueStr = String(sourceValue).toLowerCase();
-    const ruleValue = String(rule.value).toLowerCase();
-    
-    switch (rule.condition) {
-      case 'equals':
-        return valueStr === ruleValue;
-      case 'not_equals':
-        return valueStr !== ruleValue;
-      case 'contains':
-        return valueStr.includes(ruleValue);
-      case 'greater_than':
-        return Number(sourceValue) > Number(rule.value);
-      case 'less_than':
-        return Number(sourceValue) < Number(rule.value);
-      case 'is_empty':
-        return !sourceValue || valueStr === '';
-      case 'is_not_empty':
-        return !!sourceValue && valueStr !== '';
-      default:
-        return false;
-    }
-  };
-
-  // Get visible questions based on logic rules
-  const getVisibleQuestions = (): SurveyQuestion[] => {
-    if (logicRules.length === 0) return questions;
-    
-    const hiddenQuestionIds = new Set<string>();
-    
-    for (const rule of logicRules) {
-      const ruleMatches = evaluateLogicRule(rule);
-      
-      if (rule.action === 'hide' && ruleMatches) {
-        hiddenQuestionIds.add(rule.targetQuestionId);
-      } else if (rule.action === 'show' && !ruleMatches) {
-        // If show rule doesn't match, hide the target
-        hiddenQuestionIds.add(rule.targetQuestionId);
-      }
-      // Skip logic is handled during navigation, not filtering
-    }
-    
-    return questions.filter(q => !hiddenQuestionIds.has(q.id));
-  };
-
-  const visibleQuestions = getVisibleQuestions();
+  // Use shared logic engine for visibility, skip, and terminal actions
+  const visibleQuestions = getVisibleQs(questions, logicRules, responses);
   const orderedVisibleQuestions = questionOrder.length
     ? visibleQuestions.sort((a, b) => questionOrder.indexOf(a.id) - questionOrder.indexOf(b.id))
     : visibleQuestions;
@@ -431,34 +292,12 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   useEffect(() => {
     if (!project || questions.length === 0) return;
-    const ids = questions.map(q => q.id);
-    if (project.randomize_questions) {
-      const shuffled = [...ids];
-      for (let i = shuffled.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      setQuestionOrder(shuffled);
-    } else {
-      setQuestionOrder(ids);
-    }
+    setQuestionOrder(questions.map(q => q.id));
   }, [project, questions]);
 
   useEffect(() => {
     setCurrentQuestionIndex(0);
   }, [questionOrder.length]);
-
-  const getQuestionIndex = (questionId: string) => {
-    const list = orderedVisibleQuestions;
-    return list.findIndex(q => q.id === questionId);
-  };
-
-  const findSkipTargetIndex = (questionId: string) => {
-    const rule = logicRules.find(r => r.action === 'skip' && r.questionId === questionId && evaluateLogicRule(r));
-    if (!rule?.targetQuestionId) return null;
-    const targetIndex = getQuestionIndex(rule.targetQuestionId);
-    return targetIndex >= 0 ? targetIndex : null;
-  };
 
   const validateCurrentQuestion = () => {
     if (!currentQuestion) return true;
@@ -473,27 +312,37 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleNextQuestion = () => {
     if (!validateCurrentQuestion()) return;
-    const skipIndex = currentQuestion ? findSkipTargetIndex(currentQuestion.id) : null;
-    if (skipIndex !== null) {
-      setCurrentQuestionIndex(skipIndex);
+    // Check terminal actions (disqualify / end_survey)
+    const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
+    if (terminal.disqualified) {
+      toast.error('Based on your responses, you are not eligible for this study.');
+      return;
+    }
+    if (terminal.endSurvey) {
+      setIsCompleted(true);
+      return;
+    }
+    // Check skip logic
+    const skipIdx = currentQuestion ? findSkipTarget(currentQuestion.id, orderedVisibleQuestions, logicRules, responses) : null;
+    if (skipIdx !== null) {
+      setCurrentQuestionIndex(skipIdx);
       return;
     }
     setCurrentQuestionIndex(prev => Math.min(prev + 1, orderedVisibleQuestions.length - 1));
   };
 
   const handlePreviousQuestion = () => {
-    if (project?.disable_backtracking) return;
     setCurrentQuestionIndex(prev => Math.max(prev - 1, 0));
   };
 
   useEffect(() => {
-    if (!project?.auto_advance || !currentQuestion || lastAnsweredId !== currentQuestion.id) return;
+    return; // auto_advance removed from project level
     const normalized = normalizeLegacyQuestionType(currentQuestion.question_type);
     const autoAdvanceTypes = ['single_choice', 'dropdown', 'rating', 'nps', 'likert_scale', 'slider', 'date', 'time'];
     if (autoAdvanceTypes.includes(normalized) && currentQuestionIndex < orderedVisibleQuestions.length - 1) {
       handleNextQuestion();
     }
-  }, [lastAnsweredId, project?.auto_advance, currentQuestion?.id, currentQuestionIndex, orderedVisibleQuestions.length]);
+  }, [lastAnsweredId, currentQuestion?.id, currentQuestionIndex, orderedVisibleQuestions.length]);
 
   const handleVoiceInput = async (questionId: string) => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -609,7 +458,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             participant_id: user?.id || null,
             participant_email: fallbackEmail,
             status: 'active',
-            ...(project?.consent_required ? { consent_signed_at: now } : {})
+            // consent_required removed from project level
           })
           .select('id')
           .single();
@@ -1474,44 +1323,6 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     );
   }
 
-  if (showConsent && project.consent_required) {
-    return (
-      <>
-      <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
-            <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-              {project.consent_form_title || 'Research Consent Form'}
-            </h1>
-            <div className="prose max-w-none mb-8" style={{ color: 'var(--text-secondary)' }}>
-              <p className="whitespace-pre-wrap">
-                {project.consent_form_text || 'Please read and accept the consent form to continue.'}
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleConsentAccept}
-                className="px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90"
-                style={{ backgroundColor: 'var(--color-green)' }}
-              >
-                I Agree & Continue
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-lg border font-semibold transition-colors"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                Decline
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      </>
-    );
-  }
 
   // If no questions loaded, show error
   if (visibleQuestions.length === 0 && !loading) {
@@ -1653,7 +1464,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         {/* Survey Content */}
         {(isModal || activeTab === 'survey') && (
           <>
-        {project?.show_progress_bar !== false && orderedVisibleQuestions.length > 0 && (
+        {orderedVisibleQuestions.length > 0 && (
           <div className="mb-6">
             <div className="flex items-center justify-between text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
               <span>Progress</span>
@@ -1726,11 +1537,10 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                 <div className="flex items-center justify-between mb-8">
                   <button
                     onClick={() => {
-                      if (project?.disable_backtracking) return;
                       setCurrentQuestionIndex(Math.max(0, pageStart - perPage));
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    disabled={currentPage === 0 || project?.disable_backtracking}
+                    disabled={currentPage === 0}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg border disabled:opacity-50"
                     style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
                   >

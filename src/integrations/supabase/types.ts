@@ -19695,10 +19695,6 @@ export type Database = {
           compensation: string | null
           compensation_amount: number | null
           compensation_type: string | null
-          consent_form: Json | null
-          consent_form_text: string | null
-          consent_form_url: string | null
-          consent_required: boolean | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -19730,10 +19726,6 @@ export type Database = {
           compensation?: string | null
           compensation_amount?: number | null
           compensation_type?: string | null
-          consent_form?: Json | null
-          consent_form_text?: string | null
-          consent_form_url?: string | null
-          consent_required?: boolean | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -19765,10 +19757,6 @@ export type Database = {
           compensation?: string | null
           compensation_amount?: number | null
           compensation_type?: string | null
-          consent_form?: Json | null
-          consent_form_text?: string | null
-          consent_form_url?: string | null
-          consent_required?: boolean | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -22203,7 +22191,6 @@ export type Database = {
           allow_voice: boolean | null
           created_at: string | null
           id: string
-          logic_rules: Json | null
           options: Json | null
           order_index: number | null
           piping_config: Json | null
@@ -22226,7 +22213,6 @@ export type Database = {
           allow_voice?: boolean | null
           created_at?: string | null
           id?: string
-          logic_rules?: Json | null
           options?: Json | null
           order_index?: number | null
           piping_config?: Json | null
@@ -22249,7 +22235,6 @@ export type Database = {
           allow_voice?: boolean | null
           created_at?: string | null
           id?: string
-          logic_rules?: Json | null
           options?: Json | null
           order_index?: number | null
           piping_config?: Json | null

@@ -1,74 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase, authClient } from '../../lib/supabase';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
 import ParticipantAppView from './ParticipantAppView';
 import ParticipantSurveyView from './ParticipantSurveyView';
-import ConsentModal from './ConsentModal';
 
 const SurveyViewRouter: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [projectType, setProjectType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showConsentModal, setShowConsentModal] = useState(false);
-  const [project, setProject] = useState<any>(null);
-  const [consentChecked, setConsentChecked] = useState(false);
 
   useEffect(() => {
-    const checkConsentAndLoadProject = async () => {
+    const loadProject = async () => {
       if (!projectId) {
         setLoading(false);
         return;
       }
 
       try {
-        // Load project details including consent requirements
         const { data: projectData } = await supabase
           .from('research_project')
-          .select('id, title, project_type, consent_required, consent_form_text, consent_form_url')
+          .select('id, project_type')
           .eq('id', projectId)
           .maybeSingle();
 
-        if (!projectData) {
-          setLoading(false);
-          return;
+        if (projectData) {
+          setProjectType(projectData.project_type);
         }
-
-        setProject(projectData);
-        setProjectType(projectData.project_type);
-
-        const consentRequired = projectData.consent_required === true;
-        
-        if (consentRequired) {
-          // Check if user already gave consent
-          const { data: { user } } = await authClient.auth.getUser();
-          
-          if (user) {
-            const { data: enrollment } = await supabase
-              .from('enrollment')
-              .select('id, consent_signed_at')
-              .eq('project_id', projectId)
-              .eq('participant_id', user.id)
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (!enrollment?.consent_signed_at) {
-              // Need to show consent modal
-              setShowConsentModal(true);
-              setConsentChecked(true);
-              setLoading(false);
-              return;
-            }
-            // Consent already signed — ensure enrollment is in localStorage for downstream views
-            if (enrollment?.id) {
-              localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
-            }
-          }
-        }
-
-        setConsentChecked(true);
       } catch (error) {
         console.error('Error loading project:', error);
       } finally {
@@ -76,91 +34,14 @@ const SurveyViewRouter: React.FC = () => {
       }
     };
 
-    checkConsentAndLoadProject();
+    loadProject();
   }, [projectId]);
-
-  const handleConsentAccept = async () => {
-    try {
-      const { data: { user } } = await authClient.auth.getUser();
-      
-      if (user && projectId) {
-        const now = new Date().toISOString();
-
-        const { data: existingEnrollment } = await supabase
-          .from('enrollment')
-          .select('id, status')
-          .eq('project_id', projectId)
-          .eq('participant_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (existingEnrollment?.id) {
-          await supabase
-            .from('enrollment')
-            .update({ consent_signed_at: now })
-            .eq('id', existingEnrollment.id);
-          // Store in localStorage so downstream views find it
-          localStorage.setItem(`enrollment_${projectId}`, existingEnrollment.id);
-        } else {
-          const { data: newEnroll } = await supabase
-            .from('enrollment')
-            .insert({
-              project_id: projectId,
-              participant_id: user.id,
-              participant_email: user.email,
-              status: 'active',
-              consent_signed_at: now,
-            })
-            .select('id')
-            .single();
-          if (newEnroll?.id) {
-            localStorage.setItem(`enrollment_${projectId}`, newEnroll.id);
-          }
-        }
-
-        setShowConsentModal(false);
-        setConsentChecked(true);
-      }
-    } catch (error) {
-      console.error('Error storing consent:', error);
-    }
-  };
-
-  const handleConsentDecline = () => {
-    setShowConsentModal(false);
-    navigate('/easyresearch');
-  };
 
   if (loading) {
     return (
       <div className="max-w-lg mx-auto px-4 py-6 space-y-4 animate-pulse">
         <div className="h-20 bg-stone-100 rounded-xl" />
         <div className="h-14 bg-stone-100 rounded-xl" />
-        <div className="h-14 bg-stone-100 rounded-xl" />
-      </div>
-    );
-  }
-
-  // Show consent modal if required and not yet accepted
-  if (showConsentModal && project) {
-    return (
-      <ConsentModal
-        isOpen={showConsentModal}
-        onClose={handleConsentDecline}
-        onAccept={handleConsentAccept}
-        projectTitle={project.title}
-        consentFormUrl={project.consent_form_url}
-        consentFormText={project.consent_form_text}
-      />
-    );
-  }
-
-  // Only show survey if consent check is complete
-  if (!consentChecked) {
-    return (
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-4 animate-pulse">
-        <div className="h-20 bg-stone-100 rounded-xl" />
         <div className="h-14 bg-stone-100 rounded-xl" />
       </div>
     );

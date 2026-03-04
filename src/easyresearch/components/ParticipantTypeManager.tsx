@@ -1,35 +1,16 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, ChevronDown, ChevronUp, Users, Shield, ClipboardCheck, X, Hash } from 'lucide-react';
 
-export interface ConsentForm {
-  id: string;
-  title: string;
-  text: string;
-  url?: string;
-  required: boolean;
-}
-
-export interface ScreeningQuestion {
-  id: string;
-  question: string;
-  type: 'yes_no' | 'text' | 'select';
-  options?: string[];
-  required: boolean;
-  disqualify_value?: string;
-}
-
 export interface ParticipantType {
   id: string;
   project_id?: string;
   name: string;
   description: string;
-  relations: string[]; // e.g. ['Primary Caregiver', 'Spouse', 'Child']
-  consent_forms: ConsentForm[];
-  screening_questions: ScreeningQuestion[];
+  relations: string[];
   color: string;
   order_index: number;
   numbering_enabled: boolean;
-  number_prefix: string; // e.g. 'CG' for Caregiver → CG001, CG002...
+  number_prefix: string;
 }
 
 interface QuestionnaireRef {
@@ -58,8 +39,6 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
       name: `Participant Type ${num}`,
       description: '',
       relations: [],
-      consent_forms: [],
-      screening_questions: [],
       color: COLORS[(num - 1) % COLORS.length],
       order_index: participantTypes.length,
       numbering_enabled: true,

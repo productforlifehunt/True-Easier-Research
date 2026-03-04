@@ -35,7 +35,6 @@ export interface LayoutElement {
     image_url?: string;
     show_question_count?: boolean;
     show_estimated_time?: boolean;
-    consent_text?: string;
     screening_criteria?: string;
     help_sections?: { title: string; content: string }[];
     progress_style?: 'bar' | 'ring' | 'steps';

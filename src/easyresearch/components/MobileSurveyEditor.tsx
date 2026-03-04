@@ -13,7 +13,6 @@ interface Question {
   question_description?: string;
   question_config: any;
   validation_rule: any;
-  logic_rule: any;
   ai_config: any;
   order_index: number;
   required: boolean;
@@ -136,7 +135,6 @@ const MobileSurveyEditor: React.FC = () => {
       question_text: 'New Question',
       question_config: { ...questionTypeDef.defaultConfig },
       validation_rule: {},
-      logic_rule: {},
       ai_config: {},
       order_index: questions.length,
       required: false,
@@ -209,7 +207,6 @@ const MobileSurveyEditor: React.FC = () => {
             question_config: question.question_config || {},
             ...questionConfigToDbCols(question.question_config || {}),
             validation_rule: question.validation_rule || {},
-            logic_rule: {},
             ai_config: {},
             order_index: question.order_index,
             required: question.required,

@@ -11,7 +11,6 @@ interface Question {
   question_description?: string;
   question_config: any;
   validation_rule: any;
-  logic_rule: any;
   ai_config: any;
   order_index: number;
   section_name?: string;

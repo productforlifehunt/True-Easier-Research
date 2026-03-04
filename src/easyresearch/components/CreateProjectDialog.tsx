@@ -29,8 +29,6 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
     ai_enabled: false,
     voice_enabled: true,
     max_participants: 100,
-    requires_consent: true,
-    consent_text: ''
   });
 
   useEffect(() => {
@@ -122,24 +120,6 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
           notification_enabled: true,
           max_participant: projectData.max_participants,
           study_duration: projectData.duration_days,
-          show_progress_bar: true,
-          // Consent — flat columns
-          consent_required: projectData.requires_consent || false,
-          consent_form_title: 'Research Consent Form',
-          consent_form_text: projectData.requires_consent ? (projectData.consent_text || 'By participating in this study, you agree to provide honest responses. Your data will be kept confidential.') : null,
-          // Notification — flat columns
-          notification_frequency: isEsm ? 'multiple_daily' : isDiary ? 'daily' : isLongitudinal ? 'periodic' : 'once',
-          notification_times_per_day: isEsm ? projectData.prompts_per_day : isDiary ? 1 : null,
-          notification_times: notificationSettings.notification_times || [],
-          notification_send_reminders: notificationSettings.send_reminders ?? true,
-          notification_timezone: notificationSettings.timezone || null,
-          // Sampling — flat columns
-          sampling_type: isEsm ? projectData.sampling_strategy : isDiary ? 'fixed_schedule' : isLongitudinal ? 'periodic' : null,
-          sampling_prompts_per_day: isEsm ? projectData.prompts_per_day : isDiary ? 1 : null,
-          sampling_start_hour: projectData.start_hour,
-          sampling_end_hour: projectData.end_hour,
-          sampling_allow_late: true,
-          sampling_late_window_minutes: isEsm ? projectData.time_window_minutes : isDiary ? 720 : 60,
           status: 'draft'
         }).select().single();
 
@@ -351,31 +331,6 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen, onClo
                     style={{ left: projectData.voice_enabled ? '22px' : '2px' }} />
                 </button>
               </div>
-              <div className="flex items-center justify-between py-3 border-b border-stone-100">
-                <div>
-                  <p className="text-[14px] font-medium text-stone-800">Consent Form</p>
-                  <p className="text-[12px] text-stone-400 font-light">Require consent before participation</p>
-                </div>
-                <button
-                  onClick={() => setProjectData({ ...projectData, requires_consent: !projectData.requires_consent })}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${projectData.requires_consent ? 'bg-emerald-500' : 'bg-stone-200'}`}
-                >
-                  <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"
-                    style={{ left: projectData.requires_consent ? '22px' : '2px' }} />
-                </button>
-              </div>
-              {projectData.requires_consent && (
-                <div>
-                  <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Consent Text</label>
-                  <textarea
-                    value={projectData.consent_text}
-                    onChange={(e) => setProjectData({ ...projectData, consent_text: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
-                    rows={3}
-                    placeholder="By participating in this study, you agree to..."
-                  />
-                </div>
-              )}
             </div>
           )}
         </div>

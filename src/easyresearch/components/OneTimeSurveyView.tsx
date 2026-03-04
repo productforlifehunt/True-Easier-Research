@@ -6,20 +6,13 @@ import { useAuth } from '../../hooks/useAuth';
 import { Mic, ChevronRight, ChevronLeft, Check, X, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
+import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions } from '../utils/logicEngine';
 
 interface SurveyProject {
   id: string;
   organization_id?: string;
   title: string;
   description: string;
-  consent_required?: boolean;
-  consent_form_title?: string;
-  consent_form_text?: string;
-  consent_form_url?: string;
-  show_progress_bar?: boolean;
-  disable_backtracking?: boolean;
-  randomize_questions?: boolean;
-  auto_advance?: boolean;
   project_type?: string;
   study_duration?: number;
   survey_frequency?: string;
@@ -51,12 +44,13 @@ const OneTimeSurveyView: React.FC = () => {
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<SurveyResponse>({});
-  const [showConsent, setShowConsent] = useState(true);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [enrollmentId, setEnrollmentId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'survey'>('survey');
   const [isRecording, setIsRecording] = useState<string | null>(null);
+  const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
+  const [isDisqualified, setIsDisqualified] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -75,6 +69,16 @@ const OneTimeSurveyView: React.FC = () => {
       if (project) {
         setProject(project as any);
 
+        // Load logic rules from research_logic table
+        const { data: logicRows } = await supabase
+          .from('research_logic')
+          .select('*')
+          .eq('project_id', projectId)
+          .order('order_index');
+        if (logicRows) {
+          setLogicRules(logicRows.map(dbRowToLogicRule));
+        }
+
         const { data: questions } = await supabase
           .from('question')
           .select('*, options:question_option(*)')
@@ -86,35 +90,20 @@ const OneTimeSurveyView: React.FC = () => {
         }
 
         const existingEnrollmentId = localStorage.getItem(`enrollment_${projectId}`);
-        const skipConsent = searchParams.get('skip_consent') === 'true';
-
-        const consentRequired = !!project.consent_required;
 
         if (existingEnrollmentId) {
-          // Validate enrollment (and whether consent is actually signed)
           const { data: enrollment } = await supabase
             .from('enrollment')
-            .select('id, consent_signed_at')
+            .select('id')
             .eq('id', existingEnrollmentId)
             .maybeSingle();
 
           if (enrollment) {
             setEnrollmentId(enrollment.id);
-
-            const hasConsent = !!(enrollment as any).consent_signed_at;
-            if (!consentRequired || hasConsent) {
-              setShowConsent(false);
-            } else {
-              setShowConsent(true);
-            }
           } else {
-            // Stale localStorage enrollment id
             localStorage.removeItem(`enrollment_${projectId}`);
             setEnrollmentId(null);
-            setShowConsent(consentRequired);
           }
-        } else {
-          setShowConsent(consentRequired);
         }
       }
     } catch (error) {
@@ -124,45 +113,6 @@ const OneTimeSurveyView: React.FC = () => {
     }
   };
 
-  const handleConsentAccept = async () => {
-    try {
-      const now = new Date().toISOString();
-      let currentEnrollmentId = enrollmentId || localStorage.getItem(`enrollment_${projectId}`);
-
-      if (!currentEnrollmentId) {
-        const fallbackEmail = user?.email || `anonymous+${crypto.randomUUID()}@participant.local`;
-        const { data: enrollment, error } = await supabase
-          .from('enrollment')
-          .insert({
-            project_id: projectId,
-            participant_id: user?.id || null,
-            participant_email: fallbackEmail,
-            status: 'active',
-            consent_signed_at: now
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-        if (enrollment) {
-          currentEnrollmentId = enrollment.id;
-          localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
-          setEnrollmentId(enrollment.id);
-        }
-      } else {
-        await supabase
-          .from('enrollment')
-          .update({ consent_signed_at: now })
-          .eq('id', currentEnrollmentId);
-      }
-    } catch (error) {
-      console.error('Error saving consent:', error);
-      toast.error('Failed to record consent. Please try again.');
-      return;
-    }
-
-    setShowConsent(false);
-  };
 
   const handleVoiceInput = async (questionId: string) => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -207,8 +157,28 @@ const OneTimeSurveyView: React.FC = () => {
     });
   };
 
+  // Use shared logic engine for visibility
+  const visibleQuestions = getVisibleQs(questions, logicRules, responses);
+
   const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    // Check terminal actions (disqualify / end_survey)
+    const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
+    if (terminal.disqualified) {
+      setIsDisqualified(true);
+      return;
+    }
+    if (terminal.endSurvey) {
+      handleSubmit();
+      return;
+    }
+    // Check skip logic
+    const currentQ = visibleQuestions[currentQuestionIndex];
+    const skipIdx = currentQ ? findSkipTarget(currentQ.id, visibleQuestions, logicRules, responses) : null;
+    if (skipIdx !== null) {
+      setCurrentQuestionIndex(skipIdx);
+      return;
+    }
+    if (currentQuestionIndex < visibleQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     }
   };
@@ -220,13 +190,13 @@ const OneTimeSurveyView: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const unanswered = questions.filter(q => {
+    const unanswered = visibleQuestions.filter(q => {
       if (!q.required) return false;
       const v = responses[q.id];
       return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
     });
     if (unanswered.length > 0) {
-      setCurrentQuestionIndex(questions.findIndex(q => q.id === unanswered[0].id));
+      setCurrentQuestionIndex(visibleQuestions.findIndex(q => q.id === unanswered[0].id));
       toast.error(`Please answer: "${unanswered[0].question_text}"`);
       return;
     }
@@ -244,7 +214,6 @@ const OneTimeSurveyView: React.FC = () => {
             participant_id: user?.id || null,
             participant_email: fallbackEmail,
             status: 'active',
-            ...(project?.consent_required ? { consent_signed_at: now } : {})
           })
           .select()
           .single();
@@ -607,47 +576,23 @@ const OneTimeSurveyView: React.FC = () => {
     );
   }
 
-  if (showConsent && project.consent_required) {
+
+  const currentQuestion = visibleQuestions[currentQuestionIndex];
+  const progress = visibleQuestions.length > 0 ? ((currentQuestionIndex + 1) / visibleQuestions.length) * 100 : 0;
+
+  if (isDisqualified) {
     return (
-      <>
-      <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border-light)' }}>
-            <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-              {project.consent_form_title || 'Research Consent Form'}
-            </h1>
-            <div className="prose max-w-none mb-8" style={{ color: 'var(--text-secondary)' }}>
-              <p className="whitespace-pre-wrap">
-                {project.consent_form_text || 'Please read and accept the consent form to continue.'}
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleConsentAccept}
-                className="px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90"
-                style={{ backgroundColor: 'var(--color-green)' }}
-              >
-                I Agree & Continue
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-lg border font-semibold"
-                style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                Decline
-              </button>
-            </div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+            <X size={32} className="text-red-500" />
           </div>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Not Eligible</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Based on your responses, you are not eligible for this study. Thank you for your interest.</p>
         </div>
       </div>
-      </>
     );
   }
-
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
     <>
@@ -664,7 +609,7 @@ const OneTimeSurveyView: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between text-sm mb-2">
             <span style={{ color: 'var(--text-secondary)' }}>
-              Question {currentQuestionIndex + 1} of {questions.length}
+              Question {currentQuestionIndex + 1} of {visibleQuestions.length}
             </span>
             <span style={{ color: 'var(--text-secondary)' }}>
               {Math.round(progress)}% Complete
@@ -711,7 +656,7 @@ const OneTimeSurveyView: React.FC = () => {
             Previous
           </button>
 
-          {currentQuestionIndex === questions.length - 1 ? (
+          {currentQuestionIndex === visibleQuestions.length - 1 ? (
             <button
               onClick={handleSubmit}
               disabled={submitting}

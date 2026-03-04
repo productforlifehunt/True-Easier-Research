@@ -5,6 +5,7 @@ import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
 import QuestionEditor from './QuestionEditor';
 import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
+import { type LogicRule } from '../utils/logicEngine';
 
 export interface QuestionnaireConfig {
   id: string;
@@ -26,10 +27,6 @@ export interface QuestionnaireConfig {
   dnd_default_end: string;
   assigned_participant_types: string[];
   order_index: number;
-  consent_text?: string;
-  consent_url?: string;
-  consent_required?: boolean;
-  disqualify_logic?: any;
   display_mode?: 'all_at_once' | 'one_per_page' | 'section_per_page';
   questions_per_page?: number | null;
   tab_sections?: Array<{
@@ -47,8 +44,8 @@ interface QuestionnaireListProps {
   onUpdate: (questionnaires: QuestionnaireConfig[]) => void;
   project: any;
   projectId: string;
-  logicRules?: any[];
-  onUpdateLogic?: (rules: any[]) => void;
+  logicRules?: LogicRule[];
+  onUpdateLogic?: (rules: LogicRule[]) => void;
 }
 
 const frequencyOptions = [
@@ -137,7 +134,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       question_description: '',
       question_config: { ...def.defaultConfig },
       validation_rule: {},
-      logic_rule: {},
       ai_config: {},
       order_index: qConfig.questions.length,
       required: false,
@@ -382,6 +378,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               <QuestionLogicEditor
                 question={question}
                 allQuestions={q.questions}
+                questionnaireId={q.id}
+                projectId={projectId}
                 logicRules={logicRules}
                 onUpdateLogic={onUpdateLogic}
               />
@@ -909,32 +907,45 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   );
 };
 
-// Inline logic editor for a single question
+// Inline logic editor for a single question — creates rules in the shared research_logic table
 const QuestionLogicEditor: React.FC<{
   question: any;
   allQuestions: any[];
-  logicRules: any[];
-  onUpdateLogic: (rules: any[]) => void;
-}> = ({ question, allQuestions, logicRules, onUpdateLogic }) => {
-  const questionRules = logicRules.filter(r => r.questionId === question.id);
+  questionnaireId: string;
+  projectId: string;
+  logicRules: LogicRule[];
+  onUpdateLogic: (rules: LogicRule[]) => void;
+}> = ({ question, allQuestions, questionnaireId, projectId, logicRules, onUpdateLogic }) => {
+  const questionRules = logicRules.filter(r => r.sourceQuestionId === question.id && r.questionnaireId === questionnaireId);
   const [expanded, setExpanded] = useState(questionRules.length > 0);
 
   const addRule = () => {
     const targetQ = allQuestions.find(q => q.id !== question.id);
-    const newRule = {
-      id: `rule_${Date.now()}`,
-      questionId: question.id,
+    const newRule: LogicRule = {
+      id: crypto.randomUUID(),
+      projectId,
+      questionnaireId,
+      sourceQuestionId: question.id,
       condition: 'equals',
       value: '',
-      action: 'skip' as const,
+      action: 'skip',
       targetQuestionId: targetQ?.id || '',
+      orderIndex: questionRules.length,
+      enabled: true,
     };
     onUpdateLogic([...logicRules, newRule]);
     setExpanded(true);
   };
 
   const updateRule = (ruleId: string, field: string, value: any) => {
-    onUpdateLogic(logicRules.map(r => r.id === ruleId ? { ...r, [field]: value } : r));
+    onUpdateLogic(logicRules.map(r => {
+      if (r.id !== ruleId) return r;
+      const updated = { ...r, [field]: value };
+      if (field === 'action' && ['disqualify', 'end_survey'].includes(value)) {
+        updated.targetQuestionId = null;
+      }
+      return updated;
+    }));
   };
 
   const deleteRule = (ruleId: string) => {
@@ -962,7 +973,12 @@ const QuestionLogicEditor: React.FC<{
                 <option value="equals">Equals</option>
                 <option value="not_equals">Not Equals</option>
                 <option value="contains">Contains</option>
+                <option value="greater_than">Greater Than</option>
+                <option value="less_than">Less Than</option>
                 <option value="is_empty">Is Empty</option>
+                <option value="is_not_empty">Is Not Empty</option>
+                <option value="any_selected">Any Selected</option>
+                <option value="none_selected">None Selected</option>
               </select>
               <input type="text" value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
                 className="flex-1 min-w-0 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Value" />
@@ -971,13 +987,17 @@ const QuestionLogicEditor: React.FC<{
                 <option value="skip">Skip to</option>
                 <option value="show">Show</option>
                 <option value="hide">Hide</option>
+                <option value="disqualify">Disqualify</option>
+                <option value="end_survey">End Survey</option>
               </select>
-              <select value={rule.targetQuestionId} onChange={(e) => updateRule(rule.id, 'targetQuestionId', e.target.value)}
-                className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white max-w-[120px]">
-                {allQuestions.filter(q => q.id !== question.id).map((q, i) => (
-                  <option key={q.id} value={q.id}>Question {allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
-                ))}
-              </select>
+              {!['disqualify', 'end_survey'].includes(rule.action) && (
+                <select value={rule.targetQuestionId || ''} onChange={(e) => updateRule(rule.id, 'targetQuestionId', e.target.value)}
+                  className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white max-w-[120px]">
+                  {allQuestions.filter(q => q.id !== question.id).map((q) => (
+                    <option key={q.id} value={q.id}>Q{allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
+                  ))}
+                </select>
+              )}
               <button onClick={() => deleteRule(rule.id)} className="p-0.5 rounded hover:bg-red-50">
                 <Trash2 size={10} className="text-red-400" />
               </button>

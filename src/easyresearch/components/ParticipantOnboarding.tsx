@@ -58,7 +58,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
   const loadProject = async () => {
     try {
       const enrollmentId = localStorage.getItem(`enrollment_${projectId}`);
-      if (enrollmentId) { navigate(`/easyresearch/participant/${projectId}?skip_consent=true`); return; }
+      if (enrollmentId) { navigate(`/easyresearch/participant/${projectId}`); return; }
       const { data: projectData } = await supabase.from('research_project').select('*').eq('id', projectId).maybeSingle();
       if (projectData) {
         // Load screening questions from questionnaire table (type = 'screening')
@@ -112,7 +112,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
           if (ptRows.length === 1) setSelectedParticipantTypeId(ptRows[0].id);
         }
 
-        const screeningEnabled = projectData.screening_enabled || loadedScreeningQuestions.length > 0;
+        const screeningEnabled = loadedScreeningQuestions.length > 0;
 
         setProject({
           ...projectData,
@@ -125,10 +125,6 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
           })),
           screening_questions: loadedScreeningQuestions,
           screening_enabled: screeningEnabled,
-          participant_numbering: projectData.participant_numbering,
-          participant_number_prefix: projectData.participant_number_prefix || 'PP',
-          participant_relation_enabled: projectData.participant_relation_enabled,
-          participant_relation_options: projectData.participant_relation_options || [],
         });
         if (screeningEnabled && loadedScreeningQuestions.length > 0) {
           setStep('screening');
@@ -189,11 +185,6 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
           .eq('project_id', projectId)
           .eq('participant_type_id', selectedParticipantTypeId);
         assignedNumber = `${prefix}${String((count || 0) + 1).padStart(3, '0')}`;
-      } else if (project?.participant_numbering && !assignedNumber && !selectedType) {
-        // Fallback to global prefix if no participant types defined
-        const prefix = project.participant_number_prefix || 'PP';
-        const { count } = await supabase.from('enrollment').select('id', { count: 'exact', head: true }).eq('project_id', projectId);
-        assignedNumber = `${prefix}${String((count || 0) + 1).padStart(3, '0')}`;
       }
 
       const { data: enrollment, error: enrollError } = await supabase.from('enrollment').insert({
@@ -203,7 +194,6 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         participant_number: assignedNumber || null,
         participant_type_id: selectedParticipantTypeId || null,
         status: 'active',
-        consent_signed_at: new Date().toISOString(),
         study_start_date: new Date().toISOString().split('T')[0],
       }).select().single();
 
@@ -215,7 +205,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         }
         localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
         if (project?.project_type === 'longitudinal') {
-          window.location.href = `/easyresearch/participant/${projectId}?skip_consent=true`;
+          window.location.href = `/easyresearch/participant/${projectId}`;
         } else { onComplete(); }
       }
     } catch (error) { console.error('Error enrolling:', error); }
@@ -478,26 +468,15 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                   </div>
                 )}
 
-                {/* Participant Number — auto from type or global */}
-                {(selectedType?.numbering_enabled || (project?.participant_numbering && participantTypes.length === 0)) && (
+                {/* Participant Number — auto from participant type */}
+                {selectedType?.numbering_enabled && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5">
-                      Participant Number <span className="text-stone-400">(e.g., {selectedType?.number_prefix || project?.participant_number_prefix || 'PP'}001)</span>
+                      Participant Number <span className="text-stone-400">(e.g., {selectedType?.number_prefix || 'P'}001)</span>
                     </label>
                     <input type="text" value={participantNumber} onChange={(e) => setParticipantNumber(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                      placeholder={`${selectedType?.number_prefix || project?.participant_number_prefix || 'PP'}### (leave blank for auto-assign)`} />
-                  </div>
-                )}
-
-                {project?.participant_relation_enabled && (project?.participant_relation_options?.length > 0) && (
-                  <div>
-                    <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Role/Relationship</label>
-                    <select value={participantRelation} onChange={(e) => setParticipantRelation(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white">
-                      <option value="">Select your role...</option>
-                      {project.participant_relation_options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                      placeholder={`${selectedType?.number_prefix || 'P'}### (leave blank for auto-assign)`} />
                   </div>
                 )}
 

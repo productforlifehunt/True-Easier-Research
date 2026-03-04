@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Mic, Bell, Calendar, DollarSign, Users, Shield, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download, Plus, Trash2, GripVertical, HelpCircle, ChevronDown, ChevronUp, ClipboardCheck, Hash, Network } from 'lucide-react';
+import { Mic, Bell, Calendar, DollarSign, Users, Clock, Share2, Copy, Check, Link2, X, Settings, FileText, List, QrCode, Code, Mail, Download, Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
-import EcogramBuilder from './EcogramBuilder';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import IncentiveConfig from './IncentiveConfig';
 import { type SurveyProject } from './SurveyBuilder';
@@ -20,10 +19,9 @@ interface SurveySettingsProps {
   participantTypes: ParticipantType[];
   onUpdateParticipantTypes: (types: ParticipantType[]) => void;
   questionnaires: QuestionnaireRef[];
-  onAddQuestionnaire: (type: 'consent' | 'screening') => void;
 }
 
-const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProject, participantTypes, onUpdateParticipantTypes, questionnaires, onAddQuestionnaire }) => {
+const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProject, participantTypes, onUpdateParticipantTypes, questionnaires }) => {
   const [copied, setCopied] = useState(false);
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   const canShare = Boolean(project.id);
@@ -85,71 +83,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
       {/* Participant Types — the core configuration */}
       <SectionCard icon={Users} iconBg="from-violet-50 to-purple-50" iconColor="text-violet-600" title="Participants & Enrollment">
         <div className="space-y-4">
-          {/* Global toggles */}
-          <div className="divide-y divide-stone-100">
-            <Toggle enabled={project.consent_required || false} onChange={(v) => onUpdateProject({ ...project, consent_required: v })} label="Require Consent" desc="Participants must accept consent forms before enrollment" />
-            {project.consent_required && (
-              <div className="py-3 pl-3 border-l-2 border-emerald-200 ml-2">
-                <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-2">Consent Forms</p>
-                {questionnaires.filter(q => q.questionnaire_type === 'consent').length === 0 ? (
-                  <p className="text-[12px] text-stone-400 italic mb-2">No consent forms yet.</p>
-                ) : (
-                  <div className="space-y-1 mb-2">
-                    {questionnaires.filter(q => q.questionnaire_type === 'consent').map(q => (
-                      <div key={q.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100">
-                        <Shield size={12} className="text-emerald-500 shrink-0" />
-                        <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button onClick={() => onAddQuestionnaire('consent')} className="flex items-center gap-1 text-[12px] text-emerald-600 hover:text-emerald-700 font-medium">
-                  <Plus size={12} /> Add Consent Form
-                </button>
-              </div>
-            )}
-
-            <Toggle enabled={project.screening_enabled || false} onChange={(v) => onUpdateProject({ ...project, screening_enabled: v })} label="Require Screening" desc="Ask eligibility questions before enrollment" />
-            {project.screening_enabled && (
-              <div className="py-3 pl-3 border-l-2 border-amber-200 ml-2">
-                <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-2">Screening Questionnaires</p>
-                {questionnaires.filter(q => q.questionnaire_type === 'screening').length === 0 ? (
-                  <p className="text-[12px] text-stone-400 italic mb-2">No screening questionnaires yet.</p>
-                ) : (
-                  <div className="space-y-1 mb-2">
-                    {questionnaires.filter(q => q.questionnaire_type === 'screening').map(q => (
-                      <div key={q.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100">
-                        <ClipboardCheck size={12} className="text-amber-500 shrink-0" />
-                        <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
-                        <span className="text-[10px] text-stone-400">{q.questions.length} q</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <button onClick={() => onAddQuestionnaire('screening')} className="flex items-center gap-1 text-[12px] text-amber-600 hover:text-amber-700 font-medium">
-                  <Plus size={12} /> Add Screening Questionnaire
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Global Participant Numbering — fallback when no participant types defined */}
-          {participantTypes.length === 0 && (
-            <div className="border-t border-stone-100 pt-3 space-y-2">
-              <Toggle enabled={project.participant_numbering || false} onChange={(v) => onUpdateProject({ ...project, participant_numbering: v })} label="Auto-Number Participants" desc="Assign sequential IDs (e.g., PP001, PP002). When participant types are defined, numbering is configured per type." />
-              {project.participant_numbering && (
-                <div className="pl-3 border-l-2 border-indigo-200">
-                  <InputField label="Number Prefix" type="text" value={project.participant_number_prefix || 'PP'} 
-                    onChange={(e) => onUpdateProject({ ...project, participant_number_prefix: (e.target as HTMLInputElement).value })} placeholder="PP" />
-                </div>
-              )}
-            </div>
-          )}
-          {participantTypes.length > 0 && (
-            <div className="border-t border-stone-100 pt-3">
-              <p className="text-[12px] text-stone-400 font-light">Auto-numbering is configured per participant type below. Each type has its own prefix (e.g., CG001 for Caregivers, FM001 for Family Members).</p>
-            </div>
-          )}
+          {/* No special consent UI — consent is just a questionnaire_type='consent' using the unified logic builder */}
 
           {/* Participant Type Manager */}
           <div className="border-t border-stone-100 pt-4">
@@ -171,29 +105,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Ecogram / Network Diagram */}
-      <SectionCard icon={Network} iconBg="from-teal-50 to-cyan-50" iconColor="text-teal-600" title="Network Diagram (Ecogram)">
-        <div className="space-y-3">
-          <Toggle enabled={project.ecogram_enabled || false} onChange={(v) => onUpdateProject({ ...project, ecogram_enabled: v })} label="Enable Ecogram" desc="Let participants build a care network diagram" />
-          {project.ecogram_enabled && (
-            <div className="pl-3 border-l-2 border-teal-200 space-y-2">
-              <InputField label="Center Label" type="text" value={project.ecogram_center_label || 'You'} 
-                onChange={(e) => onUpdateProject({ ...project, ecogram_center_label: (e.target as HTMLInputElement).value })} placeholder="You / Patient" />
-              <p className="text-[11px] text-stone-400">The ecogram will be available in participant settings. Data is stored per-enrollment.</p>
-            </div>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard icon={Settings} iconBg="from-sky-50 to-blue-50" iconColor="text-sky-600" title="Display & Behavior">
-        <div className="divide-y divide-stone-100">
-          <Toggle enabled={project.show_progress_bar !== false} onChange={(v) => onUpdateProject({ ...project, show_progress_bar: v })} label="Progress Bar" desc="Show completion percentage" />
-          <Toggle enabled={project.disable_backtracking || false} onChange={(v) => onUpdateProject({ ...project, disable_backtracking: v })} label="Disable Backtracking" desc="Prevent going back to previous questions" />
-          <Toggle enabled={project.randomize_questions || false} onChange={(v) => onUpdateProject({ ...project, randomize_questions: v })} label="Randomize Questions" desc="Reduce response bias" />
-          <Toggle enabled={project.auto_advance || false} onChange={(v) => onUpdateProject({ ...project, auto_advance: v })} label="Auto-Advance" desc="Move to next question after selection" />
-        </div>
-      </SectionCard>
-
       {/* Schedule */}
       <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title="Schedule">
         <div className="grid grid-cols-2 gap-3">
@@ -206,10 +117,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
       <SectionCard icon={Users} iconBg="from-cyan-50 to-teal-50" iconColor="text-cyan-600" title="Capacity">
         <div className="space-y-3">
           <InputField label="Max Participants" type="number" value={project.max_participant || ''} onChange={(e) => onUpdateProject({ ...project, max_participant: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder="Unlimited" />
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Recruitment Criteria</label>
-            <textarea value={project.recruitment_criteria_text || ''} onChange={(e) => onUpdateProject({ ...project, recruitment_criteria_text: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Eligibility criteria" />
-          </div>
         </div>
       </SectionCard>
 
@@ -253,48 +160,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </SectionCard>
       )}
 
-      {/* Help & Study Information */}
-      <SectionCard icon={HelpCircle} iconBg="from-cyan-50 to-sky-50" iconColor="text-cyan-600" title="Help & Study Information">
-        <div className="space-y-3">
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Help Information</label>
-            <textarea 
-              value={(project as any).help_information || ''} 
-              onChange={(e) => onUpdateProject({ ...project, help_information: e.target.value } as any)} 
-              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" 
-              rows={5} 
-              placeholder="Study protocol, FAQ, contact info... Shown to participants in the Help tab." 
-            />
-          </div>
-        </div>
-      </SectionCard>
-
-      {/* Completion Page */}
-      <SectionCard icon={Check} iconBg="from-emerald-50 to-green-50" iconColor="text-emerald-600" title="Completion Page">
-        <div className="space-y-3">
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Thank You Title</label>
-            <input type="text" value={(project as any).completion_title || ''} 
-              onChange={(e) => onUpdateProject({ ...project, completion_title: e.target.value } as any)}
-              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-              placeholder="Thank you for participating!" />
-          </div>
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Thank You Message</label>
-            <textarea value={(project as any).completion_message || ''} 
-              onChange={(e) => onUpdateProject({ ...project, completion_message: e.target.value } as any)}
-              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
-              rows={3} placeholder="Your responses have been recorded. You may now close this page." />
-          </div>
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Redirect URL (optional)</label>
-            <input type="url" value={(project as any).completion_redirect_url || ''} 
-              onChange={(e) => onUpdateProject({ ...project, completion_redirect_url: e.target.value } as any)}
-              className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-              placeholder="https://example.com/next-steps" />
-          </div>
-        </div>
-      </SectionCard>
 
       {/* Profile Questions Builder — TODO: wire to profile_question table instead of JSONB */}
       {/* Profile questions are now stored in the profile_question table, not on the project row */}

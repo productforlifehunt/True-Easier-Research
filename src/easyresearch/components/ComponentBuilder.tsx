@@ -100,7 +100,6 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
       question_description: '',
       question_config: { ...def.defaultConfig },
       validation_rule: {},
-      logic_rule: {},
       ai_config: {},
       order_index: comp.questions.length,
       required: false,
@@ -178,21 +177,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20" rows={2} placeholder="Optional description..." />
               </div>
 
-              {comp.questionnaire_type === 'consent' && (
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Consent Document URL</label>
-                    <input type="text" value={(comp as any).consent_url || ''} onChange={(e) => updateComponent(comp.id, { consent_url: e.target.value } as any)}
-                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://..." />
-                  </div>
-                  <div className="flex items-end">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={(comp as any).consent_required !== false} onChange={(e) => updateComponent(comp.id, { consent_required: e.target.checked } as any)} className="rounded border-stone-300 accent-emerald-500" />
-                      <span className="text-[12px] text-stone-600">Required to proceed</span>
-                    </label>
-                  </div>
-                </div>
-              )}
+              {/* Consent questionnaires use the unified logic builder — no special consent fields */}
 
               {participantTypes.length > 0 && (
                 <div>

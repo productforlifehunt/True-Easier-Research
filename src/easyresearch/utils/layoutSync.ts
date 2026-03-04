@@ -42,7 +42,6 @@ export interface AppTabElementRow {
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
-  consent_text?: string | null;
   screening_criteria?: string | null;
   progress_style?: string | null;
   timeline_start_hour?: number | null;
@@ -170,7 +169,6 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
-      consent_text: row.consent_text || undefined,
       screening_criteria: row.screening_criteria || undefined,
       progress_style: (row.progress_style as any) || undefined,
       timeline_start_hour: row.timeline_start_hour ?? undefined,
@@ -293,7 +291,6 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
-        consent_text: el.config.consent_text || null,
         screening_criteria: el.config.screening_criteria || null,
         progress_style: el.config.progress_style || null,
         timeline_start_hour: el.config.timeline_start_hour ?? null,
@@ -348,10 +345,10 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
   }
 
   // Batch insert all
-  const inserts: Promise<any>[] = [];
-  if (allElements.length > 0) inserts.push(supabase.from('app_tab_element').insert(allElements));
-  if (allTodoCards.length > 0) inserts.push(supabase.from('app_element_todo_card').insert(allTodoCards));
-  if (allHelpSections.length > 0) inserts.push(supabase.from('app_element_help_section').insert(allHelpSections));
-  if (allTabSections.length > 0) inserts.push(supabase.from('app_element_tab_section').insert(allTabSections));
+  const inserts: PromiseLike<any>[] = [];
+  if (allElements.length > 0) inserts.push(supabase.from('app_tab_element').insert(allElements).then());
+  if (allTodoCards.length > 0) inserts.push(supabase.from('app_element_todo_card').insert(allTodoCards).then());
+  if (allHelpSections.length > 0) inserts.push(supabase.from('app_element_help_section').insert(allHelpSections).then());
+  if (allTabSections.length > 0) inserts.push(supabase.from('app_element_tab_section').insert(allTabSections).then());
   await Promise.all(inserts);
 }
