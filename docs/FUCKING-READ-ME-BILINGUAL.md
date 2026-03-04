@@ -49,6 +49,7 @@ Every study lives in the `research_project` table. A project can have multiple q
 - `project_type` (text) — nullable and don't use it for now, we'll use to for survey, user research, etc / 目前先不要使用，未来将用于区分调研、用户研究等，目前不要在前端使用
 - `methodology_type` (text) — two types for now, one_time multi_time multi_time should be desplayed as longitutal on frontend 研究方法类型，目前有两种，单次和多次，多次在前端显示为长期调研，但注意，我们目前不对分类进行一切后续的显示限制，两种方式均可以添加多个问卷，分类选择只是参考 
 - `survey_code` (text) — short code participants can enter to join / 参与者可以输入加入研究的研究码
+- `created_at` (timestamptz) - the create time of research / 研究的创建时间
 
 *Feature toggles / 功能选项:*
 - `ai_enabled` (bool) — allow AI-assisted questions / 允许AI辅助问题
@@ -110,9 +111,7 @@ Notification：
 - `layout_theme_background_color` (text) — background color / 背景色
 - `layout_theme_card_style` (text) — 'flat', 'elevated', or 'outlined'
 
-
-
-## 8. QUESTIONNAIRE / 问卷
+## 2. QUESTIONNAIRE / 问卷
 
 Each questionnaire is a row in the `questionnaire` table in the `care_connector` schema. It belongs to one project and has a type field that determines its purpose:
 
@@ -156,8 +155,8 @@ Each question is a row in the `question` table (renamed from the old `survey_que
 - `vr_*` (8 columns) — validation rules: `vr_min_length`, `vr_max_length`, `vr_min_value`, `vr_max_value`, `vr_min`, `vr_max`, `vr_allow_future_dates`, `vr_allow_past_dates`. Hydrated to in-memory `validation_rule` object. / 验证规则：`vr_min_length`、`vr_max_length`、`vr_min_value`、`vr_max_value`、`vr_min`、`vr_max`、`vr_allow_future_dates`、`vr_allow_past_dates`。水合到内存中的 `validation_rule` 对象。
 - `logic_rules` — DROPPED. All logic is now in the `research_logic` table (see section 5). / 已删除。所有逻辑现在在 `research_logic` 表中（见第5节）。
 - `ai_config` — AI-related settings (reserved, not yet implemented) / AI相关设置（保留，尚未实现）
-- `scoring_config` — scoring/weighting for analytics / 分析的评分/权重
-- `piping_config` — answer piping into later questions / 答案传递到后续问题
+- `scoring_config` — scoring/weighting for analytics / 分析的评分/权重 （暂未实现）
+- `piping_config` — answer piping into later questions / 答案传递到后续问题 （暂未实现）
 
 **Question options** are stored in the `question_option` table (one row per option), NOT in JSONB:
 
