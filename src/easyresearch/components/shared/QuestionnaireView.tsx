@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import QuestionRenderer from './QuestionRenderer';
@@ -49,6 +49,9 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     fn();
   };
 
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
   // Compact vs full sizes
   const s = compact
     ? { txt: 'text-[13px]', txtSm: 'text-[11px]', txtXs: 'text-[10px]', txtLg: 'text-[15px]', txtXl: 'text-[14px]', pad: 'p-3.5', pill: 'px-2.5 py-1 text-[10px]', pillGap: 'gap-1', barH: 'h-1.5', space: 'space-y-3', navPad: 'px-3 py-1.5 text-[12px]', navIcon: 12, backIcon: 14, cardPad: 'p-3.5', cardCircle: 'w-8 h-8', cardIcon: 14, sectionH: 'text-[15px]', descTxt: 'text-[12px]' }
@@ -69,30 +72,61 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
 
     const displayQs = filteredQs.length > 0 ? filteredQs : qs;
 
-    const activeSection = activeSectionId ? tabSections?.find(sec => sec.id === activeSectionId) : null;
-    const perPage = (activeSection as any)?.questions_per_page ?? qConfig.questions_per_page ?? null;
-    const isUnlimited = perPage === null;
-    const totalPages = isUnlimited ? 1 : Math.ceil(displayQs.length / perPage);
-    const pageIndex = isUnlimited ? 0 : Math.min(currentPageIndex, totalPages - 1);
-    const pageQs = isUnlimited ? displayQs : displayQs.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
-    const progress = displayQs.length > 0
-      ? (isUnlimited ? 100 : (((pageIndex + 1) * perPage >= displayQs.length ? displayQs.length : (pageIndex + 1) * perPage) / displayQs.length) * 100)
-      : 0;
-    const progressLabel = isUnlimited
-      ? `${displayQs.length} questions`
-      : `Page ${pageIndex + 1}/${totalPages} · Q${pageIndex * perPage + 1}-${Math.min((pageIndex + 1) * perPage, displayQs.length)}/${displayQs.length}`;
+    // One question at a time — qIdx is the current question index
+    const qIdx = Math.max(0, Math.min(currentPageIndex, displayQs.length - 1));
+    const isFirst = qIdx === 0;
+    const isLast = qIdx >= displayQs.length - 1;
+    const progress = displayQs.length > 0 ? ((qIdx + 1) / displayQs.length) * 100 : 0;
+
+    // Track answered (non-display-only) questions
+    const NON_INPUT_TYPES = ['section_header', 'text_block', 'instruction', 'divider', 'image_block'];
+    const answerableQs = displayQs.filter((q: any) =>
+      !NON_INPUT_TYPES.includes(normalizeLegacyQuestionType(q.question_type))
+    );
+    const answeredCount = answerableQs.filter((q: any) => {
+      const v = responses[q.id];
+      return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0);
+    }).length;
+    const allAnswered = answerableQs.length > 0 && answeredCount === answerableQs.length;
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+      const dx = touchStartX.current - e.changedTouches[0].clientX;
+      const dy = touchStartY.current - e.changedTouches[0].clientY;
+      touchStartX.current = null;
+      touchStartY.current = null;
+      // Only handle clear horizontal swipes
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
+        if (dx > 0 && !isLast) onSetPage(qIdx + 1);
+        else if (dx < 0 && !isFirst) onSetPage(qIdx - 1);
+      }
+    };
+
+    const touchHandlers = {
+      onTouchStart: stopPropagation
+        ? (e: React.TouchEvent) => { e.stopPropagation(); handleTouchStart(e); }
+        : handleTouchStart,
+      onTouchEnd: stopPropagation
+        ? (e: React.TouchEvent) => { e.stopPropagation(); handleTouchEnd(e); }
+        : handleTouchEnd,
+    };
 
     return (
-      <div className={`${s.space} pb-2`}>
+      <div className="pb-2">
         {/* Back button */}
         <button type="button" onClick={wrap(onCloseQuestionnaire)}
-          className={`flex items-center gap-1 ${s.txtSm} text-stone-500 hover:text-stone-700 cursor-pointer`}>
+          className={`flex items-center gap-1 ${s.txtSm} text-stone-500 hover:text-stone-700 cursor-pointer mb-4`}>
           <ChevronLeft size={s.backIcon} /> Back to {backLabel}
         </button>
 
         {/* Tab section pills */}
         {hasTabSections && (
-          <div className={`flex ${s.pillGap} overflow-x-auto`} style={{ scrollbarWidth: 'none' }}>
+          <div className={`flex ${s.pillGap} overflow-x-auto mb-4`} style={{ scrollbarWidth: 'none' }}>
             <button onClick={wrap(() => { onSetSection(null); onSetPage(0); })}
               className={`${s.pill} rounded-full font-medium transition-all shrink-0`}
               style={{ backgroundColor: !activeSectionId ? primaryColor : '#f5f5f4', color: !activeSectionId ? 'white' : '#a8a29e' }}>
@@ -108,89 +142,148 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           </div>
         )}
 
-        {/* Progress bar */}
-        <div>
-          <div className={`flex justify-between ${s.txtSm} text-stone-400 mb-1`}>
-            <span>{qConfig.title} — {progressLabel}</span>
-            <span>{Math.round(progress)}%</span>
+        {/* Progress */}
+        <div className={compact ? 'mb-3' : 'mb-5'}>
+          <div className={`flex justify-between ${s.txtSm} mb-1.5`}>
+            <span className="font-medium text-stone-600 truncate pr-2">{qConfig.title}</span>
+            <span className="text-stone-400 shrink-0">{answeredCount}/{answerableQs.length} answered</span>
           </div>
           <div className={`${s.barH} bg-stone-100 rounded-full overflow-hidden`}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
+            <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
           </div>
-        </div>
-
-        {/* Questions */}
-        <div className={`${compact ? 'space-y-4' : 'space-y-5'} ${isUnlimited ? (compact ? 'max-h-[50vh] overflow-y-auto pr-1' : 'overflow-y-auto') : ''}`}
-          style={isUnlimited ? { scrollbarWidth: 'thin' } : undefined}>
-          {pageQs.map((currentQ: any) => (
-            <div key={currentQ.id} className="space-y-2">
-              {normalizeLegacyQuestionType(currentQ.question_type) === 'section_header' ? (
-                <div className="py-2 border-b border-stone-200 mb-2">
-                  <h3 className={`${s.sectionH} font-bold text-stone-800`}>{currentQ.question_text}</h3>
-                  {currentQ.question_description && <p className={`${s.descTxt} text-stone-400 mt-1`}>{currentQ.question_description}</p>}
-                </div>
-              ) : (
-                <>
-                  <h3 className={`${s.txtXl} font-semibold text-stone-800`}>
-                    {currentQ.question_text}{currentQ.required && <span className="text-red-500 ml-1">*</span>}
-                  </h3>
-                  {currentQ.question_description && <p className={`${s.descTxt} text-stone-400`}>{currentQ.question_description}</p>}
-                  <AIQuestionWrapper
-                    question={currentQ}
-                    value={responses[currentQ.id]}
-                    onResponse={onResponse}
-                    aiConfig={{
-                      allow_ai_assist: currentQ.question_config?.allow_ai_assist || currentQ.allow_ai_assist,
-                      allow_ai_auto_answer: currentQ.question_config?.allow_ai_auto_answer,
-                      allow_voice: currentQ.question_config?.allow_voice || currentQ.allow_voice,
-                    }}
-                    compact={compact}
-                  >
-                    <QuestionRenderer
-                      question={currentQ}
-                      value={responses[currentQ.id]}
-                      onResponse={onResponse}
-                      primaryColor={primaryColor}
-                      compact={compact}
-                    />
-                  </AIQuestionWrapper>
-                </>
-              )}
+          {/* Dot step indicators */}
+          {displayQs.length <= 14 ? (
+            <div className="flex justify-center gap-1.5 mt-2.5">
+              {displayQs.map((_: any, i: number) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={wrap(() => onSetPage(i))}
+                  className="rounded-full transition-all duration-200 cursor-pointer"
+                  style={{
+                    width: i === qIdx ? (compact ? '14px' : '18px') : (compact ? '5px' : '6px'),
+                    height: compact ? '5px' : '6px',
+                    backgroundColor: i < qIdx ? primaryColor : i === qIdx ? primaryColor : '#e7e5e4',
+                    opacity: i < qIdx ? 0.45 : 1,
+                  }}
+                />
+              ))}
             </div>
-          ))}
+          ) : (
+            <p className={`text-center ${s.txtXs} text-stone-400 mt-1.5`}>
+              {qIdx + 1} / {displayQs.length}
+            </p>
+          )}
         </div>
 
-        {displayQs.length === 0 && (
-          <p className={`${s.txtSm} text-stone-400 italic py-4 text-center`}>No questions added yet.</p>
+        {/* Question carousel */}
+        {displayQs.length === 0 ? (
+          <p className={`${s.txtSm} text-stone-400 italic py-8 text-center`}>No questions added yet.</p>
+        ) : (
+          <div className="overflow-hidden" {...touchHandlers}>
+            <div
+              className="flex transition-transform duration-300 ease-in-out"
+              style={{ transform: `translateX(-${qIdx * 100}%)` }}
+            >
+              {displayQs.map((q: any) => {
+                const normalizedType = normalizeLegacyQuestionType(q.question_type);
+                return (
+                  <div key={q.id} className="min-w-full">
+                    {normalizedType === 'section_header' ? (
+                      <div className={`${compact ? 'py-6' : 'py-10'} text-center`}>
+                        <h3 className={`${s.sectionH} font-bold text-stone-800`}>{q.question_text}</h3>
+                        {q.question_description && (
+                          <p className={`${s.descTxt} text-stone-400 mt-2`}>{q.question_description}</p>
+                        )}
+                        <p className={`${s.txtXs} text-stone-300 mt-4`}>Swipe or tap Next to continue →</p>
+                      </div>
+                    ) : (
+                      <div className={`${compact ? 'p-4' : 'p-5'} rounded-2xl bg-white border border-stone-100 shadow-sm ${compact ? 'space-y-3' : 'space-y-4'}`}>
+                        <div>
+                          <h3 className={`${s.txtXl} font-semibold text-stone-800 leading-snug`}>
+                            {q.question_text}
+                            {q.required && <span className="text-red-400 ml-1">*</span>}
+                          </h3>
+                          {q.question_description && (
+                            <p className={`${s.descTxt} text-stone-400 mt-1.5`}>{q.question_description}</p>
+                          )}
+                        </div>
+                        <AIQuestionWrapper
+                          question={q}
+                          value={responses[q.id]}
+                          onResponse={onResponse}
+                          aiConfig={{
+                            allow_ai_assist: q.question_config?.allow_ai_assist || q.allow_ai_assist,
+                            allow_ai_auto_answer: q.question_config?.allow_ai_auto_answer,
+                            allow_voice: q.question_config?.allow_voice || q.allow_voice,
+                          }}
+                          compact={compact}
+                        >
+                          <QuestionRenderer
+                            question={q}
+                            value={responses[q.id]}
+                            onResponse={onResponse}
+                            primaryColor={primaryColor}
+                            compact={compact}
+                          />
+                        </AIQuestionWrapper>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         {/* Navigation */}
         {displayQs.length > 0 && (
-          <div className="flex justify-between pt-3 border-t border-stone-100">
+          <div className={`flex justify-between ${compact ? 'pt-3 mt-3' : 'pt-4 mt-4'} border-t border-stone-100`}>
             <button type="button"
-              onClick={wrap(() => onSetPage(Math.max(0, pageIndex - 1)))}
-              disabled={pageIndex === 0}
-              className={`flex items-center gap-1 ${s.navPad} rounded-full font-medium border border-stone-200 text-stone-500 disabled:opacity-40 hover:bg-stone-50 cursor-pointer`}>
+              onClick={wrap(() => onSetPage(Math.max(0, qIdx - 1)))}
+              disabled={isFirst}
+              className={`flex items-center gap-1 ${s.navPad} rounded-full font-medium border border-stone-200 text-stone-500 disabled:opacity-30 hover:bg-stone-50 cursor-pointer`}>
               <ChevronLeft size={s.navIcon} /> Back
             </button>
-            {pageIndex >= totalPages - 1 ? (
+            {isLast ? (
               <button type="button"
                 onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
                 disabled={submitting}
-                className={`flex items-center gap-1 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-medium text-white cursor-pointer hover:opacity-90 disabled:opacity-60`}
+                className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60 shadow-sm`}
                 style={{ backgroundColor: primaryColor }}>
                 {submitting ? 'Submitting...' : 'Submit'} <Check size={s.navIcon} />
               </button>
             ) : (
               <button type="button"
-                onClick={wrap(() => onSetPage(pageIndex + 1))}
-                className={`flex items-center gap-1 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-medium text-white cursor-pointer hover:opacity-90`}
+                onClick={wrap(() => onSetPage(qIdx + 1))}
+                className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 shadow-sm`}
                 style={{ backgroundColor: primaryColor }}>
                 Next <ChevronRight size={s.navIcon} />
               </button>
             )}
           </div>
         )}
+
+        {/* "All answered" quick-submit banner (shown when not already on last question) */}
+        {allAnswered && !isLast && (
+          <div className={`${compact ? 'mt-2.5 p-2.5' : 'mt-3 p-3'} rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between gap-2`}>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: primaryColor }}>
+                <Check size={11} className="text-white" />
+              </div>
+              <span className={`${s.txtXs} font-medium text-emerald-700 truncate`}>All questions answered!</span>
+            </div>
+            <button
+              type="button"
+              onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
+              disabled={submitting}
+              className={`${s.txtXs} font-semibold text-white px-3 py-1 rounded-full shrink-0 disabled:opacity-60 cursor-pointer hover:opacity-90`}
+              style={{ backgroundColor: primaryColor }}>
+              {submitting ? '...' : 'Submit now'}
+            </button>
+          </div>
+        )}
+
         {/* AI Chatbot Popup */}
         {qConfig.ai_chatbot_enabled && (
           <AIChatbotPopup

@@ -10,7 +10,8 @@ import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import ParticipantOnboarding from './ParticipantOnboarding';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
-import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions } from '../utils/logicEngine';
+import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
+import { filterQuestionsByParticipantType } from '../utils/participantTypeFilter';
 
 interface SurveyProject {
   id: string;
@@ -70,6 +71,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [enrollmentId, setEnrollmentId] = useState<string | null>(propEnrollmentId || null);
+  const [participantTypeId, setParticipantTypeId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'survey' | 'summary' | 'settings'>('survey');
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -233,6 +235,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
           if (enrollment) {
             setEnrollmentId(enrollment.id);
+            setParticipantTypeId(enrollment.participant_type_id || null);
             setShowOnboarding(false);
             
             // If longitudinal survey and enrolled, redirect to timeline ONLY if no instance specified
@@ -280,11 +283,27 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     }
   };
 
-  // Use shared logic engine for visibility, skip, and terminal actions
-  const visibleQuestions = getVisibleQs(questions, logicRules, responses);
+  // Use shared logic engine for visibility, skip, terminal actions, piping, calculations, loops, and quota
+  const expandedQuestions = expandLoopQuestions(questions, logicRules, responses);
+  const logicVisibleQuestions = getVisibleQs(expandedQuestions, logicRules, responses);
+  // Apply participant type filtering
+  const visibleQuestions = filterQuestionsByParticipantType(logicVisibleQuestions, participantTypeId);
   const orderedVisibleQuestions = questionOrder.length
     ? visibleQuestions.sort((a, b) => questionOrder.indexOf(a.id) - questionOrder.indexOf(b.id))
     : visibleQuestions;
+  const calculatedValues = getCalculatedValues(logicRules, responses);
+  const isQuotaFull = checkQuotaReached(logicRules, questions.map(q => q.id), responses);
+
+  // Apply calculated values into responses so downstream logic sees them
+  React.useEffect(() => {
+    if (Object.keys(calculatedValues).length === 0) return;
+    let changed = false;
+    const next = { ...responses };
+    for (const [qId, val] of Object.entries(calculatedValues)) {
+      if (next[qId] !== val) { next[qId] = val; changed = true; }
+    }
+    if (changed) setResponses(next);
+  }, [JSON.stringify(calculatedValues)]);
   const currentQuestion = orderedVisibleQuestions[currentQuestionIndex];
   const progressPercent = orderedVisibleQuestions.length > 0
     ? ((currentQuestionIndex + 1) / orderedVisibleQuestions.length) * 100
@@ -312,6 +331,28 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleNextQuestion = () => {
     if (!validateCurrentQuestion()) return;
+
+    // Check require_before_next rules
+    if (currentQuestion) {
+      const requiredError = checkRequiredBeforeNext(currentQuestion.id, logicRules, responses);
+      if (requiredError) {
+        toast.error(requiredError);
+        return;
+      }
+      // Check validate_format rules
+      const validationError = checkValidation(currentQuestion.id, logicRules, responses);
+      if (validationError) {
+        toast.error(validationError);
+        return;
+      }
+    }
+
+    // Check quota
+    if (isQuotaFull) {
+      toast.error('This survey has reached its quota. Thank you for your interest. / 此调查已达到配额上限，感谢您的关注。');
+      return;
+    }
+
     // Check terminal actions (disqualify / end_survey)
     const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
     if (terminal.disqualified) {
@@ -1272,7 +1313,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             <div className="flex items-start gap-2">
               <span className="text-lg">{icons[contentType]}</span>
               <div>
-                <p className="font-medium text-[14px] mb-1" style={{ color: 'var(--text-primary)' }}>{question.question_text}</p>
+                <p className="font-medium text-[14px] mb-1" style={{ color: 'var(--text-primary)' }}>{getPipedText(question.id, logicRules, responses) || question.question_text}</p>
                 {question.question_description && <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{question.question_description}</p>}
               </div>
             </div>
@@ -1502,7 +1543,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                         <div className="flex items-start justify-between mb-2">
                           <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                             <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>{globalIdx + 1}. </span>
-                            {q.question_text}
+                            {getPipedText(q.id, logicRules, responses) || q.question_text}
                             {q.required && <span className="text-red-500 ml-1">*</span>}
                           </h2>
                         </div>

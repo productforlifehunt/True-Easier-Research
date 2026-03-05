@@ -127,8 +127,6 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
           description: qc.description || '',
           estimated_duration: qc.estimated_duration || 5,
           frequency: qc.frequency || 'once',
-          notification_enabled: false,
-          dnd_allowed: false,
           order_index: 0,
           ai_chatbot_enabled: true,
         }, { onConflict: 'id' });

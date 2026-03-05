@@ -13,6 +13,7 @@ import type { AppLayout, LayoutElement } from './LayoutBuilder';
 import { loadLayoutFromDb } from '../utils/layoutSync';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import type { QuestionnaireConfig } from './QuestionnaireList';
+import { type LogicRule, dbRowToLogicRule, getCrossQuestionnaireVisibility } from '../utils/logicEngine';
 
 const ICON_MAP: Record<string, React.FC<any>> = {
   Home, FileText, BarChart3, HelpCircle, Settings, Layout,
@@ -39,6 +40,7 @@ const ParticipantAppView: React.FC = () => {
   const [selectedTimelineDay, setSelectedTimelineDay] = useState(2);
   const [completedTodoIds, setCompletedTodoIds] = useState<Set<string>>(new Set());
   const [submittedQuestionnaireIds, setSubmittedQuestionnaireIds] = useState<Set<string>>(new Set());
+  const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
 
   // Load persisted todo completions
   useEffect(() => {
@@ -137,6 +139,14 @@ const ParticipantAppView: React.FC = () => {
         }));
         setQuestionnaires(qConfigs);
       }
+
+      // Load logic rules for cross-questionnaire visibility
+      const { data: logicRows } = await supabase
+        .from('research_logic')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('enabled', true);
+      if (logicRows) setLogicRules(logicRows.map(dbRowToLogicRule));
     } catch (err) {
       console.error('Error loading project:', err);
     } finally {
@@ -377,6 +387,18 @@ const ParticipantAppView: React.FC = () => {
     );
   }
 
+  // Cross-questionnaire visibility filtering
+  const crossVis = getCrossQuestionnaireVisibility(logicRules, responses);
+  const visibleQuestionnaires = questionnaires.filter(q => {
+    if (crossVis.hiddenQuestionnaireIds.has(q.id)) return false;
+    // If there are show_questionnaire rules targeting this questionnaire, only show if matched
+    if (crossVis.shownQuestionnaireIds.size > 0) {
+      const hasShowRule = logicRules.some(r => r.enabled && r.action === 'show_questionnaire' && r.targetQuestionnaireId === q.id);
+      if (hasShowRule && !crossVis.shownQuestionnaireIds.has(q.id)) return false;
+    }
+    return true;
+  });
+
   // ── No layout fallback: show a simple questionnaire list ──
   if (!layout) {
     return (
@@ -385,10 +407,10 @@ const ParticipantAppView: React.FC = () => {
           renderQuestionnaireExpanded(activeQuestionnaireId)
         ) : (
           <div className="space-y-3">
-            {questionnaires.filter(q => q.questionnaire_type === 'survey').length === 0 ? (
+            {visibleQuestionnaires.filter(q => q.questionnaire_type === 'survey').length === 0 ? (
               <p className="text-stone-400 text-center py-8">No surveys available yet.</p>
             ) : (
-              questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => renderQuestionnaireCard(q.id))
+              visibleQuestionnaires.filter(q => q.questionnaire_type === 'survey').map(q => renderQuestionnaireCard(q.id))
             )}
           </div>
         )}

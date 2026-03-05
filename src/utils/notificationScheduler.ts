@@ -1,14 +1,15 @@
 /**
- * Questionnaire-Aware Notification Scheduler
+ * Notification Scheduler — loads from unified notification_config table
  *
  * Architecture:
- *   - Notification content (title, body, type) is set per QUESTIONNAIRE by the researcher.
- *   - Notification schedule (frequency, time_windows) is set per QUESTIONNAIRE.
- *   - DND is per QUESTIONNAIRE per ENROLLMENT (stored in enrollment_dnd_period table
- *     with enrollment_id, questionnaire_id, start_time, end_time columns).
+ *   - notification_config table stores ALL notification configs (project-level + questionnaire-level).
+ *   - Each config has: title, body, notification_type, frequency, minutes_before, dnd_allowed.
+ *   - Multiple configs per questionnaire and per project are supported.
+ *   - DND is per QUESTIONNAIRE per ENROLLMENT (stored in enrollment_dnd_period table).
  *   - profiles.push_notifications_enabled is the MASTER KILL SWITCH — if false, nothing fires.
- *   - The scheduler runs client-side, reads enrolled questionnaires from Supabase,
- *     and fires browser notifications using each questionnaire's own title/body.
+ *   - Time windows come from questionnaire_time_window table (for questionnaire-level configs).
+ *   - The scheduler runs client-side, reads notification_config from Supabase,
+ *     and fires browser notifications using each config's own title/body.
  */
 
 import { supabase } from '../lib/supabase';
@@ -18,21 +19,25 @@ export interface QuestionnaireDNDPeriod {
   end: string;   // HH:MM
 }
 
-export interface QuestionnaireNotificationConfig {
-  questionnaire_id: string;
+export interface SchedulerNotificationConfig {
+  config_id: string;              // notification_config.id
+  questionnaire_id: string | null; // null = project-level
   questionnaire_title: string;
   project_id: string;
   project_title: string;
-  notification_enabled: boolean;
+  enabled: boolean;
   notification_title: string;
   notification_body: string;
   notification_type: string; // 'push' | 'email' | 'sms' | 'push_email'
-  notification_minutes_before: number;
+  minutes_before: number;
   frequency: string; // 'once' | 'hourly' | '2hours' | '4hours' | 'daily' | 'twice_daily' | 'weekly'
   time_windows: { start: string; end: string }[];
   dnd_allowed: boolean;
-  participant_dnd_periods: QuestionnaireDNDPeriod[]; // per-enrollment DND for this questionnaire
+  participant_dnd_periods: QuestionnaireDNDPeriod[];
 }
+
+// Keep old name as alias for backward compat with ParticipantNotificationSettings imports
+export type QuestionnaireNotificationConfig = SchedulerNotificationConfig;
 
 class NotificationScheduler {
   private timerId: ReturnType<typeof setTimeout> | null = null;
@@ -40,7 +45,7 @@ class NotificationScheduler {
   private masterEnabled: boolean = false;
   private configs: QuestionnaireNotificationConfig[] = [];
   private language: 'en' | 'zh' = 'en';
-  private lastFiredMap: Map<string, string> = new Map(); // questionnaire_id → ISO timestamp of last fire
+  private lastFiredMap: Map<string, string> = new Map(); // config_id → ISO timestamp of last fire
 
   private canSendBrowserNotification(): boolean {
     if (!('Notification' in window)) return false;
@@ -98,14 +103,14 @@ class NotificationScheduler {
     }
   }
 
-  private shouldFireNow(config: QuestionnaireNotificationConfig): boolean {
-    if (!config.notification_enabled) return false;
-    if (config.frequency === 'once') return false; // one-time questionnaires don't get recurring reminders
+  private shouldFireNow(config: SchedulerNotificationConfig): boolean {
+    if (!config.enabled) return false;
+    if (config.frequency === 'once') return false; // one-time configs don't get recurring reminders
     if (!this.isInTimeWindow(config.time_windows)) return false;
     if (this.isInDND(config.participant_dnd_periods)) return false;
 
     // Check cooldown based on frequency
-    const lastFired = this.lastFiredMap.get(config.questionnaire_id);
+    const lastFired = this.lastFiredMap.get(config.config_id);
     if (lastFired) {
       const elapsed = Date.now() - new Date(lastFired).getTime();
       const interval = this.getIntervalMs(config.frequency);
@@ -114,10 +119,10 @@ class NotificationScheduler {
     return true;
   }
 
-  private sendBrowserNotification(config: QuestionnaireNotificationConfig) {
+  private sendBrowserNotification(config: SchedulerNotificationConfig) {
     const title = config.notification_title || `Time for: ${config.questionnaire_title}`;
     const body = config.notification_body || `Please complete your "${config.questionnaire_title}" questionnaire.`;
-    const tag = `qn-${config.questionnaire_id}`;
+    const tag = `nc-${config.config_id}`;
 
     try {
       const notification = new Notification(title, {
@@ -134,8 +139,8 @@ class NotificationScheduler {
         notification.close();
       };
       setTimeout(() => notification.close(), 12000);
-      this.lastFiredMap.set(config.questionnaire_id, new Date().toISOString());
-      console.log(`[Scheduler] Sent notification for questionnaire "${config.questionnaire_title}"`);
+      this.lastFiredMap.set(config.config_id, new Date().toISOString());
+      console.log(`[Scheduler] Sent notification for "${config.questionnaire_title}" (config ${config.config_id})`);
     } catch (err) {
       console.error('[Scheduler] Failed to send notification:', err);
     }
@@ -153,9 +158,9 @@ class NotificationScheduler {
   // ─── Public API ────────────────────────────────────────────────────
 
   /**
-   * Load questionnaire notification configs for a participant from Supabase.
-   * Reads all enrollments → their questionnaires → notification settings.
-   * Merges participant's per-questionnaire DND from enrollment_dnd_period table.
+   * Load notification configs for a participant from Supabase.
+   * Reads all enrollments → notification_config table → merges DND.
+   * Supports both project-level and questionnaire-level notification configs.
    */
   async loadAndStart(userId: string, language: 'en' | 'zh' = 'en') {
     this.language = language;
@@ -186,37 +191,48 @@ class NotificationScheduler {
       return;
     }
 
-    // 3. Get all questionnaires for enrolled projects
+    // 3. Load all notification_config rows for enrolled projects
     const projectIds = [...new Set(enrollments.map(e => e.project_id))];
-    const { data: questionnaires } = await supabase
-      .from('questionnaire')
-      .select('id, title, project_id, notification_enabled, notification_title, notification_body, notification_type, notification_minutes_before, frequency, time_windows, dnd_allowed')
+    const { data: ncRows } = await supabase
+      .from('notification_config')
+      .select('*')
       .in('project_id', projectIds)
-      .eq('notification_enabled', true);
+      .eq('enabled', true);
 
-    if (!questionnaires || questionnaires.length === 0) {
-      console.log('[Scheduler] No questionnaires with notifications enabled');
+    if (!ncRows || ncRows.length === 0) {
+      console.log('[Scheduler] No enabled notification configs');
       return;
     }
 
-    // 4. Get project titles for display
+    // 4. Get project titles and questionnaire titles for display
     const { data: projects } = await supabase
       .from('research_project')
       .select('id, title')
       .in('id', projectIds);
     const projectTitleMap = new Map((projects || []).map((p: any) => [p.id, p.title]));
 
+    const qIds = [...new Set(ncRows.filter((r: any) => r.questionnaire_id).map((r: any) => r.questionnaire_id))];
+    let qTitleMap = new Map<string, string>();
+    if (qIds.length > 0) {
+      const { data: qs } = await supabase
+        .from('questionnaire')
+        .select('id, title')
+        .in('id', qIds);
+      qTitleMap = new Map((qs || []).map((q: any) => [q.id, q.title]));
+    }
+
     // 4b. Load time_windows from flat questionnaire_time_window table
-    const qIds = questionnaires.map(q => q.id);
-    const { data: twRows } = await supabase
-      .from('questionnaire_time_window')
-      .select('questionnaire_id, start_time, end_time')
-      .in('questionnaire_id', qIds)
-      .order('order_index');
-    const twByQ = new Map<string, { start: string; end: string }[]>();
-    for (const row of (twRows || [])) {
-      if (!twByQ.has(row.questionnaire_id)) twByQ.set(row.questionnaire_id, []);
-      twByQ.get(row.questionnaire_id)!.push({ start: row.start_time, end: row.end_time });
+    let twByQ = new Map<string, { start: string; end: string }[]>();
+    if (qIds.length > 0) {
+      const { data: twRows } = await supabase
+        .from('questionnaire_time_window')
+        .select('questionnaire_id, start_time, end_time')
+        .in('questionnaire_id', qIds)
+        .order('order_index');
+      for (const row of (twRows || [])) {
+        if (!twByQ.has(row.questionnaire_id)) twByQ.set(row.questionnaire_id, []);
+        twByQ.get(row.questionnaire_id)!.push({ start: row.start_time, end: row.end_time });
+      }
     }
 
     // 4c. Load DND periods from flat enrollment_dnd_period table
@@ -232,38 +248,43 @@ class NotificationScheduler {
       dndByEnrollmentAndQ.get(key)!.push({ start: row.start_time, end: row.end_time });
     }
 
-    // 5. Filter questionnaires by participant type (if questionnaire_participant_type junction exists)
+    // 5. Build configs
     const enrollmentByProject = new Map(enrollments.map(e => [e.project_id, e]));
-
-    // 6. Build configs with per-enrollment DND
     this.configs = [];
-    for (const q of questionnaires) {
-      const enrollment = enrollmentByProject.get(q.project_id);
+    for (const nc of ncRows) {
+      const enrollment = enrollmentByProject.get(nc.project_id);
       if (!enrollment) continue;
 
-      // DND is loaded from flat enrollment_dnd_period table below
-      const qDnd = dndByEnrollmentAndQ.get(`${enrollment.id}:${q.id}`) || [];
+      // DND for questionnaire-level configs
+      const qDnd = nc.questionnaire_id
+        ? dndByEnrollmentAndQ.get(`${enrollment.id}:${nc.questionnaire_id}`) || []
+        : [];
+
+      const qTitle = nc.questionnaire_id
+        ? qTitleMap.get(nc.questionnaire_id) || 'Questionnaire'
+        : projectTitleMap.get(nc.project_id) || 'Research';
 
       this.configs.push({
-        questionnaire_id: q.id,
-        questionnaire_title: q.title,
-        project_id: q.project_id,
-        project_title: projectTitleMap.get(q.project_id) || 'Research',
-        notification_enabled: q.notification_enabled,
-        notification_title: q.notification_title || '',
-        notification_body: q.notification_body || '',
-        notification_type: q.notification_type || 'push',
-        notification_minutes_before: q.notification_minutes_before || 5,
-        frequency: q.frequency || 'daily',
-        time_windows: twByQ.get(q.id) || [],
-        dnd_allowed: q.dnd_allowed ?? true,
+        config_id: nc.id,
+        questionnaire_id: nc.questionnaire_id || null,
+        questionnaire_title: qTitle,
+        project_id: nc.project_id,
+        project_title: projectTitleMap.get(nc.project_id) || 'Research',
+        enabled: nc.enabled,
+        notification_title: nc.title || '',
+        notification_body: nc.body || '',
+        notification_type: nc.notification_type || 'push',
+        minutes_before: nc.minutes_before || 5,
+        frequency: nc.frequency || 'daily',
+        time_windows: nc.questionnaire_id ? (twByQ.get(nc.questionnaire_id) || []) : [],
+        dnd_allowed: nc.dnd_allowed ?? true,
         participant_dnd_periods: qDnd,
       });
     }
 
-    console.log(`[Scheduler] Loaded ${this.configs.length} questionnaire notification configs`);
+    console.log(`[Scheduler] Loaded ${this.configs.length} notification configs`);
 
-    // 7. Start checking every minute
+    // 6. Start checking every minute
     this.intervalId = setInterval(() => this.tick(), 60 * 1000);
     // Immediate first check
     this.tick();

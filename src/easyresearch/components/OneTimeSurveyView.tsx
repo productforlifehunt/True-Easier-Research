@@ -6,7 +6,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { Mic, ChevronRight, ChevronLeft, Check, X, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
-import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions } from '../utils/logicEngine';
+import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
+import { filterQuestionsByParticipantType } from '../utils/participantTypeFilter';
 
 interface SurveyProject {
   id: string;
@@ -157,10 +158,49 @@ const OneTimeSurveyView: React.FC = () => {
     });
   };
 
-  // Use shared logic engine for visibility
-  const visibleQuestions = getVisibleQs(questions, logicRules, responses);
+  // Use shared logic engine for visibility, piping, calculations, loops, and quota
+  const expandedQuestions = expandLoopQuestions(questions, logicRules, responses);
+  const logicVisibleQuestions = getVisibleQs(expandedQuestions, logicRules, responses);
+  // Apply participant type filtering (OneTimeSurveyView doesn't have enrollment, so pass null)
+  const visibleQuestions = filterQuestionsByParticipantType(logicVisibleQuestions, null);
+  const calculatedValues = getCalculatedValues(logicRules, responses);
+  const isQuotaFull = checkQuotaReached(logicRules, questions.map(q => q.id), responses);
+
+  // Apply calculated values into responses so downstream logic sees them
+  React.useEffect(() => {
+    if (Object.keys(calculatedValues).length === 0) return;
+    let changed = false;
+    const next = { ...responses };
+    for (const [qId, val] of Object.entries(calculatedValues)) {
+      if (next[qId] !== val) { next[qId] = val; changed = true; }
+    }
+    if (changed) setResponses(next);
+  }, [JSON.stringify(calculatedValues)]);
 
   const handleNext = () => {
+    const currentQ = visibleQuestions[currentQuestionIndex];
+
+    // Check require_before_next rules
+    if (currentQ) {
+      const requiredError = checkRequiredBeforeNext(currentQ.id, logicRules, responses);
+      if (requiredError) {
+        toast.error(requiredError);
+        return;
+      }
+      // Check validate_format rules
+      const validationError = checkValidation(currentQ.id, logicRules, responses);
+      if (validationError) {
+        toast.error(validationError);
+        return;
+      }
+    }
+
+    // Check quota
+    if (isQuotaFull) {
+      toast.error('This survey has reached its quota. Thank you for your interest. / 此调查已达到配额上限，感谢您的关注。');
+      return;
+    }
+
     // Check terminal actions (disqualify / end_survey)
     const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
     if (terminal.disqualified) {
@@ -172,7 +212,6 @@ const OneTimeSurveyView: React.FC = () => {
       return;
     }
     // Check skip logic
-    const currentQ = visibleQuestions[currentQuestionIndex];
     const skipIdx = currentQ ? findSkipTarget(currentQ.id, visibleQuestions, logicRules, responses) : null;
     if (skipIdx !== null) {
       setCurrentQuestionIndex(skipIdx);
@@ -627,7 +666,7 @@ const OneTimeSurveyView: React.FC = () => {
           <div className="bg-white rounded-2xl p-8 mb-6" style={{ border: '1px solid var(--border-light)' }}>
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                {currentQuestion.question_text}
+                {getPipedText(currentQuestion.id, logicRules, responses) || currentQuestion.question_text}
                 {currentQuestion.required && (
                   <span className="text-red-500 ml-1">*</span>
                 )}

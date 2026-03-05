@@ -59,12 +59,25 @@ const EasyResearchAuth: React.FC = () => {
     try {
       if (isSignUp) {
         const { data: authData, error: signUpError } = await authClient.auth.signUp({ email, password, options: { data: { role } } });
-        if (signUpError) throw signUpError;
-        if (authData.user && role === 'researcher') {
+        let userId = authData?.user?.id;
+        // If user already exists, fall back to sign in (user can have multiple roles)
+        if (signUpError) {
+          const isAlreadyRegistered = signUpError.message?.toLowerCase().includes('already registered') || signUpError.message?.toLowerCase().includes('already been registered');
+          if (!isAlreadyRegistered) throw signUpError;
+          const { data: signInData, error: signInError } = await authClient.auth.signInWithPassword({ email, password });
+          if (signInError) throw signInError;
+          userId = signInData?.user?.id;
+        }
+        if (userId && role === 'researcher') {
           try {
+            // Ensure profile exists (researcher.user_id FK -> profile.id)
+            const { data: existingProfile } = await supabase.from('profile').select('id').eq('id', userId).maybeSingle();
+            if (!existingProfile) {
+              await supabase.from('profile').insert({ id: userId, user_id: userId, email, user_type: 'researcher' });
+            }
             let { data: org } = await supabase.from('organization').select('id').limit(1).maybeSingle();
             if (!org) { const { data: newOrg } = await supabase.from('organization').insert({ name: 'My Organization', slug: `org-${Date.now()}`, plan: 'free' }).select().single(); org = newOrg; }
-            await supabase.from('researcher').upsert({ user_id: authData.user.id, organization_id: org?.id || null, role: 'researcher' }, { onConflict: 'user_id' });
+            await supabase.from('researcher').upsert({ user_id: userId, organization_id: org?.id || null, role: 'researcher' }, { onConflict: 'user_id' });
           } catch (err) { console.error('Error setting up researcher:', err); }
         }
       } else {

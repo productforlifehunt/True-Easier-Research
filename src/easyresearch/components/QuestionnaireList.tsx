@@ -6,6 +6,7 @@ import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
 import QuestionEditor from './QuestionEditor';
 import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 import { type LogicRule } from '../utils/logicEngine';
+import { type NotificationConfig } from '../utils/notificationConfigSync';
 
 export interface QuestionnaireConfig {
   id: string;
@@ -17,14 +18,6 @@ export interface QuestionnaireConfig {
   estimated_duration: number;
   frequency: string;
   time_windows: { start: string; end: string }[];
-  notification_enabled: boolean;
-  notification_minutes_before: number;
-  notification_title?: string;
-  notification_body?: string;
-  notification_type?: string;
-  dnd_allowed: boolean;
-  dnd_default_start: string;
-  dnd_default_end: string;
   assigned_participant_types: string[];
   order_index: number;
   display_mode?: 'all_at_once' | 'one_per_page' | 'section_per_page';
@@ -36,6 +29,7 @@ export interface QuestionnaireConfig {
     questions_per_page?: number | null;
   }>;
   ai_chatbot_enabled?: boolean;
+  notifications?: NotificationConfig[];
 }
 
 interface QuestionnaireListProps {
@@ -46,6 +40,8 @@ interface QuestionnaireListProps {
   projectId: string;
   logicRules?: LogicRule[];
   onUpdateLogic?: (rules: LogicRule[]) => void;
+  projectNotifications?: NotificationConfig[];
+  onUpdateProjectNotifications?: (notifs: NotificationConfig[]) => void;
 }
 
 const frequencyOptions = [
@@ -60,6 +56,7 @@ const frequencyOptions = [
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
+  projectNotifications = [], onUpdateProjectNotifications,
 }) => {
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
@@ -78,8 +75,9 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
   const addQuestionnaire = () => {
     const num = questionnaires.length + 1;
+    const qId = crypto.randomUUID();
     const newQ: QuestionnaireConfig = {
-      id: crypto.randomUUID(),
+      id: qId,
       questionnaire_type: 'survey',
       title: `Questionnaire ${num}`,
       description: '',
@@ -87,16 +85,22 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       estimated_duration: 5,
       frequency: 'daily',
       time_windows: [{ start: '09:00', end: '21:00' }],
-      notification_enabled: true,
-      notification_minutes_before: 5,
-      notification_title: 'Time for your survey!',
-      notification_body: 'Please complete your questionnaire now.',
-      notification_type: 'push',
-      dnd_allowed: true,
-      dnd_default_start: '22:00',
-      dnd_default_end: '08:00',
       assigned_participant_types: participantTypes.map(pt => pt.id),
       order_index: questionnaires.length,
+      notifications: [{
+        id: crypto.randomUUID(),
+        project_id: projectId,
+        questionnaire_id: qId,
+        enabled: true,
+        title: 'Time for your survey!',
+        body: 'Please complete your questionnaire now.',
+        notification_type: 'push',
+        frequency: 'daily',
+        minutes_before: 5,
+        dnd_allowed: true,
+        order_index: 0,
+        assigned_participant_types: [],
+      }],
     };
     onUpdate([...questionnaires, newQ]);
     setOpenSections(prev => ({ ...prev, [newQ.id]: 'questions' }));
@@ -367,13 +371,46 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
         {/* Inline editor */}
         {isEditing && (
-          <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100">
+          <div className="px-4 pb-4 pt-1 bg-stone-50/50 border-t border-stone-100 space-y-3">
             <QuestionEditor
               question={question}
               project={project}
               questionnaireType={q.questionnaire_type}
               onUpdateQuestion={(questionId, updates) => updateQuestion(q.id, questionId, updates)}
             />
+            
+            {/* Participant Type Assignment for Question */}
+            {participantTypes.length > 0 && (
+              <div className="p-3 rounded-lg border border-stone-200 bg-white">
+                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                  <Users size={11} /> Visible to Participant Types
+                </h5>
+                <p className="text-[10px] text-stone-400 mb-2">Select which participant types can see this question. Leave all unchecked for all types.</p>
+                <div className="space-y-1.5">
+                  {participantTypes.map(pt => {
+                    const assignedTypes = question.assigned_participant_types || [];
+                    const assigned = assignedTypes.includes(pt.id);
+                    return (
+                      <label key={pt.id} className="flex items-center gap-2 cursor-pointer group">
+                        <input
+                          type="checkbox"
+                          checked={assigned}
+                          onChange={() => {
+                            const newAssigned = assigned 
+                              ? assignedTypes.filter((id: string) => id !== pt.id) 
+                              : [...assignedTypes, pt.id];
+                            updateQuestion(q.id, question.id, { assigned_participant_types: newAssigned });
+                          }}
+                          className="w-4 h-4 rounded border-stone-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span className="text-[12px] text-stone-600 group-hover:text-stone-800 transition-colors">{pt.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {onUpdateLogic && (
               <QuestionLogicEditor
                 question={question}
@@ -545,13 +582,9 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               estimated_duration: Math.ceil(questions.length * 0.5),
               frequency: 'once',
               time_windows: [{ start: '09:00', end: '21:00' }],
-              notification_enabled: false,
-              notification_minutes_before: 5,
-              dnd_allowed: false,
-              dnd_default_start: '22:00',
-              dnd_default_end: '08:00',
               assigned_participant_types: [],
               order_index: questionnaires.length,
+              notifications: [],
             };
             onUpdate([...questionnaires, newQ]);
             setShowTemplates(false);
@@ -580,6 +613,97 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Project-Level Notifications */}
+      {onUpdateProjectNotifications && (
+        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-[13px] font-semibold text-stone-700 flex items-center gap-1.5"><Bell size={13} /> Project-Level Notifications</h4>
+            <button onClick={() => {
+              const newNotif: NotificationConfig = {
+                id: crypto.randomUUID(),
+                project_id: projectId,
+                questionnaire_id: null,
+                enabled: true,
+                title: 'Study reminder',
+                body: 'Please check in with the study.',
+                notification_type: 'push',
+                frequency: 'daily',
+                minutes_before: 0,
+                dnd_allowed: true,
+                order_index: projectNotifications.length,
+                assigned_participant_types: [],
+              };
+              onUpdateProjectNotifications([...projectNotifications, newNotif]);
+            }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
+              <Plus size={10} /> Add
+            </button>
+          </div>
+          <p className="text-[10px] text-stone-400">Notifications not tied to any specific questionnaire. Sent at the project level.</p>
+          {projectNotifications.length === 0 && (
+            <p className="text-[11px] text-stone-400 italic">No project-level notifications. Click Add to create one.</p>
+          )}
+          {projectNotifications.map((notif, ni) => (
+            <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-stone-600">#{ni + 1}</span>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => {
+                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
+                    onUpdateProjectNotifications(updated);
+                  }} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${notif.enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
+                    <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform" style={{ left: notif.enabled ? '17px' : '2px' }} />
+                  </button>
+                  <button onClick={() => {
+                    const updated = projectNotifications.filter(n => n.id !== notif.id);
+                    onUpdateProjectNotifications(updated);
+                  }} className="p-0.5 text-red-400 hover:bg-red-50 rounded">
+                    <Trash2 size={10} />
+                  </button>
+                </div>
+              </div>
+              <input type="text" value={notif.title} onChange={(e) => {
+                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
+                onUpdateProjectNotifications(updated);
+              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
+              <textarea value={notif.body} onChange={(e) => {
+                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
+                onUpdateProjectNotifications(updated);
+              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder="Notification body" />
+              <div className="flex items-center gap-2 flex-wrap">
+                <select value={notif.notification_type} onChange={(e) => {
+                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, notification_type: e.target.value } : n);
+                  onUpdateProjectNotifications(updated);
+                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
+                  <option value="push">Push</option>
+                  <option value="email">Email</option>
+                  <option value="sms">SMS</option>
+                  <option value="push_email">Push+Email</option>
+                </select>
+                <select value={notif.frequency} onChange={(e) => {
+                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
+                  onUpdateProjectNotifications(updated);
+                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
+                  <option value="once">Once</option>
+                  <option value="hourly">Hourly</option>
+                  <option value="2hours">Every 2h</option>
+                  <option value="4hours">Every 4h</option>
+                  <option value="daily">Daily</option>
+                  <option value="twice_daily">Twice daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+                <label className="flex items-center gap-1 text-[10px] text-stone-400">
+                  <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
+                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
+                    onUpdateProjectNotifications(updated);
+                  }} className="w-3 h-3 rounded" />
+                  DND allowed
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {questionnaires.length === 0 ? (
         <div className="bg-white rounded-2xl border border-stone-100 p-12 text-center">
@@ -654,9 +778,9 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 <span className="text-[11px] text-stone-400 flex items-center gap-1">
                                   <LayoutList size={10} /> {q.questions_per_page == null ? '∞/page' : `${q.questions_per_page}/page`}
                                 </span>
-                                {q.notification_enabled && (
+                                {(q.notifications && q.notifications.length > 0) && (
                                   <span className="text-[11px] text-emerald-500 flex items-center gap-1">
-                                    <Bell size={10} /> On
+                                    <Bell size={10} /> {q.notifications.length}
                                   </span>
                                 )}
                                 {participantTypes.length > 0 && (
@@ -796,59 +920,104 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               </div>
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[12px] text-stone-600">Push Notifications</span>
-                                  <button onClick={() => updateQuestionnaire(q.id, { notification_enabled: !q.notification_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.notification_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
-                                    <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.notification_enabled ? '22px' : '2px' }} />
+                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
+                                  <button onClick={() => {
+                                    const existing = q.notifications || [];
+                                    const newNotif: NotificationConfig = {
+                                      id: crypto.randomUUID(),
+                                      project_id: projectId,
+                                      questionnaire_id: q.id,
+                                      enabled: true,
+                                      title: 'Time for your survey!',
+                                      body: 'Please complete your questionnaire now.',
+                                      notification_type: 'push',
+                                      frequency: q.frequency || 'daily',
+                                      minutes_before: 5,
+                                      dnd_allowed: true,
+                                      order_index: existing.length,
+                                      assigned_participant_types: [],
+                                    };
+                                    updateQuestionnaire(q.id, { notifications: [...existing, newNotif] });
+                                  }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
+                                    <Plus size={10} /> Add
                                   </button>
                                 </div>
-                                {q.notification_enabled && (
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <label className="text-[11px] text-stone-400">Minutes before:</label>
-                                      <input type="number" value={q.notification_minutes_before} onChange={(e) => updateQuestionnaire(q.id, { notification_minutes_before: parseInt(e.target.value) || 5 })} className="w-20 px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
+                                {(!q.notifications || q.notifications.length === 0) && (
+                                  <p className="text-[11px] text-stone-400 italic">No notifications configured. Click Add to create one.</p>
+                                )}
+                                {(q.notifications || []).map((notif, ni) => (
+                                  <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[11px] font-medium text-stone-600">#{ni + 1}</span>
+                                      <div className="flex items-center gap-1.5">
+                                        <button onClick={() => {
+                                          const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
+                                          updateQuestionnaire(q.id, { notifications: updated });
+                                        }} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${notif.enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
+                                          <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform" style={{ left: notif.enabled ? '17px' : '2px' }} />
+                                        </button>
+                                        <button onClick={() => {
+                                          const updated = (q.notifications || []).filter(n => n.id !== notif.id);
+                                          updateQuestionnaire(q.id, { notifications: updated });
+                                        }} className="p-0.5 text-red-400 hover:bg-red-50 rounded">
+                                          <Trash2 size={10} />
+                                        </button>
+                                      </div>
                                     </div>
-                                    <div>
-                                      <label className="block text-[11px] text-stone-400 mb-1">Notification Title</label>
-                                      <input type="text" value={q.notification_title || ''} onChange={(e) => updateQuestionnaire(q.id, { notification_title: e.target.value })}
-                                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                                        placeholder="Time for your survey!" />
-                                    </div>
-                                    <div>
-                                      <label className="block text-[11px] text-stone-400 mb-1">Notification Body</label>
-                                      <textarea value={q.notification_body || ''} onChange={(e) => updateQuestionnaire(q.id, { notification_body: e.target.value })}
-                                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
-                                        rows={2} placeholder="Please complete your questionnaire now." />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <label className="text-[11px] text-stone-400">Type:</label>
-                                      <select value={q.notification_type || 'push'} onChange={(e) => updateQuestionnaire(q.id, { notification_type: e.target.value })}
-                                        className="px-2 py-1 rounded-lg text-[12px] border border-stone-200 bg-white">
-                                        <option value="push">Push Notification</option>
+                                    <input type="text" value={notif.title} onChange={(e) => {
+                                      const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
+                                      updateQuestionnaire(q.id, { notifications: updated });
+                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
+                                    <textarea value={notif.body} onChange={(e) => {
+                                      const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
+                                      updateQuestionnaire(q.id, { notifications: updated });
+                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder="Notification body" />
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <select value={notif.notification_type} onChange={(e) => {
+                                        const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, notification_type: e.target.value } : n);
+                                        updateQuestionnaire(q.id, { notifications: updated });
+                                      }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
+                                        <option value="push">Push</option>
                                         <option value="email">Email</option>
                                         <option value="sms">SMS</option>
-                                        <option value="push_email">Push + Email</option>
+                                        <option value="push_email">Push+Email</option>
                                       </select>
+                                      <select value={notif.frequency} onChange={(e) => {
+                                        const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
+                                        updateQuestionnaire(q.id, { notifications: updated });
+                                      }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
+                                        <option value="once">Once</option>
+                                        <option value="hourly">Hourly</option>
+                                        <option value="2hours">Every 2h</option>
+                                        <option value="4hours">Every 4h</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="twice_daily">Twice daily</option>
+                                        <option value="weekly">Weekly</option>
+                                      </select>
+                                      <div className="flex items-center gap-1">
+                                        <label className="text-[10px] text-stone-400">Before:</label>
+                                        <input type="number" value={notif.minutes_before} onChange={(e) => {
+                                          const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, minutes_before: parseInt(e.target.value) || 5 } : n);
+                                          updateQuestionnaire(q.id, { notifications: updated });
+                                        }} className="w-14 px-1.5 py-1 rounded-lg text-[10px] border border-stone-200" />
+                                        <span className="text-[10px] text-stone-400">min</span>
+                                      </div>
+                                      <label className="flex items-center gap-1 text-[10px] text-stone-400">
+                                        <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
+                                          const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
+                                          updateQuestionnaire(q.id, { notifications: updated });
+                                        }} className="w-3 h-3 rounded" />
+                                        DND allowed
+                                      </label>
                                     </div>
                                   </div>
-                                )}
+                                ))}
                               </div>
 
+                              {/* AI Chatbot Toggle */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><BellOff size={11} /> Do Not Disturb</h5>
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[12px] text-stone-600">Allow participants to set DND</span>
-                                  <button onClick={() => updateQuestionnaire(q.id, { dnd_allowed: !q.dnd_allowed })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.dnd_allowed ? 'bg-emerald-500' : 'bg-stone-200'}`}>
-                                    <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.dnd_allowed ? '22px' : '2px' }} />
-                                  </button>
-                                </div>
-                                {q.dnd_allowed && (
-                                  <p className="text-[11px] text-stone-400">Participants can configure their own quiet hours from the app settings.</p>
-                                )}
-
-                                {/* AI Chatbot Toggle */}
-                                <div className="flex items-center justify-between pt-2 border-t border-stone-100">
                                   <div>
                                     <span className="text-[12px] text-stone-600 flex items-center gap-1.5">🤖 AI Survey Chatbot</span>
                                     <p className="text-[10px] text-stone-400 mt-0.5">Floating AI assistant that helps participants complete the survey conversationally</p>
@@ -941,8 +1110,10 @@ const QuestionLogicEditor: React.FC<{
     onUpdateLogic(logicRules.map(r => {
       if (r.id !== ruleId) return r;
       const updated = { ...r, [field]: value };
-      if (field === 'action' && ['disqualify', 'end_survey'].includes(value)) {
-        updated.targetQuestionId = null;
+      if (field === 'action') {
+        if (!['skip', 'show', 'hide', 'calculate', 'pipe_answer', 'show_variant'].includes(value)) {
+          updated.targetQuestionId = null;
+        }
       }
       return updated;
     }));
@@ -951,6 +1122,9 @@ const QuestionLogicEditor: React.FC<{
   const deleteRule = (ruleId: string) => {
     onUpdateLogic(logicRules.filter(r => r.id !== ruleId));
   };
+
+  const needsQuestionTarget = (action: string) => ['skip', 'show', 'hide', 'calculate', 'pipe_answer', 'show_variant'].includes(action);
+  const needsValue = (condition: string) => !['is_empty', 'is_not_empty'].includes(condition);
 
   return (
     <div className="mt-3 border-t border-stone-200 pt-3">
@@ -966,41 +1140,113 @@ const QuestionLogicEditor: React.FC<{
       {expanded && (
         <div className="mt-2 space-y-2">
           {questionRules.map(rule => (
-            <div key={rule.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-stone-200 text-[11px]">
-              <span className="text-stone-400 shrink-0">IF</span>
-              <select value={rule.condition} onChange={(e) => updateRule(rule.id, 'condition', e.target.value)}
-                className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white">
-                <option value="equals">Equals</option>
-                <option value="not_equals">Not Equals</option>
-                <option value="contains">Contains</option>
-                <option value="greater_than">Greater Than</option>
-                <option value="less_than">Less Than</option>
-                <option value="is_empty">Is Empty</option>
-                <option value="is_not_empty">Is Not Empty</option>
-                <option value="any_selected">Any Selected</option>
-                <option value="none_selected">None Selected</option>
-              </select>
-              <input type="text" value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
-                className="flex-1 min-w-0 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Value" />
-              <select value={rule.action} onChange={(e) => updateRule(rule.id, 'action', e.target.value)}
-                className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white">
-                <option value="skip">Skip to</option>
-                <option value="show">Show</option>
-                <option value="hide">Hide</option>
-                <option value="disqualify">Disqualify</option>
-                <option value="end_survey">End Survey</option>
-              </select>
-              {!['disqualify', 'end_survey'].includes(rule.action) && (
-                <select value={rule.targetQuestionId || ''} onChange={(e) => updateRule(rule.id, 'targetQuestionId', e.target.value)}
-                  className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white max-w-[120px]">
-                  {allQuestions.filter(q => q.id !== question.id).map((q) => (
-                    <option key={q.id} value={q.id}>Q{allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
-                  ))}
+            <div key={rule.id} className="p-2 rounded-lg bg-white border border-stone-200 text-[11px] space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-stone-400 shrink-0">IF</span>
+                <select value={rule.condition} onChange={(e) => updateRule(rule.id, 'condition', e.target.value)}
+                  className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white">
+                  <option value="equals">Equals</option>
+                  <option value="not_equals">Not Equals</option>
+                  <option value="contains">Contains</option>
+                  <option value="greater_than">Greater Than</option>
+                  <option value="less_than">Less Than</option>
+                  <option value="is_empty">Is Empty</option>
+                  <option value="is_not_empty">Is Not Empty</option>
+                  <option value="any_selected">Any Selected</option>
+                  <option value="none_selected">None Selected</option>
+                  <option value="date_before">Date Before</option>
+                  <option value="date_after">Date After</option>
+                  <option value="date_between">Date Between</option>
+                  <option value="matches_regex">Matches Regex</option>
+                  <option value="length_greater">Length Greater</option>
+                  <option value="length_less">Length Less</option>
+                  <option value="in_list">In List</option>
+                  <option value="not_in_list">Not In List</option>
+                  <option value="url_param_equals">URL Param =</option>
+                  <option value="url_param_contains">URL Param ~</option>
                 </select>
+                {needsValue(rule.condition) ? (
+                  <input type="text" value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
+                    className="flex-1 min-w-0 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Value" />
+                ) : (
+                  <span className="text-stone-300 text-[10px]">N/A</span>
+                )}
+                <select value={rule.action} onChange={(e) => updateRule(rule.id, 'action', e.target.value)}
+                  className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white">
+                  <option value="skip">Skip to</option>
+                  <option value="show">Show</option>
+                  <option value="hide">Hide</option>
+                  <option value="disqualify">Disqualify</option>
+                  <option value="end_survey">End Survey</option>
+                  <option value="require_before_next">Require</option>
+                  <option value="validate_format">Validate</option>
+                  <option value="calculate">Calculate</option>
+                  <option value="pipe_answer">Pipe Answer</option>
+                  <option value="randomize_questions">Randomize</option>
+                  <option value="show_variant">A/B Variant</option>
+                  <option value="quota_check">Quota</option>
+                  <option value="loop_block">Loop</option>
+                </select>
+                {needsQuestionTarget(rule.action) && (
+                  <select value={rule.targetQuestionId || ''} onChange={(e) => updateRule(rule.id, 'targetQuestionId', e.target.value)}
+                    className="px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white max-w-[120px]">
+                    {allQuestions.filter(q => q.id !== question.id).map((q) => (
+                      <option key={q.id} value={q.id}>Q{allQuestions.indexOf(q) + 1}: {q.question_text?.substring(0, 20)}</option>
+                    ))}
+                  </select>
+                )}
+                <button onClick={() => deleteRule(rule.id)} className="p-0.5 rounded hover:bg-red-50">
+                  <Trash2 size={10} className="text-red-400" />
+                </button>
+              </div>
+              {/* Advanced fields for special actions */}
+              {rule.action === 'calculate' && (
+                <input type="text" value={rule.calculationFormula || ''} onChange={(e) => updateRule(rule.id, 'calculationFormula', e.target.value || null)}
+                  className="w-full px-1.5 py-1 rounded border border-stone-200 text-[11px] font-mono" placeholder="Formula: {{q1}} + {{q2}}" />
               )}
-              <button onClick={() => deleteRule(rule.id)} className="p-0.5 rounded hover:bg-red-50">
-                <Trash2 size={10} className="text-red-400" />
-              </button>
+              {rule.action === 'pipe_answer' && (
+                <input type="text" value={rule.pipingTemplate || ''} onChange={(e) => updateRule(rule.id, 'pipingTemplate', e.target.value || null)}
+                  className="w-full px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Template: Your name is {{q1}}" />
+              )}
+              {rule.action === 'validate_format' && (
+                <div className="flex gap-1.5">
+                  <input type="text" value={rule.validationRegex || ''} onChange={(e) => updateRule(rule.id, 'validationRegex', e.target.value || null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px] font-mono" placeholder="Regex" />
+                  <input type="text" value={rule.errorMessage || ''} onChange={(e) => updateRule(rule.id, 'errorMessage', e.target.value || null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Error msg" />
+                </div>
+              )}
+              {rule.action === 'require_before_next' && (
+                <input type="text" value={rule.errorMessage || ''} onChange={(e) => updateRule(rule.id, 'errorMessage', e.target.value || null)}
+                  className="w-full px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Error: 请填写此题" />
+              )}
+              {rule.action === 'randomize_questions' && (
+                <input type="number" min={1} value={rule.randomizeCount || ''} onChange={(e) => updateRule(rule.id, 'randomizeCount', e.target.value ? Number(e.target.value) : null)}
+                  className="w-full px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Show N random questions" />
+              )}
+              {rule.action === 'show_variant' && (
+                <input type="text" value={rule.variantGroup || ''} onChange={(e) => updateRule(rule.id, 'variantGroup', e.target.value || null)}
+                  className="w-full px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Variant group: ab-group-1" />
+              )}
+              {rule.action === 'quota_check' && (
+                <div className="flex gap-1.5">
+                  <input type="number" min={1} value={rule.quotaLimit || ''} onChange={(e) => updateRule(rule.id, 'quotaLimit', e.target.value ? Number(e.target.value) : null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Limit: 100" />
+                  <input type="text" value={rule.quotaField || ''} onChange={(e) => updateRule(rule.id, 'quotaField', e.target.value || null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Field: gender=male" />
+                </div>
+              )}
+              {rule.action === 'loop_block' && (
+                <div className="flex gap-1.5">
+                  <input type="number" min={1} value={rule.loopCount || ''} onChange={(e) => updateRule(rule.id, 'loopCount', e.target.value ? Number(e.target.value) : null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px]" placeholder="Count: 3" />
+                  <select value={rule.loopSourceQuestionId || ''} onChange={(e) => updateRule(rule.id, 'loopSourceQuestionId', e.target.value || null)}
+                    className="flex-1 px-1.5 py-1 rounded border border-stone-200 text-[11px] bg-white">
+                    <option value="">Fixed count</option>
+                    {allQuestions.map((q, i) => <option key={q.id} value={q.id}>Q{i+1}</option>)}
+                  </select>
+                </div>
+              )}
             </div>
           ))}
           <button onClick={addRule} className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium">

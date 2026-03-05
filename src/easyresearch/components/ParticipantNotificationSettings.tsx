@@ -4,15 +4,21 @@ import { supabase } from '../../lib/supabase';
 import { notificationScheduler, QuestionnaireDNDPeriod } from '../../utils/notificationScheduler';
 import { loadDndSetting, saveDndSetting } from '../utils/enrollmentSync';
 
+interface NotifConfigInfo {
+  id: string;
+  questionnaire_id: string | null;
+  title: string;
+  body: string;
+  frequency: string;
+  notification_type: string;
+  dnd_allowed: boolean;
+}
+
 interface QuestionnaireInfo {
   id: string;
   title: string;
-  frequency: string;
-  notification_enabled: boolean;
-  notification_title: string;
-  notification_body: string;
   time_windows: { start: string; end: string }[];
-  dnd_allowed: boolean;
+  notifications: NotifConfigInfo[];
 }
 
 interface ParticipantNotificationSettingsProps {
@@ -27,6 +33,7 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
   isOpen, onClose, enrollmentId, projectId, currentSettings,
 }) => {
   const [questionnaires, setQuestionnaires] = useState<QuestionnaireInfo[]>([]);
+  const [projectNotifs, setProjectNotifs] = useState<NotifConfigInfo[]>([]);
   // dndByQ: { [questionnaire_id]: { dnd_periods: [{start, end}] } }
   const [dndByQ, setDndByQ] = useState<Record<string, { dnd_periods: QuestionnaireDNDPeriod[] }>>({});
   const [saving, setSaving] = useState(false);
@@ -36,35 +43,67 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
     if (!isOpen) return;
     const load = async () => {
       setLoading(true);
-      // Load questionnaires with notifications enabled for this project
-      const { data } = await supabase
-        .from('questionnaire')
-        .select('id, title, frequency, notification_enabled, notification_title, notification_body, dnd_allowed')
+
+      // Load all notification_config rows for this project
+      const { data: ncRows } = await supabase
+        .from('notification_config')
+        .select('*')
         .eq('project_id', projectId)
-        .eq('notification_enabled', true)
+        .eq('enabled', true)
         .order('order_index');
-      // Load time_windows from flat questionnaire_time_window table
-      const qIds = (data || []).map((q: any) => q.id);
-      let twByQ = new Map<string, { start: string; end: string }[]>();
+
+      const configs: NotifConfigInfo[] = (ncRows || []).map((r: any) => ({
+        id: r.id,
+        questionnaire_id: r.questionnaire_id || null,
+        title: r.title || '',
+        body: r.body || '',
+        frequency: r.frequency || 'daily',
+        notification_type: r.notification_type || 'push',
+        dnd_allowed: r.dnd_allowed ?? true,
+      }));
+
+      // Separate project-level vs questionnaire-level
+      setProjectNotifs(configs.filter(c => !c.questionnaire_id));
+      const qLevelConfigs = configs.filter(c => c.questionnaire_id);
+
+      // Get unique questionnaire IDs that have notifications
+      const qIds = [...new Set(qLevelConfigs.map(c => c.questionnaire_id!))];
+
+      // Load questionnaire titles
+      let qInfos: QuestionnaireInfo[] = [];
       if (qIds.length > 0) {
+        const { data: qRows } = await supabase
+          .from('questionnaire')
+          .select('id, title')
+          .in('id', qIds)
+          .order('order_index');
+
+        // Load time_windows
         const { data: twRows } = await supabase
           .from('questionnaire_time_window')
-          .select('questionnaire_id, start_time, end_time, order_index')
+          .select('questionnaire_id, start_time, end_time')
           .in('questionnaire_id', qIds)
           .order('order_index');
+        const twByQ = new Map<string, { start: string; end: string }[]>();
         for (const tw of (twRows || [])) {
-          const arr = twByQ.get(tw.questionnaire_id) || [];
-          arr.push({ start: tw.start_time, end: tw.end_time });
-          twByQ.set(tw.questionnaire_id, arr);
+          if (!twByQ.has(tw.questionnaire_id)) twByQ.set(tw.questionnaire_id, []);
+          twByQ.get(tw.questionnaire_id)!.push({ start: tw.start_time, end: tw.end_time });
         }
+
+        qInfos = (qRows || []).map((qr: any) => ({
+          id: qr.id,
+          title: qr.title,
+          time_windows: twByQ.get(qr.id) || [],
+          notifications: qLevelConfigs.filter(c => c.questionnaire_id === qr.id),
+        }));
       }
-      setQuestionnaires((data || []).map((q: any) => ({ ...q, time_windows: twByQ.get(q.id) || [] })) as QuestionnaireInfo[]);
+      setQuestionnaires(qInfos);
 
       // Load DND from flat table
       const existing = await loadDndSetting(enrollmentId);
       const parsed: Record<string, { dnd_periods: QuestionnaireDNDPeriod[] }> = {};
-      for (const q of (data || [])) {
-        parsed[q.id] = existing[q.id] || { dnd_periods: [] };
+      for (const qId of qIds) {
+        parsed[qId] = existing[qId] || { dnd_periods: [] };
       }
       setDndByQ(parsed);
       setLoading(false);
@@ -147,30 +186,47 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
           <div className="py-8 text-center">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent mx-auto" />
           </div>
-        ) : questionnaires.length === 0 ? (
-          <p className="text-[13px] text-stone-400 text-center py-6">No questionnaires with notifications enabled in this study.</p>
+        ) : questionnaires.length === 0 && projectNotifs.length === 0 ? (
+          <p className="text-[13px] text-stone-400 text-center py-6">No notifications configured for this study.</p>
         ) : (
           <div className="space-y-4">
+            {/* Project-level notifications (read-only display) */}
+            {projectNotifs.length > 0 && (
+              <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/30 space-y-2">
+                <h3 className="text-[13px] font-semibold text-stone-800">Study Notifications</h3>
+                {projectNotifs.map(n => (
+                  <div key={n.id} className="text-[11px] text-stone-500">
+                    <span className="font-medium text-stone-600">{n.title}</span>
+                    <span className="ml-2 text-stone-400">({freqLabel(n.frequency)})</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Questionnaire-level notifications with DND controls */}
             {questionnaires.map(q => {
               const periods = dndByQ[q.id]?.dnd_periods || [];
+              const hasDndAllowed = q.notifications.some(n => n.dnd_allowed);
               return (
                 <div key={q.id} className="p-4 rounded-xl border border-stone-100 space-y-3">
-                  {/* Questionnaire header — shows researcher-configured notification info */}
                   <div>
                     <h3 className="text-[13px] font-semibold text-stone-800">{q.title}</h3>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[11px] text-stone-400 flex items-center gap-1"><Clock size={10} /> {freqLabel(q.frequency)}</span>
-                      {q.time_windows?.[0] && (
-                        <span className="text-[11px] text-stone-400">{q.time_windows[0].start}–{q.time_windows[0].end}</span>
-                      )}
-                    </div>
-                    {q.notification_title && (
-                      <p className="text-[11px] text-emerald-600 mt-1">"{q.notification_title}"</p>
+                    {q.time_windows?.[0] && (
+                      <span className="text-[11px] text-stone-400">{q.time_windows[0].start}–{q.time_windows[0].end}</span>
                     )}
                   </div>
 
+                  {/* Show each notification config for this questionnaire */}
+                  {q.notifications.map(n => (
+                    <div key={n.id} className="text-[11px] text-stone-500 flex items-center gap-2">
+                      <Bell size={10} className="text-emerald-400 shrink-0" />
+                      <span className="font-medium text-stone-600">"{n.title}"</span>
+                      <span className="text-stone-400">({freqLabel(n.frequency)})</span>
+                    </div>
+                  ))}
+
                   {/* DND periods for this questionnaire */}
-                  {q.dnd_allowed && (
+                  {hasDndAllowed ? (
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
                         <Moon size={12} className="text-indigo-400" />
@@ -195,8 +251,7 @@ const ParticipantNotificationSettings: React.FC<ParticipantNotificationSettingsP
                         </button>
                       </div>
                     </div>
-                  )}
-                  {!q.dnd_allowed && (
+                  ) : (
                     <p className="text-[11px] text-stone-400 italic">DND not available for this questionnaire (set by researcher)</p>
                   )}
                 </div>

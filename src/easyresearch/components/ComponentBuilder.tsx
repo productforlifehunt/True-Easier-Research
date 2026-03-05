@@ -53,13 +53,9 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
       estimated_duration: 5,
       frequency: 'once',
       time_windows: [{ start: '09:00', end: '21:00' }],
-      notification_enabled: false,
-      notification_minutes_before: 5,
-      dnd_allowed: false,
-      dnd_default_start: '22:00',
-      dnd_default_end: '08:00',
       assigned_participant_types: participantTypes.map(pt => pt.id),
       order_index: questionnaires.length,
+      notifications: [],
     };
     onUpdate([...questionnaires, newQ]);
     // Auto-expand section and open the new component
@@ -287,13 +283,9 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
             estimated_duration: 5,
             frequency: 'once',
             time_windows: [{ start: '09:00', end: '21:00' }],
-            notification_enabled: false,
-            notification_minutes_before: 5,
-            dnd_allowed: false,
-            dnd_default_start: '22:00',
-            dnd_default_end: '08:00',
             assigned_participant_types: participantTypes.map(pt => pt.id),
             order_index: questionnaires.length,
+            notifications: [],
           };
           onUpdate([...questionnaires, newQ]);
           setShowTemplates(false);

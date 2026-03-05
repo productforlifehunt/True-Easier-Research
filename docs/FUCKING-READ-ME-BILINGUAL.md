@@ -49,7 +49,6 @@ Every study lives in the `research_project` table. A project can have multiple q
 - `project_type` (text) — nullable and don't use it for now, we'll use to for survey, user research, etc / 目前先不要使用，未来将用于区分调研、用户研究等，目前不要在前端使用
 - `methodology_type` (text) — two types for now, one_time multi_time multi_time should be desplayed as longitutal on frontend 研究方法类型，目前有两种，单次和多次，多次在前端显示为长期调研，但注意，我们目前不对分类进行一切后续的显示限制，两种方式均可以添加多个问卷，分类选择只是参考 
 - `survey_code` (text) — short code participants can enter to join / 参与者可以输入加入研究的研究码
-- `created_at` (timestamptz) - the create time of research / 研究的创建时间
 
 *Feature toggles / 功能选项:*
 - `ai_enabled` (bool) — allow AI-assisted questions / 允许AI辅助问题
@@ -83,11 +82,7 @@ Every study lives in the `research_project` table. A project can have multiple q
 - `onboarding_required` (bool) — show onboarding instructions before starting / 开始前显示入门说明
 - `onboarding_instruction` (text) — the instruction text / 说明文本
 
-Notification：
 
-推送由具体的问卷决定，不是在research_project层面设置
-
-帮助文件由研究者通过questionaire创建，不要储存在research_project
 
 *Incentives / 激励:*
 - `incentive_enabled` (bool) — whether incentives are active / 激励是否激活
@@ -111,19 +106,33 @@ Notification：
 - `layout_theme_background_color` (text) — background color / 背景色
 - `layout_theme_card_style` (text) — 'flat', 'elevated', or 'outlined'
 
-## 2. QUESTIONNAIRE / 问卷
+
+
+## 8. QUESTIONNAIRE / 问卷
 
 Each questionnaire is a row in the `questionnaire` table in the `care_connector` schema. It belongs to one project and has a type field that determines its purpose:
 
-每个问卷是 `care_connector` schema 中 `questionnaire` table
+问卷储存在 `questionnaire` table，通过
 
-- **survey** — A regular questionnaire with questions, schedule, frequency (once, daily, hourly, etc.), active time window, estimated duration, notification toggle, and Do Not Disturb settings. / 常规问卷，包含问题、时间表、频率（一次、每日、每小时等）、活动时间窗口、预计持续时间、通知开关和免打扰设置。
-- **consent** — A consent form with consent text and consent URL fields. The participant must agree before proceeding. / 同意书，包含同意文本和同意URL字段。参与者必须同意才能继续。
-- **screening** — A screening questionnaire containing questions that determine participant eligibility. Questions can have a disqualify value in their config that auto-rejects participants. / 筛选问卷，包含确定参与者资格的问题。问题可以在其配置中有一个取消资格值，自动拒绝参与者。
 
-REMEMBER NOT to use a seperate consent of screening table,they are also defined as questionnaire in this project
+1. id 
+2. project_id - 所属研究项目
+3. questionnaire_type - 问卷类型
+4. title - 问卷标题
+5. description - 问卷描述
+6. estimated_duration - 预计完成时间
 
-记住不要使用单独的同意或筛选表，它们在此项目中也定义为问卷
+问卷通过questionnaire_type定义类型：
+
+1. 'questionnaire' - 常规调查问卷
+
+2-6虽然不是狭义上的问卷，但在这个项目里研究所使用的所有表单也都使用`questionnaire` table
+
+2. 'consent' - 知情同意书
+3. 'screening' - 筛选问卷
+4. 'profile' - 个人资料
+5. 'help' - 帮助文档
+6. 'custom' - 自定义类型
 
 Questionnaires are linked to participant types through the `questionnaire_participant_type` junction table — a many-to-many relationship. A questionnaire can be assigned to multiple participant types, and a participant type can have multiple questionnaires.
 
@@ -155,8 +164,8 @@ Each question is a row in the `question` table (renamed from the old `survey_que
 - `vr_*` (8 columns) — validation rules: `vr_min_length`, `vr_max_length`, `vr_min_value`, `vr_max_value`, `vr_min`, `vr_max`, `vr_allow_future_dates`, `vr_allow_past_dates`. Hydrated to in-memory `validation_rule` object. / 验证规则：`vr_min_length`、`vr_max_length`、`vr_min_value`、`vr_max_value`、`vr_min`、`vr_max`、`vr_allow_future_dates`、`vr_allow_past_dates`。水合到内存中的 `validation_rule` 对象。
 - `logic_rules` — DROPPED. All logic is now in the `research_logic` table (see section 5). / 已删除。所有逻辑现在在 `research_logic` 表中（见第5节）。
 - `ai_config` — AI-related settings (reserved, not yet implemented) / AI相关设置（保留，尚未实现）
-- `scoring_config` — scoring/weighting for analytics / 分析的评分/权重 （暂未实现）
-- `piping_config` — answer piping into later questions / 答案传递到后续问题 （暂未实现）
+- `scoring_config` — scoring/weighting for analytics / 分析的评分/权重
+- `piping_config` — answer piping into later questions / 答案传递到后续问题
 
 **Question options** are stored in the `question_option` table (one row per option), NOT in JSONB:
 
@@ -196,26 +205,87 @@ Each question is a row in the `question` table (renamed from the old `survey_que
 
 ## 5. LOGIC / 逻辑规则
 
-All conditional logic (skip, show, hide, disqualify, end survey) lives in ONE table: `research_logic`. No JSONB. No per-question `logic_rules` column. No per-questionnaire `disqualify_logic` column. One flat relational table rules them all.
+The logic system supports **12 categories** of conditional logic, all stored in ONE flat relational table: `research_logic`. No JSONB. No per-question columns. One table rules them all.
 
-所有条件逻辑（跳过、显示、隐藏、取消资格、结束调查）都存储在一个表中：`research_logic`。没有JSONB。没有每个问题的 `logic_rules` 列。没有每个问卷的 `disqualify_logic` 列。一个扁平关系表统治一切。
+逻辑系统支持 **12 大类** 条件逻辑，全部存储在一张扁平关系表 `research_logic` 中。没有JSONB。没有每个问题的列。一张表统治一切。
 
-**`research_logic` table — one row per logic rule / 每条逻辑规则一行:**
+### 5.1 The 12 Logic Categories / 12大逻辑类别
+
+1. **Basic skip/show/hide** — Jump to questions, show/hide based on answers, disqualify, end survey / 基础跳转/显示/隐藏——基于答案跳转、显示/隐藏问题、取消资格、结束调查
+2. **Compound conditions (AND/OR)** — Multiple conditions grouped with AND or OR operators / 复合条件——多个条件通过 AND 或 OR 运算符组合
+3. **Required-before-next validation** — Block navigation until a question is answered / 必填验证——阻止导航直到问题被回答
+4. **Answer piping** — Insert previous answers into question text dynamically / 答案回填——将之前的答案动态插入问题文本
+5. **Calculated fields** — Auto-compute values from other answers (BMI, scores, etc.) / 计算字段——从其他答案自动计算值（BMI、分数等）
+6. **Advanced validation** — Regex, date ranges, text length, list matching / 高级验证——正则表达式、日期范围、文本长度、列表匹配
+7. **Cross-questionnaire logic** — One questionnaire's answers control another's visibility / 跨问卷逻辑——一个问卷的答案控制另一个问卷的可见性
+8. **Random question pool** — Show N random questions from a larger set / 随机题库——从更大的题库中随机显示N题
+9. **A/B variants** — Show different question variants to different participants / A/B变体——向不同参与者显示不同的问题变体
+10. **Quota control** — Stop collecting once a quota is reached (e.g. 100 males) / 配额控制——达到配额后停止收集（如100名男性）
+11. **Loop/repeat blocks** — Repeat a question block N times or once per multi-select answer / 循环重复块——重复一组问题N次或按多选答案重复
+12. **URL parameter conditions** — Branch logic based on URL query parameters / URL参数条件——基于URL查询参数的分支逻辑
+
+### 5.2 `research_logic` table columns / 表字段
+
+**Core fields / 核心字段:**
 
 - `id` (uuid PK)
 - `project_id` (uuid FK → research_project) — always set, for easy bulk load / 始终设置，便于批量加载
-- `questionnaire_id` (uuid FK → questionnaire) — scopes the rule to one questionnaire / 将规则范围限定到一个问卷
+- `questionnaire_id` (uuid FK → questionnaire, **nullable**) — scopes the rule to one questionnaire; null for cross-questionnaire rules / 将规则限定到一个问卷；跨问卷规则时为null
 - `source_question_id` (uuid FK → question) — IF this question... / 如果这个问题...
-- `condition` (text) — comparison operator / 比较运算符
+- `condition` (text) — comparison operator (see 5.3) / 比较运算符（见5.3）
 - `value` (text) — ...has this value / ...有这个值
-- `action` (text) — THEN do this / 那么执行此操作
-- `target_question_id` (uuid FK → question, nullable) — ...to this question (null for disqualify/end_survey) / ...对这个问题（取消资格/结束调查时为null）
+- `action` (text) — THEN do this (see 5.4) / 那么执行此操作（见5.4）
+- `target_question_id` (uuid FK → question, nullable) — target question for skip/show/hide/calculate/pipe_answer / 目标问题，用于跳转/显示/隐藏/计算/回填
 - `order_index` (int) — evaluation order within the questionnaire / 问卷内的评估顺序
 - `enabled` (bool, default true) — soft toggle without deleting / 软开关，无需删除
 - `created_at` (timestamptz)
 
-**Supported conditions / 支持的条件:**
+**Compound condition fields / 复合条件字段:**
 
+- `condition_group` (text, nullable) — group ID to combine multiple rules with AND/OR; rules with the same group ID are evaluated together / 条件组ID，用于将多个规则以AND/OR组合；相同组ID的规则一起评估
+- `group_operator` (text, default 'and') — 'and' or 'or'; how rules within the same group are combined / 组内规则的组合方式：'and'（且）或 'or'（或）
+
+**Advanced action fields / 高级动作字段:**
+
+- `calculation_formula` (text, nullable) — math formula with `{{question_id}}` placeholders, e.g. `{{weight}} / (({{height}} / 100) * ({{height}} / 100))` / 计算公式，使用 `{{question_id}}` 占位符
+- `piping_template` (text, nullable) — text template with `{{question_id}}` placeholders, e.g. `您之前说您的孩子叫{{q3}}，{{q3}}今年几岁？` / 回填模板，使用 `{{question_id}}` 占位符
+- `validation_regex` (text, nullable) — regex pattern for format validation, e.g. `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$` for email / 格式验证的正则表达式
+- `error_message` (text, nullable) — custom error message for require/validate actions / 自定义错误提示
+
+**Cross-questionnaire fields / 跨问卷字段:**
+
+- `cross_questionnaire` (bool, default false) — whether this rule references another questionnaire / 是否引用其他问卷
+- `target_questionnaire_id` (uuid FK → questionnaire, nullable) — the questionnaire to show/hide / 要显示/隐藏的目标问卷
+
+**Randomization fields / 随机化字段:**
+
+- `randomize_count` (int, nullable) — number of random questions to show from the pool / 从题库中随机显示的题数
+
+**A/B Variant fields / A/B变体字段:**
+
+- `variant_group` (text, nullable) — group name for A/B variants; rules sharing the same group show only one variant per participant / 变体组名；同组规则每个参与者只显示一个变体
+
+**Quota fields / 配额字段:**
+
+- `quota_limit` (int, nullable) — maximum count for this quota bucket / 此配额桶的最大数量
+- `quota_field` (text, nullable) — field=value defining the quota bucket, e.g. `gender=male` / 定义配额桶的字段=值
+
+**Loop fields / 循环字段:**
+
+- `loop_source_question_id` (uuid FK, nullable) — multi-select question whose answers determine loop iterations / 多选问题，其答案决定循环次数
+- `loop_count` (int, nullable) — fixed number of loop iterations (used when loop_source_question_id is null) / 固定循环次数
+
+**URL parameter fields / URL参数字段:**
+
+- `url_param_key` (text, nullable) — URL query parameter key for url_param conditions / URL查询参数键
+
+**Metadata / 元数据:**
+
+- `description` (text, nullable) — optional human-readable note about the rule / 可选的规则说明
+
+### 5.3 Supported conditions (19 types) / 支持的条件（19种）
+
+**Basic / 基础:**
 - `equals` — exact match (case insensitive) / 精确匹配（不区分大小写）
 - `not_equals` — not equal / 不等于
 - `contains` — substring match / 子字符串匹配
@@ -223,40 +293,128 @@ All conditional logic (skip, show, hide, disqualify, end survey) lives in ONE ta
 - `less_than` — numeric < / 数字小于
 - `is_empty` — null or empty string / 空值或空字符串
 - `is_not_empty` — has a value / 有值
-- `any_selected` — for multiple choice: value is in the selected array / 多选：值在选中数组中
-- `none_selected` — for multiple choice: value is NOT in the selected array / 多选：值不在选中数组中
 
-**Supported actions / 支持的操作:**
+**Multiple choice / 多选:**
+- `any_selected` — value is in the selected array / 值在选中数组中
+- `none_selected` — value is NOT in the selected array / 值不在选中数组中
 
-- `skip` — jump to `target_question_id`, skipping everything in between / 跳转到目标问题，跳过中间所有内容
-- `show` — show `target_question_id` only if condition matches (hidden by default) / 仅当条件匹配时显示目标问题（默认隐藏）
-- `hide` — hide `target_question_id` if condition matches / 条件匹配时隐藏目标问题
-- `disqualify` — end the survey and mark participant as disqualified (screening questionnaires) / 结束调查并将参与者标记为不合格（筛选问卷）。`target_question_id` is null.
-- `end_survey` — end the survey early with a completion status / 提前结束调查并标记完成状态。`target_question_id` is null.
+**Date / 日期:**
+- `date_before` — response date is before the rule value (supports "today") / 响应日期在规则值之前（支持"today"）
+- `date_after` — response date is after the rule value (supports "today") / 响应日期在规则值之后（支持"today"）
+- `date_between` — response date is within a range (value: "2020-01-01,2025-12-31") / 响应日期在范围内（值："2020-01-01,2025-12-31"）
 
-**Key design rules / 关键设计规则:**
+**Text / 文本:**
+- `matches_regex` — response matches a regex pattern / 响应匹配正则表达式
+- `length_greater` — response text length > value / 响应文本长度大于值
+- `length_less` — response text length < value / 响应文本长度小于值
 
-1. Rules are **per-questionnaire**, not per-project. A rule in Questionnaire A cannot reference questions in Questionnaire B. / 规则是**按问卷**的，不是按项目的。问卷A中的规则不能引用问卷B中的问题。
-2. `source_question_id` and `target_question_id` must both belong to the same `questionnaire_id`. The frontend enforces this. / `source_question_id` 和 `target_question_id` 必须属于同一个 `questionnaire_id`。前端强制执行。
-3. Multiple rules can exist for the same source question. They are evaluated in `order_index` order. First matching `skip` wins. All matching `show`/`hide` are applied. First matching `disqualify`/`end_survey` wins. / 同一源问题可以有多条规则。按 `order_index` 顺序评估。第一个匹配的 `skip` 生效。所有匹配的 `show`/`hide` 都应用。第一个匹配的 `disqualify`/`end_survey` 生效。
+**List / 列表:**
+- `in_list` — response value is in a comma-separated list / 响应值在逗号分隔的列表中
+- `not_in_list` — response value is NOT in a comma-separated list / 响应值不在逗号分隔的列表中
+
+**URL Parameters / URL参数:**
+- `url_param_equals` — URL query parameter equals value (format: `key=expected`) / URL查询参数等于值
+- `url_param_contains` — URL query parameter contains value (format: `key=substring`) / URL查询参数包含值
+
+### 5.4 Supported actions (15 types) / 支持的动作（15种）
+
+**Basic flow / 基础流程:**
+- `skip` — jump to `target_question_id`, skipping everything in between / 跳转到目标问题
+- `show` — show `target_question_id` only if condition matches (hidden by default) / 条件匹配时显示
+- `hide` — hide `target_question_id` if condition matches / 条件匹配时隐藏
+- `disqualify` — end survey, mark participant as disqualified; `target_question_id` is null / 取消资格
+- `end_survey` — end survey early with completion status; `target_question_id` is null / 提前结束调查
+
+**Validation / 验证:**
+- `require_before_next` — block "Next" button until the source question is answered; shows `error_message` / 阻止"下一步"直到源问题被回答；显示 `error_message`
+- `validate_format` — validate source question's answer against `validation_regex`; shows `error_message` on failure / 用 `validation_regex` 验证源问题的答案；失败时显示 `error_message`
+
+**Computed / 计算:**
+- `calculate` — evaluate `calculation_formula` and store result in `target_question_id` / 计算 `calculation_formula` 并存储结果到目标问题
+- `pipe_answer` — replace `{{question_id}}` placeholders in `piping_template` and display in `target_question_id` / 替换 `piping_template` 中的占位符并显示在目标问题
+
+**Cross-questionnaire / 跨问卷:**
+- `show_questionnaire` — show `target_questionnaire_id` when condition matches / 条件匹配时显示目标问卷
+- `hide_questionnaire` — hide `target_questionnaire_id` when condition matches / 条件匹配时隐藏目标问卷
+
+**Randomization / 随机化:**
+- `randomize_questions` — randomly select `randomize_count` questions from the questionnaire; deterministic per-participant / 从问卷中随机选择 `randomize_count` 题；每个参与者确定性的
+
+**A/B Testing / A/B测试:**
+- `show_variant` — show one question variant from a `variant_group`; other variants are hidden; deterministic per-participant / 从 `variant_group` 中显示一个问题变体；其他变体隐藏
+
+**Quota / 配额:**
+- `quota_check` — when condition matches and `quota_limit` is reached, set `quotaReached = true` (used to disqualify or end survey) / 条件匹配且达到 `quota_limit` 时设置配额已满
+
+**Loop / 循环:**
+- `loop_block` — repeat a question block `loop_count` times, or once per answer in `loop_source_question_id` / 重复一组问题 `loop_count` 次，或按 `loop_source_question_id` 的每个答案重复
+
+### 5.5 Compound conditions (AND/OR) / 复合条件
+
+Multiple rules can be grouped using the same `condition_group` value. Rules in the same group are combined with `group_operator`:
+
+多个规则可以通过相同的 `condition_group` 值分组。同组规则用 `group_operator` 组合：
+
+- **AND group**: ALL conditions must match for the action to trigger / 所有条件都必须满足才触发动作
+- **OR group**: ANY condition matching triggers the action / 任一条件满足就触发动作
+
+Example: "IF age > 65 AND gender = female THEN disqualify" / 示例："如果年龄 > 65 且 性别 = 女性 则取消资格"
+- Rule 1: source=age_question, condition=greater_than, value=65, condition_group="g1", group_operator="and", action=disqualify
+- Rule 2: source=gender_question, condition=equals, value=female, condition_group="g1", group_operator="and", action=disqualify
+
+Rules **without** a `condition_group` are evaluated individually (single-condition rules). / 没有 `condition_group` 的规则单独评估（单条件规则）。
+
+### 5.6 Key design rules / 关键设计规则
+
+1. Most rules are **per-questionnaire**. Cross-questionnaire rules set `cross_questionnaire = true` and `questionnaire_id = null`. / 大多数规则是按问卷的。跨问卷规则设置 `cross_questionnaire = true` 且 `questionnaire_id = null`。
+2. For intra-questionnaire rules, `source_question_id` and `target_question_id` must both belong to the same `questionnaire_id`. / 问卷内规则中，`source_question_id` 和 `target_question_id` 必须属于同一个 `questionnaire_id`。
+3. Multiple rules for the same source question are evaluated in `order_index` order. First matching `skip` wins. All matching `show`/`hide` are applied. First matching `disqualify`/`end_survey` wins. / 同一源问题的多条规则按 `order_index` 顺序评估。
 4. `enabled = false` rules are ignored during evaluation but preserved in the builder. / `enabled = false` 的规则在评估时被忽略，但在构建器中保留。
-5. Old `cfg_disqualify_value` on question config is replaced by a `disqualify` action rule. / 旧的问题配置中的 `cfg_disqualify_value` 被 `disqualify` 操作规则替代。
+5. All new fields are **nullable/optional** — existing rules continue to work unchanged. / 所有新字段都是**可空/可选的**——现有规则继续正常工作。
 
-**Evaluation engine / 评估引擎:**
+### 5.7 Evaluation engine / 评估引擎
 
-A shared `evaluateLogic()` function in `src/easyresearch/utils/logicEngine.ts` is used by ALL survey views (ParticipantSurveyView, OneTimeSurveyView, LongitudinalSurveyView). It takes the questionnaire's logic rules and the current responses, and returns: `{ visibleQuestionIds, skipTarget, disqualified, endSurvey }`.
+A shared `evaluateLogic()` function in `src/easyresearch/utils/logicEngine.ts` is used by ALL survey views (ParticipantSurveyView, OneTimeSurveyView). It returns:
 
-共享的 `evaluateLogic()` 函数在 `src/easyresearch/utils/logicEngine.ts` 中，被所有调查视图使用（ParticipantSurveyView、OneTimeSurveyView、LongitudinalSurveyView）。它接收问卷的逻辑规则和当前响应，返回：`{ visibleQuestionIds, skipTarget, disqualified, endSurvey }`。
+共享的 `evaluateLogic()` 函数在 `src/easyresearch/utils/logicEngine.ts` 中，被所有调查视图使用。它返回：
 
-**Builder UI / 构建器UI:**
+- `visibleQuestionIds` — which questions to display / 要显示的问题
+- `skipTarget` — which question to jump to / 要跳转到的问题
+- `disqualified` — whether participant is disqualified / 参与者是否被取消资格
+- `endSurvey` — whether to end early / 是否提前结束
+- `calculatedValues` — computed values from calculate rules / 计算规则产生的计算值
+- `pipedTexts` — piped text from pipe_answer rules / 回填规则产生的文本
+- `validationErrors` — validation failures from validate_format rules / 格式验证失败信息
+- `requiredErrors` — required-before-next failures / 必填验证失败信息
+- `hiddenQuestionnaireIds` — questionnaires hidden by cross-questionnaire rules / 被跨问卷规则隐藏的问卷
+- `shownQuestionnaireIds` — questionnaires shown by cross-questionnaire rules / 被跨问卷规则显示的问卷
+- `randomizedQuestionIds` — per-questionnaire randomized question subsets / 每个问卷的随机问题子集
+- `activeVariants` — per-group selected A/B variant question ID / 每组选中的A/B变体问题ID
+- `quotaReached` — whether any quota_check rule has triggered / 是否有配额规则已触发
+- `loopIterations` — per-question loop repeat count / 每个问题的循环重复次数
 
-The Logic tab in SurveyBuilder shows rules scoped to the currently selected questionnaire. The inline QuestionLogicEditor under each question in QuestionnaireList also creates rules in the same `research_logic` table. Both are just different views of the same data.
+Additional convenience helpers / 额外的便捷辅助函数:
+- `checkRequiredBeforeNext()` — check required-before-next rules / 检查必填验证规则
+- `checkValidation()` — check validate_format rules / 检查格式验证规则
+- `getCalculatedValues()` — get calculated values / 获取计算值
+- `getPipedText()` — get piped text for a question / 获取问题的回填文本
+- `getCrossQuestionnaireVisibility()` — get cross-questionnaire visibility / 获取跨问卷可见性
+- `checkQuotaReached()` — check if quota is full, blocks survey on submit / 检查配额是否已满，提交时阻止调查
+- `expandLoopQuestions()` — expand questions with loop iterations (synthetic IDs) / 用循环迭代展开问题（合成ID）
 
-SurveyBuilder中的Logic标签显示当前选中问卷范围内的规则。QuestionnaireList中每个问题下的内联QuestionLogicEditor也在同一个 `research_logic` 表中创建规则。两者只是同一数据的不同视图。
+### 5.8 Builder UI / 构建器UI
 
-**What was removed / 删除了什么:**
+The Logic tab in SurveyBuilder shows rules scoped to the currently selected questionnaire. Each rule card shows: source question, condition, value, action, target, **condition group** (with AND/OR selector), and advanced fields (formula, piping template, regex, error message, description).
 
-- Old `logic_rule` table (project-scoped, no questionnaire_id) — DROPPED / 旧的 `logic_rule` 表（项目范围，无questionnaire_id）——已删除
+SurveyBuilder中的Logic标签显示当前选中问卷的规则。每个规则卡片显示：源问题、条件、值、动作、目标、**条件组**（带AND/OR选择器）和高级字段（公式、回填模板、正则、错误提示、说明）。
+
+The inline QuestionLogicEditor under each question in QuestionnaireList also supports all 19 conditions and 15 actions. Both are views of the same `research_logic` data. Each new action type includes bilingual help text explaining how it works.
+
+QuestionnaireList中每个问题下的内联QuestionLogicEditor也支持全部19种条件和15种动作。两者都是同一 `research_logic` 数据的视图。每种新动作类型都有双语帮助文字解释其工作原理。
+
+### 5.9 What was removed / 删除了什么
+
+- Old `logic_rule` table (project-scoped, no questionnaire_id) — DROPPED / 旧的 `logic_rule` 表——已删除
 - `question.logic_rules` JSONB column — DROPPED / `question.logic_rules` JSONB列——已删除
 - `questionnaire.disqualify_logic` JSONB column — DROPPED / `questionnaire.disqualify_logic` JSONB列——已删除
 - `cfg_disqualify_value` is kept as a convenience config but the real enforcement is via `research_logic` rules with `action = 'disqualify'` / `cfg_disqualify_value` 作为便利配置保留，但真正的执行是通过 `research_logic` 中 `action = 'disqualify'` 的规则
@@ -304,7 +462,11 @@ user role is defined in profile table's is_researcher toggle is_participant togg
 
 Each participant type is a row in the `participant_type` table. It belongs to one project via `project_id` and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
-每个参与者类型是 `participant_type` 表中的一行。它通过 `project_id` 属于一个项目，并定义参与者类别（如"主要护理者"、"家庭成员"）。
+调研参与者类型储存在participant_type table。每个研究可以设置多个参与者类型，比如家人、护理者、病人，每个问卷、问题也可以单独设置对哪些参与者可见
+
+参与者类型在研究项目(第一层级)进行设置，每个属于研究的问卷(第二层级)和问题(第三层级)均可以设置对哪些在研究项目中建立的参与者类型可见
+
+每个参与者通过 `project_id` 关联到研究项目research_project
 
 **Flat columns on `participant_type` / `participant_type` 上的扁平列:**
 - `id` (uuid PK)
@@ -321,9 +483,21 @@ Each participant type is a row in the `participant_type` table. It belongs to on
 
 **按参与者类型自动编号：** 当参与者注册时，系统计算该项目中相同 `participant_type_id` 的现有注册，并使用类型前缀生成下一个顺序号。例如，如果已有3个护理者以"CG"前缀注册，下一个获得"CG004"。编号存储在 `enrollment.participant_number` 中。
 
-**Questionnaires and questions are displayed per participant type.** Questionnaires are linked to participant types via the `questionnaire_participant_type` junction table. A questionnaire can be assigned to multiple types, and a type can have multiple questionnaires. Only participants of the assigned types see those questionnaires.
+### 3-Level Participant Type Filtering / 三级参与者类型过滤
 
-**问卷和问题按参与者类型显示。** 问卷通过 `questionnaire_participant_type` 连接表链接到参与者类型。一个问卷可以分配给多个类型，一个类型可以有多个问卷。只有分配类型的参与者才能看到这些问卷。
+**Level 1 - Project:** Participant types are defined at the project level in `participant_type` table. / 第一层级 - 项目：参与者类型在项目级别的 `participant_type` 表中定义。
+
+**Level 2 - Questionnaire:** Questionnaires are linked to participant types via the `questionnaire_participant_type` junction table (questionnaire_id, participant_type_id). A questionnaire can be assigned to multiple types. Only participants of the assigned types see those questionnaires. If no types assigned, all participants see it. / 第二层级 - 问卷：问卷通过 `questionnaire_participant_type` 连接表链接到参与者类型。一个问卷可以分配给多个类型。只有分配类型的参与者才能看到这些问卷。如果未分配类型，所有参与者都能看到。
+
+**Level 3 - Question:** Questions are linked to participant types via the `question_participant_type` junction table (question_id, participant_type_id). A question can be assigned to multiple types. Only participants of the assigned types see those questions. If no types assigned, all participants see it. / 第三层级 - 问题：问题通过 `question_participant_type` 连接表链接到参与者类型。一个问题可以分配给多个类型。只有分配类型的参与者才能看到这些问题。如果未分配类型，所有参与者都能看到。
+
+**Enrollment stores participant type:** Each enrollment has `participant_type_id` (uuid FK → participant_type). This determines which questionnaires and questions the participant sees. / 注册存储参与者类型：每个注册都有 `participant_type_id`。这决定了参与者看到哪些问卷和问题。
+
+**Filtering logic:** Survey views (`ParticipantSurveyView`, `OneTimeSurveyView`) use `filterQuestionsByParticipantType()` and `filterQuestionnairesByParticipantType()` utilities to filter content based on `enrollment.participant_type_id`. / 过滤逻辑：调查视图使用过滤工具函数根据 `enrollment.participant_type_id` 过滤内容。
+
+**UI:** Question editor in `QuestionnaireList.tsx` shows participant type checkboxes for each question. Questionnaire settings show participant type checkboxes for each questionnaire. / UI：问题编辑器显示每个问题的参与者类型复选框。问卷设置显示每个问卷的参与者类型复选框。
+
+
 
 ## 11. Layout and design / 布局和设计
 
@@ -365,33 +539,66 @@ remember: mobile footer should never be shown on public pages, to be precise, it
 
 ## 12. Notification / 通知
 
-Notification is set at **questionnaire level**, not project level. Each questionnaire has its own notification config:
+每个研究项目可以设置所需要的推送，推送关联于研究项目(第一层级)和问卷(第二层级)，每个问卷(第二层级)可以设置多项推送，每项推送均可以设置独立的时间、频率、内容以及是否允许免打扰；研究项目(第一层级)也可以设置多项不与问卷关联的推送。每个研究项目和问卷均可以设置推送应用于哪一类参与者
 
-通知设置在**问卷级别**，不是项目级别。每个问卷都有自己的通知配置：
+用户的推送设置和研究项目的推送设置并不关联，用户在自己的设置页面设置：1）开启/关闭推送 2）多个免打扰时段。用户的推送设置决定研究项目的推送是否送达，设置页面显示请遵守你所参与研究的推送时间，下拉显示用户所参与的研究的推送时间，但研究的推送时间(包括是否允许免打扰) 只作为建议，不具有约束力，用户设置的开启/关闭和免打扰时间决定推送是否送达
 
-- `notification_enabled` (bool) — researcher toggles per questionnaire / 研究员按问卷切换
-- `notification_title`, `notification_body` (text) — custom content / 自定义内容
+### Data Model / 数据模型
+
+All notification configs are stored in the unified `notification_config` table in `care_connector` schema. / 所有通知配置存储在 `care_connector` schema 的统一 `notification_config` 表中。
+
+**`notification_config` table columns / 表字段:**
+- `id` (uuid, PK)
+- `project_id` (uuid, FK → research_project) — required / 必填
+- `questionnaire_id` (uuid, FK → questionnaire, nullable) — null = project-level notification / null = 项目级通知
+- `enabled` (bool) — researcher toggle / 研究员开关
+- `title` (text) — notification title / 通知标题
+- `body` (text) — notification body / 通知正文
 - `notification_type` (text) — 'push', 'email', 'sms', 'push_email'
-- `notification_minutes_before` (int) — advance warning / 提前警告
-- `frequency` (text) — 'hourly', '2hours', '4hours', 'daily', 'twice_daily', 'weekly', 'once'
-- `time_windows` — **FLATTENED** to `questionnaire_time_window` table (questionnaire_id, start_time, end_time, order_index). In-memory still `[{start, end}]`. / **扁平化**到 `questionnaire_time_window` 表（questionnaire_id, start_time, end_time, order_index）。内存中仍然是 `[{start, end}]`。
-- `dnd_allowed` (bool) — whether researcher allows participants to set DND for this questionnaire / 研究员是否允许参与者为此问卷设置DND
+- `frequency` (text) — 'once', 'hourly', '2hours', '4hours', 'daily', 'twice_daily', 'weekly'
+- `minutes_before` (int) — advance warning / 提前提醒分钟数
+- `dnd_allowed` (bool) — whether participants can set DND for this notification / 是否允许参与者为此通知设置免打扰
+- `order_index` (int) — display order / 显示顺序
 
-**DND is per-questionnaire per-enrollment.** **FLATTENED** to `enrollment_dnd_period` table (enrollment_id, questionnaire_id, start_time, end_time, order_index). In-memory still `{ [questionnaire_id]: { dnd_periods: [{start, end}] } }`. If `dnd_allowed` is false on the questionnaire, participants cannot set DND for it.
+**Multiple notifications per entity:** Each questionnaire and each project can have **multiple** notification configs. / 每个问卷和每个项目可以有**多个**通知配置。
 
-**DND是按问卷按注册的。** **扁平化**到 `enrollment_dnd_period` 表（enrollment_id, questionnaire_id, start_time, end_time, order_index）。内存中仍然是 `{ [questionnaire_id]: { dnd_periods: [{start, end}] } }`。如果问卷上的 `dnd_allowed` 为false，参与者无法为其设置DND。
+**`notification_config_participant_type` junction table:** Links notification configs to specific participant types. / 将通知配置链接到特定的参与者类型。
 
-**Master kill switch:** `profiles.push_notifications_enabled` (bool). If false, no notifications fire regardless of questionnaire config. This is the participant's global opt-out. The Settings page shows this toggle and informs the participant about the notification agreements of their enrolled research projects — but it does NOT override the master kill switch.
+**Time windows:** Still stored in `questionnaire_time_window` table (questionnaire_id, start_time, end_time, order_index). In-memory `[{start, end}]`. / 仍然存储在 `questionnaire_time_window` 表中。
 
-**主开关：** `profiles.push_notifications_enabled` (bool)。如果为false，无论问卷配置如何，都不会触发通知。这是参与者的全局退出。设置页面显示此开关并告知参与者其注册研究项目的通知协议——但它不会覆盖主开关。
+### DND (Do Not Disturb) / 免打扰
 
-**How delivery works:** `notificationScheduler.ts` runs client-side. On load, it queries all active enrollments → their questionnaires with `notification_enabled=true` → builds a per-questionnaire notification schedule. Every 60 seconds it checks each questionnaire: is it within the time window? Is it past the frequency cooldown? Is it in DND? If all pass, fires a browser notification using the questionnaire's custom title/body. Time windows are read from `questionnaire_time_window` table. Participant DND is read from `enrollment_dnd_period` table keyed by enrollment + questionnaire ID.
+**DND is per-questionnaire per-enrollment.** **FLATTENED** to `enrollment_dnd_period` table (enrollment_id, questionnaire_id, start_time, end_time, order_index). In-memory still `{ [questionnaire_id]: { dnd_periods: [{start, end}] } }`. If `dnd_allowed` is false on all notification configs for a questionnaire, participants cannot set DND for it.
 
-**交付如何工作：** `notificationScheduler.ts` 在客户端运行。加载时，它查询所有活动注册 → 其 `notification_enabled=true` 的问卷 → 构建按问卷的通知计划。每60秒检查每个问卷：是否在时间窗口内？是否过了频率冷却？是否在DND中？如果全部通过，使用问卷的自定义标题/正文触发浏览器通知。时间窗口从 `questionnaire_time_window` 表读取。参与者DND从 `enrollment_dnd_period` 表读取，按注册 + 问卷ID键控。
+**DND是按问卷按注册的。** **扁平化**到 `enrollment_dnd_period` 表。如果问卷所有通知配置的 `dnd_allowed` 都为false，参与者无法为其设置DND。
 
-**Participant joins multiple researches:** Each enrollment is independent. Research A's questionnaire notifications have their own schedule and DND. Research B's are separate. The participant can set DND per-questionnaire from the notification settings modal (`ParticipantNotificationSettings`).
+### Master Kill Switch / 主开关
 
-**参与者加入多个研究：** 每个注册都是独立的。研究A的问卷通知有自己的计划和DND。研究B的是分开的。参与者可以从通知设置模态（`ParticipantNotificationSettings`）按问卷设置DND。
+`profiles.push_notifications_enabled` (bool). If false, no notifications fire regardless of notification_config settings. This is the participant's global opt-out.
+
+`profiles.push_notifications_enabled` (bool)。如果为false，无论通知配置如何，都不会触发通知。这是参与者的全局退出。
+
+### Delivery / 交付
+
+`notificationScheduler.ts` runs client-side. On load, it queries all active enrollments → loads `notification_config` rows for enrolled projects (both project-level and questionnaire-level) → builds per-config notification schedule. Every 60 seconds it checks each config: is it enabled? is it within the time window? past the frequency cooldown? in DND? If all pass, fires a browser notification using the config's title/body. Time windows from `questionnaire_time_window`. Participant DND from `enrollment_dnd_period`.
+
+`notificationScheduler.ts` 在客户端运行。加载时查询所有活动注册 → 从 `notification_config` 加载所有项目级和问卷级通知配置 → 构建按配置的通知计划。每60秒检查每个配置：是否启用？是否在时间窗口内？是否过了频率冷却？是否在DND中？如果全部通过，使用配置的标题/正文触发浏览器通知。
+
+### Sync Utilities / 同步工具
+
+- `notificationConfigSync.ts` — load/save `notification_config` rows, supports batch loading and per-questionnaire saving / 加载/保存通知配置行，支持批量加载和按问卷保存
+- `loadNotificationConfigs(projectId)` — loads all configs for a project / 加载项目所有配置
+- `saveNotificationConfigs(projectId, configs)` — saves all configs for a project / 保存项目所有配置
+- `saveNotificationConfigsForQuestionnaire(projectId, questionnaireId, configs)` — saves configs for one questionnaire / 保存一个问卷的配置
+
+### UI / 用户界面
+
+- **Researcher:** `QuestionnaireList.tsx` — per-questionnaire notification cards with add/edit/delete/toggle; project-level notification section at top / 问卷级通知卡片和项目级通知部分
+- **Participant:** `ParticipantNotificationSettings.tsx` — shows project-level notifications (read-only) and per-questionnaire DND controls / 显示项目级通知（只读）和按问卷DND控制
+
+**Participant joins multiple researches:** Each enrollment is independent. Each project's notification configs have their own schedule and DND. The participant can set DND per-questionnaire from `ParticipantNotificationSettings`.
+
+**参与者加入多个研究：** 每个注册都是独立的。每个项目的通知配置有自己的计划和DND。参与者可以从 `ParticipantNotificationSettings` 按问卷设置DND。
 
 ---
 

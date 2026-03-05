@@ -15,6 +15,7 @@ import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
 import { questionConfigToDbCols, validationRuleToDbCols, hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/logicEngine';
 import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
+import { loadNotificationConfigs, saveNotificationConfigs, type NotificationConfig } from '../utils/notificationConfigSync';
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
@@ -141,6 +142,7 @@ const SurveyBuilder: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
   const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
+  const [projectNotifications, setProjectNotifications] = useState<NotificationConfig[]>([]);
 
   // New state for multi-questionnaire architecture
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
@@ -408,6 +410,34 @@ const SurveyBuilder: React.FC = () => {
             .eq('project_id', projectId)
             .order('order_index');
 
+          // Load question participant types from junction table
+          const questionIds = (questionsData || []).map((q: any) => q.id);
+          const qptByQuestion = new Map<string, string[]>();
+          if (questionIds.length > 0) {
+            const { data: qptRows } = await supabase
+              .from('question_participant_type')
+              .select('question_id, participant_type_id')
+              .in('question_id', questionIds);
+            for (const row of (qptRows || [])) {
+              if (!qptByQuestion.has(row.question_id)) qptByQuestion.set(row.question_id, []);
+              qptByQuestion.get(row.question_id)!.push(row.participant_type_id);
+            }
+          }
+
+          // Load notification configs from the new notification_config table
+          const allNotifConfigs = await loadNotificationConfigs(projectId);
+          const notifByQ = new Map<string, NotificationConfig[]>();
+          const projNotifs: NotificationConfig[] = [];
+          for (const nc of allNotifConfigs) {
+            if (nc.questionnaire_id) {
+              if (!notifByQ.has(nc.questionnaire_id)) notifByQ.set(nc.questionnaire_id, []);
+              notifByQ.get(nc.questionnaire_id)!.push(nc);
+            } else {
+              projNotifs.push(nc);
+            }
+          }
+          if (mounted) setProjectNotifications(projNotifs);
+
           let qConfigs: QuestionnaireConfig[] = (questionnaireRows || []).map((qr: any) => ({
             id: qr.id,
             project_id: qr.project_id,
@@ -418,19 +448,12 @@ const SurveyBuilder: React.FC = () => {
             estimated_duration: qr.estimated_duration || 5,
             frequency: qr.frequency || 'once',
             time_windows: twMap.get(qr.id) || [{ start: '09:00', end: '21:00' }],
-            notification_enabled: qr.notification_enabled || false,
-            notification_minutes_before: qr.notification_minutes_before || 5,
-            notification_title: qr.notification_title || 'Time for your survey!',
-            notification_body: qr.notification_body || 'Please complete your questionnaire now.',
-            notification_type: qr.notification_type || 'push',
-            dnd_allowed: qr.dnd_allowed || false,
-            dnd_default_start: qr.dnd_default_start || '22:00',
-            dnd_default_end: qr.dnd_default_end || '08:00',
             assigned_participant_types: qptMap.get(qr.id) || [],
             order_index: qr.order_index || 0,
             tab_sections: qr.tab_sections || undefined,
             display_mode: qr.display_mode || 'one_per_page',
             questions_per_page: qr.questions_per_page ?? null,
+            notifications: notifByQ.get(qr.id) || [],
           }));
 
           if (questionsData && mounted) {
@@ -446,6 +469,9 @@ const SurveyBuilder: React.FC = () => {
                   if (q.question_config.allow_none !== undefined) q.allow_none = q.question_config.allow_none;
                   if (q.question_config.response_required !== undefined) q.response_required = q.question_config.response_required;
                 }
+                // Attach participant types from junction table
+                q.assigned_participant_types = qptByQuestion.get(q.id) || [];
+                
                 const qId = q.questionnaire_id;
                 if (qId && qMap.has(qId)) {
                   qMap.get(qId)!.push(q);
@@ -553,13 +579,9 @@ const SurveyBuilder: React.FC = () => {
             estimated_duration: 5,
             frequency: 'once',
             time_windows: [{ start: '09:00', end: '21:00' }],
-            notification_enabled: false,
-            notification_minutes_before: 5,
-            dnd_allowed: false,
-            dnd_default_start: '22:00',
-            dnd_default_end: '08:00',
             assigned_participant_types: [],
             order_index: 0,
+            notifications: [],
           };
           setQuestionnaireConfigs([defaultQ]);
         }
@@ -670,14 +692,6 @@ const SurveyBuilder: React.FC = () => {
             estimated_duration: qc.estimated_duration || 5,
             frequency: qc.frequency || 'once',
             time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
-            notification_enabled: qc.notification_enabled || false,
-            notification_minutes_before: qc.notification_minutes_before || 5,
-            notification_title: qc.notification_title || 'Time for your survey!',
-            notification_body: qc.notification_body || 'Please complete your questionnaire now.',
-            notification_type: qc.notification_type || 'push',
-            dnd_allowed: qc.dnd_allowed || false,
-            dnd_default_start: qc.dnd_default_start || '22:00',
-            dnd_default_end: qc.dnd_default_end || '08:00',
             order_index: qc.order_index ?? 0,
             tab_sections: qc.tab_sections || null,
             display_mode: qc.display_mode || 'one_per_page',
@@ -792,6 +806,19 @@ const SurveyBuilder: React.FC = () => {
             await supabase.from('question_option').delete().in('id', staleOptionIds);
           }
         }
+
+        // Sync question participant types to junction table
+        for (const question of allQuestions) {
+          await supabase.from('question_participant_type').delete().eq('question_id', question.id);
+          const assignedTypes = (question as any).assigned_participant_types || [];
+          if (assignedTypes.length > 0) {
+            const junctionRows = assignedTypes.map((ptId: string) => ({
+              question_id: question.id,
+              participant_type_id: ptId,
+            }));
+            await supabase.from('question_participant_type').insert(junctionRows);
+          }
+        }
       };
 
       // ── Sync logic rules to research_logic table ──
@@ -812,6 +839,9 @@ const SurveyBuilder: React.FC = () => {
         await syncParticipantTypes(projectId);
         await syncQuestionnaires(projectId);
         await Promise.all([syncQuestions(projectId), syncLogicRules(projectId)]);
+        // Save ALL notification configs (project-level + questionnaire-level) in one shot
+        const allNotifs = [...projectNotifications, ...questionnaireConfigs.flatMap(qc => qc.notifications || [])];
+        await saveNotificationConfigs(projectId, allNotifs);
       } else {
         const surveyCode = project.survey_code || await generateSurveyCode();
         const newProjectData = {
@@ -828,6 +858,8 @@ const SurveyBuilder: React.FC = () => {
           await syncParticipantTypes(newProject.id);
           await syncQuestionnaires(newProject.id);
           await Promise.all([syncQuestions(newProject.id), syncLogicRules(newProject.id)]);
+          const allNotifs = [...projectNotifications, ...questionnaireConfigs.flatMap(qc => qc.notifications || [])];
+          await saveNotificationConfigs(newProject.id, allNotifs);
           toast.success('Project created successfully!');
           navigate(`/easyresearch/project/${newProject.id}`);
         }
@@ -966,6 +998,8 @@ const SurveyBuilder: React.FC = () => {
               projectId={projectId}
               logicRules={logicRules}
               onUpdateLogic={setLogicRules}
+              projectNotifications={projectNotifications}
+              onUpdateProjectNotifications={setProjectNotifications}
             />
           </>
         )}
