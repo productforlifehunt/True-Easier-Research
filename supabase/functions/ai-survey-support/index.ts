@@ -7,8 +7,8 @@ const corsHeaders = {
 }
 
 // Dev-stage key; move to project secret for production
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
-const AI_MODEL = 'anthropic/claude-3.5-haiku'
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
+const AI_MODEL = 'anthropic/claude-haiku-4.5'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
