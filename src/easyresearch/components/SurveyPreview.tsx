@@ -107,6 +107,16 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
       case 'dropdown':
         const ddOpts = question.options || [];
         return (<select value={value || ''} onChange={(e) => handleResponse(question.id, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"><option value="">Select an option...</option>{ddOpts.map((o: any) => <option key={o.id} value={o.id}>{o.option_text}</option>)}</select>);
+      case 'constant_sum':
+        const csPreOpts = question.options || [];
+        return (<div className="space-y-2">{csPreOpts.map((o: any) => (<div key={o.id} className="flex items-center gap-2"><span className="flex-1 text-[13px] text-stone-600">{o.option_text}</span><input type="number" className="w-16 px-2 py-1.5 rounded-lg border border-stone-200 text-center text-[12px]" placeholder="0" readOnly /></div>))}<div className="text-[11px] text-stone-400 text-right">Total: {question.question_config?.total ?? 100}</div></div>);
+      case 'signature':
+        return (<div className="h-28 border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 flex items-center justify-center text-stone-400 text-[12px]">✍ Signature pad</div>);
+      case 'address':
+        return (<div className="space-y-2">{['Street','City','State','Postal Code','Country'].map(l=>(<input key={l} type="text" placeholder={l} className="w-full px-3 py-2 rounded-lg border border-stone-200 text-[12px]" readOnly />))}</div>);
+      case 'slider_range':
+        const srPCfg = question.question_config || {} as any;
+        return (<div className="space-y-2"><input type="range" className="w-full" disabled /><input type="range" className="w-full" disabled /><div className="flex justify-between text-[11px] text-stone-400"><span>{srPCfg.min_label || srPCfg.min_value || 0}</span><span>{srPCfg.max_label || srPCfg.max_value || 100}</span></div></div>);
       default: return <p className="text-[12px] text-stone-400 italic">Preview not available for: {question.question_type}</p>;
     }
   };

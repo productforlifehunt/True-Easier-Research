@@ -204,7 +204,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
           await saveProfileData(enrollment.id, profileResponses);
         }
         localStorage.setItem(`enrollment_${projectId}`, enrollment.id);
-        if (project?.project_type === 'longitudinal') {
+        if (project?.methodology_type === 'multi_time') {
           window.location.href = `/easyresearch/participant/${projectId}`;
         } else { onComplete(); }
       }
@@ -412,7 +412,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               <h1 className="text-xl font-bold text-stone-800 mb-2">{project?.title}</h1>
               <p className="text-[13px] text-stone-400 font-light mb-6">{project?.description}</p>
 
-              {project?.project_type === 'longitudinal' && (
+              {project?.methodology_type === 'multi_time' && (
                 <div className="mb-6 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
                   <h3 className="text-[13px] font-semibold text-stone-700 mb-2 flex items-center gap-2">
                     <Calendar size={14} className="text-emerald-500" /> Study Information
@@ -482,7 +482,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
 
                 <button onClick={handleInfoNext} disabled={!email || (participantTypes.length > 1 && !selectedParticipantTypeId)}
                   className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
-                  {hasProfileQuestions ? 'Continue to Profile' : (project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey')}
+                  {hasProfileQuestions ? 'Continue to Profile' : (project?.methodology_type === 'multi_time' ? 'Start Study' : 'Begin Survey')}
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -504,7 +504,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               </div>
               <button onClick={handleEnroll} disabled={!validateProfile()}
                 className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
-                {project?.project_type === 'longitudinal' ? 'Start Study' : 'Begin Survey'}
+                {project?.methodology_type === 'multi_time' ? 'Start Study' : 'Begin Survey'}
                 <ChevronRight size={16} />
               </button>
             </>

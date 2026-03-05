@@ -140,67 +140,482 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 
 ## 9. QUESTIONS / 问题
 
+The question system supports **27 question types** across 6 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
+
+问题系统支持 **27种问题类型**，分为6大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
+
 Each question is a row in the `question` table (renamed from the old `survey_question` — NEVER use `survey_question` anymore). A question belongs to one project via `project_id` and optionally to one questionnaire via `questionnaire_id`.
 
 每个问题是 `question` 表中的一行（从旧的 `survey_question` 重命名——永远不要再使用 `survey_question`）。一个问题通过 `project_id` 属于一个项目，可选地通过 `questionnaire_id` 属于一个问卷。
 
-:**
+### 9.1 `question` table columns / 表字段
+
+**Core fields / 核心字段:**
+
 - `id` (uuid PK)
-- `project_id` (uuid FK → research_project)
+- `project_id` (uuid FK → research_project) — always set / 始终设置
 - `questionnaire_id` (uuid FK → questionnaire) — links the question to a specific questionnaire / 将问题链接到特定问卷
-- `question_type` (text) — the type string, e.g. `'single_choice'`, `'likert_scale'`, `'matrix'`, `'slider'`. The canonical list lives in `src/easyresearch/constants/questionTypes.ts` / 类型字符串，如 `'single_choice'`、`'likert_scale'`、`'matrix'`、`'slider'`。规范列表在 `src/easyresearch/constants/questionTypes.ts` 中
+- `question_type` (text) — the type string from `questionTypes.ts`, e.g. `'single_choice'`, `'slider'`, `'matrix'` / 来自 `questionTypes.ts` 的类型字符串
 - `question_text` (text) — the actual question prompt shown to participants / 向参与者显示的实际问题提示
-- `question_description` (text) — optional help text or description / 可选的帮助文本或描述
+- `question_description` (text) — optional help text below the question / 问题下方的可选帮助文本
 - `order_index` (int) — position within the questionnaire / 在问卷中的位置
 - `required` (bool) — whether the participant must answer / 参与者是否必须回答
 - `section_name` (text) — groups questions into sections for display / 将问题分组到部分以供显示
-- `allow_voice` (bool) — voice input allowed / 允许语音输入
-- `allow_ai_assist` (bool) — AI assistant allowed / 允许AI助手
+
+**Feature toggles / 功能开关:**
+
+- `allow_voice` (bool) — voice input allowed for this question / 此问题允许语音输入
+- `allow_ai_assist` (bool) — AI assistant allowed for this question / 此问题允许AI助手
 - `allow_other` (bool) — adds an "Other" free-text option (for choice types) / 添加"其他"自由文本选项（用于选择类型）
 - `allow_none` (bool) — adds a "None of the above" option (for choice types) / 添加"以上都不是"选项（用于选择类型）
 
-**Flat config columns on `question` / `question` 上的扁平配置列:**
-- `cfg_*` (38 columns) — type-specific settings stored as flat columns. For a slider: `cfg_min_value`, `cfg_max_value`, `cfg_step`. For text: `cfg_max_length`. For matrix: `cfg_columns` (JSON string). Each question type has its own config shape defined in `QUESTION_TYPE_DEFINITIONS`. Hydrated to in-memory `question_config` object via `questionConfigSync.ts`. / 类型特定设置存储为扁平列。对于滑块：`cfg_min_value`、`cfg_max_value`、`cfg_step`。对于文本：`cfg_max_length`。对于矩阵：`cfg_columns`（JSON字符串）。每个问题类型在 `QUESTION_TYPE_DEFINITIONS` 中定义自己的配置形状。通过 `questionConfigSync.ts` 水合到内存中的 `question_config` 对象。
-- `vr_*` (8 columns) — validation rules: `vr_min_length`, `vr_max_length`, `vr_min_value`, `vr_max_value`, `vr_min`, `vr_max`, `vr_allow_future_dates`, `vr_allow_past_dates`. Hydrated to in-memory `validation_rule` object. / 验证规则：`vr_min_length`、`vr_max_length`、`vr_min_value`、`vr_max_value`、`vr_min`、`vr_max`、`vr_allow_future_dates`、`vr_allow_past_dates`。水合到内存中的 `validation_rule` 对象。
+**Type-specific config columns (`cfg_*`, 38 columns) / 类型特定配置列:**
+
+These are flat database columns (NOT JSONB) on the `question` table. Each question type only uses its relevant `cfg_*` columns; the rest are null. They are hydrated into an in-memory `question_config` object by `questionConfigSync.ts`.
+
+这些是 `question` 表上的扁平数据库列（不是 JSONB）。每种问题类型仅使用其相关的 `cfg_*` 列；其余为 null。它们通过 `questionConfigSync.ts` 水合为内存中的 `question_config` 对象。
+
+- `cfg_min_value` (numeric) — minimum value for slider, bipolar_scale / 滑块、双极量表的最小值
+- `cfg_max_value` (numeric) — maximum value for slider, bipolar_scale, rating / 滑块、双极量表、评分的最大值
+- `cfg_step` (numeric) — step increment for slider, bipolar_scale / 滑块、双极量表的步长
+- `cfg_min_label` (text) — label for minimum end of scale / 量表最小端的标签
+- `cfg_max_label` (text) — label for maximum end of scale / 量表最大端的标签
+- `cfg_max_length` (int) — character limit for text_short, text_long / 短文本、长文本的字符限制
+- `cfg_columns` (text) — JSON string of column headers for matrix type / 矩阵类型的列标题 JSON 字符串
+- `cfg_scale_type` (text) — scale range for likert_scale, e.g. `'1-5'`, `'1-7'` / 李克特量表的量表范围
+- `cfg_custom_labels` (text) — JSON string of custom point labels for likert_scale / 李克特量表的自定义点标签 JSON 字符串
+- `cfg_layout` (text) — layout mode for checkbox_group: `'vertical'` or `'grid'` / 复选框组的布局模式
+- `cfg_columns_count` (int) — number of columns for checkbox_group grid layout / 复选框组网格布局的列数
+- `cfg_allow_multiple` (bool) — allow multiple selections for image_choice / 图片选择允许多选
+- `cfg_yes_label` (text) — custom "Yes" text for yes_no / 是否题的自定义"是"文本
+- `cfg_no_label` (text) — custom "No" text for yes_no / 是否题的自定义"否"文本
+- `cfg_max_files` (int) — maximum files for file_upload / 文件上传的最大文件数
+- `cfg_max_size_mb` (int) — max file size in MB for file_upload / 文件上传的最大文件大小（MB）
+- `cfg_accepted_types` (text) — allowed MIME types for file_upload, e.g. `'image/*,.pdf'` / 文件上传允许的 MIME 类型
+- `cfg_content_type` (text) — content type for instruction block: `'text'` / 说明块的内容类型
+- `cfg_section_icon` (text) — icon for section_header / 章节标题的图标
+- `cfg_section_color` (text) — color for section_header, e.g. `'#10b981'` / 章节标题的颜色
+- `cfg_content` (text) — content for text_block / 文本块的内容
+- `cfg_font_size` (int) — font size for text_block / 文本块的字号
+- `cfg_image_url` (text) — URL for image_block / 图片块的 URL
+- `cfg_caption` (text) — caption for image_block / 图片块的说明文字
+- `cfg_alt_text` (text) — alt text for image_block / 图片块的替代文本
+- `cfg_max_width` (text) — max width for image_block, e.g. `'100%'` / 图片块的最大宽度
+- `cfg_style` (text) — line style for divider: `'solid'`, `'dashed'`, `'dotted'` / 分隔线样式
+- `cfg_color` (text) — color for divider / 分隔线颜色
+- `cfg_thickness` (int) — thickness in px for divider / 分隔线粗细（像素）
+- `cfg_show_value_labels` (bool) — show value labels on bipolar_scale / 双极量表上显示值标签
+
+**Validation rule columns (`vr_*`, 8 columns) / 验证规则列:**
+
+- `vr_min_length` (int) — minimum text length / 最小文本长度
+- `vr_max_length` (int) — maximum text length / 最大文本长度
+- `vr_min_value` (numeric) — minimum numeric value / 最小数值
+- `vr_max_value` (numeric) — maximum numeric value / 最大数值
+- `vr_min` (numeric) — alias for min value / 最小值别名
+- `vr_max` (numeric) — alias for max value / 最大值别名
+- `vr_allow_future_dates` (bool) — allow dates in the future / 允许未来日期
+- `vr_allow_past_dates` (bool) — allow dates in the past / 允许过去日期
+
+**Other config columns / 其他配置列:**
+
 - `logic_rules` — DROPPED. All logic is now in the `research_logic` table (see section 5). / 已删除。所有逻辑现在在 `research_logic` 表中（见第5节）。
 - `ai_config` — AI-related settings (reserved, not yet implemented) / AI相关设置（保留，尚未实现）
 - `scoring_config` — scoring/weighting for analytics / 分析的评分/权重
 - `piping_config` — answer piping into later questions / 答案传递到后续问题
 
-**Question options** are stored in the `question_option` table (one row per option), NOT in JSONB:
+### 9.2 `question_option` table / 问题选项表
 
-**问题选项** 存储在 `question_option` 表中（每个选项一行），不在 JSONB 中：
+Options are stored as individual rows in `question_option` (one row per option), NOT in JSONB. Used by: `single_choice`, `multiple_choice`, `dropdown`, `checkbox_group`, `matrix` (rows), `ranking`, `image_choice`.
+
+选项作为单独的行存储在 `question_option` 中（每个选项一行），不在 JSONB 中。以下类型使用：`single_choice`、`multiple_choice`、`dropdown`、`checkbox_group`、`matrix`（行）、`ranking`、`image_choice`。
 
 - `id` (uuid PK)
-- `question_id` (uuid FK → question)
-- `option_text` (text) — display text / 显示文本
-- `option_value` (text) — programmatic value / 程序值
-- `order_index` (int) — position / 位置
-- `is_other` (bool) — whether this is the "Other" free-text option / 这是否是"其他"自由文本选项
+- `question_id` (uuid FK → question) — which question this option belongs to / 此选项属于哪个问题
+- `option_text` (text) — display text shown to participant / 向参与者显示的文本
+- `option_value` (text) — programmatic value (e.g. image URL for image_choice) / 程序值（如 image_choice 的图片 URL）
+- `order_index` (int) — display position / 显示位置
+- `is_other` (bool) — whether this is the "Other" free-text option / 是否是"其他"自由文本选项
 
-**Responses** are stored in `survey_response` with typed columns:
+### 9.3 `survey_response` table — response storage / 响应存储
 
-**响应** 存储在 `survey_response` 中，带有类型化列：
+Responses are stored in `survey_response` with **typed columns**. Each question type writes to exactly ONE response column. This allows type-safe queries and aggregation.
 
-- `answer_text` (text) — for text, email, phone, date, time, single_choice, yes_no / 用于文本、电子邮件、电话、日期、时间、单选、是否
-- `answer_number` (numeric) — for number, slider, rating, likert_scale, NPS / 用于数字、滑块、评级、李克特量表、NPS
-- `answer_array` (text[]) — for multiple_choice, checkbox_group, ranking / 用于多选、复选框组、排名
-- `answer_json` (JSONB) — for matrix and complex types only / 仅用于矩阵和复杂类型
+响应存储在 `survey_response` 中，使用**类型化列**。每种问题类型只写入一个响应列。这允许类型安全的查询和聚合。
 
-**Questions can be shown per participant type.** Each questionnaire is linked to participant types via the `questionnaire_participant_type` junction table. When a questionnaire is assigned to specific participant types, only participants of those types see the questionnaire and its questions. This is a many-to-many relationship — one questionnaire can serve multiple participant types, and one participant type can have multiple questionnaires.
+- `answer_text` (text) — for: `text_short`, `text_long`, `email`, `phone`, `date`, `time`, `single_choice`, `dropdown`, `yes_no` / 用于：短文本、长文本、电子邮件、电话、日期、时间、单选、下拉、是否
+- `answer_number` (numeric) — for: `number`, `slider`, `bipolar_scale`, `rating`, `likert_scale`, `nps` / 用于：数字、滑块、双极量表、评分、李克特量表、NPS
+- `answer_array` (text[]) — for: `multiple_choice`, `checkbox_group`, `ranking` / 用于：多选、复选框组、排名
+- `answer_json` (JSONB) — for: `matrix`, `file_upload`, `image_choice` (complex structured data only) / 用于：矩阵、文件上传、图片选择（仅复杂结构数据）
 
-**问题可以按参与者类型显示。** 每个问卷通过 `questionnaire_participant_type` 连接表链接到参与者类型。当问卷分配给特定参与者类型时，只有这些类型的参与者才能看到问卷及其问题。这是多对多关系——一个问卷可以服务多个参与者类型，一个参与者类型可以有多个问卷。
+Layout types (`section_header`, `text_block`, `divider`, `image_block`, `instruction`) do NOT create response rows — they are display-only. / 布局类型不创建响应行——它们仅用于显示。
 
-**Supported question types** (defined in `questionTypes.ts`):
+### 9.4 Participant type filtering / 参与者类型过滤
 
-**支持的问题类型**（在 `questionTypes.ts` 中定义）：
+Questions can be shown per participant type at **3 levels**: / 问题可以在**3个层级**按参与者类型显示：
 
-- Text: `text_short`, `text_long`
-- Choice: `single_choice`, `multiple_choice`, `dropdown`, `checkbox_group`
-- Scale: `slider`, `bipolar_scale`, `rating`, `likert_scale`, `nps`
-- Data: `number`, `date`, `time`, `email`, `phone`
-- Advanced: `matrix`, `ranking`, `file_upload`, `image_choice`, `yes_no`, `instruction`
-- Layout: `section_header`, `text_block`, `divider`, `image_block` (these don't collect responses / 这些不收集响应)
+**Level 1 — Project:** Participant types are defined at the project level in `participant_type` table. Each enrollment stores `participant_type_id` (uuid FK → participant_type). / 第一层级——项目：参与者类型在项目级别的 `participant_type` 表中定义。每个注册存储 `participant_type_id`。
+
+**Level 2 — Questionnaire:** Questionnaires are linked to participant types via the `questionnaire_participant_type` junction table (questionnaire_id, participant_type_id). A questionnaire can be assigned to multiple types. Only participants of the assigned types see the questionnaire. If no types assigned, all participants see it. / 第二层级——问卷：问卷通过 `questionnaire_participant_type` 连接表链接到参与者类型。如果未分配类型，所有参与者都能看到。
+
+**Level 3 — Question:** Questions are linked to participant types via the `question_participant_type` junction table (question_id, participant_type_id). A question can be assigned to multiple types. Only participants of the assigned types see the question. If no types assigned, all participants see it. / 第三层级——问题：问题通过 `question_participant_type` 连接表链接到参与者类型。如果未分配类型，所有参与者都能看到。
+
+**Filtering logic:** Survey views (`ParticipantSurveyView`, `OneTimeSurveyView`) use `filterQuestionsByParticipantType()` and `filterQuestionnairesByParticipantType()` utilities in `src/easyresearch/utils/participantTypeFilter.ts` to filter content based on `enrollment.participant_type_id`. / 过滤逻辑：调查视图使用 `participantTypeFilter.ts` 中的过滤工具函数过滤内容。
+
+### 9.5 The 27 Question Types — Full Reference / 27种问题类型——完整参考
+
+#### Category 1: Text Input (2 types) / 文本输入（2种）
+
+**1. `text_short` — Short Text / 短文本**
+
+Single-line text input for brief responses (names, single words, short phrases). / 单行文本输入，用于简短回答（姓名、单词、短语）。
+
+- **Requires options:** No / 不需要选项
+- **Supports allow_other / allow_none:** No / 不支持
+- **Config columns used:** `cfg_max_length` (default 100) / 使用的配置列：`cfg_max_length`（默认100）
+- **Validation columns:** `vr_min_length`, `vr_max_length` / 验证列
+- **Response column:** `answer_text` / 响应列
+- **Supports voice input:** Yes (if `allow_voice = true`) / 支持语音输入
+
+**2. `text_long` — Long Text / 长文本**
+
+Multi-line textarea for detailed responses (paragraphs, open-ended feedback). Displays as a resizable textarea with min-height 120px. / 多行文本区域，用于详细回答（段落、开放式反馈）。显示为可调整大小的文本区域。
+
+- **Requires options:** No / 不需要选项
+- **Supports allow_other / allow_none:** No / 不支持
+- **Config columns used:** `cfg_max_length` (default 2000) / 使用的配置列：`cfg_max_length`（默认2000）
+- **Validation columns:** `vr_min_length`, `vr_max_length` / 验证列
+- **Response column:** `answer_text` / 响应列
+- **Supports voice input:** Yes (if `allow_voice = true`) / 支持语音输入
+
+#### Category 2: Choice Types (6 types) / 选择类型（6种）
+
+**3. `single_choice` — Single Choice (Radio Buttons) / 单选**
+
+Radio button group — participant selects exactly one option. Each option is a row in `question_option`. Supports "Other" free-text and "None of the above". / 单选按钮组——参与者选择一个选项。每个选项是 `question_option` 中的一行。支持"其他"和"以上都不是"。
+
+- **Requires options:** Yes (`question_option` rows) / 需要选项
+- **Supports allow_other:** Yes — adds free-text "Other" option / 支持——添加"其他"自由文本选项
+- **Supports allow_none:** Yes — adds "None of the above" option / 支持——添加"以上都不是"选项
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_text` (stores selected `option.id`) / 响应列：存储选中的 option.id
+- **Supports voice input:** No / 不支持语音输入
+
+**4. `multiple_choice` — Multiple Choice (Checkboxes) / 多选**
+
+Checkbox group — participant selects one or more options. Supports "Other" and "None of the above". / 复选框组——参与者选择一个或多个选项。支持"其他"和"以上都不是"。
+
+- **Requires options:** Yes (`question_option` rows) / 需要选项
+- **Supports allow_other:** Yes / 支持
+- **Supports allow_none:** Yes / 支持
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_array` (stores array of selected `option.id` values) / 响应列：存储选中的 option.id 数组
+- **Supports voice input:** No / 不支持语音输入
+
+**5. `dropdown` — Dropdown Select / 下拉选择**
+
+Space-efficient dropdown menu for when there are many options. Does NOT support "Other" or "None". / 节省空间的下拉菜单，适用于选项很多的情况。不支持"其他"或"以上都不是"。
+
+- **Requires options:** Yes (`question_option` rows) / 需要选项
+- **Supports allow_other / allow_none:** No / 不支持
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_text` (stores selected `option.id`) / 响应列：存储选中的 option.id
+- **Supports voice input:** No / 不支持语音输入
+
+**6. `checkbox_group` — Categorized Checkbox Group / 分类复选框组**
+
+Like `multiple_choice` but with grid/column layout support. Used for categorized multi-select (e.g. activity types, challenge types). Can display options in 1, 2, or 3 columns. / 类似 `multiple_choice` 但支持网格/列布局。用于分类多选（如活动类型、挑战类型）。可以1、2或3列显示选项。
+
+- **Requires options:** Yes (`question_option` rows) / 需要选项
+- **Supports allow_other:** Yes / 支持
+- **Supports allow_none:** No / 不支持
+- **Config columns used:** `cfg_layout` (`'vertical'` or `'grid'`), `cfg_columns_count` (1, 2, or 3) / 使用的配置列
+- **Response column:** `answer_array` (stores array of selected values) / 响应列：存储选中值数组
+- **Supports voice input:** No / 不支持语音输入
+
+**7. `image_choice` — Image-Based Choice / 图片选择**
+
+Select from image-based or emoji-based options (e.g. emoji mood picker, visual stimuli). Options store image URLs in `option_value` and display labels in `option_text`. Can allow single or multiple selection. / 从图片或表情选项中选择。选项在 `option_value` 中存储图片 URL，在 `option_text` 中存储标签。可以允许单选或多选。
+
+- **Requires options:** Yes (`question_option` rows, `option_value` = image URL or emoji) / 需要选项
+- **Supports allow_other / allow_none:** No / 不支持
+- **Config columns used:** `cfg_allow_multiple` (bool, default false) / 使用的配置列
+- **Response column:** `answer_text` (single) or `answer_json` (multiple) / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**8. `yes_no` — Yes / No Toggle / 是否题**
+
+Simple binary choice with customizable labels. Displays as two large toggle buttons. / 简单的二元选择，标签可自定义。显示为两个大切换按钮。
+
+- **Requires options:** No (built-in Yes/No) / 不需要选项（内置是/否）
+- **Supports allow_other / allow_none:** No / 不支持
+- **Config columns used:** `cfg_yes_label` (default "Yes"), `cfg_no_label` (default "No") / 使用的配置列
+- **Response column:** `answer_text` (stores `'yes'` or `'no'`) / 响应列：存储 `'yes'` 或 `'no'`
+- **Supports voice input:** No / 不支持语音输入
+
+#### Category 3: Scale Types (5 types) / 量表类型（5种）
+
+**9. `slider` — Range Slider / 范围滑块**
+
+Continuous range slider for numeric input. Displays a horizontal slider with current value. / 连续范围滑块，用于数字输入。显示带当前值的水平滑块。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** `cfg_min_value` (default 0), `cfg_max_value` (default 10), `cfg_step` (default 1), `cfg_min_label`, `cfg_max_label` / 使用的配置列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**10. `bipolar_scale` — Bipolar Scale / 双极量表**
+
+Negative-to-positive scale (e.g. -3 to +3) with labeled endpoints. Displays as clickable number buttons with color coding (red for negative, green for positive, gray for zero). / 负到正量表（如 -3 到 +3）。显示为可点击的数字按钮，带颜色编码（红色负值、绿色正值、灰色零值）。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** `cfg_min_value` (default -3), `cfg_max_value` (default 3), `cfg_step` (default 1), `cfg_min_label`, `cfg_max_label`, `cfg_show_value_labels` (default true) / 使用的配置列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**11. `rating` — Star / Number Rating / 星级/数字评分**
+
+Star or number rating scale (1-5, 1-10, etc.). Displays as a row of clickable numbered buttons. / 星级或数字评分量表。显示为一排可点击的数字按钮。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** `cfg_max_value` (default 5) / 使用的配置列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**12. `likert_scale` — Likert Agreement Scale / 李克特同意量表**
+
+Agreement scale (Strongly Disagree to Strongly Agree). Displays as labeled radio buttons. Supports configurable scale range and custom point labels. / 同意量表（非常不同意到非常同意）。显示为带标签的单选按钮。支持可配置的量表范围和自定义点标签。
+
+- **Requires options:** No (labels are auto-generated or custom) / 不需要选项（标签自动生成或自定义）
+- **Config columns used:** `cfg_scale_type` (e.g. `'1-5'`, `'1-7'`), `cfg_custom_labels` (JSON array of strings), `cfg_min_label`, `cfg_max_label` / 使用的配置列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**13. `nps` — Net Promoter Score / 净推荐值**
+
+Standard NPS question (0-10 likelihood to recommend). Displays 11 numbered buttons with color coding: 0-6 red (detractors), 7-8 yellow (passives), 9-10 green (promoters). Labels show "Not at all likely" to "Extremely likely". / 标准 NPS 问题（0-10 推荐可能性）。显示11个带颜色编码的数字按钮。
+
+- **Requires options:** No (fixed 0-10 scale) / 不需要选项（固定 0-10 量表）
+- **Config columns used:** None (NPS is a fixed standard) / 不使用配置列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+#### Category 4: Data Input Types (5 types) / 数据输入类型（5种）
+
+**14. `number` — Numeric Input / 数字输入**
+
+Numeric input field. Accepts integers and decimals. / 数字输入字段。接受整数和小数。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** None / 不使用配置列
+- **Validation columns:** `vr_min_value`, `vr_max_value` / 验证列
+- **Response column:** `answer_number` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**15. `date` — Date Picker / 日期选择器**
+
+Native HTML date picker input. / 原生 HTML 日期选择器输入。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** None / 不使用配置列
+- **Validation columns:** `vr_allow_future_dates`, `vr_allow_past_dates` / 验证列
+- **Response column:** `answer_text` (ISO date string, e.g. `'2025-03-05'`) / 响应列：ISO 日期字符串
+- **Supports voice input:** No / 不支持语音输入
+
+**16. `time` — Time Picker / 时间选择器**
+
+Native HTML time picker input. / 原生 HTML 时间选择器输入。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_text` (time string, e.g. `'14:30'`) / 响应列：时间字符串
+- **Supports voice input:** No / 不支持语音输入
+
+**17. `email` — Email Address / 电子邮件**
+
+Email input with browser-native validation. / 带浏览器原生验证的电子邮件输入。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** None / 不使用配置列
+- **Validation columns:** Browser validates email format / 浏览器验证电子邮件格式
+- **Response column:** `answer_text` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+**18. `phone` — Phone Number / 电话号码**
+
+Phone number input with `type="tel"`. Placeholder shows formatting hint. / 电话号码输入。占位符显示格式提示。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_text` / 响应列
+- **Supports voice input:** No / 不支持语音输入
+
+#### Category 5: Advanced Types (5 types) / 高级类型（5种）
+
+**19. `matrix` — Matrix / Grid Question / 矩阵/网格问题**
+
+Grid of rows × columns for multi-item scales. Rows are stored as `question_option` entries. Columns are stored in `cfg_columns` as a JSON string array. Each row gets exactly one column selection. / 行×列的网格。行存储为 `question_option` 条目。列存储在 `cfg_columns` 中作为 JSON 字符串数组。每行获得一个列选择。
+
+Example: Rate satisfaction across 5 categories (rows) on a 5-point scale (columns). / 示例：在5点量表（列）上对5个类别（行）进行满意度评分。
+
+- **Requires options:** Yes (`question_option` rows = matrix rows) / 需要选项（选项行 = 矩阵行）
+- **Config columns used:** `cfg_columns` (JSON array, e.g. `'["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"]'`) / 使用的配置列
+- **Response column:** `answer_json` (object: `{ "row_option_id": "selected_column_label", ... }`) / 响应列：对象
+- **Supports voice input:** No / 不支持语音输入
+
+**20. `ranking` — Drag-to-Rank / 拖拽排序**
+
+Drag items to rank in order of preference. Options stored in `question_option`. Participant reorders them using up/down arrow buttons. / 拖拽项目按偏好排序。选项存储在 `question_option` 中。参与者使用上下箭头按钮重新排序。
+
+- **Requires options:** Yes (`question_option` rows) / 需要选项
+- **Config columns used:** None / 不使用配置列
+- **Response column:** `answer_array` (ordered array of `option.id` values, first = highest rank) / 响应列：有序的 option.id 数组，第一个 = 最高排名
+- **Supports voice input:** No / 不支持语音输入
+
+**21. `file_upload` — File Upload / 文件上传**
+
+Allow participants to upload images, documents, or other files. Displays a drag-and-drop zone with file type and size constraints. / 允许参与者上传图片、文档或其他文件。显示带文件类型和大小限制的拖放区域。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** `cfg_max_files` (default 1), `cfg_max_size_mb` (default 10), `cfg_accepted_types` (default `'image/*,.pdf,.doc,.docx'`) / 使用的配置列
+- **Response column:** `answer_json` (file metadata) / 响应列：文件元数据
+- **Supports voice input:** No / 不支持语音输入
+
+**22. `instruction` — Instruction Block / 说明块**
+
+Display-only block showing instructions, information, or media to participants. No response is collected. Used to provide context or guidance between questions. / 仅显示块，向参与者展示说明、信息或媒体。不收集响应。用于在问题之间提供上下文或指导。
+
+- **Requires options:** No / 不需要选项
+- **Config columns used:** `cfg_content_type` (default `'text'`) / 使用的配置列
+- **Response column:** None (display only) / 无（仅显示）
+- **Supports voice input:** No / 不支持语音输入
+
+#### Category 6: Layout Types (4 types) / 布局类型（4种）
+
+These types do NOT collect responses. They are used purely for visual structure and organization. / 这些类型不收集响应。它们仅用于视觉结构和组织。
+
+**23. `section_header` — Section / Tab Header / 章节/标签页标题**
+
+Groups questions into tabs or sections. All questions after a section_header until the next section_header belong to that section. The `groupQuestionsBySections()` utility in `questionTypes.ts` handles the grouping logic. / 将问题分组到标签页或章节中。section_header 之后直到下一个 section_header 之间的所有问题属于该章节。`questionTypes.ts` 中的 `groupQuestionsBySections()` 处理分组逻辑。
+
+- **Config columns used:** `cfg_section_icon` (emoji or icon name), `cfg_section_color` (hex color, default `'#10b981'`) / 使用的配置列
+- **Response column:** None / 无
+- **question_text is used as:** Section title / 章节标题
+
+**24. `text_block` — Rich Text Block / 富文本块**
+
+Displays rich text content — descriptions, notes, formatted information — between questions. / 在问题之间显示富文本内容——描述、注释、格式化信息。
+
+- **Config columns used:** `cfg_content` (text content), `cfg_font_size` (default 14) / 使用的配置列
+- **Response column:** None / 无
+
+**25. `divider` — Divider Line / 分隔线**
+
+Visual separator line between sections or questions. / 章节或问题之间的视觉分隔线。
+
+- **Config columns used:** `cfg_style` (`'solid'`, `'dashed'`, `'dotted'`), `cfg_color` (default `'#e5e7eb'`), `cfg_thickness` (default 1, in px) / 使用的配置列
+- **Response column:** None / 无
+
+**26. `image_block` — Image Display / 图片展示**
+
+Displays an image with optional caption. No response collected. Used for visual stimuli, instructions with images, etc. / 显示带可选说明文字的图片。不收集响应。用于视觉刺激、带图片的说明等。
+
+- **Config columns used:** `cfg_image_url`, `cfg_caption`, `cfg_alt_text`, `cfg_max_width` (default `'100%'`) / 使用的配置列
+- **Response column:** None / 无
+
+**27. `constant_sum` — Constant Sum / 固定总额分配**
+
+Participants distribute a fixed total (e.g. 100 points) across multiple options. The sum of all inputs must equal the configured total. Uses `question_option` rows for the items to distribute across. / 参与者将固定总额（如100分）分配到多个选项中。所有输入之和必须等于配置的总额。使用 `question_option` 行作为分配项目。
+
+- **Config columns used:** `cfg_total` (integer, default 100 — the total participants must distribute) / 使用的配置列：`cfg_total`（整数，默认100——参与者必须分配的总数）
+- **Response column:** `answer_json` — `{ "option_id_1": 40, "option_id_2": 60 }` / 响应列：`answer_json`——以选项ID为键、分配数值为值的JSON对象
+- **Options:** Stored in `question_option` table (same as choice types) / 选项存储在 `question_option` 表中
+
+**28. `signature` — Signature Pad / 签名板**
+
+Draw a signature on a touch/mouse canvas. Captures the signature as a base64 PNG data URI. Used for consent forms, verification, or legal agreements. / 在触摸/鼠标画布上绘制签名。以 base64 PNG 数据URI形式捕获签名。用于同意书、验证或法律协议。
+
+- **Config columns used:** (none) / 使用的配置列：（无）
+- **Response column:** `answer_text` — base64-encoded PNG data URI (`data:image/png;base64,...`) / 响应列：`answer_text`——base64编码的PNG数据URI
+- **Options:** None / 无选项
+
+**29. `address` — Structured Address / 结构化地址**
+
+Structured address input with separate fields for street, city, state/province, postal code, and (optionally) country. Each field is stored as a key in a JSON object. / 结构化地址输入，包含街道、城市、州/省、邮政编码和（可选的）国家的独立字段。每个字段作为JSON对象中的键存储。
+
+- **Config columns used:** `cfg_show_country` (boolean, default `true` — whether to display the country field) / 使用的配置列：`cfg_show_country`（布尔值，默认 `true`——是否显示国家字段）
+- **Response column:** `answer_json` — `{ "street": "123 Main St", "city": "SF", "state": "CA", "postal_code": "94102", "country": "US" }` / 响应列：`answer_json`
+- **Options:** None / 无选项
+
+**30. `slider_range` — Range Slider (Dual-Handle) / 范围滑块（双手柄）**
+
+Dual-handle slider for selecting a numeric range (low–high). Participant chooses both a lower and upper bound within the configured min/max. Useful for price ranges, age ranges, time windows, etc. / 双手柄滑块，用于选择数值范围（低–高）。参与者在配置的最小/最大值范围内选择下限和上限。适用于价格范围、年龄范围、时间窗口等。
+
+- **Config columns used:** `cfg_min_value`, `cfg_max_value`, `cfg_step`, `cfg_min_label`, `cfg_max_label` (reuses same columns as `slider` / `bipolar_scale`) / 使用的配置列：复用 `slider`/`bipolar_scale` 的相同列
+- **Response column:** `answer_json` — `{ "low": 25, "high": 75 }` / 响应列：`answer_json`——`{ "low": 25, "high": 75 }`
+- **Options:** None / 无选项
+
+### 9.6 Response column mapping (quick reference) / 响应列映射（快速参考）
+
+| `answer_text` | `answer_number` | `answer_array` | `answer_json` | None (no response) |
+|---|---|---|---|---|
+| `text_short` | `number` | `multiple_choice` | `matrix` | `section_header` |
+| `text_long` | `slider` | `checkbox_group` | `file_upload` | `text_block` |
+| `single_choice` | `bipolar_scale` | `ranking` | `image_choice` (multi) | `divider` |
+| `dropdown` | `rating` | | `constant_sum` | `image_block` |
+| `yes_no` | `likert_scale` | | `address` | `instruction` |
+| `date` | `nps` | | `slider_range` | |
+| `time` | | | | |
+| `email` | | | | |
+| `phone` | | | | |
+| `signature` | | | | |
+| `image_choice` (single) | | | | |
+
+### 9.7 Config column mapping per question type / 每种问题类型的配置列映射
+
+| Question Type | Config Columns Used |
+|---|---|
+| `text_short` | `cfg_max_length` |
+| `text_long` | `cfg_max_length` |
+| `single_choice` | (none) |
+| `multiple_choice` | (none) |
+| `dropdown` | (none) |
+| `checkbox_group` | `cfg_layout`, `cfg_columns_count` |
+| `image_choice` | `cfg_allow_multiple` |
+| `yes_no` | `cfg_yes_label`, `cfg_no_label` |
+| `slider` | `cfg_min_value`, `cfg_max_value`, `cfg_step`, `cfg_min_label`, `cfg_max_label` |
+| `bipolar_scale` | `cfg_min_value`, `cfg_max_value`, `cfg_step`, `cfg_min_label`, `cfg_max_label`, `cfg_show_value_labels` |
+| `rating` | `cfg_max_value` |
+| `likert_scale` | `cfg_scale_type`, `cfg_custom_labels`, `cfg_min_label`, `cfg_max_label` |
+| `nps` | (none — fixed 0-10) |
+| `number` | (none) |
+| `date` | (none) |
+| `time` | (none) |
+| `email` | (none) |
+| `phone` | (none) |
+| `matrix` | `cfg_columns` |
+| `ranking` | (none) |
+| `file_upload` | `cfg_max_files`, `cfg_max_size_mb`, `cfg_accepted_types` |
+| `instruction` | `cfg_content_type` |
+| `section_header` | `cfg_section_icon`, `cfg_section_color` |
+| `text_block` | `cfg_content`, `cfg_font_size` |
+| `divider` | `cfg_style`, `cfg_color`, `cfg_thickness` |
+| `image_block` | `cfg_image_url`, `cfg_caption`, `cfg_alt_text`, `cfg_max_width` |
+| `constant_sum` | `cfg_total` |
+| `signature` | (none) |
+| `address` | `cfg_show_country` |
+| `slider_range` | `cfg_min_value`, `cfg_max_value`, `cfg_step`, `cfg_min_label`, `cfg_max_label` |
+
+### 9.8 Key design rules / 关键设计规则
+
+1. **One source of truth:** The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`. Builder, Preview, Participant views, and Response handling all import from this file. / 规范类型列表在 `questionTypes.ts` 中。构建器、预览、参与者视图和响应处理都从此文件导入。
+2. **Legacy type mapping:** Old type strings (e.g. `'text'`, `'scale'`, `'likert'`) are auto-mapped to current types via `LEGACY_TYPE_MAPPING` and `normalizeLegacyQuestionType()`. / 旧类型字符串通过 `LEGACY_TYPE_MAPPING` 和 `normalizeLegacyQuestionType()` 自动映射到当前类型。
+3. **No JSONB config:** All config is in flat `cfg_*` columns. Hydrated to `question_config` in memory via `questionConfigSync.ts`. / 所有配置在扁平 `cfg_*` 列中。通过 `questionConfigSync.ts` 水合为内存中的 `question_config`。
+4. **No JSONB options:** All options are in the `question_option` table. Never store options in JSONB. / 所有选项在 `question_option` 表中。永远不要在 JSONB 中存储选项。
+5. **Type-safe responses:** Each question type writes to exactly one `answer_*` column. This enables type-safe SQL queries and aggregation. / 每种问题类型只写入一个 `answer_*` 列。这使得类型安全的 SQL 查询和聚合成为可能。
+6. **Layout types are display-only:** `section_header`, `text_block`, `divider`, `image_block`, and `instruction` never create response rows. They are filtered out during response saving. / 布局类型仅用于显示，永远不会创建响应行。
+7. **Section grouping:** The `groupQuestionsBySections()` utility splits a flat question list into sections based on `section_header` boundaries. This powers the tabbed questionnaire UI. / `groupQuestionsBySections()` 根据 `section_header` 边界将扁平问题列表分成章节。这为标签页式问卷 UI 提供支持。
+8. **Voice and AI:** Text input types support `allow_voice` (speech-to-text) and `allow_ai_assist` (chatbot help). These are per-question toggles on the `question` table. / 文本输入类型支持语音输入和 AI 辅助。这些是 `question` 表上的每个问题开关。
 
 
 ## 5. LOGIC / 逻辑规则

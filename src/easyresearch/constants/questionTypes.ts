@@ -34,6 +34,10 @@ export const SUPPORTED_QUESTION_TYPES = {
   IMAGE_CHOICE: 'image_choice',
   YES_NO: 'yes_no',
   INSTRUCTION: 'instruction',
+  CONSTANT_SUM: 'constant_sum',
+  SIGNATURE: 'signature',
+  ADDRESS: 'address',
+  SLIDER_RANGE: 'slider_range',
 
   // Layout Types
   SECTION_HEADER: 'section_header',
@@ -50,7 +54,7 @@ export interface QuestionTypeDefinition {
   label: string;
   description: string;
   icon: string;
-  category: 'text' | 'choice' | 'scale' | 'data' | 'layout';
+  category: 'text' | 'choice' | 'scale' | 'data' | 'advanced' | 'layout';
   requiresOptions: boolean;
   supportsOther: boolean;
   supportsNone: boolean;
@@ -309,6 +313,50 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: { content_type: 'text' }
   },
+  {
+    type: SUPPORTED_QUESTION_TYPES.CONSTANT_SUM,
+    label: 'Constant Sum',
+    description: 'Distribute a fixed total (e.g. 100 points) across multiple options',
+    icon: 'Σ',
+    category: 'advanced',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { total: 100 }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.SIGNATURE,
+    label: 'Signature',
+    description: 'Draw a signature on a touch/mouse canvas for consent or verification',
+    icon: '✍',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: {}
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.ADDRESS,
+    label: 'Address',
+    description: 'Structured address input with street, city, state/province, postal code, and country fields',
+    icon: '📍',
+    category: 'data',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { show_country: true }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
+    label: 'Range Slider',
+    description: 'Dual-handle slider for selecting a numeric range (min-max)',
+    icon: '⟺',
+    category: 'scale',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { min_value: 0, max_value: 100, step: 1, min_label: '', max_label: '' }
+  },
 
   // Layout Types
   {
@@ -366,7 +414,7 @@ export const isValidQuestionType = (type: string): type is SupportedQuestionType
   return Object.values(SUPPORTED_QUESTION_TYPES).includes(type as SupportedQuestionType);
 };
 
-export const getQuestionTypesByCategory = (category: 'text' | 'choice' | 'scale' | 'data' | 'layout') => {
+export const getQuestionTypesByCategory = (category: 'text' | 'choice' | 'scale' | 'data' | 'advanced' | 'layout') => {
   return QUESTION_TYPE_DEFINITIONS.filter(def => def.category === category);
 };
 
@@ -393,6 +441,12 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'image_choice': SUPPORTED_QUESTION_TYPES.IMAGE_CHOICE,
   'yes_no': SUPPORTED_QUESTION_TYPES.YES_NO,
   'instruction': SUPPORTED_QUESTION_TYPES.INSTRUCTION,
+  'instruction_block': SUPPORTED_QUESTION_TYPES.INSTRUCTION,
+  'constant_sum': SUPPORTED_QUESTION_TYPES.CONSTANT_SUM,
+  'signature': SUPPORTED_QUESTION_TYPES.SIGNATURE,
+  'address': SUPPORTED_QUESTION_TYPES.ADDRESS,
+  'slider_range': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
+  'range_slider': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {

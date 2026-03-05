@@ -64,10 +64,24 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     const tabSections = qConfig.tab_sections;
     const hasTabSections = tabSections && tabSections.length > 0;
 
+    // Filter by tab section: prefer question_ids array, fallback to section_name on question row
+    const matchesSection = (q: any, sectionId: string) => {
+      const sec = tabSections!.find(s => s.id === sectionId);
+      if (!sec) return false;
+      if (sec.question_ids?.length > 0) return sec.question_ids.includes(q.id);
+      // Fallback: match by section_name column on the question row
+      return q.section_name === sectionId;
+    };
+    const isAssignedToAnySection = (q: any) => {
+      return tabSections!.some(sec => {
+        if (sec.question_ids?.length > 0) return sec.question_ids.includes(q.id);
+        return q.section_name && tabSections!.some(s => s.id === q.section_name);
+      });
+    };
     const filteredQs = hasTabSections && activeSectionId
-      ? qs.filter((q: any) => tabSections.find(sec => sec.id === activeSectionId)?.question_ids?.includes(q.id))
+      ? qs.filter((q: any) => matchesSection(q, activeSectionId))
       : hasTabSections
-        ? qs.filter((q: any) => !tabSections.some(sec => sec.question_ids?.includes(q.id)))
+        ? qs.filter((q: any) => !isAssignedToAnySection(q))
         : qs;
 
     const displayQs = filteredQs.length > 0 ? filteredQs : qs;

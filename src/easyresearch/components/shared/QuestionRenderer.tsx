@@ -73,7 +73,13 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     case 'likert_scale': {
       const lc = question.question_config || {};
       const ls = lc.scale_type || '1-5';
-      const [lmin, lmax] = ls.split('-').map(Number);
+      let lmin: number, lmax: number;
+      if (/^\d+-\d+$/.test(ls)) {
+        [lmin, lmax] = ls.split('-').map(Number);
+      } else {
+        lmin = lc.min_value ?? 1;
+        lmax = lc.max_value ?? 5;
+      }
       const lo: number[] = [];
       for (let i = lmin; i <= lmax; i++) lo.push(i);
       return (
@@ -140,19 +146,110 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           ))}
         </div>
       );
-    case 'yes_no':
+    case 'yes_no': {
+      const ynYes = question.question_config?.yes_label || 'Yes';
+      const ynNo = question.question_config?.no_label || 'No';
       return (
         <div className="flex gap-3">
-          {['Yes', 'No'].map(opt => (
-            <button key={opt} onClick={() => onResponse(question.id, opt)}
-              className={`flex-1 py-3 rounded-xl border-2 ${txt} font-medium transition-all ${value === opt ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>
-              {opt}
+          {[{ val: 'yes', label: ynYes }, { val: 'no', label: ynNo }].map(opt => (
+            <button key={opt.val} onClick={() => onResponse(question.id, opt.val)}
+              className={`flex-1 py-3 rounded-xl border-2 ${txt} font-medium transition-all ${value === opt.val ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:border-stone-300'}`}>
+              {opt.label}
             </button>
           ))}
         </div>
       );
+    }
     case 'date':
       return <input type="date" value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} />;
+    case 'constant_sum': {
+      const csOpts = question.options || [];
+      const csTot = (question as any).question_config?.total ?? 100;
+      const csVal: Record<string, number> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      const csSum = Object.values(csVal).reduce((s: number, v: number) => s + (Number(v) || 0), 0);
+      return (
+        <div className="space-y-2">
+          <div className={`flex justify-between ${txtSm}`}><span className="text-stone-500">Total: {csTot}</span><span className={csSum === csTot ? 'text-emerald-600' : csSum > csTot ? 'text-red-500' : 'text-stone-400'}>Remaining: {csTot - csSum}</span></div>
+          {csOpts.map((o: any) => (<div key={o.id} className="flex items-center gap-2"><span className={`flex-1 ${txt} text-stone-600`}>{o.option_text}</span><input type="number" min={0} max={csTot} value={csVal[o.id] ?? ''} onChange={(e) => onResponse(question.id, { ...csVal, [o.id]: Number(e.target.value) || 0 })} className={`w-16 px-2 py-1.5 rounded-lg border border-stone-200 text-center ${txtSm}`} placeholder="0" /></div>))}
+        </div>
+      );
+    }
+    case 'signature': {
+      const sigVal = typeof value === 'string' ? value : '';
+      return (
+        <div className="space-y-2">
+          <div className="h-28 border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 relative overflow-hidden">
+            {sigVal ? <img src={sigVal} alt="Signature" className="w-full h-full object-contain" /> : (
+              <canvas className="w-full h-full cursor-crosshair"
+                onMouseDown={(e) => { const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; ctx.beginPath(); ctx.moveTo(e.clientX - r.left, e.clientY - r.top); const draw = (ev: MouseEvent) => { ctx.lineTo(ev.clientX - r.left, ev.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('mousemove', draw); c.removeEventListener('mouseup', stop); c.removeEventListener('mouseleave', stop); onResponse(question.id, c.toDataURL('image/png')); }; c.addEventListener('mousemove', draw); c.addEventListener('mouseup', stop); c.addEventListener('mouseleave', stop); }}
+              />
+            )}
+            {!sigVal && <p className={`absolute inset-0 flex items-center justify-center ${txtSm} text-stone-400 pointer-events-none`}>Draw signature</p>}
+          </div>
+          {sigVal && <button onClick={() => onResponse(question.id, '')} className={`${txtSm} text-red-500 hover:underline`}>Clear</button>}
+        </div>
+      );
+    }
+    case 'address': {
+      const aVal: Record<string, string> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      const aFields = ['street', 'city', 'state', 'postal_code', 'country'];
+      return (
+        <div className="space-y-2">
+          {aFields.map(k => (<input key={k} type="text" value={aVal[k] || ''} onChange={(e) => onResponse(question.id, { ...aVal, [k]: e.target.value })} placeholder={k.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} className={`w-full px-3 py-2 rounded-xl border border-stone-200 ${txtSm} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} />))}
+        </div>
+      );
+    }
+    case 'slider_range': {
+      const srCfg = (question as any).question_config || {};
+      const srMin = srCfg.min_value ?? 0; const srMax = srCfg.max_value ?? 100; const srStep = srCfg.step ?? 1;
+      const srVal = (typeof value === 'object' && value && !Array.isArray(value)) ? value : { low: srMin, high: srMax };
+      return (
+        <div className="space-y-2">
+          <div className={`flex justify-between ${txtSm} font-semibold text-emerald-600`}><span>Min: {srVal.low ?? srMin}</span><span>Max: {srVal.high ?? srMax}</span></div>
+          <input type="range" min={srMin} max={srMax} step={srStep} value={srVal.low ?? srMin} onChange={(e) => { const low = Number(e.target.value); onResponse(question.id, { low, high: Math.max(low, srVal.high ?? srMax) }); }} className="w-full" style={{ accentColor: '#10b981' }} />
+          <input type="range" min={srMin} max={srMax} step={srStep} value={srVal.high ?? srMax} onChange={(e) => { const high = Number(e.target.value); onResponse(question.id, { low: Math.min(high, srVal.low ?? srMin), high }); }} className="w-full" style={{ accentColor: '#10b981' }} />
+          <div className={`flex justify-between ${txtSm} text-stone-400`}><span>{srCfg.min_label || srMin}</span><span>{srCfg.max_label || srMax}</span></div>
+        </div>
+      );
+    }
+    case 'slider': {
+      const slMin = question.question_config?.min_value ?? question.question_config?.min ?? 0;
+      const slMax = question.question_config?.max_value ?? question.question_config?.max ?? 10;
+      const slStep = question.question_config?.step ?? 1;
+      return (
+        <div className="space-y-2">
+          <input type="range" min={slMin} max={slMax} step={slStep} value={value ?? slMin}
+            onChange={(e) => onResponse(question.id, Number(e.target.value))} className="w-full" style={{ accentColor: primaryColor }} />
+          <div className={`flex justify-between ${txtSm} text-stone-400`}>
+            <span>{question.question_config?.min_label || slMin}</span>
+            <span className="font-semibold" style={{ color: primaryColor }}>{value ?? slMin}</span>
+            <span>{question.question_config?.max_label || slMax}</span>
+          </div>
+        </div>
+      );
+    }
+    case 'dropdown': {
+      const ddOpts = question.options || [];
+      return (
+        <select value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)}
+          className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}>
+          <option value="">Select an option...</option>
+          {ddOpts.map((o: any, i: number) => {
+            const oVal = typeof o === 'string' ? o : o.id || o.option_value || o.option_text;
+            const oText = typeof o === 'string' ? o : o.option_text || o.text;
+            return <option key={i} value={oVal}>{oText}</option>;
+          })}
+        </select>
+      );
+    }
+    case 'instruction': {
+      return (
+        <div className={`rounded-xl ${pad} border border-blue-200 bg-blue-50`}>
+          <p className={`${txt} text-blue-800 font-medium`}>{question.question_text}</p>
+          {question.question_description && <p className={`${txtSm} text-blue-600 mt-1`}>{question.question_description}</p>}
+        </div>
+      );
+    }
     case 'section_header':
       return null;
     default:

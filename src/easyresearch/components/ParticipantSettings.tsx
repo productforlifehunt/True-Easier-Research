@@ -88,7 +88,7 @@ const ParticipantSettings: React.FC = () => {
       await saveProfileData(enrollment.id, enrollmentResponses, 'enrollment');
 
       // Re-schedule notifications with updated DND if project has notifications enabled
-      if (notificationEnabled && project?.notification_enabled && project?.project_type !== 'survey') {
+      if (notificationEnabled && project?.notification_enabled && project?.methodology_type === 'multi_time') {
         const dndPeriods = (dndSettings.periods || []).map((p: any) => ({
           start_time: p.start_time,
           end_time: p.end_time,

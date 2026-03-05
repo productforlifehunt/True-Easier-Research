@@ -35,7 +35,7 @@ interface SurveyProject {
   id?: string;
   title: string;
   description: string;
-  project_type: string;
+  methodology_type: string;
   status: string;
   study_duration: number | null;
   survey_frequency: string | null;
@@ -62,7 +62,7 @@ const MobileSurveyEditor: React.FC = () => {
   const [project, setProject] = useState<SurveyProject>({
     title: '',
     description: '',
-    project_type: 'survey',
+    methodology_type: 'one_time',
     status: 'draft',
     study_duration: 7,
     survey_frequency: 'daily',
@@ -85,7 +85,7 @@ const MobileSurveyEditor: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   
-  const isLongitudinal = project.project_type === 'longitudinal' || project.project_type === 'esm';
+  const isLongitudinal = project.methodology_type === 'multi_time';
 
   useEffect(() => {
     if (projectId) {
@@ -168,7 +168,7 @@ const MobileSurveyEditor: React.FC = () => {
         .update({
           title: project.title,
           description: project.description,
-          project_type: project.project_type,
+          methodology_type: project.methodology_type,
           study_duration: project.study_duration,
           survey_frequency: project.survey_frequency,
           start_at: project.starts_at,
@@ -309,23 +309,8 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Settings Panel */}
             {showSettings && (
               <div className="space-y-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4', border: '1px solid var(--border-light)' }}>
-                {/* Project Type */}
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Project Type</label>
-                  <select
-                    value={project.project_type}
-                    onChange={(e) => setProject({ ...project, project_type: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border text-sm"
-                    style={{ borderColor: 'var(--border-light)' }}
-                  >
-                    <option value="survey">One-time Survey</option>
-                    <option value="longitudinal">Longitudinal Study</option>
-                    <option value="esm">Experience Sampling (ESM)</option>
-                  </select>
-                </div>
-
                 {/* Duration */}
-                {(project.project_type === 'longitudinal' || project.project_type === 'esm') && (
+                {(project.methodology_type === 'multi_time') && (
                   <div>
                     <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Study Duration (days)</label>
                     <input
@@ -340,7 +325,7 @@ const MobileSurveyEditor: React.FC = () => {
                 )}
 
                 {/* Frequency */}
-                {(project.project_type === 'longitudinal' || project.project_type === 'esm') && (
+                {(project.methodology_type === 'multi_time') && (
                   <div>
                     <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Survey Frequency</label>
                     <select

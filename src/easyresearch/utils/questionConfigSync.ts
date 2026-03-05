@@ -62,6 +62,10 @@ const CONFIG_KEY_MAP: Record<string, string> = {
   questionnaire_id: 'cfg_questionnaire_id',
   // Display
   options: 'cfg_options',   // text[] for inline options (rare)
+  // Constant sum config
+  total: 'cfg_total',
+  // Address config
+  show_country: 'cfg_show_country',
   // AI config on question level
   allow_ai_assist: 'cfg_allow_ai_assist',
   allow_ai_auto_answer: 'cfg_allow_ai_auto_answer',

@@ -10,7 +10,7 @@ interface Survey {
   description: string;
   study_duration: number;
   survey_frequency: string;
-  project_type: string;
+  methodology_type: string;
   status?: string;
   survey_code?: string;
 }
@@ -185,7 +185,7 @@ const DesktopHome: React.FC = () => {
                   </p>
                   <div className="flex items-center justify-between text-sm">
                     <span style={{ color: 'var(--text-secondary)' }}>
-                      {enrollment.research_project.project_type === 'longitudinal' ? 'Longitudinal' : 'One-time'}
+                      {enrollment.research_project.methodology_type === 'multi_time' ? 'Longitudinal' : 'One-time'}
                     </span>
                     <span className="font-medium" style={{ color: 'var(--color-green)' }}>
                       Continue →

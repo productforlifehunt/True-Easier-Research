@@ -90,10 +90,10 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = ({ questionnaires, projectTi
                   required: data.required ?? false,
                   order_index: (q.questions?.length || 0),
                   question_config: data.question_config || {},
-                  options: (data.options || []).map((opt: string, i: number) => ({
+                  options: (data.options || []).map((opt: any, i: number) => ({
                     id: crypto.randomUUID(),
-                    option_text: opt,
-                    option_value: opt,
+                    option_text: typeof opt === 'string' ? opt : opt?.text || opt?.option_text || String(opt),
+                    option_value: typeof opt === 'string' ? opt : opt?.value || opt?.option_value || String(opt),
                     order_index: i,
                     is_other: false,
                   })),
@@ -147,15 +147,22 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = ({ questionnaires, projectTi
                 question_config: q.question_config || {},
                 options: (q.options || []).map((opt: string, oi: number) => ({
                   id: crypto.randomUUID(),
-                  option_text: opt,
-                  option_value: opt,
+                  option_text: typeof opt === 'string' ? opt : opt?.text || opt?.option_text || String(opt),
+                  option_value: typeof opt === 'string' ? opt : opt?.value || opt?.option_value || String(opt),
                   order_index: oi,
                   is_other: false,
                 })),
               })),
               estimated_duration: data.estimated_duration || 5,
               frequency: data.frequency || 'once',
+              time_windows: [{ start: '09:00', end: '21:00' }],
+              assigned_participant_types: [],
               order_index: updatedQs.length,
+              display_mode: 'all_at_once',
+              questions_per_page: null,
+              tab_sections: [],
+              ai_chatbot_enabled: true,
+              notifications: [],
             } as any);
           } else if (editAction === 'edit_questionnaire' && questionnaire_id && data) {
             updatedQs = updatedQs.map(q => {

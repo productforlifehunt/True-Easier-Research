@@ -238,7 +238,7 @@ const ParticipantAppView: React.FC = () => {
       setCurrentPageIndex(0);
 
       // If it's a one-time survey with only one questionnaire, navigate to complete
-      if (project?.project_type === 'survey' && questionnaires.filter(q => q.questionnaire_type === 'survey').length <= 1) {
+      if (project?.methodology_type === 'one_time' && questionnaires.filter(q => q.questionnaire_type === 'survey').length <= 1) {
         navigate(`/easyresearch/survey/${projectId}/complete`);
       }
     } catch (err) {

@@ -563,6 +563,74 @@ const OneTimeSurveyView: React.FC = () => {
       case 'nps':
         return (<div className="space-y-3"><div className="flex flex-wrap gap-2 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n=>(<button key={n} type="button" onClick={()=>handleResponseChange(question.id,n)} className="w-11 h-11 rounded-lg font-semibold transition-all" style={{backgroundColor:value===n?'var(--color-green)':'var(--bg-secondary)',color:value===n?'white':'var(--text-primary)'}}>{n}</button>))}</div><div className="flex justify-between text-xs px-2" style={{color:'var(--text-secondary)'}}><span>Not at all likely</span><span>Extremely likely</span></div></div>);
 
+      case 'constant_sum':
+        const csOpts = question.options || [];
+        const csTot = (question as any).question_config?.total ?? 100;
+        const csV: Record<string, number> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+        const csSum = Object.values(csV).reduce((s: number, v: number) => s + (Number(v) || 0), 0);
+        const csRem = csTot - csSum;
+        return (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 rounded-lg" style={{ backgroundColor: csRem === 0 ? '#f0fdf4' : csRem < 0 ? '#fef2f2' : '#f9fafb', border: '1px solid var(--border-light)' }}>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Total: {csTot}</span>
+              <span className="text-sm font-semibold" style={{ color: csRem === 0 ? '#10b981' : csRem < 0 ? '#ef4444' : '#6b7280' }}>Remaining: {csRem}</span>
+            </div>
+            {csOpts.map((opt: any) => (
+              <div key={opt.id} className="flex items-center gap-3">
+                <span className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>{opt.option_text || opt.text}</span>
+                <input type="number" min={0} max={csTot} value={csV[opt.id] ?? ''} onChange={(e) => handleResponseChange(question.id, { ...csV, [opt.id]: Number(e.target.value) || 0 })} className="w-20 px-3 py-2 rounded-lg border-2 text-center text-sm" style={{ borderColor: 'var(--border-light)' }} placeholder="0" />
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'signature':
+        const sigV = typeof value === 'string' ? value : '';
+        return (
+          <div className="space-y-3">
+            <div className="border-2 border-dashed rounded-xl bg-white relative overflow-hidden" style={{ borderColor: 'var(--border-light)', height: 160 }}>
+              {sigV ? (
+                <img src={sigV} alt="Signature" className="w-full h-full object-contain" />
+              ) : (
+                <canvas className="w-full h-full cursor-crosshair"
+                  onMouseDown={(e) => { const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; ctx.beginPath(); ctx.moveTo(e.clientX - r.left, e.clientY - r.top); const draw = (ev: MouseEvent) => { ctx.lineTo(ev.clientX - r.left, ev.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('mousemove', draw); c.removeEventListener('mouseup', stop); c.removeEventListener('mouseleave', stop); handleResponseChange(question.id, c.toDataURL('image/png')); }; c.addEventListener('mousemove', draw); c.addEventListener('mouseup', stop); c.addEventListener('mouseleave', stop); }}
+                  onTouchStart={(e) => { e.preventDefault(); const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; const t = e.touches[0]; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); const draw = (ev: TouchEvent) => { ev.preventDefault(); const t2 = ev.touches[0]; ctx.lineTo(t2.clientX - r.left, t2.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('touchmove', draw); c.removeEventListener('touchend', stop); handleResponseChange(question.id, c.toDataURL('image/png')); }; c.addEventListener('touchmove', draw, { passive: false }); c.addEventListener('touchend', stop); }}
+                />
+              )}
+              {!sigV && <p className="absolute inset-0 flex items-center justify-center text-sm pointer-events-none" style={{ color: 'var(--text-secondary)' }}>Draw your signature here</p>}
+            </div>
+            {sigV && <button onClick={() => handleResponseChange(question.id, '')} className="text-sm px-3 py-1 rounded-lg border hover:bg-red-50" style={{ borderColor: 'var(--border-light)', color: '#ef4444' }}>Clear signature</button>}
+          </div>
+        );
+
+      case 'address':
+        const aV: Record<string, string> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+        const aShowCountry = (question as any).question_config?.show_country !== false;
+        const aFields = [{ key: 'street', label: 'Street Address', ph: '123 Main St' }, { key: 'city', label: 'City', ph: 'San Francisco' }, { key: 'state', label: 'State / Province', ph: 'CA' }, { key: 'postal_code', label: 'Postal Code', ph: '94102' }, ...(aShowCountry ? [{ key: 'country', label: 'Country', ph: 'United States' }] : [])];
+        return (
+          <div className="space-y-3">
+            {aFields.map(f => (
+              <div key={f.key}>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{f.label}</label>
+                <input type="text" value={aV[f.key] || ''} onChange={(e) => handleResponseChange(question.id, { ...aV, [f.key]: e.target.value })} className="w-full px-4 py-2.5 rounded-lg border-2 text-sm" style={{ borderColor: 'var(--border-light)' }} placeholder={f.ph} />
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'slider_range':
+        const srC = (question as any).question_config || {};
+        const srMn = srC.min_value ?? 0; const srMx = srC.max_value ?? 100; const srSt = srC.step ?? 1;
+        const srV = (typeof value === 'object' && value && !Array.isArray(value)) ? value : { low: srMn, high: srMx };
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm font-semibold" style={{ color: 'var(--color-green)' }}><span>Min: {srV.low ?? srMn}</span><span>Max: {srV.high ?? srMx}</span></div>
+            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Lower bound</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.low ?? srMn} onChange={(e) => { const low = Number(e.target.value); handleResponseChange(question.id, { low, high: Math.max(low, srV.high ?? srMx) }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
+            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Upper bound</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.high ?? srMx} onChange={(e) => { const high = Number(e.target.value); handleResponseChange(question.id, { low: Math.min(high, srV.low ?? srMn), high }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}><span>{srC.min_label || srMn}</span><span>{srC.max_label || srMx}</span></div>
+          </div>
+        );
+
       default:
         return <div>Question type not supported</div>;
     }

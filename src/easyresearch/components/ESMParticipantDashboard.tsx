@@ -78,21 +78,23 @@ const ESMParticipantDashboard: React.FC = () => {
         .maybeSingle();
       
       const nextInstanceNumber = maxData ? maxData.instance_number + 1 : 1;
-      
-      // Format date to preserve local time (don't convert to UTC)
-      const year = scheduledTime.getFullYear();
-      const month = String(scheduledTime.getMonth() + 1).padStart(2, '0');
-      const day = String(scheduledTime.getDate()).padStart(2, '0');
-      const hours = String(scheduledTime.getHours()).padStart(2, '0');
-      const minutes = String(scheduledTime.getMinutes()).padStart(2, '0');
-      const seconds = String(scheduledTime.getSeconds()).padStart(2, '0');
-      const formattedTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+      // Look up the primary survey questionnaire for this project
+      const { data: primaryQ } = await supabase
+        .from('questionnaire')
+        .select('id')
+        .eq('project_id', enrollment.project_id)
+        .eq('questionnaire_type', 'survey')
+        .order('order_index')
+        .limit(1)
+        .maybeSingle();
       
       const { data: newInstance, error } = await supabase
         .from('survey_instance')
         .insert({
           project_id: enrollment.project_id,
           enrollment_id: enrollment.id,
+          questionnaire_id: primaryQ?.id || null,
           scheduled_time: scheduledTime.toISOString(),
           status: 'scheduled',
           day_number: Math.ceil((scheduledTime.getTime() - new Date(enrollment.created_at).getTime()) / (1000 * 60 * 60 * 24)),
@@ -939,7 +941,7 @@ const ESMParticipantDashboard: React.FC = () => {
   };
 
   const renderSettingsTab = () => {
-    if (project?.project_type !== 'longitudinal') return null;
+    if (project?.methodology_type !== 'multi_time') return null;
     
     const enrollmentDate = enrollment?.created_at ? new Date(enrollment.created_at) : null;
     const isActive = enrollment?.status === 'active';

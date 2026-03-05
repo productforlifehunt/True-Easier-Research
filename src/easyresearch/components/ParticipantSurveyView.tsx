@@ -18,12 +18,13 @@ interface SurveyProject {
   organization_id?: string;
   title: string;
   description: string;
-  project_type?: string;
+  methodology_type?: string;
   onboarding_required?: boolean;
   onboarding_instruction?: string;
   allow_participant_dnd?: boolean;
   study_duration?: number;
   survey_frequency?: string;
+  notification_enabled?: boolean;
 }
 
 interface SurveyQuestion {
@@ -175,12 +176,29 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           setLogicRules(logicRows.map(dbRowToLogicRule));
         }
 
-        // Load questions
-        const { data: questions, error: questionsError } = await supabase
+        // Determine questionnaire_id from instance (if applicable)
+        let questionnaireId: string | null = null;
+        if (propInstanceId) {
+          const { data: inst } = await supabase
+            .from('survey_instance')
+            .select('questionnaire_id')
+            .eq('id', propInstanceId)
+            .maybeSingle();
+          questionnaireId = inst?.questionnaire_id || null;
+        }
+
+        // Load questions — filter by questionnaire if known, otherwise load all project questions
+        let questionsQuery = supabase
           .from('question')
           .select('*, options:question_option(*)')
           .eq('project_id', projectId)
           .order('order_index');
+        
+        if (questionnaireId) {
+          questionsQuery = questionsQuery.eq('questionnaire_id', questionnaireId);
+        }
+
+        const { data: questions, error: questionsError } = await questionsQuery;
         
         if (questionsError) {
           console.error('Error loading questions:', questionsError);
@@ -199,22 +217,13 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           setQuestions(hydrated);
 
           // Load questionnaire display_mode
-          let questionnaireId: string | null = null;
-          if (propInstanceId) {
-            const { data: inst } = await supabase
-              .from('survey_instance')
-              .select('questionnaire_id')
-              .eq('id', propInstanceId)
-              .maybeSingle();
-            questionnaireId = inst?.questionnaire_id || null;
-          }
           if (!questionnaireId && hydrated.length > 0) {
             questionnaireId = hydrated[0].questionnaire_id || null;
           }
           if (questionnaireId) {
             const { data: qRow } = await supabase
               .from('questionnaire')
-              .select('questions_per_page')
+              .select('questions_per_page, tab_sections')
               .eq('id', questionnaireId)
               .maybeSingle();
             if (qRow) {
@@ -240,21 +249,17 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
             
             // If longitudinal survey and enrolled, redirect to timeline ONLY if no instance specified
             const instanceParam = searchParams.get('instance') || propInstanceId;
-            if (project.project_type === 'longitudinal' && !instanceParam) {
+            if (project.methodology_type === 'multi_time' && !instanceParam) {
               window.location.href = `/easyresearch/participant/${projectId}`;
               return;
             }
           } else {
-            if (project.project_type === 'longitudinal' && project.onboarding_required) {
-              setShowOnboarding(true);
-            } else if (project.project_type === 'longitudinal') {
+            if (project.methodology_type === 'multi_time') {
               setShowOnboarding(true);
             }
           }
         } else {
-          if (project.project_type === 'longitudinal' && project.onboarding_required) {
-            setShowOnboarding(true);
-          } else if (project.project_type === 'longitudinal') {
+          if (project.methodology_type === 'multi_time') {
             setShowOnboarding(true);
           }
         }
@@ -627,7 +632,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           .eq('id', propInstanceId);
       }
       
-      if (project?.project_type === 'longitudinal') {
+      if (project?.methodology_type === 'multi_time') {
         window.location.href = `/easyresearch/participant/${projectId}`;
       } else {
         navigate(`/easyresearch/survey/${projectId}/complete`);
@@ -833,9 +838,9 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
               disabled={isCompleted && !editMode}
             />
             <div className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <span>{sliderMin}</span>
-              <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{value || sliderMin}</span>
-              <span>{sliderMax}</span>
+              <span>{(question as any).question_config?.min_label || sliderMin}</span>
+              <span className="font-semibold" style={{ color: 'var(--color-green)' }}>{value ?? sliderMin}</span>
+              <span>{(question as any).question_config?.max_label || sliderMax}</span>
             </div>
           </div>
         );
@@ -890,9 +895,17 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
       case 'likert_scale':
         const likertScaleType = (question as any).question_config?.scale_type || '1-5';
-        const likertRange = likertScaleType.split('-').map(Number);
-        const likertMin = likertRange[0];
-        const likertMax = likertRange[1];
+        let likertMin: number, likertMax: number;
+        // If scale_type contains '-' with numbers (e.g. '1-5', '1-7'), parse it
+        if (/^\d+-\d+$/.test(likertScaleType)) {
+          const likertRange = likertScaleType.split('-').map(Number);
+          likertMin = likertRange[0];
+          likertMax = likertRange[1];
+        } else {
+          // scale_type is a label like 'intensity', 'agreement' — use min_value/max_value
+          likertMin = (question as any).question_config?.min_value ?? 1;
+          likertMax = (question as any).question_config?.max_value ?? 5;
+        }
         const likertCustomLabels: string[] | undefined = (question as any).question_config?.custom_labels;
         const likertMinLabel = (question as any).question_config?.min_label || '';
         const likertMaxLabel = (question as any).question_config?.max_label || '';
@@ -1316,6 +1329,214 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                 <p className="font-medium text-[14px] mb-1" style={{ color: 'var(--text-primary)' }}>{getPipedText(question.id, logicRules, responses) || question.question_text}</p>
                 {question.question_description && <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{question.question_description}</p>}
               </div>
+            </div>
+          </div>
+        );
+
+      case 'constant_sum':
+        const csOptions = question.options || [];
+        const csTotal = (question as any).question_config?.total ?? 100;
+        const csVal: Record<string, number> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+        const csCurrentSum = Object.values(csVal).reduce((s: number, v: number) => s + (Number(v) || 0), 0);
+        const csRemaining = csTotal - csCurrentSum;
+        return (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-3 rounded-lg" style={{ backgroundColor: csRemaining === 0 ? '#f0fdf4' : csRemaining < 0 ? '#fef2f2' : '#f9fafb', border: '1px solid var(--border-light)' }}>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Total: {csTotal}</span>
+              <span className="text-sm font-semibold" style={{ color: csRemaining === 0 ? '#10b981' : csRemaining < 0 ? '#ef4444' : '#6b7280' }}>
+                Remaining: {csRemaining}
+              </span>
+            </div>
+            {csOptions.map((opt: any) => (
+              <div key={opt.id} className="flex items-center gap-3">
+                <span className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>{opt.option_text || opt.text}</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={csTotal}
+                  value={csVal[opt.id] ?? ''}
+                  onChange={(e) => {
+                    const newVal = { ...csVal, [opt.id]: Number(e.target.value) || 0 };
+                    handleResponseChange(question.id, newVal);
+                  }}
+                  disabled={isCompleted && !editMode}
+                  className="w-20 px-3 py-2 rounded-lg border-2 text-center text-sm"
+                  style={{ borderColor: 'var(--border-light)' }}
+                  placeholder="0"
+                />
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'signature':
+        const sigVal = typeof value === 'string' ? value : '';
+        return (
+          <div className="space-y-3">
+            <div
+              className="border-2 border-dashed rounded-xl bg-white relative overflow-hidden"
+              style={{ borderColor: 'var(--border-light)', height: 160 }}
+            >
+              {sigVal ? (
+                <img src={sigVal} alt="Signature" className="w-full h-full object-contain" />
+              ) : (
+                <canvas
+                  className="w-full h-full cursor-crosshair"
+                  onMouseDown={(e) => {
+                    const canvas = e.currentTarget;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#1a1a1a';
+                    ctx.beginPath();
+                    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                    const draw = (ev: MouseEvent) => {
+                      ctx.lineTo(ev.clientX - rect.left, ev.clientY - rect.top);
+                      ctx.stroke();
+                    };
+                    const stop = () => {
+                      canvas.removeEventListener('mousemove', draw);
+                      canvas.removeEventListener('mouseup', stop);
+                      canvas.removeEventListener('mouseleave', stop);
+                      handleResponseChange(question.id, canvas.toDataURL('image/png'));
+                    };
+                    canvas.addEventListener('mousemove', draw);
+                    canvas.addEventListener('mouseup', stop);
+                    canvas.addEventListener('mouseleave', stop);
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    const canvas = e.currentTarget;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) return;
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#1a1a1a';
+                    const touch = e.touches[0];
+                    ctx.beginPath();
+                    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+                    const draw = (ev: TouchEvent) => {
+                      ev.preventDefault();
+                      const t = ev.touches[0];
+                      ctx.lineTo(t.clientX - rect.left, t.clientY - rect.top);
+                      ctx.stroke();
+                    };
+                    const stop = () => {
+                      canvas.removeEventListener('touchmove', draw);
+                      canvas.removeEventListener('touchend', stop);
+                      handleResponseChange(question.id, canvas.toDataURL('image/png'));
+                    };
+                    canvas.addEventListener('touchmove', draw, { passive: false });
+                    canvas.addEventListener('touchend', stop);
+                  }}
+                />
+              )}
+              {!sigVal && (
+                <p className="absolute inset-0 flex items-center justify-center text-sm pointer-events-none" style={{ color: 'var(--text-secondary)' }}>
+                  Draw your signature here
+                </p>
+              )}
+            </div>
+            {sigVal && (
+              <button
+                onClick={() => handleResponseChange(question.id, '')}
+                disabled={isCompleted && !editMode}
+                className="text-sm px-3 py-1 rounded-lg border hover:bg-red-50"
+                style={{ borderColor: 'var(--border-light)', color: '#ef4444' }}
+              >
+                Clear signature
+              </button>
+            )}
+          </div>
+        );
+
+      case 'address':
+        const addrVal: Record<string, string> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+        const addrShowCountry = (question as any).question_config?.show_country !== false;
+        const addrFields = [
+          { key: 'street', label: 'Street Address', placeholder: '123 Main St' },
+          { key: 'city', label: 'City', placeholder: 'San Francisco' },
+          { key: 'state', label: 'State / Province', placeholder: 'CA' },
+          { key: 'postal_code', label: 'Postal Code', placeholder: '94102' },
+          ...(addrShowCountry ? [{ key: 'country', label: 'Country', placeholder: 'United States' }] : []),
+        ];
+        return (
+          <div className="space-y-3">
+            {addrFields.map(f => (
+              <div key={f.key}>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{f.label}</label>
+                <input
+                  type="text"
+                  value={addrVal[f.key] || ''}
+                  onChange={(e) => handleResponseChange(question.id, { ...addrVal, [f.key]: e.target.value })}
+                  disabled={isCompleted && !editMode}
+                  className="w-full px-4 py-2.5 rounded-lg border-2 text-sm"
+                  style={{ borderColor: 'var(--border-light)' }}
+                  placeholder={f.placeholder}
+                />
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'slider_range':
+        const srCfg = (question as any).question_config || {};
+        const srMin = srCfg.min_value ?? 0;
+        const srMax = srCfg.max_value ?? 100;
+        const srStep = srCfg.step ?? 1;
+        const srVal = (typeof value === 'object' && value && !Array.isArray(value)) ? value : { low: srMin, high: srMax };
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm font-semibold" style={{ color: 'var(--color-green)' }}>
+              <span>Min: {srVal.low ?? srMin}</span>
+              <span>Max: {srVal.high ?? srMax}</span>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Lower bound</label>
+              <input
+                type="range"
+                min={srMin}
+                max={srMax}
+                step={srStep}
+                value={srVal.low ?? srMin}
+                onChange={(e) => {
+                  const low = Number(e.target.value);
+                  const high = Math.max(low, srVal.high ?? srMax);
+                  handleResponseChange(question.id, { low, high });
+                }}
+                disabled={isCompleted && !editMode}
+                className="w-full"
+                style={{ accentColor: 'var(--color-green)' }}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Upper bound</label>
+              <input
+                type="range"
+                min={srMin}
+                max={srMax}
+                step={srStep}
+                value={srVal.high ?? srMax}
+                onChange={(e) => {
+                  const high = Number(e.target.value);
+                  const low = Math.min(high, srVal.low ?? srMin);
+                  handleResponseChange(question.id, { low, high });
+                }}
+                disabled={isCompleted && !editMode}
+                className="w-full"
+                style={{ accentColor: 'var(--color-green)' }}
+              />
+            </div>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <span>{srCfg.min_label || srMin}</span>
+              <span>{srCfg.max_label || srMax}</span>
             </div>
           </div>
         );

@@ -26,7 +26,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   const canShare = Boolean(project.id);
   const participantLink = canShare ? `${window.location.origin}/easyresearch/participant/${project.id}` : '';
-  const isLongitudinal = ['longitudinal', 'esm', 'diary'].includes(project.project_type);
+  const isLongitudinal = project.methodology_type === 'multi_time';
 
   const copyToClipboard = () => {
     if (!canShare) return;
@@ -72,10 +72,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           <div>
             <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Description</label>
             <textarea value={project.description} onChange={(e) => onUpdateProject({ ...project, description: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Survey purpose and goals" />
-          </div>
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Survey Type</label>
-            <CustomDropdown options={[{value:'survey',label:'One-time Survey'},{value:'longitudinal',label:'Longitudinal Study'},{value:'esm',label:'ESM (Experience Sampling)'},{value:'clinical_trial',label:'Clinical Trial'},{value:'diary',label:'Diary Study'}]} value={project.project_type} onChange={(v) => onUpdateProject({ ...project, project_type: v })} placeholder="Select type" />
           </div>
         </div>
       </SectionCard>

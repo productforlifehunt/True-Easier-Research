@@ -186,8 +186,8 @@ const ResearcherDashboard: React.FC = () => {
         .insert({
           organization_id: researcher.organization_id, researcher_id: researcher.id,
           title: `${project.title} (Copy)`, description: project.description,
-          status: 'draft', project_type: project.project_type,
-          methodology_type: (project as any).methodology_type || 'single_survey',
+          status: 'draft',
+          methodology_type: (project as any).methodology_type || 'one_time',
           ai_enabled: project.ai_enabled, voice_enabled: project.voice_enabled,
           max_participant: (project as any).max_participant || 100,
           show_progress_bar: (project as any).show_progress_bar ?? true,

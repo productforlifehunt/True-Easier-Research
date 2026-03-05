@@ -7,7 +7,7 @@ import ParticipantSurveyView from './ParticipantSurveyView';
 const SurveyViewRouter: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams] = useSearchParams();
-  const [projectType, setProjectType] = useState<string | null>(null);
+  const [methodologyType, setMethodologyType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,12 +20,12 @@ const SurveyViewRouter: React.FC = () => {
       try {
         const { data: projectData } = await supabase
           .from('research_project')
-          .select('id, project_type')
+          .select('id, methodology_type')
           .eq('id', projectId)
           .maybeSingle();
 
         if (projectData) {
-          setProjectType(projectData.project_type);
+          setMethodologyType(projectData.methodology_type);
         }
       } catch (error) {
         console.error('Error loading project:', error);
@@ -47,14 +47,11 @@ const SurveyViewRouter: React.FC = () => {
     );
   }
 
-  // Check if instance parameter is present for longitudinal surveys
+  // For multi_time (longitudinal/ESM) surveys with an instance param, show the survey view
   const instanceId = searchParams.get('instance');
   
-  if (projectType === 'longitudinal') {
-    // If instance specified, show the actual survey view
-    if (instanceId) {
-      return <ParticipantSurveyView />;
-    }
+  if (methodologyType === 'multi_time' && instanceId) {
+    return <ParticipantSurveyView />;
   }
 
   // Use the layout-based app view for all project types
