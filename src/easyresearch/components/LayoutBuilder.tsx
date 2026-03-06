@@ -899,6 +899,58 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left: Tab & Element Editor */}
           <div className="flex-1 space-y-3">
+            {/* Theme & Global Settings — above tab editor */}
+            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
+              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">App Design</h5>
+              
+              {/* Header */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={layout.show_header !== false} onChange={(e) => onUpdate({ ...layout, show_header: e.target.checked })} className="rounded border-stone-300" />
+                  <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
+                </label>
+                {layout.show_header !== false && (
+                  <div>
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                    <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
+                      placeholder="Auto (uses tab name)"
+                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                  </div>
+                )}
+              </div>
+
+              {/* Colors */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
+                  <input type="color" value={layout.theme?.primary_color || '#10b981'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
+                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Background</label>
+                  <input type="color" value={layout.theme?.background_color || '#f5f5f4'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
+                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
+                  <select value={layout.theme?.card_style || 'elevated'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
+                    className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                    <option value="flat">Flat</option>
+                    <option value="elevated">Elevated</option>
+                    <option value="outlined">Outlined</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Bottom nav count */}
+              <div className="pt-2 border-t border-stone-200">
+                <p className="text-[10px] text-stone-400">
+                  <strong>{layout.tabs.length}</strong> tabs · <strong>{layout.bottom_nav.length}</strong> nav items · 
+                  <strong> {layout.tabs.reduce((acc, t) => acc + t.elements.length, 0)}</strong> total elements
+                </p>
+              </div>
+            </div>
+
             <Droppable droppableId="tabs" direction="horizontal" type="TAB">
               {(provided) => (
                 <div ref={provided.innerRef} {...provided.droppableProps}
@@ -1085,57 +1137,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               </div>
             )}
 
-            {/* Theme & Global Settings */}
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">App Design</h5>
-              
-              {/* Header */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={layout.show_header !== false} onChange={(e) => onUpdate({ ...layout, show_header: e.target.checked })} className="rounded border-stone-300" />
-                  <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
-                </label>
-                {layout.show_header !== false && (
-                  <div>
-                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
-                    <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                      placeholder="Auto (uses tab name)"
-                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                  </div>
-                )}
-              </div>
-
-              {/* Colors */}
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
-                  <input type="color" value={layout.theme?.primary_color || '#10b981'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
-                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Background</label>
-                  <input type="color" value={layout.theme?.background_color || '#f5f5f4'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
-                    className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
-                  <select value={layout.theme?.card_style || 'elevated'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
-                    className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-                    <option value="flat">Flat</option>
-                    <option value="elevated">Elevated</option>
-                    <option value="outlined">Outlined</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Bottom nav count */}
-              <div className="pt-2 border-t border-stone-200">
-                <p className="text-[10px] text-stone-400">
-                  <strong>{layout.tabs.length}</strong> tabs · <strong>{layout.bottom_nav.length}</strong> nav items · 
-                  <strong> {layout.tabs.reduce((acc, t) => acc + t.elements.length, 0)}</strong> total elements
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* Right: Live Phone Preview — uses the SAME renderer as Preview tab */}
