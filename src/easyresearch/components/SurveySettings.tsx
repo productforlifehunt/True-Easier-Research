@@ -9,7 +9,7 @@ import { type SurveyProject } from './SurveyBuilder';
 interface QuestionnaireRef {
   id: string;
   title: string;
-  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom';
+  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom' | 'onboarding';
   questions: any[];
 }
 
