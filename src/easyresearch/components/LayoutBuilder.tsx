@@ -19,6 +19,7 @@ export interface LayoutElement {
   type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
   config: {
     questionnaire_id?: string;
+    questionnaire_ids?: string[];
     title?: string;
     content?: string;
     visible?: boolean;
