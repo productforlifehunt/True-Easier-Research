@@ -360,29 +360,38 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
   const staleHelpIds = existingHelpIds; // help sections get new UUIDs each time, so delete all existing
   const staleTabSecIds = existingTabSecIds.filter((id: string) => !newTabSectionIds.has(id));
 
+  // Helper to run supabase query and throw on error
+  const run = async (label: string, query: PromiseLike<{ error: any }>) => {
+    const { error } = await query;
+    if (error) {
+      console.error(`[layoutSync] ${label} failed:`, error);
+      throw new Error(`${label}: ${error.message}`);
+    }
+  };
+
   // STEP 3: Parallel — delete stale rows + upsert tabs (tabs must exist before elements)
-  const step3: PromiseLike<any>[] = [];
-  if (staleTodoIds.length > 0) step3.push(supabase.from('app_element_todo_card').delete().in('id', staleTodoIds).then());
-  if (staleHelpIds.length > 0) step3.push(supabase.from('app_element_help_section').delete().in('id', staleHelpIds).then());
-  if (staleTabSecIds.length > 0) step3.push(supabase.from('app_element_tab_section').delete().in('id', staleTabSecIds).then());
-  if (staleElementIds.length > 0) step3.push(supabase.from('app_tab_element').delete().in('id', staleElementIds).then());
-  if (tabPayload.length > 0) step3.push(supabase.from('app_tab').upsert(tabPayload, { onConflict: 'id' }).then());
+  const step3: Promise<void>[] = [];
+  if (staleTodoIds.length > 0) step3.push(run('delete stale todos', supabase.from('app_element_todo_card').delete().in('id', staleTodoIds)));
+  if (staleHelpIds.length > 0) step3.push(run('delete stale help', supabase.from('app_element_help_section').delete().in('id', staleHelpIds)));
+  if (staleTabSecIds.length > 0) step3.push(run('delete stale tabsec', supabase.from('app_element_tab_section').delete().in('id', staleTabSecIds)));
+  if (staleElementIds.length > 0) step3.push(run('delete stale elements', supabase.from('app_tab_element').delete().in('id', staleElementIds)));
+  if (tabPayload.length > 0) step3.push(run('upsert tabs', supabase.from('app_tab').upsert(tabPayload, { onConflict: 'id' })));
   if (step3.length > 0) await Promise.all(step3);
 
   // Delete stale tabs (after elements referencing them are gone)
   if (staleTabIds.length > 0) {
-    await supabase.from('app_tab').delete().in('id', staleTabIds).then();
+    await run('delete stale tabs', supabase.from('app_tab').delete().in('id', staleTabIds));
   }
 
   // STEP 4: Upsert elements
   if (allElements.length > 0) {
-    await supabase.from('app_tab_element').upsert(allElements, { onConflict: 'id' }).then();
+    await run('upsert elements', supabase.from('app_tab_element').upsert(allElements, { onConflict: 'id' }));
   }
 
   // STEP 5: Parallel — upsert/insert all child rows
-  const step5: PromiseLike<any>[] = [];
-  if (allTodoCards.length > 0) step5.push(supabase.from('app_element_todo_card').upsert(allTodoCards, { onConflict: 'id' }).then());
-  if (allHelpSections.length > 0) step5.push(supabase.from('app_element_help_section').insert(allHelpSections).then());
-  if (allTabSections.length > 0) step5.push(supabase.from('app_element_tab_section').upsert(allTabSections, { onConflict: 'id' }).then());
+  const step5: Promise<void>[] = [];
+  if (allTodoCards.length > 0) step5.push(run('upsert todo cards', supabase.from('app_element_todo_card').upsert(allTodoCards, { onConflict: 'id' })));
+  if (allHelpSections.length > 0) step5.push(run('insert help sections', supabase.from('app_element_help_section').insert(allHelpSections)));
+  if (allTabSections.length > 0) step5.push(run('upsert tab sections', supabase.from('app_element_tab_section').upsert(allTabSections, { onConflict: 'id' })));
   if (step5.length > 0) await Promise.all(step5);
 }
