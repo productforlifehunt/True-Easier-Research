@@ -816,17 +816,20 @@ const SurveyBuilder: React.FC = () => {
           }
         }
 
-        // Sync question participant types to junction table
-        for (const question of allQuestions) {
-          await supabase.from('question_participant_type').delete().eq('question_id', question.id);
+        // Batch sync question participant types: single delete + single insert
+        const allQuestionIds = allQuestions.map(q => q.id);
+        if (allQuestionIds.length > 0) {
+          await supabase.from('question_participant_type').delete().in('question_id', allQuestionIds);
+        }
+        const allQPTRows = allQuestions.flatMap(question => {
           const assignedTypes = (question as any).assigned_participant_types || [];
-          if (assignedTypes.length > 0) {
-            const junctionRows = assignedTypes.map((ptId: string) => ({
-              question_id: question.id,
-              participant_type_id: ptId,
-            }));
-            await supabase.from('question_participant_type').insert(junctionRows);
-          }
+          return assignedTypes.map((ptId: string) => ({
+            question_id: question.id,
+            participant_type_id: ptId,
+          }));
+        });
+        if (allQPTRows.length > 0) {
+          await supabase.from('question_participant_type').insert(allQPTRows);
         }
       };
 
