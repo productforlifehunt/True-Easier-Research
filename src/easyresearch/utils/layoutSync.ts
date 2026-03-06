@@ -338,7 +338,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
   const staleTabIds = existingTabIds.filter(id => !newTabIds.has(id));
 
   // STEP 2: Parallel — delete stale child rows for removed elements + fetch actual child IDs
-  const childFetches: Promise<any>[] = [];
+  const childFetches: PromiseLike<any>[] = [];
   if (existingElementIds.length > 0) {
     childFetches.push(
       supabase.from('app_element_todo_card').select('id, element_id').in('element_id', existingElementIds).then(),
@@ -358,7 +358,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
   const staleTabSecIds = existingTabSecIds.filter((id: string) => !newTabSectionIds.has(id));
 
   // STEP 3: Parallel — delete stale rows + upsert tabs (tabs must exist before elements)
-  const step3: Promise<any>[] = [];
+  const step3: PromiseLike<any>[] = [];
   if (staleTodoIds.length > 0) step3.push(supabase.from('app_element_todo_card').delete().in('id', staleTodoIds).then());
   if (staleHelpIds.length > 0) step3.push(supabase.from('app_element_help_section').delete().in('id', staleHelpIds).then());
   if (staleTabSecIds.length > 0) step3.push(supabase.from('app_element_tab_section').delete().in('id', staleTabSecIds).then());
@@ -377,7 +377,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
   }
 
   // STEP 5: Parallel — upsert/insert all child rows
-  const step5: Promise<any>[] = [];
+  const step5: PromiseLike<any>[] = [];
   if (allTodoCards.length > 0) step5.push(supabase.from('app_element_todo_card').upsert(allTodoCards, { onConflict: 'id' }).then());
   if (allHelpSections.length > 0) step5.push(supabase.from('app_element_help_section').insert(allHelpSections).then());
   if (allTabSections.length > 0) step5.push(supabase.from('app_element_tab_section').upsert(allTabSections, { onConflict: 'id' }).then());
