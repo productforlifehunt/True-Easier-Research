@@ -41,6 +41,7 @@ interface QuestionnaireViewProps {
   showFrequency?: boolean;
   cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal';
   buttonLabel?: string;
+  buttonBorderRadius?: string;
 }
 
 const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
@@ -50,7 +51,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   onSetSection, onSetPage, onResponse, onSubmit, submitting = false,
   stopPropagation = false,
   showQuestionCount = true, showEstimatedTime = true, showFrequency = true,
-  cardDisplayStyle = 'icon', buttonLabel,
+  cardDisplayStyle = 'icon', buttonLabel, buttonBorderRadius,
 }) => {
   const wrap = (fn: () => void) => (e?: React.MouseEvent) => {
     if (stopPropagation) e?.stopPropagation();
@@ -399,7 +400,8 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
       </div>
       {showButton && (
         <div className="mt-2">
-          <span className={`inline-block px-3 py-1.5 rounded-lg ${s.txtSm} font-medium border border-stone-200 text-stone-600`}>
+          <span className={`inline-block px-3 py-1.5 ${s.txtSm} font-medium border border-stone-200 text-stone-600`}
+            style={{ borderRadius: buttonBorderRadius || '8px' }}>
             {buttonLabel || 'Open'}
           </span>
         </div>
