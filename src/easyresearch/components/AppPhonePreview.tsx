@@ -266,8 +266,16 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 </div>
               )}
 
-              {/* Content — when height is fixed, force the inner element to fill */}
-              <div style={hasFixedHeight ? { height: '100%' } : {}}>
+              {/* Content — CSS grid stretches the inner card to fill the fixed height */}
+              <div style={hasFixedHeight ? {
+                height: '100%',
+                display: 'grid',
+                gridTemplateRows: '1fr',
+                // If content_align is set, position the card content without stretching
+                ...(customStyle.content_align && customStyle.content_align !== 'top' ? {
+                  alignItems: customStyle.content_align === 'center' ? 'center' : 'end',
+                } : {}),
+              } : {}}>
                 {content}
               </div>
 
