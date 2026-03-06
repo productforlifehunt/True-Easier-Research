@@ -334,10 +334,30 @@ const ParticipantAppView: React.FC = () => {
         compact={false}
         onOpenQuestionnaire={(id) => { setActiveQuestionnaireId(id); setCurrentPageIndex(0); }}
         onSelectTimelineDay={setSelectedTimelineDay}
-        renderQuestionnaireCard={(qId, title) => {
+        renderQuestionnaireCard={(qId, title, cardOptions) => {
           const qConfig = questionnaires.find(q => q.id === qId);
           if (!qConfig) return null;
-          return renderQuestionnaireCard(qId);
+          return (
+            <QuestionnaireView
+              qConfig={qConfig}
+              activeQuestionnaireId={null}
+              activeSectionId={null}
+              currentPageIndex={0}
+              responses={responses}
+              primaryColor={pColor}
+              compact={false}
+              onOpenQuestionnaire={(id) => { setActiveQuestionnaireId(id); setCurrentPageIndex(0); setActiveSectionId(null); }}
+              onCloseQuestionnaire={() => {}}
+              onSetSection={() => {}}
+              onSetPage={() => {}}
+              onResponse={handleResponse}
+              showQuestionCount={cardOptions?.showQuestionCount}
+              showEstimatedTime={cardOptions?.showEstimatedTime}
+              showFrequency={cardOptions?.showFrequency}
+              cardDisplayStyle={cardOptions?.cardDisplayStyle}
+              buttonLabel={cardOptions?.buttonLabel}
+            />
+          );
         }}
         completedTodoIds={completedTodoIds}
         onToggleTodo={handleToggleTodo}
