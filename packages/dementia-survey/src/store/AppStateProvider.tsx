@@ -237,11 +237,7 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     dispatch(action)
   }, [])
 
-  // Handle side effects
-  useEffect(() => {
-    // REMOVED: destructive OptimizedStorage.clear() that caused blank screens during auth transitions
-    // Storage is only cleared on explicit SIGNED_OUT event in onAuthStateChange
-  }, [state.auth.isAuthenticated, state.auth.isLoading])
+  // REMOVED: destructive useEffect that cleared storage on auth state transitions (caused blank screens)
 
   return (
     <AppStateContext.Provider value={{ state, dispatch: enhancedDispatch }}>
