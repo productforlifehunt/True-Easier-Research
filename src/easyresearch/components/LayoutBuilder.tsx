@@ -337,6 +337,33 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
         )}
 
+        {/* Visible to — participant type toggles (shown near top for discoverability) */}
+        {participantTypes.length > 0 && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to</label>
+            <div className="flex flex-wrap gap-1">
+              {participantTypes.map(pt => {
+                // Inherit defaults from linked questionnaire if element has no explicit participant_types
+                const linkedQ = el.config.questionnaire_id ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
+                const effectiveTypes = el.config.participant_types
+                  ?? (linkedQ?.assigned_participant_types && linkedQ.assigned_participant_types.length > 0
+                    ? linkedQ.assigned_participant_types
+                    : null);
+                const visible = !effectiveTypes || effectiveTypes.includes(pt.id);
+                return (
+                  <button key={pt.id} onClick={() => {
+                    const current = effectiveTypes || participantTypes.map(p => p.id);
+                    const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
+                    updateElement(el.id, { participant_types: next });
+                  }} className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'}`}>
+                    {pt.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {el.type === 'questionnaire' && (
           <>
             <div>
@@ -859,25 +886,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
         </details>
 
-        {participantTypes.length > 0 && (
-          <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Visible to</label>
-            <div className="flex flex-wrap gap-1">
-              {participantTypes.map(pt => {
-                const visible = !el.config.participant_types || el.config.participant_types.includes(pt.id);
-                return (
-                  <button key={pt.id} onClick={() => {
-                    const current = el.config.participant_types || participantTypes.map(p => p.id);
-                    const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
-                    updateElement(el.id, { participant_types: next });
-                  }} className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'}`}>
-                    {pt.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Visible to section moved to top of config panel */}
       </div>
     );
   };
@@ -1095,34 +1104,39 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                           <Draggable key={el.id} draggableId={`el-${el.id}`} index={elIdx}>
                             {(provided, snapshot) => (
                               <div ref={provided.innerRef} {...provided.draggableProps}
-                                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border bg-white group transition-all ${
+                                className={`rounded-xl border bg-white transition-all ${
                                   snapshot.isDragging ? 'shadow-lg border-emerald-300 ring-2 ring-emerald-100' : 'border-stone-100 hover:border-stone-200'
-                                } ${editingElementId === el.id ? 'border-emerald-300 bg-emerald-50/30' : ''}`}
-                                onClick={() => setEditingElementId(editingElementId === el.id ? null : el.id)}>
-                                <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100" onClick={(e) => e.stopPropagation()}>
-                                  <GripVertical size={14} className="text-stone-300" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm">{getElementIcon(el.type)}</span>
-                                    <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
-                                    <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
-                                    {el.config.width && el.config.width !== '100%' && (
-                                      <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">{el.config.width}</span>
-                                    )}
+                                } ${editingElementId === el.id ? 'border-emerald-300 ring-1 ring-emerald-100' : ''}`}>
+                                <div
+                                  className={`flex items-center gap-2 px-3 py-2.5 group cursor-pointer transition-colors ${editingElementId === el.id ? 'bg-emerald-50/30' : ''}`}
+                                  onClick={() => setEditingElementId(editingElementId === el.id ? null : el.id)}>
+                                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100" onClick={(e) => e.stopPropagation()}>
+                                    <GripVertical size={14} className="text-stone-300" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm">{getElementIcon(el.type)}</span>
+                                      <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
+                                      <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
+                                      {el.config.width && el.config.width !== '100%' && (
+                                        <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">{el.config.width}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                    <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-1 hover:bg-stone-100 rounded">
+                                      {el.config.visible !== false ? <Eye size={12} className="text-emerald-500" /> : <EyeOff size={12} className="text-stone-300" />}
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }} className="p-1 hover:bg-stone-100 rounded">
+                                      <Edit3 size={12} className="text-stone-400" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="p-1 hover:bg-red-50 rounded">
+                                      <Trash2 size={12} className="text-red-400" />
+                                    </button>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                  <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-1 hover:bg-stone-100 rounded">
-                                    {el.config.visible !== false ? <Eye size={12} className="text-emerald-500" /> : <EyeOff size={12} className="text-stone-300" />}
-                                  </button>
-                                  <button onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }} className="p-1 hover:bg-stone-100 rounded">
-                                    <Edit3 size={12} className="text-stone-400" />
-                                  </button>
-                                  <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="p-1 hover:bg-red-50 rounded">
-                                    <Trash2 size={12} className="text-red-400" />
-                                  </button>
-                                </div>
+                                {/* Inline config panel — expands below the element row */}
+                                {editingElementId === el.id && renderElementConfig(el)}
                               </div>
                             )}
                           </Draggable>
@@ -1132,8 +1146,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     </div>
                   )}
                 </Droppable>
-
-                {editingElement && renderElementConfig(editingElement)}
               </div>
             )}
 
