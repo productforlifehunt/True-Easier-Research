@@ -156,7 +156,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-amber-600`}>{(linkedQ as any).description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}>
-                Review & Sign
+                {el.config.button_label || 'Review & Sign'}
               </button>
             </>
           ) : (
@@ -179,7 +179,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-orange-600 mt-1`}>{linkedQ.questions?.length || 0} screening questions</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg bg-orange-500 text-white ${txtSm} font-medium hover:bg-orange-600 transition-colors`}>
-                Start Screening
+                {el.config.button_label || 'Start Screening'}
               </button>
             </>
           ) : (
@@ -202,7 +202,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} profile fields</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}>
-                Edit Profile
+                {el.config.button_label || 'Edit Profile'}
               </button>
             </>
           ) : compact ? (
@@ -384,7 +384,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}>
-                View Help
+                {el.config.button_label || 'View Help'}
               </button>
             </>
           ) : (
@@ -407,7 +407,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-emerald-600 mt-1`}>{linkedQ.questions?.length || 0} fields</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors`}>
-                Open
+                {el.config.button_label || 'Open'}
               </button>
             </>
           ) : (

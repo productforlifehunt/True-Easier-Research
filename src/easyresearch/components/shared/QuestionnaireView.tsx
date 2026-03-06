@@ -370,22 +370,40 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     );
   }
 
+  // Build subtitle parts from real data / 从真实数据构建副标题
+  const subtitleParts: string[] = [];
+  if (showQuestionCount && qs.length > 0) subtitleParts.push(`${qs.length} questions`);
+  if (showEstimatedTime && qConfig.estimated_duration) subtitleParts.push(`${qConfig.estimated_duration} min`);
+  if (showFrequency && qConfig.frequency && qConfig.frequency !== 'once') subtitleParts.push(qConfig.frequency);
+  const subtitle = subtitleParts.join(' · ');
+
+  const showIcon = cardDisplayStyle === 'icon' || cardDisplayStyle === 'both';
+  const showButton = cardDisplayStyle === 'button' || cardDisplayStyle === 'both';
+  const isMinimal = cardDisplayStyle === 'minimal';
+
   // Card view (collapsed)
   return (
     <button type="button"
       onClick={wrap(() => onOpenQuestionnaire(qConfig.id))}
       className={`w-full ${s.cardPad} rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left cursor-pointer`}>
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex-1 min-w-0">
           <h4 className={`${s.txt} font-semibold text-stone-800`}>{qConfig.title}</h4>
-          <p className={`${s.txtSm} text-stone-400 mt-0.5`}>
-            {qs.length} questions · {qConfig.estimated_duration || 5} min{qConfig.frequency && !compact ? '' : qConfig.frequency ? ` · ${qConfig.frequency}` : ''}
-          </p>
+          {subtitle && <p className={`${s.txtSm} text-stone-400 mt-0.5`}>{subtitle}</p>}
         </div>
-        <div className={`${s.cardCircle} rounded-full flex items-center justify-center`} style={{ backgroundColor: primaryColor }}>
-          <ChevronRight size={s.cardIcon} className="text-white" />
-        </div>
+        {showIcon && (
+          <div className={`${s.cardCircle} rounded-full flex items-center justify-center shrink-0 ml-2`} style={{ backgroundColor: primaryColor }}>
+            <ChevronRight size={s.cardIcon} className="text-white" />
+          </div>
+        )}
       </div>
+      {showButton && (
+        <div className="mt-2">
+          <span className={`inline-block px-3 py-1.5 rounded-lg ${s.txtSm} font-medium border border-stone-200 text-stone-600`}>
+            {buttonLabel || 'Open'}
+          </span>
+        </div>
+      )}
     </button>
   );
 };
