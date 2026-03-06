@@ -136,8 +136,17 @@ const SurveyBuilder: React.FC = () => {
     voice_enabled: false,
     notification_enabled: true,
   });
-  const initialTab = (location.state as any)?.activeTab as TabId | undefined;
-  const [activeTab, setActiveTab] = useState<TabId>(initialTab || 'settings');
+  // Persist active tab in URL so it survives HMR / page reconnections
+  const searchParams = new URLSearchParams(location.search);
+  const urlTab = searchParams.get('tab') as TabId | null;
+  const initialTab = urlTab || (location.state as any)?.activeTab as TabId | undefined;
+  const [activeTab, setActiveTabRaw] = useState<TabId>(initialTab || 'settings');
+  const setActiveTab = React.useCallback((tab: TabId) => {
+    setActiveTabRaw(tab);
+    const sp = new URLSearchParams(window.location.search);
+    sp.set('tab', tab);
+    window.history.replaceState(null, '', `${window.location.pathname}?${sp.toString()}`);
+  }, []);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
