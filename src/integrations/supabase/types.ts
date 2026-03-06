@@ -1192,6 +1192,129 @@ export type Database = {
         }
         Relationships: []
       }
+      app_element_help_section: {
+        Row: {
+          content: string
+          created_at: string | null
+          element_id: string
+          id: string
+          order_index: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          element_id: string
+          id: string
+          order_index: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          element_id?: string
+          id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_element_help_section_element_id_fkey"
+            columns: ["element_id"]
+            isOneToOne: false
+            referencedRelation: "app_tab_element"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_element_tab_section: {
+        Row: {
+          created_at: string | null
+          element_id: string
+          id: string
+          label: string
+          order_index: number
+          question_ids: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          element_id: string
+          id: string
+          label: string
+          order_index: number
+          question_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          element_id?: string
+          id?: string
+          label?: string
+          order_index?: number
+          question_ids?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_element_tab_section_element_id_fkey"
+            columns: ["element_id"]
+            isOneToOne: false
+            referencedRelation: "app_tab_element"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_element_todo_card: {
+        Row: {
+          completion_trigger: string | null
+          created_at: string | null
+          description: string | null
+          element_id: string
+          id: string
+          order_index: number
+          questionnaire_id: string | null
+          title: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          completion_trigger?: string | null
+          created_at?: string | null
+          description?: string | null
+          element_id: string
+          id: string
+          order_index: number
+          questionnaire_id?: string | null
+          title?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          completion_trigger?: string | null
+          created_at?: string | null
+          description?: string | null
+          element_id?: string
+          id?: string
+          order_index?: number
+          questionnaire_id?: string | null
+          title?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_element_todo_card_element_id_fkey"
+            columns: ["element_id"]
+            isOneToOne: false
+            referencedRelation: "app_tab_element"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_features: {
         Row: {
           created_at: string | null
@@ -1314,6 +1437,140 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      app_tab: {
+        Row: {
+          created_at: string | null
+          icon: string
+          id: string
+          label: string
+          order_index: number
+          project_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          icon: string
+          id: string
+          label: string
+          order_index: number
+          project_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          icon?: string
+          id?: string
+          label?: string
+          order_index?: number
+          project_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      app_tab_element: {
+        Row: {
+          button_action: string | null
+          button_label: string | null
+          content: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          order_index: number
+          participant_types: string[] | null
+          progress_style: string | null
+          project_id: string
+          questionnaire_id: string | null
+          screening_criteria: string | null
+          show_estimated_time: boolean | null
+          show_question_count: boolean | null
+          style_background: string | null
+          style_border_radius: string | null
+          style_height: string | null
+          style_padding: string | null
+          tab_id: string
+          timeline_days: number | null
+          timeline_end_hour: number | null
+          timeline_start_hour: number | null
+          title: string | null
+          todo_auto_scroll: boolean | null
+          todo_layout: string | null
+          type: string
+          updated_at: string | null
+          visible: boolean | null
+          width: string | null
+        }
+        Insert: {
+          button_action?: string | null
+          button_label?: string | null
+          content?: string | null
+          created_at?: string | null
+          id: string
+          image_url?: string | null
+          order_index: number
+          participant_types?: string[] | null
+          progress_style?: string | null
+          project_id: string
+          questionnaire_id?: string | null
+          screening_criteria?: string | null
+          show_estimated_time?: boolean | null
+          show_question_count?: boolean | null
+          style_background?: string | null
+          style_border_radius?: string | null
+          style_height?: string | null
+          style_padding?: string | null
+          tab_id: string
+          timeline_days?: number | null
+          timeline_end_hour?: number | null
+          timeline_start_hour?: number | null
+          title?: string | null
+          todo_auto_scroll?: boolean | null
+          todo_layout?: string | null
+          type: string
+          updated_at?: string | null
+          visible?: boolean | null
+          width?: string | null
+        }
+        Update: {
+          button_action?: string | null
+          button_label?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          participant_types?: string[] | null
+          progress_style?: string | null
+          project_id?: string
+          questionnaire_id?: string | null
+          screening_criteria?: string | null
+          show_estimated_time?: boolean | null
+          show_question_count?: boolean | null
+          style_background?: string | null
+          style_border_radius?: string | null
+          style_height?: string | null
+          style_padding?: string | null
+          tab_id?: string
+          timeline_days?: number | null
+          timeline_end_hour?: number | null
+          timeline_start_hour?: number | null
+          title?: string | null
+          todo_auto_scroll?: boolean | null
+          todo_layout?: string | null
+          type?: string
+          updated_at?: string | null
+          visible?: boolean | null
+          width?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_tab_element_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "app_tab"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       background_checks: {
         Row: {
@@ -16101,6 +16358,48 @@ export type Database = {
           },
         ]
       }
+      participant_type: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          number_prefix: string | null
+          numbering_enabled: boolean | null
+          order_index: number | null
+          project_id: string
+          relations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          number_prefix?: string | null
+          numbering_enabled?: boolean | null
+          order_index?: number | null
+          project_id: string
+          relations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          number_prefix?: string | null
+          numbering_enabled?: boolean | null
+          order_index?: number | null
+          project_id?: string
+          relations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       patient_medicines: {
         Row: {
           created_at: string | null
@@ -19177,6 +19476,142 @@ export type Database = {
         }
         Relationships: []
       }
+      question: {
+        Row: {
+          ai_config: Json | null
+          allow_ai_assist: boolean | null
+          allow_voice: boolean | null
+          cfg_allow_none: boolean | null
+          cfg_allow_other: boolean | null
+          cfg_max_label: string | null
+          cfg_max_value: number | null
+          cfg_min_label: string | null
+          cfg_min_value: number | null
+          cfg_no_label: string | null
+          cfg_response_required: string | null
+          cfg_scale_type: string | null
+          cfg_step: number | null
+          cfg_yes_label: string | null
+          created_at: string | null
+          id: string
+          order_index: number | null
+          project_id: string
+          question_config: Json | null
+          question_description: string | null
+          question_text: string
+          question_type: string | null
+          questionnaire_id: string | null
+          required: boolean | null
+          section_name: string | null
+          updated_at: string | null
+          validation_rule: Json | null
+        }
+        Insert: {
+          ai_config?: Json | null
+          allow_ai_assist?: boolean | null
+          allow_voice?: boolean | null
+          cfg_allow_none?: boolean | null
+          cfg_allow_other?: boolean | null
+          cfg_max_label?: string | null
+          cfg_max_value?: number | null
+          cfg_min_label?: string | null
+          cfg_min_value?: number | null
+          cfg_no_label?: string | null
+          cfg_response_required?: string | null
+          cfg_scale_type?: string | null
+          cfg_step?: number | null
+          cfg_yes_label?: string | null
+          created_at?: string | null
+          id?: string
+          order_index?: number | null
+          project_id: string
+          question_config?: Json | null
+          question_description?: string | null
+          question_text: string
+          question_type?: string | null
+          questionnaire_id?: string | null
+          required?: boolean | null
+          section_name?: string | null
+          updated_at?: string | null
+          validation_rule?: Json | null
+        }
+        Update: {
+          ai_config?: Json | null
+          allow_ai_assist?: boolean | null
+          allow_voice?: boolean | null
+          cfg_allow_none?: boolean | null
+          cfg_allow_other?: boolean | null
+          cfg_max_label?: string | null
+          cfg_max_value?: number | null
+          cfg_min_label?: string | null
+          cfg_min_value?: number | null
+          cfg_no_label?: string | null
+          cfg_response_required?: string | null
+          cfg_scale_type?: string | null
+          cfg_step?: number | null
+          cfg_yes_label?: string | null
+          created_at?: string | null
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          question_config?: Json | null
+          question_description?: string | null
+          question_text?: string
+          question_type?: string | null
+          questionnaire_id?: string | null
+          required?: boolean | null
+          section_name?: string | null
+          updated_at?: string | null
+          validation_rule?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_option: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_other: boolean | null
+          option_text: string
+          option_value: string | null
+          order_index: number | null
+          question_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_other?: boolean | null
+          option_text: string
+          option_value?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_other?: boolean | null
+          option_text?: string
+          option_value?: string | null
+          order_index?: number | null
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_option_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "question"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       question_options: {
         Row: {
           created_at: string | null
@@ -19210,7 +19645,132 @@ export type Database = {
             foreignKeyName: "question_options_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "questions"
+            referencedRelation: "survey_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaire: {
+        Row: {
+          ai_chatbot_enabled: boolean | null
+          created_at: string | null
+          description: string | null
+          display_mode: string | null
+          estimated_duration: number | null
+          frequency: string | null
+          id: string
+          order_index: number | null
+          project_id: string
+          questionnaire_type: string | null
+          questions_per_page: number | null
+          tab_sections: Json | null
+          time_windows: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_chatbot_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          display_mode?: string | null
+          estimated_duration?: number | null
+          frequency?: string | null
+          id?: string
+          order_index?: number | null
+          project_id: string
+          questionnaire_type?: string | null
+          questions_per_page?: number | null
+          tab_sections?: Json | null
+          time_windows?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_chatbot_enabled?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          display_mode?: string | null
+          estimated_duration?: number | null
+          frequency?: string | null
+          id?: string
+          order_index?: number | null
+          project_id?: string
+          questionnaire_type?: string | null
+          questions_per_page?: number | null
+          tab_sections?: Json | null
+          time_windows?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      questionnaire_participant_type: {
+        Row: {
+          created_at: string | null
+          id: string
+          participant_type_id: string | null
+          questionnaire_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          participant_type_id?: string | null
+          questionnaire_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          participant_type_id?: string | null
+          questionnaire_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_participant_type_participant_type_id_fkey"
+            columns: ["participant_type_id"]
+            isOneToOne: false
+            referencedRelation: "participant_type"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaire_participant_type_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaire_time_window: {
+        Row: {
+          created_at: string | null
+          end_time: string
+          id: string
+          order_index: number | null
+          questionnaire_id: string | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time: string
+          id?: string
+          order_index?: number | null
+          questionnaire_id?: string | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string
+          id?: string
+          order_index?: number | null
+          questionnaire_id?: string | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_time_window_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire"
             referencedColumns: ["id"]
           },
         ]
@@ -19695,11 +20255,20 @@ export type Database = {
           compensation: string | null
           compensation_amount: number | null
           compensation_type: string | null
+          consent_form: Json | null
+          consent_form_text: string | null
+          consent_form_url: string | null
+          consent_required: boolean | null
           created_at: string | null
           created_by: string | null
           description: string | null
           disable_backtracking: boolean | null
           id: string
+          layout_header_title: string | null
+          layout_show_header: boolean | null
+          layout_theme_background_color: string | null
+          layout_theme_card_style: string | null
+          layout_theme_primary_color: string | null
           max_participants: number | null
           notification_enabled: boolean | null
           notification_settings: Json | null
@@ -19726,11 +20295,20 @@ export type Database = {
           compensation?: string | null
           compensation_amount?: number | null
           compensation_type?: string | null
+          consent_form?: Json | null
+          consent_form_text?: string | null
+          consent_form_url?: string | null
+          consent_required?: boolean | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           disable_backtracking?: boolean | null
           id?: string
+          layout_header_title?: string | null
+          layout_show_header?: boolean | null
+          layout_theme_background_color?: string | null
+          layout_theme_card_style?: string | null
+          layout_theme_primary_color?: string | null
           max_participants?: number | null
           notification_enabled?: boolean | null
           notification_settings?: Json | null
@@ -19757,11 +20335,20 @@ export type Database = {
           compensation?: string | null
           compensation_amount?: number | null
           compensation_type?: string | null
+          consent_form?: Json | null
+          consent_form_text?: string | null
+          consent_form_url?: string | null
+          consent_required?: boolean | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           disable_backtracking?: boolean | null
           id?: string
+          layout_header_title?: string | null
+          layout_show_header?: boolean | null
+          layout_theme_background_color?: string | null
+          layout_theme_card_style?: string | null
+          layout_theme_primary_color?: string | null
           max_participants?: number | null
           notification_enabled?: boolean | null
           notification_settings?: Json | null
@@ -22182,7 +22769,7 @@ export type Database = {
           },
         ]
       }
-      questions: {
+      survey_questions: {
         Row: {
           ai_config: Json | null
           allow_ai_assist: boolean | null
@@ -22191,6 +22778,7 @@ export type Database = {
           allow_voice: boolean | null
           created_at: string | null
           id: string
+          logic_rules: Json | null
           options: Json | null
           order_index: number | null
           piping_config: Json | null
@@ -22213,6 +22801,7 @@ export type Database = {
           allow_voice?: boolean | null
           created_at?: string | null
           id?: string
+          logic_rules?: Json | null
           options?: Json | null
           order_index?: number | null
           piping_config?: Json | null
@@ -22235,6 +22824,7 @@ export type Database = {
           allow_voice?: boolean | null
           created_at?: string | null
           id?: string
+          logic_rules?: Json | null
           options?: Json | null
           order_index?: number | null
           piping_config?: Json | null
@@ -22251,7 +22841,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "questions_project_id_fkey"
+            foreignKeyName: "survey_questions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "research_projects"
@@ -22322,7 +22912,7 @@ export type Database = {
             foreignKeyName: "survey_responses_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "questions"
+            referencedRelation: "survey_questions"
             referencedColumns: ["id"]
           },
         ]
