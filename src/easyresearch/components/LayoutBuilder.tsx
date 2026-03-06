@@ -526,6 +526,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
             </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+              <div className="flex gap-1">
+                {['4px', '8px', '12px', '999px'].map(r => (
+                  <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.button_border_radius || '8px') === r
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{r === '999px' ? 'Pill' : r}</button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -691,6 +703,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
               <input type="text" value={el.config.button_label || el.config.title || ''} onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+              <div className="flex gap-1">
+                {['4px', '8px', '12px', '999px'].map(r => (
+                  <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.button_border_radius || '8px') === r
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{r === '999px' ? 'Pill' : r}</button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Action</label>
