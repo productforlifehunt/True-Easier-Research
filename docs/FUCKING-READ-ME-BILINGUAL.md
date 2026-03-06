@@ -1020,6 +1020,7 @@ The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creatin
 
 ### CRC STARTS ###
 
+1. 特殊组件时间线timeline：timeline的目的是为了在时间线上显示所选择的问卷，如问卷1设置在8点回答则时间线上8点显示该问卷，并显示是否回答。时间线设置页面可以选择多个属于此研究项目的问卷，显示时间继承问卷所设置的回答时间，并可以在设置页面编辑；时间线设置组件可以设置显示时长，横竖轴，这里的设置与具体问卷的回答时间不关联，只决定时间线组件的显示时长
 
 ### CRC ENDS ###
 
