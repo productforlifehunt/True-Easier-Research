@@ -231,13 +231,8 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     dispatch(action)
   }, [])
 
-  // Handle side effects
-  useEffect(() => {
-    if (!state.auth.isAuthenticated && !state.auth.isLoading) {
-      // Clear all cached data on logout
-      OptimizedStorage.clear()
-    }
-  }, [state.auth.isAuthenticated, state.auth.isLoading])
+  // Side effects handled by AUTH_LOGOUT dispatch + OptimizedStorage.clear() in onAuthStateChange SIGNED_OUT only
+  // REMOVED: destructive useEffect that cleared storage on every auth state transition (caused blank screens)
 
   return (
     <AppStateContext.Provider value={{ state, dispatch: enhancedDispatch }}>
