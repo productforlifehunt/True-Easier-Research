@@ -216,6 +216,24 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         ? Math.max(40, (explicitHeight || (elRefs.current[el.id]?.getBoundingClientRect().height ?? 100)) + resizeDelta.dh)
         : explicitHeight;
 
+      // Build custom styles from element config
+      const customStyle = el.config.style || {};
+      const shadowMap: Record<string, string> = {
+        sm: '0 1px 2px rgba(0,0,0,0.05)',
+        md: '0 4px 6px rgba(0,0,0,0.07)',
+        lg: '0 10px 15px rgba(0,0,0,0.1)',
+        xl: '0 20px 25px rgba(0,0,0,0.1)',
+      };
+      const contentAlignMap: Record<string, string> = {
+        top: 'flex-start',
+        center: 'center',
+        bottom: 'flex-end',
+      };
+      const activeHeight = isResizing && resizeRef.current?.dir === 'height'
+        ? `${liveHeight}px`
+        : savedHeight;
+      const hasFixedHeight = !!activeHeight;
+
       return (
         <Draggable key={el.id} draggableId={`phone-el-${el.id}`} index={index}>
           {(provided, snapshot) => (
@@ -223,11 +241,27 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               ref={(node) => { provided.innerRef(node); elRefs.current[el.id] = node; }}
               {...provided.draggableProps}
               data-resize-id={el.id}
-              className={`relative group/el transition-all rounded-xl cursor-pointer ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
+              className={`relative group/el transition-all cursor-pointer ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
               style={{
-                backgroundColor: 'white',
-                ...(savedHeight && !isResizing ? { height: savedHeight, overflow: 'hidden' } : {}),
-                ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${liveHeight}px`, overflow: 'hidden' } : {}),
+                backgroundColor: customStyle.bg_color || 'white',
+                borderRadius: customStyle.border_radius || '12px',
+                border: customStyle.border || undefined,
+                boxShadow: customStyle.shadow ? shadowMap[customStyle.shadow] : undefined,
+                opacity: customStyle.opacity ?? 1,
+                margin: customStyle.margin || undefined,
+                padding: customStyle.padding || undefined,
+                color: customStyle.text_color || undefined,
+                fontSize: customStyle.font_size || undefined,
+                fontWeight: customStyle.font_weight || undefined,
+                textAlign: (customStyle.text_align as any) || undefined,
+                // Height: apply to the ENTIRE card, with flex for content alignment
+                ...(hasFixedHeight ? {
+                  height: activeHeight,
+                  overflow: customStyle.overflow || 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column' as const,
+                  justifyContent: contentAlignMap[customStyle.content_align || 'top'] || 'flex-start',
+                } : {}),
                 ...(provided.draggableProps.style || {}),
               }}
               onClick={handleClick}
@@ -256,7 +290,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 </div>
               )}
 
-              {content}
+              {/* Content wrapper — shrinks to fit within the flex container */}
+              <div className={hasFixedHeight ? 'w-full flex-shrink-0' : ''}>
+                {content}
+              </div>
 
               {/* Bottom resize handle (height) — shows on click */}
               {showControls && (
