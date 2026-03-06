@@ -49,6 +49,7 @@ export interface AppTabElementRow {
   timeline_days?: number | null;
   todo_layout?: string | null;
   todo_auto_scroll?: boolean | null;
+  questionnaire_ids?: string[] | null;
 }
 
 export interface AppElementTodoCardRow {
