@@ -138,10 +138,14 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
     order_index: i,
   }));
 
+  const homeId = crypto.randomUUID();
+  const timelineId = crypto.randomUUID();
+  const settingsId = crypto.randomUUID();
+
   return {
     tabs: [
       {
-        id: 'tab-home', label: 'Home', icon: 'Home',
+        id: homeId, label: 'Home', icon: 'Home',
         elements: [
           { id: crypto.randomUUID(), type: 'progress', config: { title: 'Your Progress', visible: true, progress_style: 'bar' }, order_index: 0 },
           ...tabElements,
@@ -149,14 +153,14 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
         order_index: 0,
       },
       {
-        id: 'tab-timeline', label: 'Timeline', icon: 'FileText',
+        id: timelineId, label: 'Timeline', icon: 'FileText',
         elements: [
           { id: crypto.randomUUID(), type: 'timeline', config: { title: 'Study Timeline', visible: true }, order_index: 0 },
         ],
         order_index: 1,
       },
       {
-        id: 'tab-settings', label: 'Settings', icon: 'Settings',
+        id: settingsId, label: 'Settings', icon: 'Settings',
         elements: [
           { id: crypto.randomUUID(), type: 'profile', config: { title: 'Profile', visible: true }, order_index: 0 },
           { id: crypto.randomUUID(), type: 'help', config: { title: 'Help & FAQ', visible: true }, order_index: 1 },
@@ -165,9 +169,9 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
       },
     ],
     bottom_nav: [
-      { icon: 'Home', label: 'Home', tab_id: 'tab-home' },
-      { icon: 'FileText', label: 'Survey', tab_id: 'tab-timeline' },
-      { icon: 'Settings', label: 'Settings', tab_id: 'tab-settings' },
+      { icon: 'Home', label: 'Home', tab_id: homeId },
+      { icon: 'FileText', label: 'Survey', tab_id: timelineId },
+      { icon: 'Settings', label: 'Settings', tab_id: settingsId },
     ],
     show_header: true,
     header_title: '',
