@@ -17,7 +17,10 @@ interface ElementRendererProps {
   onOpenQuestionnaire: (qId: string) => void;
   onSelectTimelineDay: (day: number) => void;
   /** Render a questionnaire card/expanded view — delegated to parent since it involves complex state */
-  renderQuestionnaireCard: (qId: string, title: string) => React.ReactNode;
+  renderQuestionnaireCard: (qId: string, title: string, cardOptions?: {
+    showQuestionCount?: boolean; showEstimatedTime?: boolean; showFrequency?: boolean;
+    cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal'; buttonLabel?: string;
+  }) => React.ReactNode;
   /** Whether to stop event propagation */
   stopPropagation?: boolean;
   /** Set of completed todo card IDs */
@@ -58,7 +61,13 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
     case 'questionnaire':
       if (el.config.questionnaire_id) {
         const q = questionnaires?.find(qc => qc.id === el.config.questionnaire_id);
-        return <>{renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire')}</>;
+        return <>{renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire', {
+          showQuestionCount: el.config.show_question_count !== false,
+          showEstimatedTime: el.config.show_estimated_time !== false,
+          showFrequency: el.config.show_frequency !== false,
+          cardDisplayStyle: el.config.card_display_style || 'icon',
+          buttonLabel: el.config.button_label,
+        })}</>;
       }
       return null;
 
