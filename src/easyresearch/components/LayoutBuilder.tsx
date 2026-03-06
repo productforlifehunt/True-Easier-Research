@@ -506,24 +506,43 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         )}
 
         {el.type === 'timeline' && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Days</label>
-              <input type="number" min={1} max={90} value={el.config.timeline_days || studyDuration || 7}
-                onChange={(e) => updateElement(el.id, { timeline_days: parseInt(e.target.value) || 7 })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Questionnaire</label>
+              <select value={el.config.questionnaire_id || ''} onChange={(e) => {
+                const selected = questionnaires.find(q => q.id === e.target.value);
+                updateElement(el.id, { questionnaire_id: e.target.value || undefined, title: selected?.title ? `${selected.title} Timeline` : el.config.title });
+              }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                <option value="">— Select questionnaire —</option>
+                {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
+                  <option key={q.id} value={q.id}>{q.title} ({q.frequency}, {q.time_windows?.[0]?.start || '09:00'}–{q.time_windows?.[0]?.end || '21:00'})</option>
+                ))}
+              </select>
+              {el.config.questionnaire_id && (
+                <div className="text-[10px] text-emerald-600 bg-emerald-50 rounded-lg px-2 py-1.5 border border-emerald-100 mt-1">
+                  ✓ Linked — schedule derived from questionnaire frequency & time windows
+                </div>
+              )}
             </div>
-            <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">From</label>
-              <input type="number" min={0} max={23} value={el.config.timeline_start_hour ?? 0}
-                onChange={(e) => updateElement(el.id, { timeline_start_hour: parseInt(e.target.value) || 0 })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">To</label>
-              <input type="number" min={0} max={23} value={el.config.timeline_end_hour ?? 23}
-                onChange={(e) => updateElement(el.id, { timeline_end_hour: parseInt(e.target.value) || 23 })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Days</label>
+                <input type="number" min={1} max={90} value={el.config.timeline_days || studyDuration || 7}
+                  onChange={(e) => updateElement(el.id, { timeline_days: parseInt(e.target.value) || 7 })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">From</label>
+                <input type="number" min={0} max={23} value={el.config.timeline_start_hour ?? 0}
+                  onChange={(e) => updateElement(el.id, { timeline_start_hour: parseInt(e.target.value) || 0 })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">To</label>
+                <input type="number" min={0} max={23} value={el.config.timeline_end_hour ?? 23}
+                  onChange={(e) => updateElement(el.id, { timeline_end_hour: parseInt(e.target.value) || 23 })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
             </div>
           </div>
         )}

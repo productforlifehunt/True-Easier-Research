@@ -244,10 +244,54 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       const endH = el.config.timeline_end_hour ?? 23;
       const allHours: number[] = [];
       for (let h = startH; h <= endH; h++) allHours.push(h);
-      const targetQ = questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0];
+
+      // Use linked questionnaire or fall back to first survey
+      const targetQ = el.config.questionnaire_id
+        ? questionnaires?.find(q => q.id === el.config.questionnaire_id)
+        : (questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0]);
+
+      // Derive scheduled hours from questionnaire frequency & time_windows
+      const getScheduledHours = (): number[] => {
+        if (!targetQ) return [];
+        const tw = targetQ.time_windows;
+        const windowStart = tw?.[0]?.start ? parseInt(tw[0].start.split(':')[0], 10) : 9;
+        const windowEnd = tw?.[0]?.end ? parseInt(tw[0].end.split(':')[0], 10) : 21;
+        const freq = targetQ.frequency || 'daily';
+        const scheduled: number[] = [];
+
+        let intervalH = 24;
+        switch (freq) {
+          case 'hourly': intervalH = 1; break;
+          case '2hours': intervalH = 2; break;
+          case '3hours': intervalH = 3; break;
+          case '4hours': intervalH = 4; break;
+          case '6hours': intervalH = 6; break;
+          case 'twice_daily': intervalH = Math.max(1, Math.floor((windowEnd - windowStart) / 2)); break;
+          case 'three_daily': intervalH = Math.max(1, Math.floor((windowEnd - windowStart) / 3)); break;
+          case 'daily': intervalH = 24; break; // only once
+          case 'once': intervalH = 24; break;
+          default: intervalH = 24;
+        }
+
+        if (intervalH >= 24) {
+          // Single slot at window start
+          scheduled.push(windowStart);
+        } else {
+          for (let h = windowStart; h <= windowEnd; h += intervalH) {
+            scheduled.push(h);
+          }
+        }
+        return scheduled;
+      };
+
+      const scheduledHours = new Set(getScheduledHours());
+
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
           <h4 className={`${txt} font-semibold text-stone-800`}>📅 {el.config.title || 'Study Timeline'}</h4>
+          {!targetQ && (
+            <p className={`${txtSm} text-stone-400 italic`}>No questionnaire linked. Configure in Layout settings.</p>
+          )}
           <div className={`flex ${compact ? 'gap-1' : 'gap-1.5'} overflow-x-auto`} style={{ scrollbarWidth: 'none' }}>
             {Array.from({ length: Math.min(days, 30) }, (_, i) => i + 1).map(d => (
               <button key={d} onClick={wrap(() => onSelectTimelineDay(d))}
@@ -260,9 +304,10 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
           </div>
           <div className={`space-y-0.5 ${compact ? 'max-h-48' : 'max-h-60'} overflow-y-auto`} style={{ scrollbarWidth: 'thin' }}>
             {allHours.map(h => {
-              const hasQ = h % 2 === 0 && h >= 8 && h <= 20;
-              const isCompleted = hasQ && h <= 10 && selectedTimelineDay <= 2;
-              const isMissed = hasQ && h >= 18 && selectedTimelineDay < 2;
+              const hasQ = scheduledHours.has(h);
+              // In preview, simulate: past days = completed, current day future hours = scheduled, past days late hours = missed
+              const isCompleted = hasQ && selectedTimelineDay < Math.ceil(days / 2);
+              const isMissed = false; // No real submission data in preview
               const isScheduled = hasQ && !isCompleted && !isMissed;
               return (
                 <div key={h} className="flex items-center gap-2">
@@ -272,7 +317,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
                     style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : undefined }}>
                     {hasQ && (
                       <div className="flex items-center justify-between">
-                        <span className={`${txtXs} font-medium`} style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
+                        <span className={`${txtXs} font-medium`} style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : isScheduled ? '#a8a29e' : '#a8a29e' }}>
                           {targetQ?.title || 'Survey'}
                         </span>
                         <span className={`${txtXx}`} style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
