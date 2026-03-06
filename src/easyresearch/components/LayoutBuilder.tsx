@@ -49,6 +49,8 @@ export interface LayoutElement {
     image_url?: string;
     show_question_count?: boolean;
     show_estimated_time?: boolean;
+    show_frequency?: boolean;
+    card_display_style?: 'icon' | 'button' | 'both' | 'minimal';
     screening_criteria?: string;
     help_sections?: { title: string; content: string }[];
     progress_style?: 'bar' | 'ring' | 'steps';

@@ -35,6 +35,12 @@ interface QuestionnaireViewProps {
   submitting?: boolean;
   /** Whether to stop event propagation on clicks (needed in phone preview) */
   stopPropagation?: boolean;
+  /** Card display options — configurable from layout builder */
+  showQuestionCount?: boolean;
+  showEstimatedTime?: boolean;
+  showFrequency?: boolean;
+  cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal';
+  buttonLabel?: string;
 }
 
 const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
