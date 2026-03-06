@@ -6,7 +6,7 @@ import QuestionEditor from './QuestionEditor';
 import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 
-type ComponentType = 'consent' | 'screening' | 'profile' | 'help' | 'custom';
+type ComponentType = 'consent' | 'screening' | 'profile' | 'help' | 'custom' | 'onboarding';
 
 interface ComponentBuilderProps {
   questionnaires: QuestionnaireConfig[];
@@ -17,6 +17,7 @@ interface ComponentBuilderProps {
 }
 
 const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNode; desc: string; defaultTitle: string }[] = [
+  { type: 'onboarding', label: 'Onboarding', icon: <Layers size={16} className="text-teal-500" />, desc: 'Welcome screens and instructions shown to new participants / 向新参与者展示的欢迎界面和说明', defaultTitle: 'Onboarding' },
   { type: 'consent', label: 'Consent Form', icon: <Shield size={16} className="text-amber-500" />, desc: 'Informed consent agreements participants must accept', defaultTitle: 'Consent Form' },
   { type: 'screening', label: 'Screening', icon: <ClipboardCheck size={16} className="text-orange-500" />, desc: 'Eligibility screening questions with disqualification logic', defaultTitle: 'Screening Questions' },
   { type: 'profile', label: 'Profile', icon: <User size={16} className="text-blue-500" />, desc: 'Participant demographics, contact info, and baseline data', defaultTitle: 'Participant Profile' },
@@ -30,7 +31,7 @@ const ComponentBuilder: React.FC<ComponentBuilderProps> = ({ questionnaires, par
   const [openComponentId, setOpenComponentId] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
 
-  const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type));
+  const components = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type));
 
   const toggleSection = (type: ComponentType) => {
     setExpandedSections(prev => {
