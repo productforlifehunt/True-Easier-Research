@@ -682,36 +682,44 @@ const SurveyBuilder: React.FC = () => {
           await supabase.from('questionnaire').delete().in('id', removedQIds);
         }
 
-        for (const qc of questionnaireConfigs) {
-          const qPayload = {
-            id: qc.id,
-            project_id: targetProjectId,
-            questionnaire_type: qc.questionnaire_type || 'survey',
-            title: qc.title,
-            description: qc.description || '',
-            estimated_duration: qc.estimated_duration || 5,
-            frequency: qc.frequency || 'once',
-            time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
-            order_index: qc.order_index ?? 0,
-            tab_sections: qc.tab_sections || null,
-            display_mode: qc.display_mode || 'one_per_page',
-            questions_per_page: qc.questions_per_page ?? null,
-            ai_chatbot_enabled: qc.ai_chatbot_enabled ?? false,
-          };
-          await supabase.from('questionnaire').upsert(qPayload, { onConflict: 'id' });
+        // Batch upsert all questionnaires at once
+        const allQPayloads = questionnaireConfigs.map(qc => ({
+          id: qc.id,
+          project_id: targetProjectId,
+          questionnaire_type: qc.questionnaire_type || 'survey',
+          title: qc.title,
+          description: qc.description || '',
+          estimated_duration: qc.estimated_duration || 5,
+          frequency: qc.frequency || 'once',
+          time_windows: qc.time_windows || [{ start: '09:00', end: '21:00' }],
+          order_index: qc.order_index ?? 0,
+          tab_sections: qc.tab_sections || null,
+          display_mode: qc.display_mode || 'one_per_page',
+          questions_per_page: qc.questions_per_page ?? null,
+          ai_chatbot_enabled: qc.ai_chatbot_enabled ?? false,
+        }));
+        await supabase.from('questionnaire').upsert(allQPayloads, { onConflict: 'id' });
 
-          // Save time_windows to flat questionnaire_time_window table
-          await saveTimeWindows(qc.id, qc.time_windows || [{ start: '09:00', end: '21:00' }]);
+        // Parallel: save time windows + participant type assignments for all questionnaires
+        const qcIds = questionnaireConfigs.map(qc => qc.id);
+        const [, ...twResults] = await Promise.all([
+          // Delete all existing participant_type assignments for these questionnaires, then re-insert
+          supabase.from('questionnaire_participant_type').delete().in('questionnaire_id', qcIds).then(),
+          // Save all time windows in parallel
+          ...questionnaireConfigs.map(qc =>
+            saveTimeWindows(qc.id, qc.time_windows || [{ start: '09:00', end: '21:00' }])
+          ),
+        ]);
 
-          // Sync questionnaire<->participant_type assignments
-          await supabase.from('questionnaire_participant_type').delete().eq('questionnaire_id', qc.id);
-          if (qc.assigned_participant_types && qc.assigned_participant_types.length > 0) {
-            const junctionRows = qc.assigned_participant_types.map(ptId => ({
-              questionnaire_id: qc.id,
-              participant_type_id: ptId,
-            }));
-            await supabase.from('questionnaire_participant_type').insert(junctionRows);
-          }
+        // Batch insert all participant_type assignments
+        const allJunctionRows = questionnaireConfigs.flatMap(qc =>
+          (qc.assigned_participant_types || []).map(ptId => ({
+            questionnaire_id: qc.id,
+            participant_type_id: ptId,
+          }))
+        );
+        if (allJunctionRows.length > 0) {
+          await supabase.from('questionnaire_participant_type').insert(allJunctionRows);
         }
       };
 
