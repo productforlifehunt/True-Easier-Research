@@ -1472,6 +1472,7 @@ export type Database = {
         Row: {
           button_action: string | null
           button_label: string | null
+          card_display_style: string | null
           content: string | null
           created_at: string | null
           id: string
@@ -1484,6 +1485,7 @@ export type Database = {
           questionnaire_ids: string[] | null
           screening_criteria: string | null
           show_estimated_time: boolean | null
+          show_frequency: boolean | null
           show_question_count: boolean | null
           style_background: string | null
           style_border_radius: string | null
@@ -1504,6 +1506,7 @@ export type Database = {
         Insert: {
           button_action?: string | null
           button_label?: string | null
+          card_display_style?: string | null
           content?: string | null
           created_at?: string | null
           id: string
@@ -1516,6 +1519,7 @@ export type Database = {
           questionnaire_ids?: string[] | null
           screening_criteria?: string | null
           show_estimated_time?: boolean | null
+          show_frequency?: boolean | null
           show_question_count?: boolean | null
           style_background?: string | null
           style_border_radius?: string | null
@@ -1536,6 +1540,7 @@ export type Database = {
         Update: {
           button_action?: string | null
           button_label?: string | null
+          card_display_style?: string | null
           content?: string | null
           created_at?: string | null
           id?: string
@@ -1548,6 +1553,7 @@ export type Database = {
           questionnaire_ids?: string[] | null
           screening_criteria?: string | null
           show_estimated_time?: boolean | null
+          show_frequency?: boolean | null
           show_question_count?: boolean | null
           style_background?: string | null
           style_border_radius?: string | null
