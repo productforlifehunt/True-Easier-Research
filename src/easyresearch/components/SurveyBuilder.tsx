@@ -1057,7 +1057,7 @@ const SurveyBuilder: React.FC = () => {
         )}
 
         {/* Layout Tab */}
-        {activeTab === 'layout' && (
+        {activeTab === 'layout' && appLayout && (
           <LayoutBuilder
             layout={appLayout}
             questionnaires={questionnaireConfigs}
