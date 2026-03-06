@@ -64,12 +64,11 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     const tabSections = qConfig.tab_sections;
     const hasTabSections = tabSections && tabSections.length > 0;
 
-    // Filter by tab section: prefer question_ids array, fallback to section_name on question row
+    // Filter by tab section
     const matchesSection = (q: any, sectionId: string) => {
       const sec = tabSections!.find(s => s.id === sectionId);
       if (!sec) return false;
       if (sec.question_ids?.length > 0) return sec.question_ids.includes(q.id);
-      // Fallback: match by section_name column on the question row
       return q.section_name === sectionId;
     };
     const isAssignedToAnySection = (q: any) => {
@@ -86,11 +85,32 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
 
     const displayQs = filteredQs.length > 0 ? filteredQs : qs;
 
-    // One question at a time — qIdx is the current question index
-    const qIdx = Math.max(0, Math.min(currentPageIndex, displayQs.length - 1));
-    const isFirst = qIdx === 0;
-    const isLast = qIdx >= displayQs.length - 1;
-    const progress = displayQs.length > 0 ? ((qIdx + 1) / displayQs.length) * 100 : 0;
+    // ── Determine questions_per_page ──
+    // Priority: active tab_section override → questionnaire default → 1 (legacy one-at-a-time)
+    // 优先级：活动标签区段覆盖 → 问卷默认值 → 1（遗留逐题模式）
+    let perPage: number;
+    const activeSection = activeSectionId && tabSections
+      ? tabSections.find(sec => sec.id === activeSectionId)
+      : null;
+    if (activeSection?.questions_per_page != null) {
+      perPage = activeSection.questions_per_page;
+    } else if (qConfig.questions_per_page != null) {
+      perPage = qConfig.questions_per_page;
+    } else {
+      perPage = 1; // default: one question at a time
+    }
+
+    // perPage <= 0 or very large means show all / perPage <= 0 或非常大则显示全部
+    const isUnlimited = perPage >= displayQs.length;
+    const effectivePerPage = isUnlimited ? displayQs.length : perPage;
+
+    const totalPages = Math.max(1, Math.ceil(displayQs.length / effectivePerPage));
+    const currentPage = Math.max(0, Math.min(Math.floor(currentPageIndex / effectivePerPage), totalPages - 1));
+    const pageStart = currentPage * effectivePerPage;
+    const pageQuestions = displayQs.slice(pageStart, pageStart + effectivePerPage);
+    const isFirst = currentPage === 0;
+    const isLast = currentPage >= totalPages - 1;
+    const progress = displayQs.length > 0 ? ((pageStart + pageQuestions.length) / displayQs.length) * 100 : 0;
 
     // Track answered (non-display-only) questions
     const NON_INPUT_TYPES = ['section_header', 'text_block', 'instruction', 'divider', 'image_block'];
@@ -114,10 +134,9 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
       const dy = touchStartY.current - e.changedTouches[0].clientY;
       touchStartX.current = null;
       touchStartY.current = null;
-      // Only handle clear horizontal swipes
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
-        if (dx > 0 && !isLast) onSetPage(qIdx + 1);
-        else if (dx < 0 && !isFirst) onSetPage(qIdx - 1);
+        if (dx > 0 && !isLast) onSetPage((currentPage + 1) * effectivePerPage);
+        else if (dx < 0 && !isFirst) onSetPage((currentPage - 1) * effectivePerPage);
       }
     };
 
@@ -129,6 +148,59 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
         ? (e: React.TouchEvent) => { e.stopPropagation(); handleTouchEnd(e); }
         : handleTouchEnd,
     };
+
+    // ── Render question(s) ──
+    const renderQuestion = (q: any) => {
+      const normalizedType = normalizeLegacyQuestionType(q.question_type);
+      if (normalizedType === 'section_header') {
+        return (
+          <div key={q.id} className={`${compact ? 'py-6' : 'py-10'} text-center`}>
+            <h3 className={`${s.sectionH} font-bold text-stone-800`}>{q.question_text}</h3>
+            {q.question_description && (
+              <p className={`${s.descTxt} text-stone-400 mt-2`}>{q.question_description}</p>
+            )}
+            {effectivePerPage === 1 && (
+              <p className={`${s.txtXs} text-stone-300 mt-4`}>Swipe or tap Next to continue →</p>
+            )}
+          </div>
+        );
+      }
+      return (
+        <div key={q.id} className={`${compact ? 'p-4' : 'p-5'} rounded-2xl bg-white border border-stone-100 shadow-sm ${compact ? 'space-y-3' : 'space-y-4'}`}>
+          <div>
+            <h3 className={`${s.txtXl} font-semibold text-stone-800 leading-snug`}>
+              {q.question_text}
+              {q.required && <span className="text-red-400 ml-1">*</span>}
+            </h3>
+            {q.question_description && (
+              <p className={`${s.descTxt} text-stone-400 mt-1.5`}>{q.question_description}</p>
+            )}
+          </div>
+          <AIQuestionWrapper
+            question={q}
+            value={responses[q.id]}
+            onResponse={onResponse}
+            aiConfig={{
+              allow_ai_assist: q.question_config?.allow_ai_assist || q.allow_ai_assist,
+              allow_ai_auto_answer: q.question_config?.allow_ai_auto_answer,
+              allow_voice: q.question_config?.allow_voice || q.allow_voice,
+            }}
+            compact={compact}
+          >
+            <QuestionRenderer
+              question={q}
+              value={responses[q.id]}
+              onResponse={onResponse}
+              primaryColor={primaryColor}
+              compact={compact}
+            />
+          </AIQuestionWrapper>
+        </div>
+      );
+    };
+
+    // Single-question carousel mode (perPage === 1) vs multi-question list mode
+    const isSingleMode = effectivePerPage === 1;
 
     return (
       <div className="pb-2">
@@ -165,8 +237,8 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           <div className={`${s.barH} bg-stone-100 rounded-full overflow-hidden`}>
             <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
           </div>
-          {/* Dot step indicators */}
-          {displayQs.length <= 14 ? (
+          {/* Step indicators — only for single-question mode with few questions */}
+          {isSingleMode && displayQs.length <= 14 ? (
             <div className="flex justify-center gap-1.5 mt-2.5">
               {displayQs.map((_: any, i: number) => (
                 <button
@@ -175,86 +247,50 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
                   onClick={wrap(() => onSetPage(i))}
                   className="rounded-full transition-all duration-200 cursor-pointer"
                   style={{
-                    width: i === qIdx ? (compact ? '14px' : '18px') : (compact ? '5px' : '6px'),
+                    width: i === currentPage ? (compact ? '14px' : '18px') : (compact ? '5px' : '6px'),
                     height: compact ? '5px' : '6px',
-                    backgroundColor: i < qIdx ? primaryColor : i === qIdx ? primaryColor : '#e7e5e4',
-                    opacity: i < qIdx ? 0.45 : 1,
+                    backgroundColor: i < currentPage ? primaryColor : i === currentPage ? primaryColor : '#e7e5e4',
+                    opacity: i < currentPage ? 0.45 : 1,
                   }}
                 />
               ))}
             </div>
-          ) : (
+          ) : totalPages > 1 ? (
             <p className={`text-center ${s.txtXs} text-stone-400 mt-1.5`}>
-              {qIdx + 1} / {displayQs.length}
+              Page {currentPage + 1} / {totalPages}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Question carousel */}
+        {/* Questions */}
         {displayQs.length === 0 ? (
           <p className={`${s.txtSm} text-stone-400 italic py-8 text-center`}>No questions added yet.</p>
-        ) : (
+        ) : isSingleMode ? (
+          /* Single-question carousel mode */
           <div className="overflow-hidden" {...touchHandlers}>
             <div
               className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${qIdx * 100}%)` }}
+              style={{ transform: `translateX(-${currentPage * 100}%)` }}
             >
-              {displayQs.map((q: any) => {
-                const normalizedType = normalizeLegacyQuestionType(q.question_type);
-                return (
-                  <div key={q.id} className="min-w-full">
-                    {normalizedType === 'section_header' ? (
-                      <div className={`${compact ? 'py-6' : 'py-10'} text-center`}>
-                        <h3 className={`${s.sectionH} font-bold text-stone-800`}>{q.question_text}</h3>
-                        {q.question_description && (
-                          <p className={`${s.descTxt} text-stone-400 mt-2`}>{q.question_description}</p>
-                        )}
-                        <p className={`${s.txtXs} text-stone-300 mt-4`}>Swipe or tap Next to continue →</p>
-                      </div>
-                    ) : (
-                      <div className={`${compact ? 'p-4' : 'p-5'} rounded-2xl bg-white border border-stone-100 shadow-sm ${compact ? 'space-y-3' : 'space-y-4'}`}>
-                        <div>
-                          <h3 className={`${s.txtXl} font-semibold text-stone-800 leading-snug`}>
-                            {q.question_text}
-                            {q.required && <span className="text-red-400 ml-1">*</span>}
-                          </h3>
-                          {q.question_description && (
-                            <p className={`${s.descTxt} text-stone-400 mt-1.5`}>{q.question_description}</p>
-                          )}
-                        </div>
-                        <AIQuestionWrapper
-                          question={q}
-                          value={responses[q.id]}
-                          onResponse={onResponse}
-                          aiConfig={{
-                            allow_ai_assist: q.question_config?.allow_ai_assist || q.allow_ai_assist,
-                            allow_ai_auto_answer: q.question_config?.allow_ai_auto_answer,
-                            allow_voice: q.question_config?.allow_voice || q.allow_voice,
-                          }}
-                          compact={compact}
-                        >
-                          <QuestionRenderer
-                            question={q}
-                            value={responses[q.id]}
-                            onResponse={onResponse}
-                            primaryColor={primaryColor}
-                            compact={compact}
-                          />
-                        </AIQuestionWrapper>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {displayQs.map((q: any) => (
+                <div key={q.id} className="min-w-full">
+                  {renderQuestion(q)}
+                </div>
+              ))}
             </div>
+          </div>
+        ) : (
+          /* Multi-question list mode — show all questions for current page */
+          <div className={s.space} {...touchHandlers}>
+            {pageQuestions.map((q: any) => renderQuestion(q))}
           </div>
         )}
 
         {/* Navigation */}
-        {displayQs.length > 0 && (
+        {displayQs.length > 0 && totalPages > 1 && (
           <div className={`flex justify-between ${compact ? 'pt-3 mt-3' : 'pt-4 mt-4'} border-t border-stone-100`}>
             <button type="button"
-              onClick={wrap(() => onSetPage(Math.max(0, qIdx - 1)))}
+              onClick={wrap(() => onSetPage(Math.max(0, (currentPage - 1) * effectivePerPage)))}
               disabled={isFirst}
               className={`flex items-center gap-1 ${s.navPad} rounded-full font-medium border border-stone-200 text-stone-500 disabled:opacity-30 hover:bg-stone-50 cursor-pointer`}>
               <ChevronLeft size={s.navIcon} /> Back
@@ -269,7 +305,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
               </button>
             ) : (
               <button type="button"
-                onClick={wrap(() => onSetPage(qIdx + 1))}
+                onClick={wrap(() => onSetPage((currentPage + 1) * effectivePerPage))}
                 className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 shadow-sm`}
                 style={{ backgroundColor: primaryColor }}>
                 Next <ChevronRight size={s.navIcon} />
@@ -278,8 +314,21 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           </div>
         )}
 
-        {/* "All answered" quick-submit banner (shown when not already on last question) */}
-        {allAnswered && !isLast && (
+        {/* Single-page submit button (when all questions fit on one page) */}
+        {displayQs.length > 0 && totalPages <= 1 && (
+          <div className={`flex justify-end ${compact ? 'pt-3 mt-3' : 'pt-4 mt-4'} border-t border-stone-100`}>
+            <button type="button"
+              onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
+              disabled={submitting}
+              className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60 shadow-sm`}
+              style={{ backgroundColor: primaryColor }}>
+              {submitting ? 'Submitting...' : 'Submit'} <Check size={s.navIcon} />
+            </button>
+          </div>
+        )}
+
+        {/* "All answered" quick-submit banner */}
+        {allAnswered && !isLast && totalPages > 1 && (
           <div className={`${compact ? 'mt-2.5 p-2.5' : 'mt-3 p-3'} rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between gap-2`}>
             <div className="flex items-center gap-2 min-w-0">
               <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: primaryColor }}>
