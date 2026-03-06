@@ -76,7 +76,10 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   );
 
   // ── Questionnaire card/expanded view (shared) ──
-  const renderQuestionnaireCard = (qId: string, qTitle: string) => {
+  const renderQuestionnaireCard = (qId: string, qTitle: string, cardOptions?: {
+    showQuestionCount?: boolean; showEstimatedTime?: boolean; showFrequency?: boolean;
+    cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal'; buttonLabel?: string;
+  }) => {
     const qConfig = questionnaires?.find(q => q.id === qId);
     if (!qConfig) return null;
     return (
@@ -95,6 +98,11 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         onSetSection={(sId) => { setActiveSectionId(sId); }}
         onSetPage={setCurrentQuestionIndex}
         onResponse={handleResponse}
+        showQuestionCount={cardOptions?.showQuestionCount}
+        showEstimatedTime={cardOptions?.showEstimatedTime}
+        showFrequency={cardOptions?.showFrequency}
+        cardDisplayStyle={cardOptions?.cardDisplayStyle}
+        buttonLabel={cardOptions?.buttonLabel}
       />
     );
   };
