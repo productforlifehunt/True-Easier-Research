@@ -49,6 +49,8 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   compact = false, onOpenQuestionnaire, onCloseQuestionnaire,
   onSetSection, onSetPage, onResponse, onSubmit, submitting = false,
   stopPropagation = false,
+  showQuestionCount = true, showEstimatedTime = true, showFrequency = true,
+  cardDisplayStyle = 'icon', buttonLabel,
 }) => {
   const wrap = (fn: () => void) => (e?: React.MouseEvent) => {
     if (stopPropagation) e?.stopPropagation();
