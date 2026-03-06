@@ -156,7 +156,7 @@ const SurveyBuilder: React.FC = () => {
   // New state for multi-questionnaire architecture
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
   const [participantTypes, setParticipantTypes] = useState<ParticipantType[]>([]);
-  const [appLayout, setAppLayout] = useState<AppLayout>(getDefaultLayout([]));
+  const [appLayout, setAppLayout] = useState<AppLayout | null>(null);
   const appLayoutInitializedRef = useRef(false);
 
   // Auto-save layout to flat DB tables whenever it changes (debounced)
@@ -164,7 +164,7 @@ const SurveyBuilder: React.FC = () => {
   useEffect(() => {
     // Skip the initial mount and the first load from DB
     if (!appLayoutInitializedRef.current) return;
-    if (!projectId) return;
+    if (!projectId || !appLayout) return;
 
     if (layoutSaveTimerRef.current) clearTimeout(layoutSaveTimerRef.current);
     layoutSaveTimerRef.current = setTimeout(async () => {
@@ -356,6 +356,9 @@ const SurveyBuilder: React.FC = () => {
           const flatLayout = await loadLayoutFromDb(projectId);
           if (flatLayout && flatLayout.tabs.length > 0) {
             setAppLayout(flatLayout);
+          } else {
+            // Only set default if DB truly has nothing
+            setAppLayout(getDefaultLayout([]));
           }
           // Mark layout as initialized so auto-save kicks in only after DB load
           setTimeout(() => { appLayoutInitializedRef.current = true; }, 100);
@@ -1054,7 +1057,7 @@ const SurveyBuilder: React.FC = () => {
         )}
 
         {/* Layout Tab */}
-        {activeTab === 'layout' && (
+        {activeTab === 'layout' && appLayout && (
           <LayoutBuilder
             layout={appLayout}
             questionnaires={questionnaireConfigs}
@@ -1079,7 +1082,7 @@ const SurveyBuilder: React.FC = () => {
         )}
 
         {/* Preview Tab */}
-        {activeTab === 'preview' && (
+        {activeTab === 'preview' && appLayout && (
           <SurveyPreview
             questions={questionnaireConfigs.flatMap(q => q.questions)}
             projectTitle={project.title || ''}
