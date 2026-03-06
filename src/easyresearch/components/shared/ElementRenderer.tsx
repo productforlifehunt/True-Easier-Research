@@ -20,6 +20,7 @@ interface ElementRendererProps {
   renderQuestionnaireCard: (qId: string, title: string, cardOptions?: {
     showQuestionCount?: boolean; showEstimatedTime?: boolean; showFrequency?: boolean;
     cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal'; buttonLabel?: string;
+    buttonBorderRadius?: string;
   }) => React.ReactNode;
   /** Whether to stop event propagation */
   stopPropagation?: boolean;
@@ -67,6 +68,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
           showFrequency: el.config.show_frequency !== false,
           cardDisplayStyle: el.config.card_display_style || 'icon',
           buttonLabel: el.config.button_label,
+          buttonBorderRadius: el.config.button_border_radius,
         })}</>;
       }
       return null;
