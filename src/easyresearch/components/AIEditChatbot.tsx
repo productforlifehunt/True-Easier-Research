@@ -145,7 +145,7 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = ({ questionnaires, projectTi
                 required: q.required ?? false,
                 order_index: i,
                 question_config: q.question_config || {},
-                options: (q.options || []).map((opt: string, oi: number) => ({
+                options: (q.options || []).map((opt: any, oi: number) => ({
                   id: crypto.randomUUID(),
                   option_text: typeof opt === 'string' ? opt : opt?.text || opt?.option_text || String(opt),
                   option_value: typeof opt === 'string' ? opt : opt?.value || opt?.option_value || String(opt),
