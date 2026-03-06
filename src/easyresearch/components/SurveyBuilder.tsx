@@ -11,6 +11,7 @@ import ProjectParticipantsTab from './ProjectParticipantsTab';
 import QuestionnaireList, { type QuestionnaireConfig } from './QuestionnaireList';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import LayoutBuilder, { type AppLayout, getDefaultLayout } from './LayoutBuilder';
+import LayoutTabWrapper from './LayoutTabWrapper';
 import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
 import { questionConfigToDbCols, validationRuleToDbCols, hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/logicEngine';
@@ -1058,7 +1059,8 @@ const SurveyBuilder: React.FC = () => {
 
         {/* Layout Tab */}
         {activeTab === 'layout' && appLayout && (
-          <LayoutBuilder
+          <LayoutTabWrapper
+            projectId={projectId}
             layout={appLayout}
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
