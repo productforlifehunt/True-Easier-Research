@@ -1082,7 +1082,7 @@ const SurveyBuilder: React.FC = () => {
         )}
 
         {/* Preview Tab */}
-        {activeTab === 'preview' && (
+        {activeTab === 'preview' && appLayout && (
           <SurveyPreview
             questions={questionnaireConfigs.flatMap(q => q.questions)}
             projectTitle={project.title || ''}
