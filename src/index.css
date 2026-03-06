@@ -1116,3 +1116,16 @@ a:focus-visible {
 /* Fallback for accidental var class usage in markup */
 .text-var\(--logo-green\) { color: var(--primary) !important; }
 .bg-var\(--logo-green\) { background-color: var(--primary) !important; color: var(--bg-primary) !important; }
+
+/* Builder: force ElementRenderer cards to fill fixed-height containers */
+/* When top-aligned, stretch the card to fill */
+.element-content-wrap[data-valign="top"] > div,
+.element-content-wrap[data-valign="top"] > div > .rounded-xl {
+  flex: 1;
+  min-height: 0;
+}
+/* When center/bottom aligned, let the card keep natural size for positioning */
+.element-content-wrap[data-valign="center"] > div,
+.element-content-wrap[data-valign="bottom"] > div {
+  flex: none;
+}

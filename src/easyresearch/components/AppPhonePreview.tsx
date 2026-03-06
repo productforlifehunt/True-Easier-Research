@@ -234,6 +234,13 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               style={{
                 ...(provided.draggableProps.style || {}),
                 opacity: customStyle.opacity ?? 1,
+                ...(customStyle.bg_color ? { backgroundColor: customStyle.bg_color } : {}),
+                ...(customStyle.text_color && customStyle.text_color !== 'inherit' ? { color: customStyle.text_color } : {}),
+                ...(customStyle.padding ? { padding: customStyle.padding } : {}),
+                ...(customStyle.margin ? { margin: customStyle.margin } : {}),
+                ...(customStyle.border_radius ? { borderRadius: customStyle.border_radius } : {}),
+                ...(customStyle.border ? { border: customStyle.border } : {}),
+                ...(customStyle.shadow && customStyle.shadow !== 'none' ? { boxShadow: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.1)', xl: '0 20px 25px rgba(0,0,0,0.1)' }[customStyle.shadow] } : {}),
                 // Height MUST come after DnD styles to avoid being overridden
                 ...(hasFixedHeight ? {
                   height: activeHeight,
@@ -266,11 +273,19 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 </div>
               )}
 
-              {/* Scoped style to force the ElementRenderer's root div to fill height */}
-              {hasFixedHeight && (
-                <style>{`[data-resize-id="${el.id}"] > div:last-of-type > * { height: 100% !important; min-height: 100% !important; }`}</style>
-              )}
-              <div style={hasFixedHeight ? { height: '100%' } : {}}>
+              {/* Content wrapper — stretches inner card to fill fixed height + vertical alignment */}
+              <div
+                className="element-content-wrap"
+                data-valign={hasFixedHeight ? (customStyle.content_align || 'top') : undefined}
+                style={hasFixedHeight ? {
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: customStyle.content_align === 'center' ? 'center'
+                    : customStyle.content_align === 'bottom' ? 'flex-end'
+                    : 'flex-start',
+                } : {}}
+              >
                 {content}
               </div>
 
