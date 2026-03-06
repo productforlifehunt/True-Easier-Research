@@ -232,13 +232,13 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               data-resize-id={el.id}
               className={`relative group/el transition-all cursor-pointer rounded-xl ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
               style={{
+                ...(provided.draggableProps.style || {}),
                 opacity: customStyle.opacity ?? 1,
-                // When height is set, constrain the card and force inner content to fill
+                // Height MUST come after DnD styles to avoid being overridden
                 ...(hasFixedHeight ? {
                   height: activeHeight,
                   overflow: 'hidden',
                 } : {}),
-                ...(provided.draggableProps.style || {}),
               }}
               onClick={handleClick}
             >
@@ -266,16 +266,11 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 </div>
               )}
 
-              {/* Content — CSS grid stretches the inner card to fill the fixed height */}
-              <div style={hasFixedHeight ? {
-                height: '100%',
-                display: 'grid',
-                gridTemplateRows: '1fr',
-                // If content_align is set, position the card content without stretching
-                ...(customStyle.content_align && customStyle.content_align !== 'top' ? {
-                  alignItems: customStyle.content_align === 'center' ? 'center' : 'end',
-                } : {}),
-              } : {}}>
+              {/* Scoped style to force the ElementRenderer's root div to fill height */}
+              {hasFixedHeight && (
+                <style>{`[data-resize-id="${el.id}"] > div:last-of-type > * { height: 100% !important; min-height: 100% !important; }`}</style>
+              )}
+              <div style={hasFixedHeight ? { height: '100%' } : {}}>
                 {content}
               </div>
 
