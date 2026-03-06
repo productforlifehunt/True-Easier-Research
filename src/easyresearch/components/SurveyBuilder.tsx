@@ -156,7 +156,7 @@ const SurveyBuilder: React.FC = () => {
   // New state for multi-questionnaire architecture
   const [questionnaireConfigs, setQuestionnaireConfigs] = useState<QuestionnaireConfig[]>([]);
   const [participantTypes, setParticipantTypes] = useState<ParticipantType[]>([]);
-  const [appLayout, setAppLayout] = useState<AppLayout>(getDefaultLayout([]));
+  const [appLayout, setAppLayout] = useState<AppLayout | null>(null);
   const appLayoutInitializedRef = useRef(false);
 
   // Auto-save layout to flat DB tables whenever it changes (debounced)
