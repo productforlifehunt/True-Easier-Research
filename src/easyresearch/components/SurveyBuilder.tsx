@@ -652,19 +652,20 @@ const SurveyBuilder: React.FC = () => {
           await supabase.from('participant_type').delete().in('id', removedPTIds);
         }
 
-        for (const pt of participantTypes) {
-          const ptPayload = {
-            id: pt.id,
-            project_id: targetProjectId,
-            name: pt.name,
-            description: pt.description || '',
-            relations: pt.relations || [],
-            color: pt.color || '#10b981',
-            order_index: pt.order_index ?? 0,
-            numbering_enabled: pt.numbering_enabled ?? true,
-            number_prefix: pt.number_prefix || '',
-          };
-          await supabase.from('participant_type').upsert(ptPayload, { onConflict: 'id' });
+        // Batch upsert all participant types at once
+        const allPTPayloads = participantTypes.map(pt => ({
+          id: pt.id,
+          project_id: targetProjectId,
+          name: pt.name,
+          description: pt.description || '',
+          relations: pt.relations || [],
+          color: pt.color || '#10b981',
+          order_index: pt.order_index ?? 0,
+          numbering_enabled: pt.numbering_enabled ?? true,
+          number_prefix: pt.number_prefix || '',
+        }));
+        if (allPTPayloads.length > 0) {
+          await supabase.from('participant_type').upsert(allPTPayloads, { onConflict: 'id' });
         }
       };
 
