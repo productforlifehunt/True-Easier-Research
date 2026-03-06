@@ -11,7 +11,7 @@ import { type NotificationConfig } from '../utils/notificationConfigSync';
 export interface QuestionnaireConfig {
   id: string;
   project_id?: string;
-  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom';
+  questionnaire_type: 'survey' | 'consent' | 'screening' | 'profile' | 'help' | 'custom' | 'onboarding';
   title: string;
   description: string;
   questions: any[];
