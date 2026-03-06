@@ -1085,7 +1085,8 @@ The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creatin
 - `project_id` (uuid FK → research_project)
 - `type` (text) — element type: 'questionnaire', 'consent', 'screening', 'profile', 'ecogram', 'text_block', 'progress', 'timeline', 'help', 'custom', 'spacer', 'divider', 'image', 'button', 'todo_list' / 元素类型
 - `order_index` (int) — element order within tab / 标签内元素顺序
-- `questionnaire_id` (uuid FK, nullable) — which questionnaire this element shows / 此元素显示哪个问卷
+- `questionnaire_id` (uuid FK, nullable) — which questionnaire this element shows (single) / 此元素显示哪个问卷（单个）
+- `questionnaire_ids` (text[], nullable) — which questionnaires this element shows (multiple, used by timeline) / 此元素显示哪些问卷（多个，用于时间线）
 - `title` (text) — element title / 元素标题
 - `content` (text) — text content for text_block/custom elements / text_block/自定义元素的文本内容
 - `visible` (bool) — whether element is visible / 元素是否可见
@@ -1097,9 +1098,28 @@ The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creatin
 - `show_question_count`, `show_estimated_time` (bool) — questionnaire display options / 问卷显示选项
 - `consent_text`, `screening_criteria` (text) — consent/screening element text / 同意/筛选元素文本
 - `progress_style` (text) — 'bar', 'ring', 'steps'
-- `timeline_start_hour`, `timeline_end_hour`, `timeline_days` (int) — timeline config / 时间线配置
+- `timeline_start_hour`, `timeline_end_hour` (int) — timeline display range (controls visible hour range ONLY, does NOT affect questionnaire schedules) / 时间线显示范围（仅控制可见小时范围，不影响问卷时间表）
+- `timeline_days` (int) — how many days the timeline displays / 时间线显示多少天
 - `todo_layout` (text) — 'horizontal' or 'vertical'
 - `todo_auto_scroll` (bool) — auto-scroll todo list / 自动滚动待办事项列表
+
+### Element Type Descriptions / 元素类型说明
+
+- **`questionnaire`** — Renders a card linking to a specific questionnaire. Shows title, question count, estimated time. / 渲染链接到特定问卷的卡片。显示标题、问题数、预计时间。
+- **`consent`** — Consent form element. / 知情同意书元素。
+- **`screening`** — Screening questionnaire element. / 筛选问卷元素。
+- **`profile`** — Profile questionnaire element. / 个人资料问卷元素。
+- **`ecogram`** — Ecogram visualization element. / 生态图可视化元素。
+- **`text_block`** — Static text content block. / 静态文本内容块。
+- **`progress`** — Progress indicator (bar, ring, or steps). / 进度指示器（条形、圆环或步骤）。
+- **`timeline`** — Displays selected questionnaires on a time axis. Links to MULTIPLE questionnaires via `questionnaire_ids`. The timeline inherits each questionnaire's scheduled answer times (from `frequency` and `questionnaire_time_window`) and shows whether each slot has been answered (submitted). `timeline_start_hour`/`timeline_end_hour`/`timeline_days` ONLY control the visible display range — they do NOT change when questionnaires are due. Config panel allows selecting multiple questionnaires belonging to this project. / 在时间轴上显示所选问卷。通过 `questionnaire_ids` 链接到多个问卷。时间线继承每个问卷的计划回答时间（来自 `frequency` 和 `questionnaire_time_window`），并显示每个时段是否已回答（已提交）。`timeline_start_hour`/`timeline_end_hour`/`timeline_days` 仅控制可见显示范围——不改变问卷的截止时间。配置面板允许选择属于此项目的多个问卷。
+- **`help`** — Help/FAQ section with expandable sections stored in `app_element_help_section`. / 帮助/FAQ部分，展开式章节存储在 `app_element_help_section` 中。
+- **`custom`** — Custom content element. / 自定义内容元素。
+- **`spacer`** — Empty space for layout padding. / 用于布局填充的空白空间。
+- **`divider`** — Visual separator line. / 视觉分隔线。
+- **`image`** — Image display element. / 图像显示元素。
+- **`button`** — Action button with configurable label and action. / 带有可配置标签和动作的按钮。
+- **`todo_list`** — Task checklist with cards stored in `app_element_todo_card`. Supports manual and auto-complete (questionnaire_complete) triggers. / 任务清单，卡片存储在 `app_element_todo_card` 中。支持手动和自动完成触发器。
 
 **`app_element_todo_card` table** — child of `app_tab_element` for todo_list elements:
 
