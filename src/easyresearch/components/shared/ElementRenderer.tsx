@@ -166,7 +166,8 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
             <>
               <p className={`${txtSm} text-amber-600`}>{(linkedQ as any).description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}>
+                className={`mt-2 px-3 py-1.5 bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}
+                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
                 {el.config.button_label || 'Review & Sign'}
               </button>
             </>
