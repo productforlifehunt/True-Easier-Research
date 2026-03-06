@@ -504,6 +504,13 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             {!el.config.questionnaire_id && (
               <p className="text-[10px] text-stone-400 italic">No component linked. Create one in the Components tab first.</p>
             )}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input type="text" value={el.config.button_label || ''} 
+                placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
           </div>
         )}
 
