@@ -1018,6 +1018,11 @@ The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creatin
 
 调查构建器（`SurveyBuilder.tsx`）是研究员创建和编辑研究项目的主要工具。它有标签：设置、问卷、组件、逻辑、布局、预览、参与者、响应。
 
+### CRC STARTS ###
+
+
+### CRC ENDS ###
+
 **How questions are saved:** The `syncQuestions` function in `SurveyBuilder.tsx` takes all questions from all questionnaires and upserts them into the `question` table. Each question gets a `questionnaire_id` FK linking it to its questionnaire. Question options go to `question_option` table. Deleted questions and stale options are cleaned up in the same sync.
 
 **问题如何保存：** `SurveyBuilder.tsx` 中的 `syncQuestions` 函数从所有问卷中获取所有问题并将它们更新插入到 `question` 表中。每个问题获得一个 `questionnaire_id` FK 将其链接到其问卷。问题选项进入 `question_option` 表。删除的问题和过时的选项在同一同步中清理。
