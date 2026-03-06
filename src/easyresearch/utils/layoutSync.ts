@@ -268,6 +268,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         timeline_days: el.config.timeline_days ?? null,
         todo_layout: el.config.todo_layout || null,
         todo_auto_scroll: el.config.todo_auto_scroll ?? null,
+        questionnaire_ids: el.config.questionnaire_ids || null,
       });
 
       if (el.config.todo_cards?.length) {
