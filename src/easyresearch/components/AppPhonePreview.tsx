@@ -225,6 +225,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               data-resize-id={el.id}
               className={`relative group/el transition-all rounded-xl cursor-pointer ${showControls ? 'ring-2 ring-emerald-400 shadow-emerald-100 shadow-md' : 'hover:ring-1 hover:ring-stone-300'} ${snapshot.isDragging ? 'ring-2 ring-blue-400 shadow-lg z-50' : ''} ${isResizing ? 'ring-2 ring-blue-400' : ''}`}
               style={{
+                backgroundColor: 'white',
                 ...(savedHeight && !isResizing ? { height: savedHeight, overflow: 'hidden' } : {}),
                 ...(isResizing && resizeRef.current?.dir === 'height' ? { height: `${liveHeight}px`, overflow: 'hidden' } : {}),
                 ...(provided.draggableProps.style || {}),
