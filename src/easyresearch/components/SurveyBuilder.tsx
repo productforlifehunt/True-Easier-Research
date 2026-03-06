@@ -356,6 +356,9 @@ const SurveyBuilder: React.FC = () => {
           const flatLayout = await loadLayoutFromDb(projectId);
           if (flatLayout && flatLayout.tabs.length > 0) {
             setAppLayout(flatLayout);
+          } else {
+            // Only set default if DB truly has nothing
+            setAppLayout(getDefaultLayout([]));
           }
           // Mark layout as initialized so auto-save kicks in only after DB load
           setTimeout(() => { appLayoutInitializedRef.current = true; }, 100);
