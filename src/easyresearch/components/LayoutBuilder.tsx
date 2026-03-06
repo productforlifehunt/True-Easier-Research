@@ -29,6 +29,19 @@ export interface LayoutElement {
       background?: string;
       border_radius?: string;
       height?: string;
+      // Advanced styling
+      margin?: string;
+      opacity?: number;
+      border?: string;
+      border_color?: string;
+      shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+      text_align?: 'left' | 'center' | 'right';
+      content_align?: 'top' | 'center' | 'bottom'; // vertical alignment within fixed height
+      font_size?: string;
+      font_weight?: string;
+      text_color?: string;
+      bg_color?: string;
+      overflow?: 'hidden' | 'scroll' | 'visible';
     };
     button_action?: string;
     button_label?: string;
@@ -615,7 +628,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         <div>
           <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
           <div className="flex gap-1 mb-1.5">
-            {['auto', '80px', '120px', '200px'].map(h => (
+            {['auto', '80px', '120px', '200px', '300px'].map(h => (
               <button key={h} onClick={() => updateElement(el.id, { style: { ...el.config.style, height: h === 'auto' ? undefined : h } })}
                 className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
                   (el.config.style?.height || 'auto') === (h === 'auto' ? undefined : h) || (!el.config.style?.height && h === 'auto')
@@ -629,6 +642,222 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             onChange={(e) => updateElement(el.id, { style: { ...el.config.style, height: e.target.value || undefined } })}
             className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
         </div>
+
+        {/* Content Alignment (vertical — for fixed-height cards) */}
+        {el.config.style?.height && (
+          <div>
+            <label className="block text-[11px] font-medium text-stone-400 mb-1">Vertical Alignment</label>
+            <div className="flex gap-1">
+              {(['top', 'center', 'bottom'] as const).map(a => (
+                <button key={a} onClick={() => updateElement(el.id, { style: { ...el.config.style, content_align: a } })}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
+                    (el.config.style?.content_align || 'top') === a ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                  }`}>
+                  {a}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Text Alignment */}
+        <div>
+          <label className="block text-[11px] font-medium text-stone-400 mb-1">Text Alignment</label>
+          <div className="flex gap-1">
+            {(['left', 'center', 'right'] as const).map(a => (
+              <button key={a} onClick={() => updateElement(el.id, { style: { ...el.config.style, text_align: a } })}
+                className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
+                  (el.config.style?.text_align || 'left') === a ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                }`}>
+                {a}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Advanced Styling Section */}
+        <details className="group">
+          <summary className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider cursor-pointer select-none flex items-center gap-1.5 py-1">
+            <span className="transition-transform group-open:rotate-90">▸</span>
+            Advanced Styling
+          </summary>
+          <div className="mt-2 space-y-3 pl-1">
+            {/* Background Color */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Background Color</label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={el.config.style?.bg_color || '#ffffff'}
+                  onChange={(e) => updateElement(el.id, { style: { ...el.config.style, bg_color: e.target.value } })}
+                  className="w-8 h-8 rounded-lg border border-stone-200 cursor-pointer" />
+                <input type="text" value={el.config.style?.bg_color || ''} placeholder="#ffffff or transparent"
+                  onChange={(e) => updateElement(el.id, { style: { ...el.config.style, bg_color: e.target.value || undefined } })}
+                  className="flex-1 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+                {el.config.style?.bg_color && (
+                  <button onClick={() => updateElement(el.id, { style: { ...el.config.style, bg_color: undefined } })}
+                    className="text-[10px] text-stone-400 hover:text-stone-600 underline">Reset</button>
+                )}
+              </div>
+            </div>
+
+            {/* Text Color */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Text Color</label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={el.config.style?.text_color || '#1c1917'}
+                  onChange={(e) => updateElement(el.id, { style: { ...el.config.style, text_color: e.target.value } })}
+                  className="w-8 h-8 rounded-lg border border-stone-200 cursor-pointer" />
+                <input type="text" value={el.config.style?.text_color || ''} placeholder="inherit"
+                  onChange={(e) => updateElement(el.id, { style: { ...el.config.style, text_color: e.target.value || undefined } })}
+                  className="flex-1 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+            </div>
+
+            {/* Padding */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Padding</label>
+              <div className="flex gap-1 mb-1.5">
+                {['0', '8px', '16px', '24px', '32px'].map(p => (
+                  <button key={p} onClick={() => updateElement(el.id, { style: { ...el.config.style, padding: p === '0' ? undefined : p } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.style?.padding || '0') === p || (!el.config.style?.padding && p === '0')
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{p}</button>
+                ))}
+              </div>
+              <input type="text" value={el.config.style?.padding || ''} placeholder="e.g. 16px, 8px 12px"
+                onChange={(e) => updateElement(el.id, { style: { ...el.config.style, padding: e.target.value || undefined } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+
+            {/* Margin */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Margin</label>
+              <div className="flex gap-1">
+                {['0', '4px', '8px', '16px', '24px'].map(m => (
+                  <button key={m} onClick={() => updateElement(el.id, { style: { ...el.config.style, margin: m === '0' ? undefined : m } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.style?.margin || '0') === m || (!el.config.style?.margin && m === '0')
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{m}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Border Radius */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Border Radius</label>
+              <div className="flex gap-1">
+                {['0', '4px', '8px', '12px', '16px', '24px'].map(r => (
+                  <button key={r} onClick={() => updateElement(el.id, { style: { ...el.config.style, border_radius: r === '0' ? undefined : r } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.style?.border_radius || '0') === r || (!el.config.style?.border_radius && r === '0')
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{r}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Border */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Border</label>
+              <div className="flex gap-1 flex-wrap">
+                {[
+                  { value: 'none', label: 'None' },
+                  { value: '1px solid #e7e5e4', label: 'Light' },
+                  { value: '2px solid #d6d3d1', label: 'Medium' },
+                  { value: '2px solid #10b981', label: 'Accent' },
+                ].map(b => (
+                  <button key={b.value} onClick={() => updateElement(el.id, { style: { ...el.config.style, border: b.value === 'none' ? undefined : b.value } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.style?.border || 'none') === b.value || (!el.config.style?.border && b.value === 'none')
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{b.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Shadow */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Shadow</label>
+              <div className="flex gap-1">
+                {(['none', 'sm', 'md', 'lg', 'xl'] as const).map(s => (
+                  <button key={s} onClick={() => updateElement(el.id, { style: { ...el.config.style, shadow: s === 'none' ? undefined : s } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
+                      (el.config.style?.shadow || 'none') === s || (!el.config.style?.shadow && s === 'none')
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{s}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Opacity */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">
+                Opacity: {Math.round((el.config.style?.opacity ?? 1) * 100)}%
+              </label>
+              <input type="range" min={10} max={100} step={5}
+                value={Math.round((el.config.style?.opacity ?? 1) * 100)}
+                onChange={(e) => updateElement(el.id, { style: { ...el.config.style, opacity: parseInt(e.target.value) / 100 } })}
+                className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+            </div>
+
+            {/* Font Size */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Size</label>
+              <div className="flex gap-1 flex-wrap">
+                {[
+                  { value: undefined as string | undefined, label: 'Default' },
+                  { value: '11px', label: 'XS' },
+                  { value: '13px', label: 'SM' },
+                  { value: '15px', label: 'MD' },
+                  { value: '18px', label: 'LG' },
+                  { value: '24px', label: 'XL' },
+                ].map(f => (
+                  <button key={f.label} onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: f.value } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      el.config.style?.font_size === f.value || (!el.config.style?.font_size && !f.value)
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{f.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Font Weight */}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Weight</label>
+              <div className="flex gap-1 flex-wrap">
+                {[
+                  { value: undefined as string | undefined, label: 'Default' },
+                  { value: '300', label: 'Light' },
+                  { value: '400', label: 'Normal' },
+                  { value: '600', label: 'Semi' },
+                  { value: '700', label: 'Bold' },
+                ].map(f => (
+                  <button key={f.label} onClick={() => updateElement(el.id, { style: { ...el.config.style, font_weight: f.value } })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      el.config.style?.font_weight === f.value || (!el.config.style?.font_weight && !f.value)
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{f.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Overflow (when height is set) */}
+            {el.config.style?.height && (
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Overflow</label>
+                <div className="flex gap-1">
+                  {(['hidden', 'scroll', 'visible'] as const).map(o => (
+                    <button key={o} onClick={() => updateElement(el.id, { style: { ...el.config.style, overflow: o } })}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
+                        (el.config.style?.overflow || 'hidden') === o ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                      }`}>{o}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </details>
 
         {participantTypes.length > 0 && (
           <div>
