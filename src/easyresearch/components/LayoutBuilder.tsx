@@ -19,6 +19,7 @@ export interface LayoutElement {
   type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
   config: {
     questionnaire_id?: string;
+    questionnaire_ids?: string[];
     title?: string;
     content?: string;
     visible?: boolean;
@@ -508,42 +509,53 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         {el.type === 'timeline' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Questionnaire</label>
-              <select value={el.config.questionnaire_id || ''} onChange={(e) => {
-                const selected = questionnaires.find(q => q.id === e.target.value);
-                updateElement(el.id, { questionnaire_id: e.target.value || undefined, title: selected?.title ? `${selected.title} Timeline` : el.config.title });
-              }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-                <option value="">— Select questionnaire —</option>
-                {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
-                  <option key={q.id} value={q.id}>{q.title} ({q.frequency}, {q.time_windows?.[0]?.start || '09:00'}–{q.time_windows?.[0]?.end || '21:00'})</option>
-                ))}
-              </select>
-              {el.config.questionnaire_id && (
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Questionnaires (multi-select)</label>
+              <div className="space-y-1 max-h-40 overflow-y-auto border border-stone-200 rounded-lg p-2 bg-white">
+                {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => {
+                  const selectedIds: string[] = el.config.questionnaire_ids || (el.config.questionnaire_id ? [el.config.questionnaire_id] : []);
+                  const checked = selectedIds.includes(q.id);
+                  return (
+                    <label key={q.id} className="flex items-center gap-2 py-1 cursor-pointer hover:bg-stone-50 rounded px-1">
+                      <input type="checkbox" checked={checked} onChange={() => {
+                        const next = checked ? selectedIds.filter(id => id !== q.id) : [...selectedIds, q.id];
+                        updateElement(el.id, { questionnaire_ids: next, questionnaire_id: next[0] || undefined });
+                      }} className="rounded border-stone-300 text-emerald-500" />
+                      <span className="text-[11px] text-stone-700 flex-1">{q.title}</span>
+                      <span className="text-[9px] text-stone-400">{q.frequency || 'daily'} · {q.time_windows?.[0]?.start || '09:00'}–{q.time_windows?.[0]?.end || '21:00'}</span>
+                    </label>
+                  );
+                })}
+                {questionnaires.filter(q => q.questionnaire_type === 'survey').length === 0 && (
+                  <p className="text-[10px] text-stone-400 italic py-1">No survey questionnaires created yet.</p>
+                )}
+              </div>
+              {((el.config.questionnaire_ids?.length || 0) > 0) && (
                 <div className="text-[10px] text-emerald-600 bg-emerald-50 rounded-lg px-2 py-1.5 border border-emerald-100 mt-1">
-                  ✓ Linked — schedule derived from questionnaire frequency & time windows
+                  ✓ {el.config.questionnaire_ids!.length} questionnaire(s) linked — schedule derived from each questionnaire's frequency & time windows
                 </div>
               )}
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Days</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Days</label>
                 <input type="number" min={1} max={90} value={el.config.timeline_days || studyDuration || 7}
                   onChange={(e) => updateElement(el.id, { timeline_days: parseInt(e.target.value) || 7 })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">From</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Display From</label>
                 <input type="number" min={0} max={23} value={el.config.timeline_start_hour ?? 0}
                   onChange={(e) => updateElement(el.id, { timeline_start_hour: parseInt(e.target.value) || 0 })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">To</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Display To</label>
                 <input type="number" min={0} max={23} value={el.config.timeline_end_hour ?? 23}
                   onChange={(e) => updateElement(el.id, { timeline_end_hour: parseInt(e.target.value) || 23 })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
             </div>
+            <p className="text-[9px] text-stone-400">Display hours control the timeline view range only — actual answer times come from each questionnaire's settings.</p>
           </div>
         )}
 

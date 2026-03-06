@@ -49,6 +49,7 @@ export interface AppTabElementRow {
   timeline_days?: number | null;
   todo_layout?: string | null;
   todo_auto_scroll?: boolean | null;
+  questionnaire_ids?: string[] | null;
 }
 
 export interface AppElementTodoCardRow {
@@ -153,6 +154,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
     order_index: row.order_index,
     config: {
       questionnaire_id: row.questionnaire_id || undefined,
+      questionnaire_ids: row.questionnaire_ids || undefined,
       title: row.title || undefined,
       content: row.content || undefined,
       visible: row.visible ?? true,
@@ -266,6 +268,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         timeline_days: el.config.timeline_days ?? null,
         todo_layout: el.config.todo_layout || null,
         todo_auto_scroll: el.config.todo_auto_scroll ?? null,
+        questionnaire_ids: el.config.questionnaire_ids || null,
       });
 
       if (el.config.todo_cards?.length) {

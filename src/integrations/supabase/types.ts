@@ -1481,6 +1481,7 @@ export type Database = {
           progress_style: string | null
           project_id: string
           questionnaire_id: string | null
+          questionnaire_ids: string[] | null
           screening_criteria: string | null
           show_estimated_time: boolean | null
           show_question_count: boolean | null
@@ -1512,6 +1513,7 @@ export type Database = {
           progress_style?: string | null
           project_id: string
           questionnaire_id?: string | null
+          questionnaire_ids?: string[] | null
           screening_criteria?: string | null
           show_estimated_time?: boolean | null
           show_question_count?: boolean | null
@@ -1543,6 +1545,7 @@ export type Database = {
           progress_style?: string | null
           project_id?: string
           questionnaire_id?: string | null
+          questionnaire_ids?: string[] | null
           screening_criteria?: string | null
           show_estimated_time?: boolean | null
           show_question_count?: boolean | null

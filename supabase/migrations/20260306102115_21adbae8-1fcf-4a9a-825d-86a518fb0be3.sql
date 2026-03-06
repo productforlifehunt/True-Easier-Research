@@ -1,0 +1,1 @@
+ALTER TABLE public.app_tab_element ADD COLUMN IF NOT EXISTS questionnaire_ids text[] DEFAULT NULL;

@@ -827,7 +827,12 @@ The inline QuestionLogicEditor under each question in QuestionnaireList also sup
 
 QuestionnaireList中每个问题下的内联QuestionLogicEditor也支持全部19种条件和15种动作。两者都是同一 `research_logic` 数据的视图。每种新动作类型都有双语帮助文字解释其工作原理。
 
+### 5.9 What was removed / 删除了什么
 
+- Old `logic_rule` table (project-scoped, no questionnaire_id) — DROPPED / 旧的 `logic_rule` 表——已删除
+- `question.logic_rules` JSONB column — DROPPED / `question.logic_rules` JSONB列——已删除
+- `questionnaire.disqualify_logic` JSONB column — DROPPED / `questionnaire.disqualify_logic` JSONB列——已删除
+- `cfg_disqualify_value` is kept as a convenience config but the real enforcement is via `research_logic` rules with `action = 'disqualify'` / `cfg_disqualify_value` 作为便利配置保留，但真正的执行是通过 `research_logic` 中 `action = 'disqualify'` 的规则
 
 ---
 
@@ -1017,13 +1022,6 @@ All notification configs are stored in the unified `notification_config` table i
 The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creating and editing research projects. It has tabs: settings, questionnaires, components, logic, layout, preview, participants, responses.
 
 调查构建器（`SurveyBuilder.tsx`）是研究员创建和编辑研究项目的主要工具。它有标签：设置、问卷、组件、逻辑、布局、预览、参与者、响应。
-
-### CRC STARTS ###
-
-1. 特殊组件时间线timeline：timeline的目的是为了在时间线上显示所选择的问卷，如问卷1设置在8点回答则时间线上8点显示该问卷，并显示是否回答。时间线设置页面可以选择多个属于此研究项目的问卷，显示时间继承问卷所设置的回答时间，并可以在设置页面编辑；时间线设置组件可以设置显示时长，横竖轴，这里的设置与具体问卷的回答时间不关联，只决定时间线组件的显示时长
-2. 页面构建器可以构建两类页面，1）研究项目的公开页面，用户可以构建多个属于研究的公开页面，用户项目介绍、招募或沟通等，研究公开可以作为独立网页分享，不显示mobile footer，2）研究项目构建，构建研究项目在app里的具体显示，预览应于用户在app内看到的研究一致
-
-### CRC ENDS ###
 
 **How questions are saved:** The `syncQuestions` function in `SurveyBuilder.tsx` takes all questions from all questionnaires and upserts them into the `question` table. Each question gets a `questionnaire_id` FK linking it to its questionnaire. Question options go to `question_option` table. Deleted questions and stale options are cleaned up in the same sync.
 
