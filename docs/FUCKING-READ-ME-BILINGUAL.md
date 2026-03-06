@@ -827,12 +827,7 @@ The inline QuestionLogicEditor under each question in QuestionnaireList also sup
 
 QuestionnaireList中每个问题下的内联QuestionLogicEditor也支持全部19种条件和15种动作。两者都是同一 `research_logic` 数据的视图。每种新动作类型都有双语帮助文字解释其工作原理。
 
-### 5.9 What was removed / 删除了什么
 
-- Old `logic_rule` table (project-scoped, no questionnaire_id) — DROPPED / 旧的 `logic_rule` 表——已删除
-- `question.logic_rules` JSONB column — DROPPED / `question.logic_rules` JSONB列——已删除
-- `questionnaire.disqualify_logic` JSONB column — DROPPED / `questionnaire.disqualify_logic` JSONB列——已删除
-- `cfg_disqualify_value` is kept as a convenience config but the real enforcement is via `research_logic` rules with `action = 'disqualify'` / `cfg_disqualify_value` 作为便利配置保留，但真正的执行是通过 `research_logic` 中 `action = 'disqualify'` 的规则
 
 ---
 
