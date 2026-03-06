@@ -42,6 +42,8 @@ export interface AppTabElementRow {
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
+  show_frequency?: boolean | null;
+  card_display_style?: string | null;
   screening_criteria?: string | null;
   progress_style?: string | null;
   timeline_start_hour?: number | null;
@@ -171,6 +173,8 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
+      show_frequency: (row as any).show_frequency ?? undefined,
+      card_display_style: (row as any).card_display_style || undefined,
       screening_criteria: row.screening_criteria || undefined,
       progress_style: (row.progress_style as any) || undefined,
       timeline_start_hour: row.timeline_start_hour ?? undefined,
@@ -261,6 +265,8 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
+        show_frequency: (el.config as any).show_frequency ?? null,
+        card_display_style: (el.config as any).card_display_style || null,
         screening_criteria: el.config.screening_criteria || null,
         progress_style: el.config.progress_style || null,
         timeline_start_hour: el.config.timeline_start_hour ?? null,
