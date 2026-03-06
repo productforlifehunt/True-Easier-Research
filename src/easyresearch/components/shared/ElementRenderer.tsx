@@ -245,20 +245,30 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       const allHours: number[] = [];
       for (let h = startH; h <= endH; h++) allHours.push(h);
 
-      // Use linked questionnaire or fall back to first survey
-      const targetQ = el.config.questionnaire_id
-        ? questionnaires?.find(q => q.id === el.config.questionnaire_id)
-        : (questionnaires?.find(q => q.questionnaire_type === 'survey') || questionnaires?.[0]);
+      // Support multiple questionnaires via questionnaire_ids (backward compat with single questionnaire_id)
+      const linkedIds: string[] = (el.config as any).questionnaire_ids?.length
+        ? (el.config as any).questionnaire_ids
+        : el.config.questionnaire_id
+          ? [el.config.questionnaire_id]
+          : [];
+      const linkedQs = linkedIds
+        .map(id => questionnaires?.find(q => q.id === id))
+        .filter(Boolean) as QuestionnaireConfig[];
 
-      // Derive scheduled hours from questionnaire frequency & time_windows
-      const getScheduledHours = (): number[] => {
-        if (!targetQ) return [];
-        const tw = targetQ.time_windows;
+      // If no explicit links, fall back to first survey questionnaire
+      const effectiveQs = linkedQs.length > 0
+        ? linkedQs
+        : (questionnaires?.filter(q => q.questionnaire_type === 'survey').slice(0, 1) || []);
+
+      // Build a map: hour → list of questionnaire entries scheduled at that hour
+      // Each questionnaire contributes its own scheduled hours based on frequency & time_windows
+      const hourEntries = new Map<number, { q: QuestionnaireConfig; isCompleted: boolean }[]>();
+
+      for (const q of effectiveQs) {
+        const tw = q.time_windows;
         const windowStart = tw?.[0]?.start ? parseInt(tw[0].start.split(':')[0], 10) : 9;
         const windowEnd = tw?.[0]?.end ? parseInt(tw[0].end.split(':')[0], 10) : 21;
-        const freq = targetQ.frequency || 'daily';
-        const scheduled: number[] = [];
-
+        const freq = q.frequency || 'daily';
         let intervalH = 24;
         switch (freq) {
           case 'hourly': intervalH = 1; break;
@@ -268,29 +278,43 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
           case '6hours': intervalH = 6; break;
           case 'twice_daily': intervalH = Math.max(1, Math.floor((windowEnd - windowStart) / 2)); break;
           case 'three_daily': intervalH = Math.max(1, Math.floor((windowEnd - windowStart) / 3)); break;
-          case 'daily': intervalH = 24; break; // only once
-          case 'once': intervalH = 24; break;
+          case 'daily': case 'once': intervalH = 24; break;
           default: intervalH = 24;
         }
-
+        const scheduledHours: number[] = [];
         if (intervalH >= 24) {
-          // Single slot at window start
-          scheduled.push(windowStart);
+          scheduledHours.push(windowStart);
         } else {
-          for (let h = windowStart; h <= windowEnd; h += intervalH) {
-            scheduled.push(h);
-          }
+          for (let h = windowStart; h <= windowEnd; h += intervalH) scheduledHours.push(h);
         }
-        return scheduled;
-      };
+        for (const h of scheduledHours) {
+          if (h < startH || h > endH) continue;
+          if (!hourEntries.has(h)) hourEntries.set(h, []);
+          // Preview simulation: past days = completed
+          const isCompleted = selectedTimelineDay < Math.ceil(days / 2);
+          hourEntries.get(h)!.push({ q, isCompleted });
+        }
+      }
 
-      const scheduledHours = new Set(getScheduledHours());
+      // Color palette for multiple questionnaires
+      const qColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
           <h4 className={`${txt} font-semibold text-stone-800`}>📅 {el.config.title || 'Study Timeline'}</h4>
-          {!targetQ && (
+          {effectiveQs.length === 0 && (
             <p className={`${txtSm} text-stone-400 italic`}>No questionnaire linked. Configure in Layout settings.</p>
+          )}
+          {/* Legend for multiple questionnaires */}
+          {effectiveQs.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              {effectiveQs.map((q, i) => (
+                <span key={q.id} className="flex items-center gap-1 text-[10px] text-stone-500">
+                  <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: qColors[i % qColors.length] }} />
+                  {q.title}
+                </span>
+              ))}
+            </div>
           )}
           <div className={`flex ${compact ? 'gap-1' : 'gap-1.5'} overflow-x-auto`} style={{ scrollbarWidth: 'none' }}>
             {Array.from({ length: Math.min(days, 30) }, (_, i) => i + 1).map(d => (
@@ -304,28 +328,35 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
           </div>
           <div className={`space-y-0.5 ${compact ? 'max-h-48' : 'max-h-60'} overflow-y-auto`} style={{ scrollbarWidth: 'thin' }}>
             {allHours.map(h => {
-              const hasQ = scheduledHours.has(h);
-              // In preview, simulate: past days = completed, current day future hours = scheduled, past days late hours = missed
-              const isCompleted = hasQ && selectedTimelineDay < Math.ceil(days / 2);
-              const isMissed = false; // No real submission data in preview
-              const isScheduled = hasQ && !isCompleted && !isMissed;
+              const entries = hourEntries.get(h) || [];
+              const hasEntries = entries.length > 0;
               return (
-                <div key={h} className="flex items-center gap-2">
-                  <span className={`${txtXx} text-stone-300 ${compact ? 'w-7' : 'w-8'} text-right shrink-0 font-mono`}>{String(h).padStart(2, '0')}:00</span>
-                  <div className={`flex-1 rounded-md transition-all ${hasQ ? `${compact ? 'py-1.5 px-2' : 'py-2 px-2.5'} cursor-pointer hover:opacity-80` : 'h-px bg-stone-50'}`}
-                    onClick={hasQ && targetQ ? wrap(() => onOpenQuestionnaire(targetQ.id)) : undefined}
-                    style={{ backgroundColor: isCompleted ? '#dcfce7' : isMissed ? '#fee2e2' : isScheduled ? '#f0fdf4' : undefined }}>
-                    {hasQ && (
-                      <div className="flex items-center justify-between">
-                        <span className={`${txtXs} font-medium`} style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : isScheduled ? '#a8a29e' : '#a8a29e' }}>
-                          {targetQ?.title || 'Survey'}
-                        </span>
-                        <span className={`${txtXx}`} style={{ color: isCompleted ? '#16a34a' : isMissed ? '#dc2626' : '#a8a29e' }}>
-                          {isCompleted ? '✓' : isMissed ? '✗' : '○'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                <div key={h} className="flex items-start gap-2">
+                  <span className={`${txtXx} text-stone-300 ${compact ? 'w-7' : 'w-8'} text-right shrink-0 font-mono pt-1`}>{String(h).padStart(2, '0')}:00</span>
+                  {hasEntries ? (
+                    <div className="flex-1 space-y-0.5">
+                      {entries.map((entry, ei) => {
+                        const color = qColors[effectiveQs.indexOf(entry.q) % qColors.length];
+                        return (
+                          <div key={`${h}-${ei}`}
+                            className={`rounded-md cursor-pointer hover:opacity-80 ${compact ? 'py-1 px-2' : 'py-1.5 px-2.5'}`}
+                            onClick={wrap(() => onOpenQuestionnaire(entry.q.id))}
+                            style={{ backgroundColor: entry.isCompleted ? '#dcfce7' : `${color}10`, borderLeft: `3px solid ${entry.isCompleted ? '#16a34a' : color}` }}>
+                            <div className="flex items-center justify-between">
+                              <span className={`${txtXs} font-medium`} style={{ color: entry.isCompleted ? '#16a34a' : color }}>
+                                {entry.q.title || 'Survey'}
+                              </span>
+                              <span className={`${txtXx}`} style={{ color: entry.isCompleted ? '#16a34a' : '#a8a29e' }}>
+                                {entry.isCompleted ? '✓' : '○'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex-1 h-px bg-stone-50 mt-2" />
+                  )}
                 </div>
               );
             })}
@@ -334,7 +365,6 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
             <div className="flex gap-3">
               <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> Done</span>
               <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-stone-200 inline-block" /> Scheduled</span>
-              <span className="flex items-center gap-1 text-[10px] text-stone-400"><span className="w-2 h-2 rounded-full bg-red-300 inline-block" /> Missed</span>
             </div>
           )}
         </div>
