@@ -49,6 +49,8 @@ export interface LayoutElement {
     image_url?: string;
     show_question_count?: boolean;
     show_estimated_time?: boolean;
+    show_frequency?: boolean;
+    card_display_style?: 'icon' | 'button' | 'both' | 'minimal';
     screening_criteria?: string;
     help_sections?: { title: string; content: string }[];
     progress_style?: 'bar' | 'ring' | 'steps';
@@ -396,6 +398,29 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <span className="text-[11px] text-stone-600">Show estimated time</span>
             </label>
 
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={el.config.show_frequency !== false} onChange={(e) => updateElement(el.id, { show_frequency: e.target.checked })} className="rounded border-stone-300" />
+              <span className="text-[11px] text-stone-600">Show frequency</span>
+            </label>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
+              <select value={el.config.card_display_style || 'icon'} onChange={(e) => updateElement(el.id, { card_display_style: e.target.value as any })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                <option value="icon">Icon (chevron arrow)</option>
+                <option value="button">Text Button</option>
+                <option value="both">Icon + Button</option>
+                <option value="minimal">Minimal (no icon/button)</option>
+              </select>
+            </div>
+            {(el.config.card_display_style === 'button' || el.config.card_display_style === 'both') && (
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+                <input type="text" value={el.config.button_label || ''} placeholder="Open"
+                  onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+              </div>
+            )}
+
             {/* Display Density Settings */}
             {q && onUpdateQuestionnaire && (
               <div className="border-t border-stone-200 pt-3 space-y-2">
@@ -479,6 +504,13 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             {!el.config.questionnaire_id && (
               <p className="text-[10px] text-stone-400 italic">No component linked. Create one in the Components tab first.</p>
             )}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input type="text" value={el.config.button_label || ''} 
+                placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
           </div>
         )}
 

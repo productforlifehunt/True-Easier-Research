@@ -17,7 +17,10 @@ interface ElementRendererProps {
   onOpenQuestionnaire: (qId: string) => void;
   onSelectTimelineDay: (day: number) => void;
   /** Render a questionnaire card/expanded view — delegated to parent since it involves complex state */
-  renderQuestionnaireCard: (qId: string, title: string) => React.ReactNode;
+  renderQuestionnaireCard: (qId: string, title: string, cardOptions?: {
+    showQuestionCount?: boolean; showEstimatedTime?: boolean; showFrequency?: boolean;
+    cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal'; buttonLabel?: string;
+  }) => React.ReactNode;
   /** Whether to stop event propagation */
   stopPropagation?: boolean;
   /** Set of completed todo card IDs */
@@ -58,7 +61,13 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
     case 'questionnaire':
       if (el.config.questionnaire_id) {
         const q = questionnaires?.find(qc => qc.id === el.config.questionnaire_id);
-        return <>{renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire')}</>;
+        return <>{renderQuestionnaireCard(el.config.questionnaire_id, q?.title || el.config.title || 'Questionnaire', {
+          showQuestionCount: el.config.show_question_count !== false,
+          showEstimatedTime: el.config.show_estimated_time !== false,
+          showFrequency: el.config.show_frequency !== false,
+          cardDisplayStyle: el.config.card_display_style || 'icon',
+          buttonLabel: el.config.button_label,
+        })}</>;
       }
       return null;
 
@@ -156,7 +165,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-amber-600`}>{(linkedQ as any).description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}>
-                Review & Sign
+                {el.config.button_label || 'Review & Sign'}
               </button>
             </>
           ) : (
@@ -179,7 +188,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-orange-600 mt-1`}>{linkedQ.questions?.length || 0} screening questions</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg bg-orange-500 text-white ${txtSm} font-medium hover:bg-orange-600 transition-colors`}>
-                Start Screening
+                {el.config.button_label || 'Start Screening'}
               </button>
             </>
           ) : (
@@ -202,7 +211,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} profile fields</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}>
-                Edit Profile
+                {el.config.button_label || 'Edit Profile'}
               </button>
             </>
           ) : compact ? (
@@ -384,7 +393,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}>
-                View Help
+                {el.config.button_label || 'View Help'}
               </button>
             </>
           ) : (
@@ -407,7 +416,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
               <p className={`${txtSm} text-emerald-600 mt-1`}>{linkedQ.questions?.length || 0} fields</p>
               <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
                 className={`mt-2 px-3 py-1.5 rounded-lg ${txtSm} font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors`}>
-                Open
+                {el.config.button_label || 'Open'}
               </button>
             </>
           ) : (
