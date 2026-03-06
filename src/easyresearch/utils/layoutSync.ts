@@ -154,6 +154,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
     order_index: row.order_index,
     config: {
       questionnaire_id: row.questionnaire_id || undefined,
+      questionnaire_ids: row.questionnaire_ids || undefined,
       title: row.title || undefined,
       content: row.content || undefined,
       visible: row.visible ?? true,
