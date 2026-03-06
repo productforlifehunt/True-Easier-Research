@@ -164,7 +164,7 @@ const SurveyBuilder: React.FC = () => {
   useEffect(() => {
     // Skip the initial mount and the first load from DB
     if (!appLayoutInitializedRef.current) return;
-    if (!projectId) return;
+    if (!projectId || !appLayout) return;
 
     if (layoutSaveTimerRef.current) clearTimeout(layoutSaveTimerRef.current);
     layoutSaveTimerRef.current = setTimeout(async () => {
