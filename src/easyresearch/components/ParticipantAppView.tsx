@@ -356,6 +356,7 @@ const ParticipantAppView: React.FC = () => {
               showFrequency={cardOptions?.showFrequency}
               cardDisplayStyle={cardOptions?.cardDisplayStyle}
               buttonLabel={cardOptions?.buttonLabel}
+              buttonBorderRadius={cardOptions?.buttonBorderRadius}
             />
           );
         }}

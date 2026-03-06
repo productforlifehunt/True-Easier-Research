@@ -79,6 +79,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const renderQuestionnaireCard = (qId: string, qTitle: string, cardOptions?: {
     showQuestionCount?: boolean; showEstimatedTime?: boolean; showFrequency?: boolean;
     cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal'; buttonLabel?: string;
+    buttonBorderRadius?: string;
   }) => {
     const qConfig = questionnaires?.find(q => q.id === qId);
     if (!qConfig) return null;
@@ -103,6 +104,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         showFrequency={cardOptions?.showFrequency}
         cardDisplayStyle={cardOptions?.cardDisplayStyle}
         buttonLabel={cardOptions?.buttonLabel}
+        buttonBorderRadius={cardOptions?.buttonBorderRadius}
       />
     );
   };
