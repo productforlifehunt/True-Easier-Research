@@ -1471,6 +1471,7 @@ export type Database = {
       app_tab_element: {
         Row: {
           button_action: string | null
+          button_border_radius: string | null
           button_label: string | null
           card_display_style: string | null
           content: string | null
@@ -1488,9 +1489,21 @@ export type Database = {
           show_frequency: boolean | null
           show_question_count: boolean | null
           style_background: string | null
+          style_bg_color: string | null
+          style_border: string | null
+          style_border_color: string | null
           style_border_radius: string | null
+          style_content_align: string | null
+          style_font_size: string | null
+          style_font_weight: string | null
           style_height: string | null
+          style_margin: string | null
+          style_opacity: number | null
+          style_overflow: string | null
           style_padding: string | null
+          style_shadow: string | null
+          style_text_align: string | null
+          style_text_color: string | null
           tab_id: string
           timeline_days: number | null
           timeline_end_hour: number | null
@@ -1505,6 +1518,7 @@ export type Database = {
         }
         Insert: {
           button_action?: string | null
+          button_border_radius?: string | null
           button_label?: string | null
           card_display_style?: string | null
           content?: string | null
@@ -1522,9 +1536,21 @@ export type Database = {
           show_frequency?: boolean | null
           show_question_count?: boolean | null
           style_background?: string | null
+          style_bg_color?: string | null
+          style_border?: string | null
+          style_border_color?: string | null
           style_border_radius?: string | null
+          style_content_align?: string | null
+          style_font_size?: string | null
+          style_font_weight?: string | null
           style_height?: string | null
+          style_margin?: string | null
+          style_opacity?: number | null
+          style_overflow?: string | null
           style_padding?: string | null
+          style_shadow?: string | null
+          style_text_align?: string | null
+          style_text_color?: string | null
           tab_id: string
           timeline_days?: number | null
           timeline_end_hour?: number | null
@@ -1539,6 +1565,7 @@ export type Database = {
         }
         Update: {
           button_action?: string | null
+          button_border_radius?: string | null
           button_label?: string | null
           card_display_style?: string | null
           content?: string | null
@@ -1556,9 +1583,21 @@ export type Database = {
           show_frequency?: boolean | null
           show_question_count?: boolean | null
           style_background?: string | null
+          style_bg_color?: string | null
+          style_border?: string | null
+          style_border_color?: string | null
           style_border_radius?: string | null
+          style_content_align?: string | null
+          style_font_size?: string | null
+          style_font_weight?: string | null
           style_height?: string | null
+          style_margin?: string | null
+          style_opacity?: number | null
+          style_overflow?: string | null
           style_padding?: string | null
+          style_shadow?: string | null
+          style_text_align?: string | null
+          style_text_color?: string | null
           tab_id?: string
           timeline_days?: number | null
           timeline_end_hour?: number | null

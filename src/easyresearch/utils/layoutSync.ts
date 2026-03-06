@@ -37,8 +37,21 @@ export interface AppTabElementRow {
   style_background?: string | null;
   style_border_radius?: string | null;
   style_height?: string | null;
+  style_margin?: string | null;
+  style_opacity?: number | null;
+  style_border?: string | null;
+  style_border_color?: string | null;
+  style_shadow?: string | null;
+  style_text_align?: string | null;
+  style_content_align?: string | null;
+  style_font_size?: string | null;
+  style_font_weight?: string | null;
+  style_text_color?: string | null;
+  style_bg_color?: string | null;
+  style_overflow?: string | null;
   button_action?: string | null;
   button_label?: string | null;
+  button_border_radius?: string | null;
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
@@ -162,14 +175,27 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       visible: row.visible ?? true,
       participant_types: row.participant_types || undefined,
       width: row.width || undefined,
-      style: (row.style_padding || row.style_background || row.style_border_radius || row.style_height) ? {
+      style: {
         padding: row.style_padding || undefined,
         background: row.style_background || undefined,
         border_radius: row.style_border_radius || undefined,
         height: row.style_height || undefined,
-      } : undefined,
+        margin: row.style_margin || undefined,
+        opacity: row.style_opacity != null ? Number(row.style_opacity) : undefined,
+        border: row.style_border || undefined,
+        border_color: row.style_border_color || undefined,
+        shadow: (row.style_shadow as any) || undefined,
+        text_align: (row.style_text_align as any) || undefined,
+        content_align: (row.style_content_align as any) || undefined,
+        font_size: row.style_font_size || undefined,
+        font_weight: row.style_font_weight || undefined,
+        text_color: row.style_text_color || undefined,
+        bg_color: row.style_bg_color || undefined,
+        overflow: (row.style_overflow as any) || undefined,
+      },
       button_action: row.button_action || undefined,
       button_label: row.button_label || undefined,
+      button_border_radius: (row as any).button_border_radius || undefined,
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
@@ -260,8 +286,21 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         style_background: el.config.style?.background || null,
         style_border_radius: el.config.style?.border_radius || null,
         style_height: el.config.style?.height || null,
+        style_margin: el.config.style?.margin || null,
+        style_opacity: el.config.style?.opacity != null ? el.config.style.opacity : null,
+        style_border: el.config.style?.border || null,
+        style_border_color: el.config.style?.border_color || null,
+        style_shadow: el.config.style?.shadow || null,
+        style_text_align: el.config.style?.text_align || null,
+        style_content_align: el.config.style?.content_align || null,
+        style_font_size: el.config.style?.font_size || null,
+        style_font_weight: el.config.style?.font_weight || null,
+        style_text_color: el.config.style?.text_color || null,
+        style_bg_color: el.config.style?.bg_color || null,
+        style_overflow: el.config.style?.overflow || null,
         button_action: el.config.button_action || null,
         button_label: el.config.button_label || null,
+        button_border_radius: (el.config as any).button_border_radius || null,
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,

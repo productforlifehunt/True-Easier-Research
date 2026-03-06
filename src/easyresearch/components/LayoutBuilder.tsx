@@ -46,6 +46,7 @@ export interface LayoutElement {
     };
     button_action?: string;
     button_label?: string;
+    button_border_radius?: string;
     image_url?: string;
     show_question_count?: boolean;
     show_estimated_time?: boolean;
@@ -413,11 +414,25 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               </select>
             </div>
             {(el.config.card_display_style === 'button' || el.config.card_display_style === 'both') && (
-              <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
-                <input type="text" value={el.config.button_label || ''} placeholder="Open"
-                  onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+                  <input type="text" value={el.config.button_label || ''} placeholder="Open"
+                    onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+                  <div className="flex gap-1">
+                    {['4px', '8px', '12px', '999px'].map(r => (
+                      <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                          (el.config.button_border_radius || '8px') === r
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                        }`}>{r === '999px' ? 'Pill' : r}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -510,6 +525,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
                 onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+              <div className="flex gap-1">
+                {['4px', '8px', '12px', '999px'].map(r => (
+                  <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.button_border_radius || '8px') === r
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{r === '999px' ? 'Pill' : r}</button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -676,6 +703,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
               <input type="text" value={el.config.button_label || el.config.title || ''} onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+              <div className="flex gap-1">
+                {['4px', '8px', '12px', '999px'].map(r => (
+                  <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                      (el.config.button_border_radius || '8px') === r
+                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                    }`}>{r === '999px' ? 'Pill' : r}</button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Action</label>
@@ -886,13 +925,22 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Opacity */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">
-                Opacity: {Math.round((el.config.style?.opacity ?? 1) * 100)}%
-              </label>
-              <input type="range" min={10} max={100} step={5}
-                value={Math.round((el.config.style?.opacity ?? 1) * 100)}
-                onChange={(e) => updateElement(el.id, { style: { ...el.config.style, opacity: parseInt(e.target.value) / 100 } })}
-                className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-medium text-stone-400">
+                  Opacity: {Math.round((el.config.style?.opacity ?? 1) * 100)}%
+                </label>
+              </div>
+              <div className="relative h-6 flex items-center">
+                <div className="absolute inset-x-0 h-2 rounded-full bg-stone-100 border border-stone-200" />
+                <div className="absolute left-0 h-2 rounded-full bg-emerald-400" 
+                  style={{ width: `${Math.round((el.config.style?.opacity ?? 1) * 100)}%` }} />
+                <input type="range" min={10} max={100} step={5}
+                  value={Math.round((el.config.style?.opacity ?? 1) * 100)}
+                  onChange={(e) => updateElement(el.id, { style: { ...el.config.style, opacity: parseInt(e.target.value) / 100 } })}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                <div className="absolute h-4 w-4 rounded-full bg-white border-2 border-emerald-500 shadow-sm pointer-events-none"
+                  style={{ left: `calc(${Math.round((el.config.style?.opacity ?? 1) * 100)}% - 8px)` }} />
+              </div>
             </div>
 
             {/* Font Size */}
