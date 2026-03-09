@@ -969,22 +969,31 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Font Size */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Size</label>
-              <div className="flex gap-1 flex-wrap">
-                {[
-                  { value: undefined as string | undefined, label: 'Default' },
-                  { value: '11px', label: 'XS' },
-                  { value: '13px', label: 'SM' },
-                  { value: '15px', label: 'MD' },
-                  { value: '18px', label: 'LG' },
-                  { value: '24px', label: 'XL' },
-                ].map(f => (
-                  <button key={f.label} onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: f.value } })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      el.config.style?.font_size === f.value || (!el.config.style?.font_size && !f.value)
-                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}>{f.label}</button>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-medium text-stone-400">
+                  Font Size: {el.config.style?.font_size || 'Default'}
+                </label>
+                {el.config.style?.font_size && (
+                  <button onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: undefined } })}
+                    className="text-[10px] text-stone-400 hover:text-stone-600 underline">Reset</button>
+                )}
+              </div>
+              <div className="relative h-6 flex items-center">
+                <div className="absolute inset-x-0 h-2 rounded-full bg-stone-100 border border-stone-200" />
+                <div className="absolute left-0 h-2 rounded-full bg-emerald-400"
+                  style={{ width: `${((parseInt(el.config.style?.font_size || '14') - 10) / 22) * 100}%` }} />
+                <input type="range" min={10} max={32} step={1}
+                  value={parseInt(el.config.style?.font_size || '14')}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    updateElement(el.id, { style: { ...el.config.style, font_size: v === 14 ? undefined : `${v}px` } });
+                  }}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                <div className="absolute h-4 w-4 rounded-full bg-white border-2 border-emerald-500 shadow-sm pointer-events-none"
+                  style={{ left: `calc(${((parseInt(el.config.style?.font_size || '14') - 10) / 22) * 100}% - 8px)` }} />
+              </div>
+              <div className="flex justify-between text-[9px] text-stone-300 mt-1">
+                <span>10 XS</span><span>14 Default</span><span>20 LG</span><span>32 XL</span>
               </div>
             </div>
 
