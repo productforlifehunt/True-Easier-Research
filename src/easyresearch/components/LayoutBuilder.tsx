@@ -858,19 +858,32 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Padding */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Padding</label>
-              <div className="flex gap-1 mb-1.5">
-                {['0', '8px', '16px', '24px', '32px'].map(p => (
-                  <button key={p} onClick={() => updateElement(el.id, { style: { ...el.config.style, padding: p === '0' ? undefined : p } })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      (el.config.style?.padding || '0') === p || (!el.config.style?.padding && p === '0')
-                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}>{p}</button>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-medium text-stone-400">
+                  Padding: {parseInt(el.config.style?.padding || '0') || 0}px
+                </label>
+                {el.config.style?.padding && (
+                  <button onClick={() => updateElement(el.id, { style: { ...el.config.style, padding: undefined } })}
+                    className="text-[10px] text-stone-400 hover:text-stone-600 underline">Reset</button>
+                )}
               </div>
-              <input type="text" value={el.config.style?.padding || ''} placeholder="e.g. 16px, 8px 12px"
-                onChange={(e) => updateElement(el.id, { style: { ...el.config.style, padding: e.target.value || undefined } })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              <div className="relative h-6 flex items-center">
+                <div className="absolute inset-x-0 h-2 rounded-full bg-stone-100 border border-stone-200" />
+                <div className="absolute left-0 h-2 rounded-full bg-emerald-400"
+                  style={{ width: `${Math.min(100, (parseInt(el.config.style?.padding || '0') || 0) / 48 * 100)}%` }} />
+                <input type="range" min={0} max={48} step={4}
+                  value={parseInt(el.config.style?.padding || '0') || 0}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    updateElement(el.id, { style: { ...el.config.style, padding: v === 0 ? undefined : `${v}px` } });
+                  }}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                <div className="absolute h-4 w-4 rounded-full bg-white border-2 border-emerald-500 shadow-sm pointer-events-none"
+                  style={{ left: `calc(${Math.min(100, (parseInt(el.config.style?.padding || '0') || 0) / 48 * 100)}% - 8px)` }} />
+              </div>
+              <div className="flex justify-between text-[9px] text-stone-300 mt-1">
+                <span>0</span><span>12</span><span>24</span><span>36</span><span>48</span>
+              </div>
             </div>
 
             {/* Margin */}
