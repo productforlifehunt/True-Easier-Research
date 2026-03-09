@@ -238,6 +238,19 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                     />
                   </div>
                 </div>
+                {/* Shareable URL / 可分享链接 */}
+                {page.slug && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-stone-100">
+                    <Globe size={12} className="text-stone-400 shrink-0" />
+                    <code className="text-[11px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{page.slug}</code>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${page.slug}`); toast.success('URL copied / 链接已复制'); }}
+                      className="text-[10px] text-emerald-600 hover:text-emerald-700 font-medium shrink-0"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  </div>
+                )}
                 <div>
                   <label className="text-[11px] text-stone-400 mb-1 block">Description / 描述</label>
                   <textarea

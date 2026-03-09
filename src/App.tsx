@@ -49,6 +49,7 @@ const lazyImports = {
   InboxPage: () => import('./easyresearch/components/InboxPage'),
   ConversationView: () => import('./easyresearch/components/ConversationView'),
   FeaturesPage: () => import('./easyresearch/components/FeaturesPage'),
+  PublicPageRenderer: () => import('./easyresearch/components/PublicPageRenderer'),
 };
 
 const LandingPage = React.lazy(lazyImports.LandingPage);
@@ -72,6 +73,7 @@ const SurveyViewRouter = React.lazy(lazyImports.SurveyViewRouter);
 const InboxPage = React.lazy(lazyImports.InboxPage);
 const ConversationView = React.lazy(lazyImports.ConversationView);
 const FeaturesPage = React.lazy(lazyImports.FeaturesPage);
+const PublicPageRenderer = React.lazy(lazyImports.PublicPageRenderer);
 
 // Preload all EasyResearch chunks after initial paint
 if (typeof window !== 'undefined') {
@@ -246,6 +248,7 @@ function App() {
                     <Route path="/easyresearch/templates" element={<TemplateLibrary />} />
                     <Route path="/easyresearch/pricing" element={<PricingPage />} />
                     <Route path="/easyresearch/features" element={<FeaturesPage />} />
+                    <Route path="/easyresearch/page/:projectId/:slug" element={<PublicPageRenderer />} />
                     
                     {/* Unified dashboard - shows both owned & enrolled studies */}
                     <Route path="/easyresearch/dashboard" element={<ParticipantHome />} />
