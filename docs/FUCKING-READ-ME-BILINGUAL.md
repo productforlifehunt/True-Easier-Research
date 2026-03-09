@@ -149,6 +149,9 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 
 ## 9. QUESTIONS / 问题
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 The question system supports **37 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
 问题系统支持 **37种问题类型**，分为7大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
