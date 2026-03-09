@@ -50,7 +50,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
   const save = useCallback(async (updated: NotificationConfig[]) => {
     setConfigs(updated);
     await saveNotificationConfigs(projectId, updated);
-    toast.success('Notifications saved / 通知已保存');
+    toast.success('Notifications saved');
   }, [projectId]);
 
   const addProjectNotification = () => {
