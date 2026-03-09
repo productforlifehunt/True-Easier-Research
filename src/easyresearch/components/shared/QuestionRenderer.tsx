@@ -429,6 +429,117 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
       );
     }
+    case 'max_diff': {
+      const items = question.options || [];
+      const setSize = question.question_config?.items_per_set || 4;
+      const bestLabel = question.question_config?.best_label || 'Most Important';
+      const worstLabel = question.question_config?.worst_label || 'Least Important';
+      // Show one set at a time (simplified: first N items)
+      const currentSet = items.slice(0, Math.min(setSize, items.length));
+      const mdVal: { best?: string; worst?: string } = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      return (
+        <div className="space-y-2">
+          <div className={`grid grid-cols-[80px_1fr_80px] gap-1 text-center`}>
+            <p className={`${txtXs} font-semibold text-emerald-600`}>{bestLabel}</p>
+            <p className={`${txtXs} text-stone-400`}>Item</p>
+            <p className={`${txtXs} font-semibold text-red-500`}>{worstLabel}</p>
+          </div>
+          {currentSet.map((item: any) => {
+            const itemId = typeof item === 'string' ? item : item.id || item.option_text;
+            const itemText = typeof item === 'string' ? item : item.option_text;
+            return (
+              <div key={itemId} className={`grid grid-cols-[80px_1fr_80px] gap-1 items-center border rounded-xl ${pad}`}>
+                <div className="flex justify-center">
+                  <button onClick={() => onResponse(question.id, { ...mdVal, best: itemId, worst: mdVal.worst === itemId ? undefined : mdVal.worst })}
+                    className={`w-6 h-6 rounded-full border-2 transition-all ${mdVal.best === itemId ? 'bg-emerald-500 border-emerald-500' : 'border-stone-300 hover:border-emerald-400'}`}>
+                    {mdVal.best === itemId && <span className="text-white text-[10px]">✓</span>}
+                  </button>
+                </div>
+                <p className={`${txt} text-stone-700 text-center`}>{itemText}</p>
+                <div className="flex justify-center">
+                  <button onClick={() => onResponse(question.id, { ...mdVal, worst: itemId, best: mdVal.best === itemId ? undefined : mdVal.best })}
+                    className={`w-6 h-6 rounded-full border-2 transition-all ${mdVal.worst === itemId ? 'bg-red-500 border-red-500' : 'border-stone-300 hover:border-red-400'}`}>
+                    {mdVal.worst === itemId && <span className="text-white text-[10px]">✗</span>}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    case 'design_survey': {
+      const variants = question.options || [];
+      const showLabels = question.question_config?.show_labels !== false;
+      const followup = question.question_config?.followup_question || '';
+      const dsVal: { choice?: string; ranking?: string[]; reason?: string } = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      return (
+        <div className="space-y-3">
+          <div className={`grid gap-3 ${variants.length <= 3 ? `grid-cols-${Math.min(variants.length, 3)}` : 'grid-cols-2'}`} style={{ gridTemplateColumns: `repeat(${Math.min(variants.length, 3)}, 1fr)` }}>
+            {variants.map((v: any) => {
+              const vId = typeof v === 'string' ? v : v.id || v.option_text;
+              const vText = typeof v === 'string' ? v : v.option_text;
+              const vUrl = typeof v === 'string' ? '' : v.option_value || '';
+              return (
+                <div key={vId} onClick={() => onResponse(question.id, { ...dsVal, choice: vId })}
+                  className={`cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${dsVal.choice === vId ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-stone-200 hover:border-stone-300'}`}>
+                  {vUrl ? <img src={vUrl} alt={vText} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400 text-2xl">🎨</div>}
+                  {showLabels && <p className={`text-center py-2 ${txtSm} font-medium ${dsVal.choice === vId ? 'text-emerald-600' : 'text-stone-600'}`}>{vText}</p>}
+                </div>
+              );
+            })}
+          </div>
+          {followup && dsVal.choice && (
+            <div>
+              <p className={`${txtSm} text-stone-500 mb-1`}>{followup}</p>
+              <textarea value={dsVal.reason || ''} onChange={(e) => onResponse(question.id, { ...dsVal, reason: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl border border-stone-200 ${txtSm} resize-none`} rows={2} placeholder="Your reason..." />
+            </div>
+          )}
+        </div>
+      );
+    }
+    case 'heatmap': {
+      const hmImgUrl = question.question_config?.test_image_url || '';
+      const hmTask = question.question_config?.task_description || '';
+      const hmMax = question.question_config?.max_clicks || 10;
+      const hmFollowup = question.question_config?.followup_question || '';
+      const hmVal: { clicks?: Array<{ x: number; y: number; t: number }>; answer?: string } = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      const clicks = hmVal.clicks || [];
+      return (
+        <div className="space-y-2">
+          {hmTask && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>🔥 {hmTask}</div>}
+          <p className={`${txtXs} text-stone-400`}>{clicks.length}/{hmMax} clicks</p>
+          {hmImgUrl ? (
+            <div className="relative cursor-crosshair" onClick={(e) => {
+              if (clicks.length >= hmMax) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = Number(((e.clientX - rect.left) / rect.width * 100).toFixed(1));
+              const y = Number(((e.clientY - rect.top) / rect.height * 100).toFixed(1));
+              onResponse(question.id, { ...hmVal, clicks: [...clicks, { x, y, t: Date.now() }] });
+            }}>
+              <img src={hmImgUrl} alt="Test" className="w-full rounded-xl border border-stone-200" />
+              {clicks.map((c, i) => (
+                <div key={i} className="absolute w-5 h-5 -ml-2.5 -mt-2.5 rounded-full border-2 border-red-500 bg-red-500/30 flex items-center justify-center"
+                  style={{ left: `${c.x}%`, top: `${c.y}%` }}>
+                  <span className="text-[8px] text-red-700 font-bold">{i + 1}</span>
+                </div>
+              ))}
+            </div>
+          ) : <div className={`h-32 rounded-xl border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center ${txtSm} text-stone-400`}>Upload test image</div>}
+          {clicks.length > 0 && (
+            <button onClick={() => onResponse(question.id, { ...hmVal, clicks: clicks.slice(0, -1) })} className={`${txtXs} text-red-500 hover:underline`}>Undo last click</button>
+          )}
+          {hmFollowup && clicks.length > 0 && (
+            <div>
+              <p className={`${txtSm} text-stone-500 mb-1`}>{hmFollowup}</p>
+              <textarea value={hmVal.answer || ''} onChange={(e) => onResponse(question.id, { ...hmVal, answer: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl border border-stone-200 ${txtSm} resize-none`} rows={2} placeholder="Your answer..." />
+            </div>
+          )}
+        </div>
+      );
+    }
     default:
       return <p className={`${txtSm} text-stone-400 italic`}>Unsupported: {question.question_type}</p>;
   }

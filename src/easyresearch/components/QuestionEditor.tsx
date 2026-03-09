@@ -275,6 +275,34 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         );
       case 'prototype_test':
         return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
+      case 'max_diff':
+        return (
+          <div className="space-y-1">
+            <p className="text-[10px] text-stone-400 font-semibold">Best-Worst Scaling</p>
+            {(localQuestion.options || []).slice(0, 3).map((opt: any, i: number) => (
+              <div key={opt.id} className="flex items-center justify-between text-[10px] text-stone-500 px-2 py-1 border border-stone-200 rounded">
+                <span className="text-emerald-500 text-[9px]">BEST</span>
+                <span className="truncate mx-2">{opt.option_text}</span>
+                <span className="text-red-400 text-[9px]">WORST</span>
+              </div>
+            ))}
+          </div>
+        );
+      case 'design_survey':
+        return (
+          <div className="grid grid-cols-3 gap-1">
+            {(localQuestion.options || []).slice(0, 3).map((opt: any) => (
+              <div key={opt.id} className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[9px] text-stone-500 text-center p-1">{opt.option_text}</div>
+            ))}
+            {(localQuestion.options || []).length > 3 && <span className="text-[9px] text-stone-400">+{(localQuestion.options || []).length - 3}</span>}
+          </div>
+        );
+      case 'heatmap':
+        return (
+          <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">
+            🔥 Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
+          </div>
+        );
       default: return null;
     }
   };
@@ -399,12 +427,25 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               else if (newType === 'five_second_test') { updates.question_config = { test_image_url: '', test_duration: 5, followup_question: 'What do you remember about this page?' }; updates.options = []; }
               else if (newType === 'preference_test') { updates.question_config = { variant_a_url: '', variant_a_label: 'Design A', variant_b_url: '', variant_b_label: 'Design B', followup_question: 'Why do you prefer this design?' }; updates.options = []; }
               else if (newType === 'prototype_test') { updates.question_config = { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }; updates.options = []; }
+              else if (newType === 'max_diff') {
+                updates.question_config = { items_per_set: 4, best_label: 'Most Important', worst_label: 'Least Important' };
+                if (!localQuestion.options || localQuestion.options.length < 4) {
+                  updates.options = Array.from({ length: 6 }, (_, i) => ({ id: crypto.randomUUID(), option_text: `Item ${i + 1}`, option_value: '', order_index: i, is_other: false }));
+                }
+              }
+              else if (newType === 'design_survey') {
+                updates.question_config = { show_labels: true, randomize_variants: false, followup_question: 'Which design best meets your needs and why?' };
+                if (!localQuestion.options || localQuestion.options.length < 3) {
+                  updates.options = Array.from({ length: 3 }, (_, i) => ({ id: crypto.randomUUID(), option_text: `Design ${String.fromCharCode(65 + i)}`, option_value: '', order_index: i, is_other: false }));
+                }
+              }
+              else if (newType === 'heatmap') { updates.question_config = { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
@@ -453,8 +494,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="tree_test">Tree Test</option>
               <option value="first_click">First Click Test</option>
               <option value="five_second_test">5-Second Test</option>
-              <option value="preference_test">Preference Test</option>
+              <option value="preference_test">Preference Test (A/B)</option>
               <option value="prototype_test">Prototype Test</option>
+              <option value="max_diff">MaxDiff (Best-Worst)</option>
+              <option value="design_survey">Design Survey (Multi-Variant)</option>
+              <option value="heatmap">Heatmap (Multi-Click)</option>
             </optgroup>
           </select>
         </div>
@@ -1102,6 +1146,89 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <textarea value={JSON.stringify(localQuestion.question_config?.task_list || [], null, 2)}
                 onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, task_list: JSON.parse(e.target.value) } }); } catch {} }}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={4} />
+            </div>
+          </div>
+        )}
+
+        {/* MaxDiff Configuration */}
+        {localQuestion.question_type === 'max_diff' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Items Per Set</label>
+              <input type="number" value={localQuestion.question_config?.items_per_set ?? 4} min={3} max={7}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, items_per_set: Number(e.target.value) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+              <p className="text-[10px] text-stone-400 mt-1">How many items shown per comparison set (3-7)</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Best Label</label>
+                <input type="text" value={localQuestion.question_config?.best_label || 'Most Important'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, best_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Worst Label</label>
+                <input type="text" value={localQuestion.question_config?.worst_label || 'Least Important'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, worst_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+            </div>
+            <p className="text-[11px] text-stone-400">Add items via the Options section above. Each participant will see randomized sets of {localQuestion.question_config?.items_per_set || 4} items and pick the best &amp; worst from each set.</p>
+          </div>
+        )}
+
+        {/* Design Survey Configuration */}
+        {localQuestion.question_type === 'design_survey' && (
+          <div className="space-y-3">
+            <p className="text-[11px] text-stone-400">Add design variants via Options above. Use option_value for image URLs. Participants compare all variants side-by-side.</p>
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.show_labels !== false}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, show_labels: e.target.checked } })}
+                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Show variant labels
+            </label>
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.randomize_variants || false}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, randomize_variants: e.target.checked } })}
+                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Randomize display order
+            </label>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <input type="text" value={localQuestion.question_config?.followup_question || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Why did you choose this design?" />
+            </div>
+          </div>
+        )}
+
+        {/* Heatmap Configuration */}
+        {localQuestion.question_type === 'heatmap' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <input type="text" value={localQuestion.question_config?.test_image_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/page-screenshot.png" />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task</label>
+              <textarea value={localQuestion.question_config?.task_description || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Click all areas that grab your attention" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Clicks</label>
+              <input type="number" value={localQuestion.question_config?.max_clicks ?? 10} min={1} max={50}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_clicks: Number(e.target.value) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <input type="text" value={localQuestion.question_config?.followup_question || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="What stood out most?" />
             </div>
           </div>
         )}

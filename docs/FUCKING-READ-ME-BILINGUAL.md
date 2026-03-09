@@ -152,9 +152,9 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 <!-- CRC STARTS -->
 <!-- CRC ENDS -->
 
-The question system supports **37 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
+The question system supports **40 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
-问题系统支持 **37种问题类型**，分为7大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
+问题系统支持 **40种问题类型**，分为7大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
 
 **Categories / 类别:**
 1. Text: text_short, text_long / 文本：短文本、长文本
@@ -163,7 +163,7 @@ The question system supports **37 question types** across 7 categories, all stor
 4. Data: number, date, time, email, phone, file_upload, address / 数据：数字、日期、时间、邮箱、电话、文件上传、地址
 5. Advanced: constant_sum, signature / 高级：常量总和、签名
 6. Layout & Media: section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block / 布局与媒体：章节标题、文本块、分隔线、图片块、说明、视频块、音频块、嵌入块
-7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试
+7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test, max_diff, design_survey, heatmap / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试、最大差异分析、设计调查（多变体）、热图
 
 **Rich Media Types (Layout & Media category) / 富媒体类型:**
 - `video_block` — Embed YouTube, Vimeo, Loom, or direct MP4. Config: cfg_video_url, cfg_autoplay, cfg_loop, cfg_muted, cfg_poster_url / 嵌入视频
@@ -177,6 +177,9 @@ The question system supports **37 question types** across 7 categories, all stor
 - `five_second_test` — Timed exposure test. Config: cfg_test_image_url, cfg_test_duration, cfg_followup_question / 5秒测试
 - `preference_test` — A/B side-by-side comparison. Config: cfg_variant_a_url, cfg_variant_a_label, cfg_variant_b_url, cfg_variant_b_label, cfg_followup_question / 偏好测试
 - `prototype_test` — Embed Figma/InVision prototype with usability tasks. Config: cfg_prototype_url, cfg_prototype_platform, cfg_task_list (jsonb), cfg_embed_height / 原型测试
+- `max_diff` — Best-worst scaling (MaxDiff). Participants pick best/worst from item sets. Uses `question_option` for items. Config: cfg_items_per_set, cfg_best_label, cfg_worst_label / 最大差异分析（最佳-最差缩放），参与者从项目集中选择最佳/最差
+- `design_survey` — Multi-variant design comparison (3+ designs). Uses `question_option` for variants (option_value = image URL). Config: cfg_show_labels, cfg_randomize_variants, cfg_followup_question / 多变体设计比较（3+设计），使用选项表存储变体
+- `heatmap` — Multi-click heatmap on image. Participants click multiple areas to indicate attention/interest. Config: cfg_test_image_url, cfg_task_description, cfg_allow_multiple_clicks, cfg_max_clicks, cfg_followup_question / 多点击热图，参与者点击多个区域表示注意力/兴趣
 
 **A/B Test Questionnaires / A/B测试问卷:**
 Questionnaires support A/B testing at the questionnaire level. Two questionnaires with the same `ab_group_id` form a test group. Participants are randomly assigned to one variant based on `ab_split_percentage`.
@@ -187,6 +190,13 @@ Columns on `questionnaire` table / `questionnaire` 表上的列:
 - `ab_variant_name` (text) — variant identifier, e.g. "Variant A" / 变体标识符
 - `ab_group_id` (text) — shared group ID linking variants together / 链接变体的共享组ID
 - `ab_split_percentage` (int) — traffic split %, default 50 / 流量分配百分比，默认50
+
+**Questionnaire-Level Research Features / 问卷级研究功能:**
+
+Columns on `questionnaire` table / `questionnaire` 表上的列:
+- `randomize_questions` (bool) — shuffle non-section question order for each participant / 为每个参与者随机排列非章节问题顺序
+- `enable_piping` (bool) — enable answer piping using `{{Q1}}` or `{{question_id}}` template syntax in question text / 启用答案传递，在问题文本中使用 `{{Q1}}` 或 `{{question_id}}` 模板语法
+- `track_time_per_question` (bool) — record response duration per question for analytics / 记录每个问题的响应时长用于分析
 
 Each question is a row in the `question` table (renamed from the old `survey_question` — NEVER use `survey_question` anymore). A question belongs to one project via `project_id` and optionally to one questionnaire via `questionnaire_id`.
 
@@ -276,6 +286,13 @@ These are flat database columns (NOT JSONB) on the `question` table. Each questi
 - `cfg_prototype_url` (text) — prototype URL for prototype_test / 原型URL
 - `cfg_prototype_platform` (text) — figma, invision, sketch, adobe_xd, custom / 原型平台
 - `cfg_task_list` (jsonb) — task list for prototype_test / 原型测试任务列表
+- `cfg_items_per_set` (int) — items per comparison set for max_diff (3-7) / 最大差异的每组项目数
+- `cfg_best_label` (text) — "best" button label for max_diff / 最大差异的"最佳"按钮标签
+- `cfg_worst_label` (text) — "worst" button label for max_diff / 最大差异的"最差"按钮标签
+- `cfg_allow_multiple_clicks` (bool) — allow multiple clicks for heatmap / 热图允许多次点击
+- `cfg_max_clicks` (int) — max clicks for heatmap / 热图最大点击数
+- `cfg_show_labels` (bool) — show variant labels in design_survey / 设计调查显示变体标签
+- `cfg_randomize_variants` (bool) — randomize variant order in design_survey / 设计调查随机变体顺序
 
 **Validation rule columns (`vr_*`, 8 columns) / 验证规则列:**
 

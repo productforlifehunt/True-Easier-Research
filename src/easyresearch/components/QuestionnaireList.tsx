@@ -972,6 +972,39 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 )}
                               </div>
 
+                              {/* Research Features */}
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">🔬 Research Features</h5>
+                                <label className="flex items-center justify-between">
+                                  <span className="text-[11px] text-stone-600">Randomize question order</span>
+                                  <div className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={(q as any).randomize_questions || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { randomize_questions: e.target.checked } as any)}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </div>
+                                </label>
+                                <label className="flex items-center justify-between">
+                                  <span className="text-[11px] text-stone-600">Answer piping ({"{{Q1}}"} syntax)</span>
+                                  <div className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={(q as any).enable_piping || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { enable_piping: e.target.checked } as any)}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </div>
+                                </label>
+                                <label className="flex items-center justify-between">
+                                  <span className="text-[11px] text-stone-600">Track time per question</span>
+                                  <div className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={(q as any).track_time_per_question || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { track_time_per_question: e.target.checked } as any)}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </div>
+                                </label>
+                                <p className="text-[10px] text-stone-400">Randomization shuffles non-section questions. Piping inserts previous answers into question text using {"{{Q1}}"} or {"{{question_id}}"}. Timer records response duration per question.</p>
+                              </div>
+
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>

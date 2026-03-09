@@ -52,6 +52,11 @@ export const SUPPORTED_QUESTION_TYPES = {
   PREFERENCE_TEST: 'preference_test',
   PROTOTYPE_TEST: 'prototype_test',
 
+  // Advanced UX Research Types (Qualtrics/Conjoint-level)
+  MAX_DIFF: 'max_diff',
+  DESIGN_SURVEY: 'design_survey',
+  HEATMAP: 'heatmap',
+
   // Layout Types
   SECTION_HEADER: 'section_header',
   TEXT_BLOCK: 'text_block',
@@ -518,6 +523,39 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }
   },
+  {
+    type: SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+    label: 'MaxDiff (Best-Worst)',
+    description: 'Best-worst scaling — participants pick most/least preferred from sets of items',
+    icon: '📊',
+    category: 'advanced',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { items_per_set: 4, best_label: 'Most Important', worst_label: 'Least Important' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
+    label: 'Design Survey (Multi)',
+    description: 'Compare 3+ design variants — participants rank or rate multiple options',
+    icon: '🎨',
+    category: 'advanced',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { show_labels: true, randomize_variants: false, followup_question: 'Which design best meets your needs and why?' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.HEATMAP,
+    label: 'Heatmap (Multi-Click)',
+    description: 'Participants click multiple areas on an image to indicate attention, interest, or confusion',
+    icon: '🔥',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }
+  },
 ];
 
 // Helper functions
@@ -571,6 +609,12 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'five_second_test': SUPPORTED_QUESTION_TYPES.FIVE_SECOND_TEST,
   'preference_test': SUPPORTED_QUESTION_TYPES.PREFERENCE_TEST,
   'prototype_test': SUPPORTED_QUESTION_TYPES.PROTOTYPE_TEST,
+  'max_diff': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'maxdiff': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'best_worst': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'design_survey': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
+  'multi_variant': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
+  'heatmap': SUPPORTED_QUESTION_TYPES.HEATMAP,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {
