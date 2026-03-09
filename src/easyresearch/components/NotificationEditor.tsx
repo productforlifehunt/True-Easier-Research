@@ -267,22 +267,21 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             )}
 
-            {/* Specific times mode / 指定时间模式 */}
             {nc.schedule_mode === 'specific_times' && (
               <div className="space-y-2 p-3 bg-stone-50 rounded-lg border border-stone-100">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">
-                    Times / 时间列表 ({nc.specific_times.length})
+                    Times ({nc.specific_times.length})
                   </label>
                   <button
                     onClick={() => addSpecificTime(nc.id)}
                     className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 transition-colors"
                   >
-                    <Plus size={10} /> Add Time / 添加
+                    <Plus size={10} /> Add Time
                   </button>
                 </div>
                 {nc.specific_times.length === 0 && (
-                  <p className="text-[11px] text-stone-300 text-center py-3">No times set. Click "Add Time". / 未设置时间，点击"添加"。</p>
+                  <p className="text-[11px] text-stone-300 text-center py-3">No times set. Click "Add Time".</p>
                 )}
                 <div className="flex flex-wrap gap-2">
                   {nc.specific_times.map((time, idx) => (
