@@ -471,6 +471,9 @@ const SurveyBuilder: React.FC = () => {
             ab_variant_name: qr.ab_variant_name || undefined,
             ab_group_id: qr.ab_group_id || undefined,
             ab_split_percentage: qr.ab_split_percentage ?? 50,
+            randomize_questions: qr.randomize_questions ?? false,
+            enable_piping: qr.enable_piping ?? false,
+            track_time_per_question: qr.track_time_per_question ?? false,
           }));
 
           if (questionsData && mounted) {
