@@ -1829,18 +1829,95 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 - 每个指标的可视化柱状图与基准对比。
 <!-- CRC ENDS -->
 
-## 38. COMPLETE SYSTEM INVENTORY / 完整系统清单
+## 38. SUBMISSION RUNTIME PIPELINE / 提交运行时管道
+
+<!-- CRC STARTS -->
+- The submission pipeline (`src/easyresearch/utils/submissionRuntime.ts`) orchestrates: Quality Check → Quota Check → Save → Webhook Fire
+- 提交管道编排：质量检查 → 配额检查 → 保存 → Webhook 触发
+- Quality flags (`__quality_flags__`) and timings (`__question_timings__`) are injected into every response
+- 质量标记和计时数据注入每个响应
+- Quota enforcement blocks submissions when segment or total caps are reached, firing `quota.reached` webhooks
+- 配额执行在达到细分或总量上限时阻止提交，触发 `quota.reached` Webhook
+- Webhook firing is non-blocking (Promise.allSettled with 10s timeout) — never breaks submission flow
+- Webhook 触发是非阻塞的 — 永远不会中断提交流程
+<!-- CRC ENDS -->
+
+---
+
+## 39. CONSENT & ETHICS MANAGER / 知情同意与伦理管理器
+
+<!-- CRC STARTS -->
+- Component: `ConsentEthicsManager.tsx` — builder tab `consent`
+- 组件：`ConsentEthicsManager.tsx` — 构建器标签页 `consent`
+- Features: IRB consent form builder with HTML content, version management (auto-deactivate old versions), e-signature requirement toggle, IRB number/expiry tracking with auto-warning (30-day threshold)
+- 功能：带 HTML 内容的 IRB 知情同意书构建器、版本管理（自动停用旧版本）、电子签名需求开关、IRB 编号/到期追踪（30天阈值自动预警）
+- Three sub-views: Forms (editor + version list), Records (signed consents table), Withdrawals (withdrawal tracking with reasons)
+- 三个子视图：表单（编辑器+版本列表）、记录（已签署同意书表格）、退出（含原因的退出追踪）
+<!-- CRC ENDS -->
+
+---
+
+## 40. COLLABORATION & COMMENTS ENGINE / 协作与评论引擎
+
+<!-- CRC STARTS -->
+- Component: `CollaborationEngine.tsx` — builder tab `collaboration`
+- 组件：`CollaborationEngine.tsx` — 构建器标签页 `collaboration`
+- Features: Threaded comments with @mention support, resolution tracking (open/resolved states), mention picker from team roster
+- 功能：带 @提及支持的线程评论、解决状态追踪（打开/已解决）、从团队名册中选择提及对象
+- Team management: collaborator roles (owner/editor/viewer/commenter), last-active timestamps, online presence indicators
+- 团队管理：协作者角色（所有者/编辑者/查看者/评论者）、最后活跃时间戳、在线状态指示器
+- Filter modes: All, Open, Resolved, My Mentions
+- 筛选模式：全部、打开、已解决、我的提及
+<!-- CRC ENDS -->
+
+---
+
+## 41. PARTICIPANT JOURNEY TRACKER / 参与者旅程追踪器
+
+<!-- CRC STARTS -->
+- Component: `ParticipantJourneyTracker.tsx` — builder tab `journeys`
+- 组件：`ParticipantJourneyTracker.tsx` — 构建器标签页 `journeys`
+- Visual timeline of 10 event types: enrolled, consent_signed, survey_started, survey_completed, survey_abandoned, notification_sent, reminder_sent, withdrawn, dnd_set, profile_updated
+- 10 种事件类型的可视化时间线
+- Per-participant metrics: completion rate, total responses, avg response time, engagement score (0-100)
+- 每位参与者指标：完成率、总响应数、平均响应时间、参与度评分（0-100）
+- Aggregate dashboard: total participants, active count, avg engagement, avg completion
+- 聚合仪表板：总参与者数、活跃数、平均参与度、平均完成率
+- Sort/filter by engagement score, completion rate, recency, status
+- 按参与度评分、完成率、时间、状态排序/筛选
+<!-- CRC ENDS -->
+
+---
+
+## 42. DATA PIPELINE & API ACCESS / 数据管道与 API 访问
+
+<!-- CRC STARTS -->
+- Component: `DataPipelineAPI.tsx` — builder tab `api`
+- 组件：`DataPipelineAPI.tsx` — 构建器标签页 `api`
+- Auto-generated REST API documentation for 5 core endpoints (responses, enrollments, questions, questionnaires, submission)
+- 为 5 个核心端点自动生成 REST API 文档
+- API Key management: create/revoke keys with permission scoping (read/write/delete) and rate limiting
+- API 密钥管理：创建/撤销密钥，权限范围（读/写/删除）和速率限制
+- API Playground: in-browser endpoint testing with example responses
+- API 测试场：浏览器内端点测试及示例响应
+- Code snippets in cURL, Python, JavaScript with one-click copy
+- cURL、Python、JavaScript 代码片段及一键复制
+<!-- CRC ENDS -->
+
+---
+
+## 43. COMPLETE SYSTEM INVENTORY (UPDATED) / 完整系统清单（已更新）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **20 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, responses)
-- **20 个构建器标签页**
+- **24 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, api, responses)
+- **24 个构建器标签页**
 - **12 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark)
 - **12 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Theme → Build → Preview → Publish → Distribute → Recruit → Collect → Analyze → Benchmark → Report → Export → Iterate
-- **完整研究生命周期：** 设计 → 主题 → 构建 → 预览 → 发布 → 分发 → 招募 → 收集 → 分析 → 对标 → 报告 → 导出 → 迭代
+- **Full Research Lifecycle:** Design → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Collect → Quality Control → Analyze → Benchmark → Journey Track → Report → Export → API Access → Iterate
+- **完整研究生命周期：** 设计 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 收集 → 质量控制 → 分析 → 对标 → 旅程追踪 → 报告 → 导出 → API 访问 → 迭代
 
 ---
