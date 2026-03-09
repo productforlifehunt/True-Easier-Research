@@ -181,9 +181,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               />
             </div>
 
-            {/* Type / 类型 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Type / 类型</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Type</label>
               <select
                 value={nc.notification_type}
                 onChange={(e) => updateConfig(nc.id, { notification_type: e.target.value })}
