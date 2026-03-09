@@ -14,6 +14,8 @@ interface LayoutTabWrapperProps {
   questionnaires: QuestionnaireConfig[];
   participantTypes: ParticipantType[];
   studyDuration: number;
+  projectTitle?: string;
+  projectDescription?: string;
   onUpdate: (layout: AppLayout) => void;
   onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
