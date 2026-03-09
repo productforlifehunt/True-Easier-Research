@@ -594,6 +594,31 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               />
             </div>
           )}
+
+          {/* REPORT VIEW / 报告生成 */}
+          {subView === 'report' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <ReportGenerator
+                projectId={projectId}
+                projectTitle=""
+                responses={responses}
+                questions={filteredQuestions}
+                enrollments={enrollments}
+              />
+            </div>
+          )}
+
+          {/* BENCHMARK VIEW / 基准对标 */}
+          {subView === 'benchmark' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <BenchmarkingEngine
+                projectId={projectId}
+                responses={responses}
+                questions={filteredQuestions}
+                enrollments={enrollments}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
