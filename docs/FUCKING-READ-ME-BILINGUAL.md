@@ -958,6 +958,9 @@ user role is defined in profile table's is_researcher toggle is_participant togg
 
 ## 10. PARTICIPANT TYPES / 参与者类型
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Each participant type is a row in the `participant_type` table. It belongs to one project via `project_id` and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
 调研参与者类型储存在participant_type table。每个研究可以设置多个参与者类型，比如家人、护理者、病人，每个问卷、问题也可以单独设置对哪些参与者可见
