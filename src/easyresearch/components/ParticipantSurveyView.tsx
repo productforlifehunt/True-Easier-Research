@@ -282,6 +282,17 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   };
 
   const handleResponseChange = (questionId: string, value: any) => {
+    // Track per-question timing / 追踪每题用时
+    const now = Date.now();
+    if (lastAnsweredId && lastAnsweredId !== questionId) {
+      const elapsed = Math.round((now - questionStartTime) / 1000);
+      setQuestionTimings(prev => ({
+        ...prev,
+        [lastAnsweredId]: (prev[lastAnsweredId] || 0) + elapsed,
+      }));
+    }
+    setQuestionStartTime(now);
+
     setResponses(prev => ({
       ...prev,
       [questionId]: value
