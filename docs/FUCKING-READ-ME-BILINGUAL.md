@@ -116,6 +116,9 @@ Every study lives in the `research_project` table. A project can have multiple q
 
 ## 8. QUESTIONNAIRE / 问卷
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Each questionnaire is a row in the `questionnaire` table in the `care_connector` schema. It belongs to one project and has a type field that determines its purpose:
 
 问卷储存在 `questionnaire` table，通过
