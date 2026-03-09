@@ -39,6 +39,12 @@ import DataPipelineAPI from './DataPipelineAPI';
 import IncentiveManager from './IncentiveManager';
 import CollectionMonitor from './CollectionMonitor';
 import AuditTrail from './AuditTrail';
+import PowerAnalysisCalculator from './PowerAnalysisCalculator';
+import ResearchRepository from './ResearchRepository';
+import DataCleaningStudio from './DataCleaningStudio';
+import SessionReplayViewer from './SessionReplayViewer';
+import PanelRecruitmentHub from './PanelRecruitmentHub';
+import AdvancedSegmentation from './AdvancedSegmentation';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -114,7 +120,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -976,6 +982,12 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'monitor' as TabId, label: '🟢 Live / 实时' }] : []),
     ...(projectId ? [{ id: 'audit' as TabId, label: 'Audit / 审计' }] : []),
     ...(projectId ? [{ id: 'api' as TabId, label: 'API / 接口' }] : []),
+    ...(projectId ? [{ id: 'power_analysis' as TabId, label: '📐 Power / 功效' }] : []),
+    ...(projectId ? [{ id: 'repository' as TabId, label: '📚 Insights / 洞察' }] : []),
+    ...(projectId ? [{ id: 'data_cleaning' as TabId, label: '🧹 Clean / 清洗' }] : []),
+    ...(projectId ? [{ id: 'sessions' as TabId, label: '🎬 Sessions / 会话' }] : []),
+    ...(projectId ? [{ id: 'recruitment' as TabId, label: '📢 Recruit / 招募' }] : []),
+    ...(projectId ? [{ id: 'segmentation' as TabId, label: '🎯 Segments / 分群' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1304,6 +1316,36 @@ const SurveyBuilder: React.FC = () => {
         {/* API Access Tab / API 访问 */}
         {activeTab === 'api' && projectId && (
           <DataPipelineAPI projectId={projectId} />
+        )}
+
+        {/* Power Analysis Tab / 功效分析 */}
+        {activeTab === 'power_analysis' && projectId && (
+          <PowerAnalysisCalculator projectId={projectId} />
+        )}
+
+        {/* Research Repository Tab / 研究仓库 */}
+        {activeTab === 'repository' && projectId && (
+          <ResearchRepository projectId={projectId} />
+        )}
+
+        {/* Data Cleaning Tab / 数据清洗 */}
+        {activeTab === 'data_cleaning' && projectId && (
+          <DataCleaningStudio projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Session Replay Tab / 会话回放 */}
+        {activeTab === 'sessions' && projectId && (
+          <SessionReplayViewer projectId={projectId} />
+        )}
+
+        {/* Panel Recruitment Tab / 面板招募 */}
+        {activeTab === 'recruitment' && projectId && (
+          <PanelRecruitmentHub projectId={projectId} surveyCode={project.survey_code} />
+        )}
+
+        {/* Advanced Segmentation Tab / 高级分群 */}
+        {activeTab === 'segmentation' && projectId && (
+          <AdvancedSegmentation projectId={projectId} questionnaires={questionnaireConfigs} />
         )}
 
         {/* Responses Tab */}

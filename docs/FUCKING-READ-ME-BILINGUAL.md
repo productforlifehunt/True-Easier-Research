@@ -1956,18 +1956,94 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 48. COMPLETE SYSTEM INVENTORY (UPDATED) / 完整系统清单（已更新）
+## 48. POWER ANALYSIS CALCULATOR / 功效分析计算器
+
+<!-- CRC STARTS -->
+- Component: `PowerAnalysisCalculator.tsx` — builder tab `power_analysis`
+- Statistical power analysis with 7 test types (two-sample t-test, paired t-test, ANOVA, chi-square, correlation, regression, two proportions)
+- 统计功效分析，支持7种检验类型（双样本t检验、配对t检验、方差分析、卡方检验、相关分析、回归、双比例检验）
+- Implements Abramowitz & Stegun normal inverse CDF approximation for precise calculations
+- 实现 Abramowitz & Stegun 正态逆CDF近似以进行精确计算
+- Features: effect size presets (small/medium/large/custom), alpha (0.01/0.05/0.10), power (70-99%), attrition buffer (0-60%), interactive power curve visualization, group/predictor configuration, bilingual interpretation
+- 功能：效应量预设（小/中/大/自定义）、显著性水平（0.01/0.05/0.10）、功效（70-99%）、流失缓冲（0-60%）、交互式功效曲线可视化、组数/预测变量配置、双语解释
+<!-- CRC ENDS -->
+
+---
+
+## 49. RESEARCH REPOSITORY / 研究仓库
+
+<!-- CRC STARTS -->
+- Component: `ResearchRepository.tsx` — builder tab `repository`
+- Insights library for organizing findings, recommendations, hypotheses, pain points, opportunities, and participant quotes across projects
+- 洞察库，用于跨项目组织发现、建议、假设、痛点、机会和参与者引用
+- 6 insight types, 4 severity levels (low/medium/high/critical), 4 status states (draft/validated/actioned/archived), tag-based organization, search/filter
+- 6种洞察类型、4种严重程度（低/中/高/关键）、4种状态（草稿/已验证/已行动/已归档）、基于标签的组织、搜索/筛选
+<!-- CRC ENDS -->
+
+---
+
+## 50. DATA CLEANING STUDIO / 数据清洗工作室
+
+<!-- CRC STARTS -->
+- Component: `DataCleaningStudio.tsx` — builder tab `data_cleaning`
+- Pre-analysis data preparation with 10 configurable cleaning rules: remove incomplete, remove speeders, remove straightliners, remove duplicates, remove outliers (Z-score), recode values, merge categories, fill missing (mean/median/mode), trim text, standardize case
+- 分析前数据准备，包含10条可配置清洗规则：删除不完整、删除快速答题、删除直线答题、删除重复、删除离群值（Z分数）、重新编码值、合并类别、填充缺失值（均值/中位数/众数）、修剪文本、统一大小写
+- Features: one-click analysis against live data, data quality health bar, per-rule affected count, clean data CSV export, rule enable/disable toggles with inline threshold configuration
+- 功能：针对实时数据的一键分析、数据质量健康条、每条规则影响计数、清洁数据CSV导出、规则启用/禁用切换及内联阈值配置
+<!-- CRC ENDS -->
+
+---
+
+## 51. SESSION REPLAY & TRACKING / 会话回放与追踪
+
+<!-- CRC STARTS -->
+- Component: `SessionReplayViewer.tsx` — builder tab `sessions`
+- Hotjar-style session replay viewer tracking 10 event types: page_view, click, scroll, input, question_view, question_answer, navigation, focus, blur, error
+- 类似Hotjar的会话回放查看器，追踪10种事件类型：页面浏览、点击、滚动、输入、问题查看、问题回答、导航、聚焦、失焦、错误
+- Features: session list with completion progress, event timeline with color-coded markers, playback controls (play/pause/skip ±5s, scrubber), event log with timestamp alignment, interaction heatmap showing most-interacted questions, filter by completed/abandoned
+- 功能：带完成进度的会话列表、带颜色编码标记的事件时间线、播放控制（播放/暂停/跳转±5秒、进度条）、带时间戳对齐的事件日志、显示最多交互问题的交互热图、按完成/放弃筛选
+<!-- CRC ENDS -->
+
+---
+
+## 52. PANEL RECRUITMENT HUB / 面板招募中心
+
+<!-- CRC STARTS -->
+- Component: `PanelRecruitmentHub.tsx` — builder tab `recruitment`
+- Multi-platform participant recruitment management supporting 6 sources: Prolific, Amazon MTurk, Respondent.io, User Interviews, Internal Panel, Custom Source
+- 多平台参与者招募管理，支持6种来源：Prolific、Amazon MTurk、Respondent.io、User Interviews、内部面板、自定义来源
+- Features: auto-generated redirect URLs with source tracking, completion redirect URL templates with {{COMPLETION_CODE}} placeholders, per-source budget tracking (cost/response, total budget, spent), recruitment progress bars, status management (draft/active/paused/completed), one-click URL copy
+- 功能：自动生成带来源追踪的重定向URL、带{{COMPLETION_CODE}}占位符的完成重定向URL模板、每来源预算追踪（每次费用、总预算、已花费）、招募进度条、状态管理（草稿/活跃/暂停/完成）、一键复制URL
+<!-- CRC ENDS -->
+
+---
+
+## 53. ADVANCED SEGMENTATION ENGINE / 高级分群引擎
+
+<!-- CRC STARTS -->
+- Component: `AdvancedSegmentation.tsx` — builder tab `segmentation`
+- Complex participant segment builder with AND/OR logic, supporting conditions on question responses and behavioral metrics (completion rate, total time, response count, first/last response date)
+- 复杂的参与者分群构建器，支持AND/OR逻辑，可基于问题响应和行为指标（完成率、总时间、响应数、首次/最后响应日期）设定条件
+- 11 operators: equals, not_equals, contains, gt, lt, gte, lte, in, is_empty, is_not_empty, between
+- 11种运算符：等于、不等于、包含、大于、小于、大于等于、小于等于、在列表中、为空、不为空、介于
+- Features: visual segment cards with color coding, real-time evaluation against response data, run-all batch evaluation, inline condition editor with field type switching
+- 功能：带颜色编码的可视分群卡片、针对响应数据的实时评估、全部运行批量评估、带字段类型切换的内联条件编辑器
+<!-- CRC ENDS -->
+
+---
+
+## 54. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **27 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, responses)
-- **27 个构建器标签页**
+- **33 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, responses)
+- **33 个构建器标签页**
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Collect → Monitor → Quality Control → Analyze → Sentiment → Cohort Compare → Benchmark → Journey Track → Incentivize → Report → Export → API Access → Audit → Iterate
-- **完整研究生命周期：** 设计 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 收集 → 监控 → 质量控制 → 分析 → 情感分析 → 队列比较 → 对标 → 旅程追踪 → 激励 → 报告 → 导出 → API 访问 → 审计 → 迭代
+- **Full Research Lifecycle:** Design → Power Analysis → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Analyze → Sentiment → Cohort Compare → Benchmark → Journey Track → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
+- **完整研究生命周期：** 设计 → 功效分析 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 分析 → 情感分析 → 队列比较 → 对标 → 旅程追踪 → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
 
 ---
