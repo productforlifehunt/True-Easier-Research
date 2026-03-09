@@ -279,6 +279,13 @@ These are flat database columns (NOT JSONB) on the `question` table. Each questi
 - `cfg_prototype_url` (text) — prototype URL for prototype_test / 原型URL
 - `cfg_prototype_platform` (text) — figma, invision, sketch, adobe_xd, custom / 原型平台
 - `cfg_task_list` (jsonb) — task list for prototype_test / 原型测试任务列表
+- `cfg_items_per_set` (int) — items per comparison set for max_diff (3-7) / 最大差异的每组项目数
+- `cfg_best_label` (text) — "best" button label for max_diff / 最大差异的"最佳"按钮标签
+- `cfg_worst_label` (text) — "worst" button label for max_diff / 最大差异的"最差"按钮标签
+- `cfg_allow_multiple_clicks` (bool) — allow multiple clicks for heatmap / 热图允许多次点击
+- `cfg_max_clicks` (int) — max clicks for heatmap / 热图最大点击数
+- `cfg_show_labels` (bool) — show variant labels in design_survey / 设计调查显示变体标签
+- `cfg_randomize_variants` (bool) — randomize variant order in design_survey / 设计调查随机变体顺序
 
 **Validation rule columns (`vr_*`, 8 columns) / 验证规则列:**
 
