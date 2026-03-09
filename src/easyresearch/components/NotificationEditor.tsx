@@ -324,9 +324,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                     onChange={(e) => updateConfig(nc.id, { dnd_allowed: e.target.checked })}
                     className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-300"
                   />
-                  <span className="text-xs text-stone-600">
+                   <span className="text-xs text-stone-600">
                     {nc.dnd_allowed ? <BellOff size={11} className="inline mr-1" /> : <Bell size={11} className="inline mr-1" />}
-                    Allow DND / 允许免打扰
+                    Allow DND
                   </span>
                 </label>
               </div>
