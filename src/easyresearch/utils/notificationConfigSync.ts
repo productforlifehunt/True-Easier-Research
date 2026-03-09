@@ -21,6 +21,10 @@ export interface NotificationConfig {
   body: string;
   notification_type: string; // 'push' | 'email' | 'sms' | 'push_email'
   frequency: string; // 'once' | 'hourly' | '2hours' | '4hours' | 'daily' | 'twice_daily' | 'weekly'
+  schedule_mode: 'interval' | 'specific_times'; // interval = recurring in range; specific_times = exact HH:MM list
+  interval_start_hour: number; // 0-23, default 8
+  interval_end_hour: number; // 0-23, default 19
+  specific_times: string[]; // HH:MM strings
   minutes_before: number;
   dnd_allowed: boolean;
   order_index: number;
@@ -61,6 +65,10 @@ export async function loadNotificationConfigs(projectId: string): Promise<Notifi
     body: r.body || 'Please complete your questionnaire now.',
     notification_type: r.notification_type || 'push',
     frequency: r.frequency || 'daily',
+    schedule_mode: r.schedule_mode || 'interval',
+    interval_start_hour: r.interval_start_hour ?? 8,
+    interval_end_hour: r.interval_end_hour ?? 19,
+    specific_times: r.specific_times || [],
     minutes_before: r.minutes_before ?? 5,
     dnd_allowed: r.dnd_allowed ?? true,
     order_index: r.order_index ?? 0,
@@ -101,6 +109,10 @@ export async function loadNotificationConfigsForQuestionnaire(questionnaireId: s
     body: r.body || '',
     notification_type: r.notification_type || 'push',
     frequency: r.frequency || 'daily',
+    schedule_mode: r.schedule_mode || 'interval',
+    interval_start_hour: r.interval_start_hour ?? 8,
+    interval_end_hour: r.interval_end_hour ?? 19,
+    specific_times: r.specific_times || [],
     minutes_before: r.minutes_before ?? 5,
     dnd_allowed: r.dnd_allowed ?? true,
     order_index: r.order_index ?? 0,
@@ -143,6 +155,10 @@ export async function saveNotificationConfigs(
       body: config.body,
       notification_type: config.notification_type,
       frequency: config.frequency,
+      schedule_mode: config.schedule_mode,
+      interval_start_hour: config.interval_start_hour,
+      interval_end_hour: config.interval_end_hour,
+      specific_times: config.specific_times,
       minutes_before: config.minutes_before,
       dnd_allowed: config.dnd_allowed,
       order_index: config.order_index,
@@ -196,6 +212,10 @@ export async function saveNotificationConfigsForQuestionnaire(
       body: config.body,
       notification_type: config.notification_type,
       frequency: config.frequency,
+      schedule_mode: config.schedule_mode,
+      interval_start_hour: config.interval_start_hour,
+      interval_end_hour: config.interval_end_hour,
+      specific_times: config.specific_times,
       minutes_before: config.minutes_before,
       dnd_allowed: config.dnd_allowed,
       order_index: config.order_index,
@@ -227,6 +247,10 @@ export function createDefaultNotificationConfig(projectId: string, questionnaire
     body: 'Please complete your questionnaire now.',
     notification_type: 'push',
     frequency: 'daily',
+    schedule_mode: 'interval',
+    interval_start_hour: 8,
+    interval_end_hour: 19,
+    specific_times: [],
     minutes_before: 5,
     dnd_allowed: true,
     order_index: 0,

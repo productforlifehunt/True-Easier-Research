@@ -971,9 +971,17 @@ All notification configs are stored in the unified `notification_config` table i
 - `body` (text) — notification body / 通知正文
 - `notification_type` (text) — 'push', 'email', 'sms', 'push_email'
 - `frequency` (text) — 'once', 'hourly', '2hours', '4hours', 'daily', 'twice_daily', 'weekly'
+- `schedule_mode` (text, default 'interval') — 'interval' = recurring within time range; 'specific_times' = exact HH:MM list / 'interval' = 在时间范围内重复; 'specific_times' = 精确 HH:MM 列表
+- `interval_start_hour` (int, default 8) — start hour for interval mode (0-23) / 间隔模式的起始小时 (0-23)
+- `interval_end_hour` (int, default 19) — end hour for interval mode (0-23) / 间隔模式的结束小时 (0-23)
+- `specific_times` (text[], default '{}') — array of HH:MM strings for specific_times mode / specific_times 模式的 HH:MM 字符串数组
 - `minutes_before` (int) — advance warning / 提前提醒分钟数
 - `dnd_allowed` (bool) — whether participants can set DND for this notification / 是否允许参与者为此通知设置免打扰
 - `order_index` (int) — display order / 显示顺序
+
+**Schedule modes / 调度模式:**
+- **Interval mode / 间隔模式:** Researcher selects a frequency (hourly, every 2h, every 4h, daily, etc.) and a time range (e.g., 08:00–19:00). Notifications fire at every interval within that range. / 研究员选择频率和时间范围，通知在该范围内按间隔触发。
+- **Specific times mode / 指定时间模式:** Researcher adds multiple exact times (e.g., 09:00, 12:30, 17:00). Notifications fire only at those specific times. Multiple times are supported. / 研究员添加多个精确时间，通知仅在这些时间触发，支持多个时间。
 
 **Multiple notifications per entity:** Each questionnaire and each project can have **multiple** notification configs. / 每个问卷和每个项目可以有**多个**通知配置。
 
