@@ -2297,16 +2297,21 @@ These tabs are visible and available to users in the project editor:
 5. **Flow** / 流程
 6. **Layout** / 布局
 7. **Preview** / 预览
-8. **Participants** / 参与者
-9. **Panel** / 面板
-10. **Translation** / 翻译
-11. **Responses** / 回复
+8. **Translation** / 翻译
+9. **Responses** / 回复 (includes Participants sub-view / 包含参与者子视图)
 
 ### TYPE 3 FUTURE FEATURES — DO NOT SHOW TO USERS YET / 三类未来功能 — 暂不向用户展示
 The following tabs are fully implemented in code but hidden from the UI. They will be exposed in future releases:
 以下标签页已在代码中完整实现，但在UI中隐藏。将在未来版本中开放：
 
-- Quotas / 配额, Variables / 变量, Webhooks, Versioning / 版本, A/B Testing / A/B 实验, Scheduler / 调度, Theming / 主题, Distribute / 分发, Accessibility / 无障碍, Consent / 知情同意, Collaboration / 协作, Journeys / 旅程, Incentives / 激励, Live Monitor / 实时监控, Audit Trail / 审计, API / 接口, Power Analysis / 功效分析, Insights Repository / 洞察仓库, Data Cleaning / 数据清洗, Session Replay / 会话回放, Recruitment Hub / 招募中心, Segmentation / 分群, Personas / 画像, Journey Maps / 旅程图, Annotations / 标注, Calendar / 日历, Stakeholder Dashboard / 利益相关者仪表板, CRM, Templates Library / 模板库, Data Visualization / 数据可视化, Screener Builder / 筛选器构建器, Research Brief / 研究简报, Multi-Lang Preview / 多语言预览, A/B Results / A/B 结果, Prototype Testing / 原型测试, Conversational Mode / 对话模式, Contact List & Email Campaigns / 联系人与邮件活动, Workflow Automation / 工作流自动化, Save & Continue / 保存并继续, Shareable Reports / 共享报告, Card Sorting / 卡片分类, Tree Testing / 树测试, Intercept Surveys / 拦截调查, Video Capture / 视频捕获, Incentive Rewards / 激励奖励, Live Poll / 实时投票, Panel Marketplace / 面板市场, Custom Scripts / 自定义脚本, IRB Compliance / IRB合规, Offline Collection / 离线采集, Video Highlight Reels / 视频精华剪辑, Regression Analysis / 回归分析
+- Participants (standalone tab) / 参与者（独立标签页）, Panel / 面板, Quotas / 配额, Variables / 变量, Webhooks, Versioning / 版本, A/B Testing / A/B 实验, Scheduler / 调度, Theming / 主题, Distribute / 分发, Accessibility / 无障碍, Consent / 知情同意, Collaboration / 协作, Journeys / 旅程, Incentives / 激励, Live Monitor / 实时监控, Audit Trail / 审计, API / 接口, Power Analysis / 功效分析, Insights Repository / 洞察仓库, Data Cleaning / 数据清洗, Session Replay / 会话回放, Recruitment Hub / 招募中心, Segmentation / 分群, Personas / 画像, Journey Maps / 旅程图, Annotations / 标注, Calendar / 日历, Stakeholder Dashboard / 利益相关者仪表板, CRM, Templates Library / 模板库, Data Visualization / 数据可视化, Screener Builder / 筛选器构建器, Research Brief / 研究简报, Multi-Lang Preview / 多语言预览, A/B Results / A/B 结果, Prototype Testing / 原型测试, Conversational Mode / 对话模式, Contact List & Email Campaigns / 联系人与邮件活动, Workflow Automation / 工作流自动化, Save & Continue / 保存并继续, Shareable Reports / 共享报告, Card Sorting / 卡片分类, Tree Testing / 树测试, Intercept Surveys / 拦截调查, Video Capture / 视频捕获, Incentive Rewards / 激励奖励, Live Poll / 实时投票, Panel Marketplace / 面板市场, Custom Scripts / 自定义脚本, IRB Compliance / IRB合规, Offline Collection / 离线采集, Video Highlight Reels / 视频精华剪辑, Regression Analysis / 回归分析
+
+### Response Sub-Views (6 active, 8 future) / 回复子视图（6个活跃，8个未来）
+**Active:** Summary, Individual, Table, Cross-Tab, Export, Participants
+**活跃：** 摘要、个体、表格、交叉分析、导出、参与者
+
+**TYPE 3 FUTURE:** Funnel, AI Text, UX Results, Stats, Quality, Report, Benchmark, Sentiment, Cohort
+**三类未来：** 漏斗、AI文本、UX结果、统计、质量、报告、对标、情感、队列
 
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**

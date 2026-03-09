@@ -1,27 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers, TrendingDown, Brain, FileSpreadsheet, Shield, FileText, Target } from 'lucide-react';
+import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, FileSpreadsheet, Users } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
 import CrossTabAnalysis from './CrossTabAnalysis';
-import FunnelAnalysis from './FunnelAnalysis';
-import AITextAnalysis from './AITextAnalysis';
 import AdvancedExport from './AdvancedExport';
-import UXResearchVisualizer from './UXResearchVisualizer';
-import StatisticalAnalysis from './StatisticalAnalysis';
-import ResponseQualityEngine from './ResponseQualityEngine';
-import ReportGenerator from './ReportGenerator';
-import BenchmarkingEngine from './BenchmarkingEngine';
-import SentimentDashboard from './SentimentDashboard';
-import CohortComparisonEngine from './CohortComparisonEngine';
+import ProjectParticipantsTab from './ProjectParticipantsTab';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats' | 'quality' | 'report' | 'benchmark' | 'sentiment' | 'cohort';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'export' | 'participants';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -60,11 +52,9 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
   // Map questions by questionnaire
   const questionsByQuestionnaire = useMemo(() => {
     const map = new Map<string, any[]>();
-    // Use questionnaire configs to group questions
     questionnaires.forEach(qc => {
       map.set(qc.id, qc.questions || []);
     });
-    // Also add DB questions that may not be in configs
     questions.forEach(q => {
       const qcId = q.questionnaire_id || 'ungrouped';
       if (!map.has(qcId)) map.set(qcId, []);
@@ -223,16 +213,8 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'individual' as SubView, label: 'Individual', icon: User },
             { id: 'table' as SubView, label: 'Table', icon: Table2 },
             { id: 'cross_tab' as SubView, label: 'Cross-Tab', icon: ArrowLeftRight },
-            { id: 'funnel' as SubView, label: 'Funnel', icon: TrendingDown },
-            { id: 'ai_text' as SubView, label: 'AI Text', icon: Brain },
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
-            { id: 'ux_results' as SubView, label: 'UX Results', icon: Layers },
-            { id: 'stats' as SubView, label: 'Stats', icon: BarChart3 },
-            { id: 'quality' as SubView, label: 'Quality', icon: Shield },
-            { id: 'report' as SubView, label: 'Report / 报告', icon: FileText },
-            { id: 'benchmark' as SubView, label: 'Benchmark / 对标', icon: Target },
-            { id: 'sentiment' as SubView, label: 'Sentiment / 情感', icon: Brain },
-            { id: 'cohort' as SubView, label: 'Cohort / 队列', icon: ArrowLeftRight },
+            { id: 'participants' as SubView, label: 'Participants / 参与者', icon: Users },
           ].map(tab => (
             <button
               key={tab.id}
@@ -250,7 +232,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         </div>
 
         <div className="flex items-center gap-3">
-          {questionnaires.length > 1 && (
+          {questionnaires.length > 1 && subView !== 'participants' && (
             <select
               value={selectedQuestionnaire}
               onChange={e => setSelectedQuestionnaire(e.target.value)}
@@ -262,22 +244,29 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               ))}
             </select>
           )}
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
-          >
-            <Download size={13} /> Export
-          </button>
+          {subView !== 'participants' && (
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+            >
+              <Download size={13} /> Export
+            </button>
+          )}
         </div>
       </div>
 
-      {responses.length === 0 ? (
+      {/* PARTICIPANTS SUB-VIEW */}
+      {subView === 'participants' && (
+        <ProjectParticipantsTab projectId={projectId} />
+      )}
+
+      {subView !== 'participants' && responses.length === 0 ? (
         <div className="bg-white rounded-xl border border-stone-100 p-16 text-center">
           <MessageSquare size={32} className="text-stone-200 mx-auto mb-3" />
           <p className="text-[14px] font-medium text-stone-600 mb-1">No responses yet</p>
           <p className="text-[12px] text-stone-400">Responses will appear here as participants complete your questionnaires.</p>
         </div>
-      ) : (
+      ) : subView !== 'participants' && (
         <>
           {/* SUMMARY VIEW */}
           {subView === 'summary' && (
@@ -535,27 +524,6 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             </div>
           )}
 
-          {/* FUNNEL VIEW / 漏斗分析 */}
-          {subView === 'funnel' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <FunnelAnalysis
-                projectId={projectId}
-                questionnaires={questionnaires}
-              />
-            </div>
-          )}
-
-          {/* AI TEXT VIEW / AI 文本分析 */}
-          {subView === 'ai_text' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <AITextAnalysis
-                projectId={projectId}
-                responses={responses}
-                questions={filteredQuestions}
-              />
-            </div>
-          )}
-
           {/* EXPORT VIEW / 高级导出 */}
           {subView === 'export' && (
             <div className="bg-white rounded-xl border border-stone-100 p-5">
@@ -567,76 +535,6 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                 enrollments={enrollments}
                 questionnaires={questionnaires}
               />
-            </div>
-          )}
-
-          {/* UX RESULTS VIEW / UX 研究结果 */}
-          {subView === 'ux_results' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <UXResearchVisualizer
-                questions={filteredQuestions}
-                responses={responses}
-              />
-            </div>
-          )}
-
-          {/* STATS VIEW / 统计分析 */}
-          {subView === 'stats' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <StatisticalAnalysis
-                questions={filteredQuestions}
-                responses={responses}
-                enrollments={enrollments}
-              />
-            </div>
-          )}
-
-          {/* QUALITY VIEW / 质量检测 */}
-          {subView === 'quality' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <ResponseQualityEngine
-                projectId={projectId}
-                questions={filteredQuestions}
-              />
-            </div>
-          )}
-
-          {/* REPORT VIEW / 报告生成 */}
-          {subView === 'report' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <ReportGenerator
-                projectId={projectId}
-                projectTitle=""
-                responses={responses}
-                questions={filteredQuestions}
-                enrollments={enrollments}
-              />
-            </div>
-          )}
-
-          {/* BENCHMARK VIEW / 基准对标 */}
-          {subView === 'benchmark' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <BenchmarkingEngine
-                projectId={projectId}
-                responses={responses}
-                questions={filteredQuestions}
-                enrollments={enrollments}
-              />
-            </div>
-          )}
-
-          {/* SENTIMENT VIEW / 情感分析 */}
-          {subView === 'sentiment' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <SentimentDashboard projectId={projectId} responses={responses} questions={filteredQuestions} />
-            </div>
-          )}
-
-          {/* COHORT VIEW / 队列比较 */}
-          {subView === 'cohort' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <CohortComparisonEngine projectId={projectId} responses={responses} questions={filteredQuestions} enrollments={enrollments} />
             </div>
           )}
         </>
