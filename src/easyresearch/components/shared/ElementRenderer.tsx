@@ -153,8 +153,16 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'consent': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'Review & Sign',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
@@ -164,12 +172,23 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
           </div>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-amber-600`}>{(linkedQ as any).description || `${linkedQ.questions?.length || 0} fields to complete`}</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'Review & Sign'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-amber-600`}>{linkedQ.questions?.length || 0} fields to complete</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-amber-500`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 bg-amber-500 text-white ${txtSm} font-medium hover:bg-amber-600 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-amber-400" />
+                </div>
+              )}
+              {cardOpts.cardDisplayStyle === 'minimal' && (
+                <div className="cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))} />
+              )}
             </>
           ) : (
             <p className={`${txtSm} text-amber-600 italic`}>No consent form linked</p>
@@ -180,20 +199,36 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'screening': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'Start Screening',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-orange-50 border border-orange-200">
           <h4 className={`${txt} font-semibold text-orange-800`}>📝 {el.config.title || 'Screening'}</h4>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-orange-600 mt-1`}>{linkedQ.questions?.length || 0} screening questions</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 bg-orange-500 text-white ${txtSm} font-medium hover:bg-orange-600 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'Start Screening'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-orange-600 mt-1`}>{linkedQ.questions?.length || 0} screening questions</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-orange-500`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 bg-orange-500 text-white ${txtSm} font-medium hover:bg-orange-600 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-orange-400" />
+                </div>
+              )}
             </>
           ) : (
             <p className={`${txtSm} text-orange-600 mt-1 italic`}>No screening linked</p>
@@ -204,20 +239,36 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'profile': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'Edit Profile',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
           <h4 className={`${txt} font-semibold text-stone-800`}>👤 {el.config.title || 'Profile'}</h4>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} profile fields</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'Edit Profile'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} profile fields</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-stone-400`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-stone-400" />
+                </div>
+              )}
             </>
           ) : compact ? (
             <div className="mt-2 space-y-2">
@@ -387,20 +438,36 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'help': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'View Help',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
           <h4 className={`${txt} font-semibold text-stone-800`}>❓ {el.config.title || 'Help & FAQ'}</h4>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'View Help'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-stone-400`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-stone-400" />
+                </div>
+              )}
             </>
           ) : (
             <p className={`${txtSm} text-stone-400 mt-1`}>Common questions and support{compact ? ' contact' : ''}</p>
@@ -411,20 +478,36 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'custom': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'Open',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
           <h4 className={`${txt} font-semibold text-emerald-800`}>🧩 {el.config.title || 'Custom Component'}</h4>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-emerald-600 mt-1`}>{linkedQ.questions?.length || 0} fields</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'Open'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-emerald-600 mt-1`}>{linkedQ.questions?.length || 0} fields</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-emerald-500`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-emerald-300 text-emerald-700 hover:bg-emerald-100 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-emerald-400" />
+                </div>
+              )}
             </>
           ) : (
             <p className={`${txtSm} text-emerald-600 mt-1 italic`}>No component linked</p>

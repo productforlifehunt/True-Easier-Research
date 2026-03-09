@@ -51,6 +51,9 @@ export interface AppTabElementRow {
   style_overflow?: string | null;
   button_action?: string | null;
   button_label?: string | null;
+  button_border_radius?: string | null;
+  card_display_style?: string | null;
+  show_frequency?: boolean | null;
   
   image_url?: string | null;
   show_question_count?: boolean | null;
@@ -193,11 +196,14 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       },
       button_action: row.button_action || undefined,
       button_label: row.button_label || undefined,
+      button_border_radius: row.button_border_radius || undefined,
+      card_display_style: (row.card_display_style as any) || undefined,
+      show_frequency: row.show_frequency ?? undefined,
       
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
-      show_frequency: (row as any).show_frequency ?? undefined,
+      
       screening_criteria: row.screening_criteria || undefined,
       progress_style: (row.progress_style as any) || undefined,
       timeline_start_hour: row.timeline_start_hour ?? undefined,
@@ -249,6 +255,27 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
 
 // ── Save: in-memory AppLayout → flat DB rows ──
 // Optimized: parallel operations, upsert where possible, minimal round-trips
+// NOTE: Extended style columns may not exist on the external DB yet.
+// We try the full upsert first; on schema error, we retry with core columns only.
+
+// Core columns that always exist on the DB
+const CORE_ELEMENT_KEYS = [
+  'id', 'tab_id', 'project_id', 'type', 'order_index',
+  'questionnaire_id', 'title', 'content', 'visible', 'participant_types', 'width',
+  'style_padding', 'style_background', 'style_border_radius', 'style_height',
+  'button_action', 'button_label', 'image_url',
+  'show_question_count', 'show_estimated_time', 'screening_criteria',
+  'progress_style', 'timeline_start_hour', 'timeline_end_hour', 'timeline_days',
+  'todo_layout', 'todo_auto_scroll', 'questionnaire_ids',
+];
+
+function pickCoreColumns(row: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  for (const key of CORE_ELEMENT_KEYS) {
+    if (key in row) result[key] = row[key];
+  }
+  return result;
+}
 
 export async function saveLayoutToDb(projectId: string, layout: AppLayout): Promise<void> {
   // Prepare all data upfront before any DB calls
@@ -297,6 +324,9 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         style_overflow: el.config.style?.overflow || null,
         button_action: el.config.button_action || null,
         button_label: el.config.button_label || null,
+        button_border_radius: el.config.button_border_radius || null,
+        card_display_style: el.config.card_display_style || null,
+        show_frequency: el.config.show_frequency ?? null,
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
@@ -422,9 +452,19 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
     await run('delete stale tabs', supabase.from('app_tab').delete().in('id', staleTabIds));
   }
 
-  // STEP 4: Upsert elements
+  // STEP 4: Upsert elements — try full columns first, fallback to core columns
   if (allElements.length > 0) {
-    await run('upsert elements', supabase.from('app_tab_element').upsert(allElements, { onConflict: 'id' }));
+    const { error: fullErr } = await supabase.from('app_tab_element').upsert(allElements as any[], { onConflict: 'id' });
+    if (fullErr) {
+      if (fullErr.message?.includes('column') && fullErr.message?.includes('schema cache')) {
+        console.warn('[layoutSync] Full upsert failed (missing columns), retrying with core columns only:', fullErr.message);
+        const coreElements = allElements.map(e => pickCoreColumns(e as any));
+        await run('upsert elements (core)', supabase.from('app_tab_element').upsert(coreElements as any[], { onConflict: 'id' }));
+      } else {
+        console.error('[layoutSync] upsert elements failed:', fullErr);
+        throw new Error(`upsert elements: ${fullErr.message}`);
+      }
+    }
   }
 
   // STEP 5: Parallel — upsert/insert all child rows
