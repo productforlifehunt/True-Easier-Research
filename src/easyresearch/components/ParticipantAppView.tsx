@@ -244,6 +244,7 @@ const ParticipantAppView: React.FC = () => {
         quality_flags: qualityFlags.flags,
       });
 
+      setSubmittedQuestionnaireIds(prev => new Set([...prev, questionnaireId]));
       setActiveQuestionnaireId(null);
       setCurrentPageIndex(0);
 
