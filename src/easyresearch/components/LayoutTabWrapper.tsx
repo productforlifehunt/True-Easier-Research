@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Layout, Layers, Bell } from 'lucide-react';
+import { Layout, Layers, Bell, Globe } from 'lucide-react';
 import LayoutBuilder, { type AppLayout, type LayoutTab, type LayoutElement } from './LayoutBuilder';
 import PopupBuilder from './PopupBuilder';
 import NotificationEditor from './NotificationEditor';
+import PublicPageBuilder from './PublicPageBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 
-type SubTab = 'layout' | 'popups' | 'notifications';
-
+type SubTab = 'layout' | 'popups' | 'notifications' | 'public_pages';
 interface LayoutTabWrapperProps {
   projectId: string;
   layout: AppLayout;
