@@ -1360,6 +1360,36 @@ const SurveyBuilder: React.FC = () => {
           <AdvancedSegmentation projectId={projectId} questionnaires={questionnaireConfigs} />
         )}
 
+        {/* Persona Builder Tab / 用户画像 */}
+        {activeTab === 'personas' && projectId && (
+          <PersonaBuilder projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Journey Map Tab / 旅程地图 */}
+        {activeTab === 'journey_maps' && projectId && (
+          <JourneyMapDesigner projectId={projectId} />
+        )}
+
+        {/* Theme Annotator Tab / 主题标注 */}
+        {activeTab === 'annotations' && projectId && (
+          <ThemeAnnotator projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Research Calendar Tab / 研究日历 */}
+        {activeTab === 'calendar' && projectId && (
+          <ResearchCalendar projectId={projectId} />
+        )}
+
+        {/* Stakeholder Dashboard Tab / 利益相关者仪表板 */}
+        {activeTab === 'stakeholder' && projectId && (
+          <StakeholderDashboard projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Participant CRM Tab / 参与者CRM */}
+        {activeTab === 'crm' && projectId && (
+          <ParticipantCRM projectId={projectId} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
