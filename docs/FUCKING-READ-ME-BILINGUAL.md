@@ -199,6 +199,11 @@ Columns on `questionnaire` table / `questionnaire` 表上的列:
 - `randomize_questions` (bool) — shuffle non-section question order for each participant / 为每个参与者随机排列非章节问题顺序
 - `enable_piping` (bool) — enable answer piping using `{{Q1}}` or `{{question_id}}` template syntax in question text / 启用答案传递，在问题文本中使用 `{{Q1}}` 或 `{{question_id}}` 模板语法
 - `track_time_per_question` (bool) — record response duration per question for analytics / 记录每个问题的响应时长用于分析
+- `min_completion_time_seconds` (int) — minimum completion time; flags responses completed faster as "speeder" / 最短完成时间；更快完成的响应标记为"抢答者"
+- `detect_straightlining` (bool) — flag responses with identical answers across all scale questions / 标记所有量表问题答案相同的响应
+- `detect_gibberish` (bool) — flag text responses that appear to be gibberish or random characters / 标记看似乱码或随机字符的文本响应
+- `custom_thank_you_message` (text) — custom message shown after completion / 完成后显示的自定义消息
+- `redirect_url` (text) — URL to redirect to after completion / 完成后重定向的URL
 
 Each question is a row in the `question` table (renamed from the old `survey_question` — NEVER use `survey_question` anymore). A question belongs to one project via `project_id` and optionally to one questionnaire via `questionnaire_id`.
 
