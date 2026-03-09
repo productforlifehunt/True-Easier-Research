@@ -404,25 +404,36 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                   <Users size={11} /> Visible to Participant Types
                 </h5>
-                <p className="text-[10px] text-stone-400 mb-2">Select which participant types can see this question. Leave all unchecked for all types.</p>
+                <p className="text-[10px] text-stone-400 mb-2">
+                  Defaults to the questionnaire's assigned types. Override below if this question needs different visibility.
+                </p>
                 <div className="space-y-1.5">
                   {participantTypes.map(pt => {
-                    const assignedTypes = question.assigned_participant_types || [];
-                    const assigned = assignedTypes.includes(pt.id);
+                    const questionTypes = question.assigned_participant_types || [];
+                    const questionnaireTypes = q.assigned_participant_types || [];
+                    // If question has no explicit assignment, inherit from questionnaire
+                    const effectiveTypes = questionTypes.length > 0 ? questionTypes : questionnaireTypes;
+                    const isInherited = questionTypes.length === 0;
+                    const assigned = effectiveTypes.includes(pt.id);
                     return (
                       <label key={pt.id} className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
                           checked={assigned}
                           onChange={() => {
+                            // On first change, copy from questionnaire to establish explicit assignment
+                            const baseTypes = isInherited ? [...questionnaireTypes] : [...questionTypes];
                             const newAssigned = assigned 
-                              ? assignedTypes.filter((id: string) => id !== pt.id) 
-                              : [...assignedTypes, pt.id];
+                              ? baseTypes.filter((id: string) => id !== pt.id) 
+                              : [...baseTypes, pt.id];
                             updateQuestion(q.id, question.id, { assigned_participant_types: newAssigned });
                           }}
                           className="w-4 h-4 rounded border-stone-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-[12px] text-stone-600 group-hover:text-stone-800 transition-colors">{pt.name}</span>
+                        {isInherited && assigned && (
+                          <span className="text-[9px] text-stone-400 italic">(inherited)</span>
+                        )}
                       </label>
                     );
                   })}
