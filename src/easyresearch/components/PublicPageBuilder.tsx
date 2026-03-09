@@ -273,7 +273,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                           className="flex items-center gap-1 px-2 py-1 text-[10px] border border-stone-200 rounded-md hover:bg-stone-50 text-stone-500 transition-colors"
                           title={bt.label}
                         >
-                          {bt.icon} {bt.label.split(' / ')[0]}
+                          {bt.icon} {bt.label}
                         </button>
                       ))}
                     </div>
