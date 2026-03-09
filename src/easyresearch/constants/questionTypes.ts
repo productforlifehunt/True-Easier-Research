@@ -39,6 +39,19 @@ export const SUPPORTED_QUESTION_TYPES = {
   ADDRESS: 'address',
   SLIDER_RANGE: 'slider_range',
 
+  // Rich Media Types
+  VIDEO_BLOCK: 'video_block',
+  AUDIO_BLOCK: 'audio_block',
+  EMBED_BLOCK: 'embed_block',
+
+  // UX Research Types
+  CARD_SORT: 'card_sort',
+  TREE_TEST: 'tree_test',
+  FIRST_CLICK: 'first_click',
+  FIVE_SECOND_TEST: 'five_second_test',
+  PREFERENCE_TEST: 'preference_test',
+  PROTOTYPE_TEST: 'prototype_test',
+
   // Layout Types
   SECTION_HEADER: 'section_header',
   TEXT_BLOCK: 'text_block',
