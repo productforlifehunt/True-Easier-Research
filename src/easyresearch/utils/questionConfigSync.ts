@@ -70,6 +70,39 @@ const CONFIG_KEY_MAP: Record<string, string> = {
   allow_ai_assist: 'cfg_allow_ai_assist',
   allow_ai_auto_answer: 'cfg_allow_ai_auto_answer',
   allow_voice: 'cfg_allow_voice',
+  // Rich media config
+  video_url: 'cfg_video_url',
+  audio_url: 'cfg_audio_url',
+  embed_url: 'cfg_embed_url',
+  embed_type: 'cfg_embed_type',
+  autoplay: 'cfg_autoplay',
+  loop: 'cfg_loop',
+  muted: 'cfg_muted',
+  poster_url: 'cfg_poster_url',
+  media_type: 'cfg_media_type',
+  embed_height: 'cfg_embed_height',
+  allow_fullscreen: 'cfg_allow_fullscreen',
+  // Card Sort config
+  cards: 'cfg_cards',
+  categories: 'cfg_categories',
+  sort_type: 'cfg_sort_type',
+  // Tree Test config
+  tree_data: 'cfg_tree_data',
+  task_description: 'cfg_task_description',
+  correct_answer: 'cfg_correct_answer',
+  // First Click / 5-Second Test config
+  test_image_url: 'cfg_test_image_url',
+  test_duration: 'cfg_test_duration',
+  followup_question: 'cfg_followup_question',
+  // Preference Test config
+  variant_a_url: 'cfg_variant_a_url',
+  variant_a_label: 'cfg_variant_a_label',
+  variant_b_url: 'cfg_variant_b_url',
+  variant_b_label: 'cfg_variant_b_label',
+  // Prototype Test config
+  prototype_url: 'cfg_prototype_url',
+  prototype_platform: 'cfg_prototype_platform',
+  task_list: 'cfg_task_list',
 };
 
 // Reverse map: DB column → config key

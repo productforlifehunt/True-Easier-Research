@@ -460,6 +460,15 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'address': SUPPORTED_QUESTION_TYPES.ADDRESS,
   'slider_range': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
   'range_slider': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
+  'video_block': SUPPORTED_QUESTION_TYPES.VIDEO_BLOCK,
+  'audio_block': SUPPORTED_QUESTION_TYPES.AUDIO_BLOCK,
+  'embed_block': SUPPORTED_QUESTION_TYPES.EMBED_BLOCK,
+  'card_sort': SUPPORTED_QUESTION_TYPES.CARD_SORT,
+  'tree_test': SUPPORTED_QUESTION_TYPES.TREE_TEST,
+  'first_click': SUPPORTED_QUESTION_TYPES.FIRST_CLICK,
+  'five_second_test': SUPPORTED_QUESTION_TYPES.FIVE_SECOND_TEST,
+  'preference_test': SUPPORTED_QUESTION_TYPES.PREFERENCE_TEST,
+  'prototype_test': SUPPORTED_QUESTION_TYPES.PROTOTYPE_TEST,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {
