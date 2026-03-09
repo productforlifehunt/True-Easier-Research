@@ -452,9 +452,19 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
     await run('delete stale tabs', supabase.from('app_tab').delete().in('id', staleTabIds));
   }
 
-  // STEP 4: Upsert elements
+  // STEP 4: Upsert elements — try full columns first, fallback to core columns
   if (allElements.length > 0) {
-    await run('upsert elements', supabase.from('app_tab_element').upsert(allElements, { onConflict: 'id' }));
+    const { error: fullErr } = await supabase.from('app_tab_element').upsert(allElements as any[], { onConflict: 'id' });
+    if (fullErr) {
+      if (fullErr.message?.includes('column') && fullErr.message?.includes('schema cache')) {
+        console.warn('[layoutSync] Full upsert failed (missing columns), retrying with core columns only:', fullErr.message);
+        const coreElements = allElements.map(e => pickCoreColumns(e as any));
+        await run('upsert elements (core)', supabase.from('app_tab_element').upsert(coreElements as any[], { onConflict: 'id' }));
+      } else {
+        console.error('[layoutSync] upsert elements failed:', fullErr);
+        throw new Error(`upsert elements: ${fullErr.message}`);
+      }
+    }
   }
 
   // STEP 5: Parallel — upsert/insert all child rows
