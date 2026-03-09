@@ -281,7 +281,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
 
                   {page.blocks.length === 0 && (
                     <div className="text-center py-6 text-stone-300 text-xs border border-dashed border-stone-200 rounded-lg">
-                      Add blocks above / 从上方添加内容块
+                      Add blocks above to build your page
                     </div>
                   )}
 
