@@ -1318,6 +1318,36 @@ const SurveyBuilder: React.FC = () => {
           <DataPipelineAPI projectId={projectId} />
         )}
 
+        {/* Power Analysis Tab / 功效分析 */}
+        {activeTab === 'power_analysis' && projectId && (
+          <PowerAnalysisCalculator projectId={projectId} />
+        )}
+
+        {/* Research Repository Tab / 研究仓库 */}
+        {activeTab === 'repository' && projectId && (
+          <ResearchRepository projectId={projectId} />
+        )}
+
+        {/* Data Cleaning Tab / 数据清洗 */}
+        {activeTab === 'data_cleaning' && projectId && (
+          <DataCleaningStudio projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Session Replay Tab / 会话回放 */}
+        {activeTab === 'sessions' && projectId && (
+          <SessionReplayViewer projectId={projectId} />
+        )}
+
+        {/* Panel Recruitment Tab / 面板招募 */}
+        {activeTab === 'recruitment' && projectId && (
+          <PanelRecruitmentHub projectId={projectId} surveyCode={project.survey_code} />
+        )}
+
+        {/* Advanced Segmentation Tab / 高级分群 */}
+        {activeTab === 'segmentation' && projectId && (
+          <AdvancedSegmentation projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
