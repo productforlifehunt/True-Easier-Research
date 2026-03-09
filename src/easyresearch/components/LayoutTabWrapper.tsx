@@ -20,11 +20,11 @@ interface LayoutTabWrapperProps {
   onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
 
-const SUB_TABS: { id: SubTab; label: string; labelCn: string; icon: React.ReactNode }[] = [
-  { id: 'layout', label: 'Layout', labelCn: '布局', icon: <Layout size={14} /> },
-  { id: 'popups', label: 'Popups', labelCn: '弹窗', icon: <Layers size={14} /> },
-  { id: 'notifications', label: 'Notifications', labelCn: '通知', icon: <Bell size={14} /> },
-  { id: 'public_pages', label: 'Public Pages', labelCn: '公开页面', icon: <Globe size={14} /> },
+const SUB_TABS: { id: SubTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'layout', label: 'Layout', icon: <Layout size={14} /> },
+  { id: 'popups', label: 'Popups', icon: <Layers size={14} /> },
+  { id: 'notifications', label: 'Notifications', icon: <Bell size={14} /> },
+  { id: 'public_pages', label: 'Public Pages', icon: <Globe size={14} /> },
 ];
 
 const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
