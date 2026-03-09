@@ -168,7 +168,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     ));
   };
 
-  if (loading) return <div className="text-stone-400 text-sm py-8 text-center">Loading public pages... / 加载公开页面中...</div>;
+  if (loading) return <div className="text-stone-400 text-sm py-8 text-center">Loading public pages...</div>;
 
   return (
     <div className="space-y-4">
