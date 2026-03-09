@@ -427,12 +427,25 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               else if (newType === 'five_second_test') { updates.question_config = { test_image_url: '', test_duration: 5, followup_question: 'What do you remember about this page?' }; updates.options = []; }
               else if (newType === 'preference_test') { updates.question_config = { variant_a_url: '', variant_a_label: 'Design A', variant_b_url: '', variant_b_label: 'Design B', followup_question: 'Why do you prefer this design?' }; updates.options = []; }
               else if (newType === 'prototype_test') { updates.question_config = { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }; updates.options = []; }
+              else if (newType === 'max_diff') {
+                updates.question_config = { items_per_set: 4, best_label: 'Most Important', worst_label: 'Least Important' };
+                if (!localQuestion.options || localQuestion.options.length < 4) {
+                  updates.options = Array.from({ length: 6 }, (_, i) => ({ id: crypto.randomUUID(), option_text: `Item ${i + 1}`, option_value: '', order_index: i, is_other: false }));
+                }
+              }
+              else if (newType === 'design_survey') {
+                updates.question_config = { show_labels: true, randomize_variants: false, followup_question: 'Which design best meets your needs and why?' };
+                if (!localQuestion.options || localQuestion.options.length < 3) {
+                  updates.options = Array.from({ length: 3 }, (_, i) => ({ id: crypto.randomUUID(), option_text: `Design ${String.fromCharCode(65 + i)}`, option_value: '', order_index: i, is_other: false }));
+                }
+              }
+              else if (newType === 'heatmap') { updates.question_config = { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
