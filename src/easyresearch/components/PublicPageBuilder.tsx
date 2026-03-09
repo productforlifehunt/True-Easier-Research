@@ -317,7 +317,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   onChange={e => updateBlock(page.id, block.id, 'content', e.target.value)}
                                   className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 resize-none"
                                   rows={4}
-                                  placeholder="Enter text content... / 输入文本内容..."
+                                  placeholder="Enter text content..."
                                 />
                               )}
                               {block.type === 'image' && (
