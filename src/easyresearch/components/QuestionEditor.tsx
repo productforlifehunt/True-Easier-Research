@@ -245,6 +245,36 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{localQuestion.question_config.caption}</p>}
           </div>
         );
+      case 'video_block':
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🎬 {localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
+      case 'audio_block':
+        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🔊 {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
+      case 'embed_block':
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🌐 {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
+      case 'card_sort':
+        return (
+          <div className="flex flex-wrap gap-1">
+            {(localQuestion.question_config?.cards || []).slice(0, 4).map((c: string, i: number) => (
+              <div key={i} className="px-2 py-1 rounded border border-dashed border-stone-300 text-[10px] text-stone-500">{c}</div>
+            ))}
+            {(localQuestion.question_config?.cards || []).length > 4 && <span className="text-[10px] text-stone-400">+{(localQuestion.question_config?.cards || []).length - 4}</span>}
+          </div>
+        );
+      case 'tree_test':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🌳 Tree navigation test</div>;
+      case 'first_click':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🖱️ First click test</div>;
+      case 'five_second_test':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">⏱️ {localQuestion.question_config?.test_duration ?? 5}s exposure test</div>;
+      case 'preference_test':
+        return (
+          <div className="grid grid-cols-2 gap-1">
+            <div className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[10px] text-stone-500">{localQuestion.question_config?.variant_a_label || 'A'}</div>
+            <div className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[10px] text-stone-500">{localQuestion.question_config?.variant_b_label || 'B'}</div>
+          </div>
+        );
+      case 'prototype_test':
+        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
       default: return null;
     }
   };
