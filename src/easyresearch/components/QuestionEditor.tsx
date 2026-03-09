@@ -494,8 +494,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="tree_test">Tree Test</option>
               <option value="first_click">First Click Test</option>
               <option value="five_second_test">5-Second Test</option>
-              <option value="preference_test">Preference Test</option>
+              <option value="preference_test">Preference Test (A/B)</option>
               <option value="prototype_test">Prototype Test</option>
+              <option value="max_diff">MaxDiff (Best-Worst)</option>
+              <option value="design_survey">Design Survey (Multi-Variant)</option>
+              <option value="heatmap">Heatmap (Multi-Click)</option>
             </optgroup>
           </select>
         </div>
