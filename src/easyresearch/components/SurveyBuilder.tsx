@@ -36,6 +36,9 @@ import ConsentEthicsManager from './ConsentEthicsManager';
 import CollaborationEngine from './CollaborationEngine';
 import ParticipantJourneyTracker from './ParticipantJourneyTracker';
 import DataPipelineAPI from './DataPipelineAPI';
+import IncentiveManager from './IncentiveManager';
+import CollectionMonitor from './CollectionMonitor';
+import AuditTrail from './AuditTrail';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
