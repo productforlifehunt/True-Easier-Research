@@ -63,6 +63,18 @@ import ContactListEmailCampaign from './ContactListEmailCampaign';
 import WorkflowAutomationBuilder from './WorkflowAutomationBuilder';
 import SaveAndContinueManager from './SaveAndContinueManager';
 import ShareableReportPortal from './ShareableReportPortal';
+import CardSortingEngine from './CardSortingEngine';
+import TreeTestingEngine from './TreeTestingEngine';
+import InterceptSurveyWidget from './InterceptSurveyWidget';
+import VideoResponseCapture from './VideoResponseCapture';
+import IncentiveRewardManager from './IncentiveRewardManager';
+import LivePollPresentation from './LivePollPresentation';
+import PanelMarketplace from './PanelMarketplace';
+import CustomScriptInjector from './CustomScriptInjector';
+import IRBComplianceModule from './IRBComplianceModule';
+import OfflineDataCollector from './OfflineDataCollector';
+import VideoHighlightReels from './VideoHighlightReels';
+import RegressionAnalysis from './RegressionAnalysis';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -138,7 +150,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports' | 'card_sorting' | 'tree_testing' | 'intercept' | 'video_capture' | 'reward_mgmt' | 'live_poll' | 'panel_market' | 'custom_scripts' | 'irb_compliance' | 'offline_collect' | 'video_reels' | 'regression';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -1449,6 +1461,18 @@ const SurveyBuilder: React.FC = () => {
         {activeTab === 'share_reports' && projectId && (
           <ShareableReportPortal projectId={projectId} />
         )}
+        {activeTab === 'card_sorting' && projectId && <CardSortingEngine projectId={projectId} />}
+        {activeTab === 'tree_testing' && projectId && <TreeTestingEngine projectId={projectId} />}
+        {activeTab === 'intercept' && projectId && <InterceptSurveyWidget projectId={projectId} />}
+        {activeTab === 'video_capture' && projectId && <VideoResponseCapture projectId={projectId} />}
+        {activeTab === 'reward_mgmt' && projectId && <IncentiveRewardManager projectId={projectId} />}
+        {activeTab === 'live_poll' && projectId && <LivePollPresentation projectId={projectId} />}
+        {activeTab === 'panel_market' && projectId && <PanelMarketplace projectId={projectId} />}
+        {activeTab === 'custom_scripts' && projectId && <CustomScriptInjector projectId={projectId} />}
+        {activeTab === 'irb_compliance' && projectId && <IRBComplianceModule projectId={projectId} />}
+        {activeTab === 'offline_collect' && projectId && <OfflineDataCollector projectId={projectId} />}
+        {activeTab === 'video_reels' && projectId && <VideoHighlightReels projectId={projectId} />}
+        {activeTab === 'regression' && projectId && <RegressionAnalysis projectId={projectId} />}
 
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
