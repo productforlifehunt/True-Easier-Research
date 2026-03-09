@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 
 // Block types available for public pages / 公开页面可用的块类型
 const BLOCK_TYPES = [
-  { value: 'text', label: 'Text / 文本', icon: <Type size={14} /> },
-  { value: 'image', label: 'Image / 图片', icon: <Image size={14} /> },
-  { value: 'spacer', label: 'Spacer / 间距', icon: <Square size={14} /> },
-  { value: 'divider', label: 'Divider / 分割线', icon: <Minus size={14} /> },
+  { value: 'text', label: 'Text', icon: <Type size={14} /> },
+  { value: 'image', label: 'Image', icon: <Image size={14} /> },
+  { value: 'spacer', label: 'Spacer', icon: <Square size={14} /> },
+  { value: 'divider', label: 'Divider', icon: <Minus size={14} /> },
 ] as const;
 
 type BlockType = typeof BLOCK_TYPES[number]['value'];
