@@ -51,6 +51,12 @@ import ThemeAnnotator from './ThemeAnnotator';
 import ResearchCalendar from './ResearchCalendar';
 import StakeholderDashboard from './StakeholderDashboard';
 import ParticipantCRM from './ParticipantCRM';
+import ResearchTemplatesLibrary from './ResearchTemplatesLibrary';
+import DataVisualizationStudio from './DataVisualizationStudio';
+import ScreenerBuilder from './ScreenerBuilder';
+import ResearchBriefGenerator from './ResearchBriefGenerator';
+import MultiLangPreview from './MultiLangPreview';
+import ABTestResults from './ABTestResults';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
