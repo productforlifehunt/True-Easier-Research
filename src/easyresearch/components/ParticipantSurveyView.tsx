@@ -4,6 +4,7 @@ import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Mic, X, ChevronRight, ChevronLeft, Check, Clock, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submissionRuntime';
 import { validateSurveyResponse } from '../services/validationService';
 import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
