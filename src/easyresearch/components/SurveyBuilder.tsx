@@ -1147,6 +1147,29 @@ const SurveyBuilder: React.FC = () => {
             }}
           />
         )}
+        {/* Translations Tab / 翻译 */}
+        {activeTab === 'translations' && (
+          <SurveyTranslationManager
+            projectId={projectId || ''}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+            onQuestionsUpdate={(updatedQuestions) => {
+              // Map updated questions back to their questionnaires
+              setQuestionnaireConfigs(prev => prev.map(qc => ({
+                ...qc,
+                questions: (qc.questions || []).map(q => {
+                  const updated = updatedQuestions.find(uq => uq.id === q.id);
+                  return updated || q;
+                }),
+              })));
+            }}
+          />
+        )}
+
+        {/* Panel Tab / 参与者面板 */}
+        {activeTab === 'panel' && projectId && (
+          <ParticipantPanel projectId={projectId} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
