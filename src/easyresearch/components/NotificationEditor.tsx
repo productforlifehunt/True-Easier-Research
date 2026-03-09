@@ -19,13 +19,13 @@ const NOTIFICATION_TYPES = [
 ];
 
 const FREQUENCY_OPTIONS = [
-  { value: 'once', label: 'Once / 一次' },
-  { value: 'hourly', label: 'Hourly / 每小时' },
-  { value: '2hours', label: 'Every 2 Hours / 每2小时' },
-  { value: '4hours', label: 'Every 4 Hours / 每4小时' },
-  { value: 'daily', label: 'Daily / 每日' },
-  { value: 'twice_daily', label: 'Twice Daily / 每日两次' },
-  { value: 'weekly', label: 'Weekly / 每周' },
+  { value: 'once', label: 'Once' },
+  { value: 'hourly', label: 'Hourly' },
+  { value: '2hours', label: 'Every 2 Hours' },
+  { value: '4hours', label: 'Every 4 Hours' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'twice_daily', label: 'Twice Daily' },
+  { value: 'weekly', label: 'Weekly' },
 ];
 
 // Generate hour options 0-23 / 生成 0-23 小时选项
