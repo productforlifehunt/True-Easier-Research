@@ -26,6 +26,9 @@ import ParticipantPanel from './ParticipantPanel';
 import QuotaManager from './QuotaManager';
 import WebhookManager from './WebhookManager';
 import CustomVariablesManager, { type CustomVariable } from './CustomVariablesManager';
+import SurveyVersioning from './SurveyVersioning';
+import ABTestingEngine from './ABTestingEngine';
+import ResponseScheduler from './ResponseScheduler';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
