@@ -102,12 +102,12 @@ interface LayoutBuilderProps {
 }
 
 const ICON_OPTIONS = [
-  { value: 'Home', label: '🏠 Home' },
-  { value: 'FileText', label: '📄 Survey' },
-  { value: 'BarChart3', label: '📊 Progress' },
-  { value: 'HelpCircle', label: '❓ Help' },
-  { value: 'Settings', label: '⚙️ Settings' },
-  { value: 'Layout', label: '📐 Layout' },
+  { value: 'Home', label: 'Home', icon: 'Home' },
+  { value: 'FileText', label: 'Survey', icon: 'FileText' },
+  { value: 'BarChart3', label: 'Progress', icon: 'BarChart3' },
+  { value: 'HelpCircle', label: 'Help', icon: 'HelpCircle' },
+  { value: 'Settings', label: 'Settings', icon: 'Settings' },
+  { value: 'Layout', label: 'Layout', icon: 'Layout' },
 ];
 
 const STATIC_CONTENT_ELEMENTS = [
