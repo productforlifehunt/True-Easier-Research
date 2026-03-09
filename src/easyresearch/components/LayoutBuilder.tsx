@@ -1240,7 +1240,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-sm">{getElementIcon(el.type)}</span>
+                                      {getLucideIcon(getElementIcon(el.type), 14, 'text-stone-500')}
                                       <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
                                       <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
                                       {el.config.width && el.config.width !== '100%' && (
