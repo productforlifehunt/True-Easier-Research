@@ -35,6 +35,10 @@ export interface QuestionnaireConfig {
   ab_variant_name?: string;
   ab_group_id?: string;
   ab_split_percentage?: number;
+  // Advanced research features / 高级研究功能
+  randomize_questions?: boolean;
+  enable_piping?: boolean;
+  track_time_per_question?: boolean;
 }
 
 interface QuestionnaireListProps {
