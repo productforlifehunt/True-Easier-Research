@@ -152,9 +152,9 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 <!-- CRC STARTS -->
 <!-- CRC ENDS -->
 
-The question system supports **42 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
+The question system supports **45 question types** across 8 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
-问题系统支持 **42种问题类型**，分为7大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
+问题系统支持 **45种问题类型**，分为8大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
 
 **Categories / 类别:**
 1. Text: text_short, text_long / 文本：短文本、长文本
@@ -162,8 +162,9 @@ The question system supports **42 question types** across 7 categories, all stor
 3. Scale: slider, bipolar_scale, rating, likert_scale, nps, slider_range / 量表：滑块、双极量表、评分、李克特、NPS、范围滑块
 4. Data: number, date, time, email, phone, file_upload, address / 数据：数字、日期、时间、邮箱、电话、文件上传、地址
 5. Advanced: constant_sum, signature / 高级：常量总和、签名
-6. Layout & Media: section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block / 布局与媒体：章节标题、文本块、分隔线、图片块、说明、视频块、音频块、嵌入块
-7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test, max_diff, design_survey, heatmap, conjoint, kano / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试、最大差异分析、设计调查（多变体）、热图、联合分析、卡诺模型
+6. Layout & Media: section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block / 布局与媒体
+7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test, max_diff, design_survey, heatmap, conjoint, kano / UX研究
+8. Standardized Metrics: sus, csat, ces / 标准化指标：SUS系统可用性量表、CSAT客户满意度、CES客户努力度
 
 **Rich Media Types (Layout & Media category) / 富媒体类型:**
 - `video_block` — Embed YouTube, Vimeo, Loom, or direct MP4. Config: cfg_video_url, cfg_autoplay, cfg_loop, cfg_muted, cfg_poster_url / 嵌入视频
