@@ -404,25 +404,36 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
                   <Users size={11} /> Visible to Participant Types
                 </h5>
-                <p className="text-[10px] text-stone-400 mb-2">Select which participant types can see this question. Leave all unchecked for all types.</p>
+                <p className="text-[10px] text-stone-400 mb-2">
+                  Defaults to the questionnaire's assigned types. Override below if this question needs different visibility.
+                </p>
                 <div className="space-y-1.5">
                   {participantTypes.map(pt => {
-                    const assignedTypes = question.assigned_participant_types || [];
-                    const assigned = assignedTypes.includes(pt.id);
+                    const questionTypes = question.assigned_participant_types || [];
+                    const questionnaireTypes = q.assigned_participant_types || [];
+                    // If question has no explicit assignment, inherit from questionnaire
+                    const effectiveTypes = questionTypes.length > 0 ? questionTypes : questionnaireTypes;
+                    const isInherited = questionTypes.length === 0;
+                    const assigned = effectiveTypes.includes(pt.id);
                     return (
                       <label key={pt.id} className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
                           checked={assigned}
                           onChange={() => {
+                            // On first change, copy from questionnaire to establish explicit assignment
+                            const baseTypes = isInherited ? [...questionnaireTypes] : [...questionTypes];
                             const newAssigned = assigned 
-                              ? assignedTypes.filter((id: string) => id !== pt.id) 
-                              : [...assignedTypes, pt.id];
+                              ? baseTypes.filter((id: string) => id !== pt.id) 
+                              : [...baseTypes, pt.id];
                             updateQuestion(q.id, question.id, { assigned_participant_types: newAssigned });
                           }}
                           className="w-4 h-4 rounded border-stone-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
                         />
                         <span className="text-[12px] text-stone-600 group-hover:text-stone-800 transition-colors">{pt.name}</span>
+                        {isInherited && assigned && (
+                          <span className="text-[9px] text-stone-400 italic">(inherited)</span>
+                        )}
                       </label>
                     );
                   })}
@@ -633,98 +644,15 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         </div>
       </div>
 
-      {/* Project-Level Notifications */}
+      {/* Project-Level Notifications — redirect to Notifications tab in Layout */}
       {onUpdateProjectNotifications && (
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-[13px] font-semibold text-stone-700 flex items-center gap-1.5"><Bell size={13} /> Project-Level Notifications</h4>
-            <button onClick={() => {
-              const newNotif: NotificationConfig = {
-                id: crypto.randomUUID(),
-                project_id: projectId,
-                questionnaire_id: null,
-                enabled: true,
-                title: 'Study reminder',
-                body: 'Please check in with the study.',
-                notification_type: 'push',
-                frequency: 'daily',
-                schedule_mode: 'interval',
-                interval_start_hour: 8,
-                interval_end_hour: 19,
-                specific_times: [],
-                minutes_before: 0,
-                dnd_allowed: true,
-                order_index: projectNotifications.length,
-                assigned_participant_types: [],
-              };
-              onUpdateProjectNotifications([...projectNotifications, newNotif]);
-            }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
-              <Plus size={10} /> Add
-            </button>
+        <div className="bg-white rounded-2xl border border-stone-100 p-4">
+          <div className="flex items-center gap-1.5">
+            <Bell size={13} className="text-stone-400" />
+            <p className="text-[12px] text-stone-500">
+              You can configure project-level notifications (not tied to any questionnaire) in the <strong>Layout → Notifications</strong> tab.
+            </p>
           </div>
-          <p className="text-[10px] text-stone-400">Notifications not tied to any specific questionnaire. Sent at the project level.</p>
-          {projectNotifications.length === 0 && (
-            <p className="text-[11px] text-stone-400 italic">No project-level notifications. Click Add to create one.</p>
-          )}
-          {projectNotifications.map((notif, ni) => (
-            <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium text-stone-600">#{ni + 1}</span>
-                <div className="flex items-center gap-1.5">
-                  <button onClick={() => {
-                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
-                    onUpdateProjectNotifications(updated);
-                  }} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${notif.enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
-                    <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform" style={{ left: notif.enabled ? '17px' : '2px' }} />
-                  </button>
-                  <button onClick={() => {
-                    const updated = projectNotifications.filter(n => n.id !== notif.id);
-                    onUpdateProjectNotifications(updated);
-                  }} className="p-0.5 text-red-400 hover:bg-red-50 rounded">
-                    <Trash2 size={10} />
-                  </button>
-                </div>
-              </div>
-              <input type="text" value={notif.title} onChange={(e) => {
-                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
-                onUpdateProjectNotifications(updated);
-              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
-              <textarea value={notif.body} onChange={(e) => {
-                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
-                onUpdateProjectNotifications(updated);
-              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder="Notification body" />
-              <div className="flex items-center gap-2 flex-wrap">
-                <select value={notif.notification_type} onChange={(e) => {
-                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, notification_type: e.target.value } : n);
-                  onUpdateProjectNotifications(updated);
-                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                  <option value="push">Push</option>
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                  <option value="push_email">Push+Email</option>
-                </select>
-                <select value={notif.frequency} onChange={(e) => {
-                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
-                  onUpdateProjectNotifications(updated);
-                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                  <option value="once">Once</option>
-                  <option value="hourly">Hourly</option>
-                  <option value="2hours">Every 2h</option>
-                  <option value="4hours">Every 4h</option>
-                  <option value="daily">Daily</option>
-                  <option value="twice_daily">Twice daily</option>
-                  <option value="weekly">Weekly</option>
-                </select>
-                <label className="flex items-center gap-1 text-[10px] text-stone-400">
-                  <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
-                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
-                    onUpdateProjectNotifications(updated);
-                  }} className="w-3 h-3 rounded" />
-                  DND allowed
-                </label>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
@@ -942,108 +870,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
-                              {/* A/B Test Configuration */}
-                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><GitBranch size={11} /> A/B Testing</h5>
-                                  <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={q.is_ab_test || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { is_ab_test: e.target.checked })}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </label>
-                                </div>
-                                {q.is_ab_test && (
-                                  <div className="space-y-2 pt-1">
-                                    <div className="grid grid-cols-2 gap-2">
-                                      <div>
-                                        <label className="block text-[10px] font-medium text-stone-400 mb-1">Variant Name</label>
-                                        <input type="text" value={q.ab_variant_name || ''}
-                                          onChange={(e) => updateQuestionnaire(q.id, { ab_variant_name: e.target.value })}
-                                          className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200"
-                                          placeholder="e.g., Variant A" />
-                                      </div>
-                                      <div>
-                                        <label className="block text-[10px] font-medium text-stone-400 mb-1">Group ID</label>
-                                        <input type="text" value={q.ab_group_id || ''}
-                                          onChange={(e) => updateQuestionnaire(q.id, { ab_group_id: e.target.value })}
-                                          className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200"
-                                          placeholder="e.g., homepage-test" />
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <label className="block text-[10px] font-medium text-stone-400 mb-1">Split % (this variant)</label>
-                                      <input type="number" value={q.ab_split_percentage ?? 50} min={1} max={99}
-                                        onChange={(e) => updateQuestionnaire(q.id, { ab_split_percentage: Number(e.target.value) })}
-                                        className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200" />
-                                    </div>
-                                    <p className="text-[10px] text-stone-400">Create another questionnaire with the same Group ID for the other variant. Participants randomly assigned by split %.</p>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Research Features */}
-                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">🔬 Research Features</h5>
-                                <label className="flex items-center justify-between">
-                                  <span className="text-[11px] text-stone-600">Randomize question order</span>
-                                  <div className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={(q as any).randomize_questions || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { randomize_questions: e.target.checked } as any)}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </div>
-                                </label>
-                                <label className="flex items-center justify-between">
-                                  <span className="text-[11px] text-stone-600">Answer piping ({"{{Q1}}"} syntax)</span>
-                                  <div className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={(q as any).enable_piping || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { enable_piping: e.target.checked } as any)}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </div>
-                                </label>
-                                <label className="flex items-center justify-between">
-                                  <span className="text-[11px] text-stone-600">Track time per question</span>
-                                  <div className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={(q as any).track_time_per_question || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { track_time_per_question: e.target.checked } as any)}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </div>
-                                </label>
-                                <p className="text-[10px] text-stone-400">Randomization shuffles non-section questions. Piping inserts previous answers into question text using {"{{Q1}}"} or {"{{question_id}}"}. Timer records response duration per question.</p>
-                              </div>
-
-                              {/* Response Quality Controls */}
-                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">🛡️ Quality Controls</h5>
-                                <label className="flex items-center justify-between">
-                                  <span className="text-[11px] text-stone-600">Detect straightlining</span>
-                                  <div className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={(q as any).detect_straightlining || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { detect_straightlining: e.target.checked } as any)}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-amber-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </div>
-                                </label>
-                                <label className="flex items-center justify-between">
-                                  <span className="text-[11px] text-stone-600">Detect gibberish text</span>
-                                  <div className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={(q as any).detect_gibberish || false}
-                                      onChange={(e) => updateQuestionnaire(q.id, { detect_gibberish: e.target.checked } as any)}
-                                      className="sr-only peer" />
-                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-amber-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-                                  </div>
-                                </label>
-                                <div>
-                                  <label className="block text-[11px] text-stone-500 mb-1">Min completion time (seconds)</label>
-                                  <input type="number" value={(q as any).min_completion_time_seconds || ''} min={0}
-                                    onChange={(e) => updateQuestionnaire(q.id, { min_completion_time_seconds: e.target.value ? Number(e.target.value) : null } as any)}
-                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Auto (disabled)" />
-                                </div>
-                                <p className="text-[10px] text-stone-400">Flags responses completed too fast (speeders) or with identical answers across scale questions (straightliners). Flagged responses are kept but marked for review.</p>
-                              </div>
+                              {/* A/B Testing, Quality Controls — moved to TYPE 3 FUTURE */}
 
                               {/* Completion Actions */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">

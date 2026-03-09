@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Mic, GripVertical, X, Save, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
+import CustomDropdown from './CustomDropdown';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import toast from 'react-hot-toast';
 
@@ -390,10 +391,60 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Question Type */}
         <div>
           <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Type</label>
-          <select
+          <CustomDropdown
+            options={[
+              // Layout & Media
+              { value: 'section_header', label: '📐 Section / Tab' },
+              { value: 'text_block', label: '📐 Text Block' },
+              { value: 'divider', label: '📐 Divider Line' },
+              { value: 'image_block', label: '📐 Image' },
+              { value: 'video_block', label: '📐 Video' },
+              { value: 'audio_block', label: '📐 Audio' },
+              { value: 'embed_block', label: '📐 Embed / Webpage' },
+              // Text
+              { value: 'text_short', label: '✏️ Short Text' },
+              { value: 'text_long', label: '✏️ Long Text' },
+              // Choice
+              { value: 'single_choice', label: '🔘 Single Choice' },
+              { value: 'multiple_choice', label: '☑️ Multiple Choice' },
+              { value: 'checkbox_group', label: '☑️ Checkbox Group' },
+              { value: 'dropdown', label: '📋 Dropdown' },
+              { value: 'yes_no', label: '👍 Yes / No' },
+              { value: 'image_choice', label: '🖼️ Image Choice' },
+              { value: 'matrix', label: '📊 Matrix / Grid' },
+              { value: 'ranking', label: '🏅 Ranking' },
+              // Scale
+              { value: 'slider', label: '🎚️ Slider' },
+              { value: 'bipolar_scale', label: '↔️ Bipolar Scale (-/+)' },
+              { value: 'rating', label: '⭐ Rating' },
+              { value: 'likert_scale', label: '📏 Likert Scale' },
+              { value: 'nps', label: '📊 NPS (0-10)' },
+              // Data
+              { value: 'number', label: '🔢 Number' },
+              { value: 'date', label: '📅 Date' },
+              { value: 'time', label: '🕐 Time' },
+              { value: 'email', label: '📧 Email' },
+              { value: 'phone', label: '📞 Phone Number' },
+              { value: 'file_upload', label: '📁 File Upload' },
+              // UX Research
+              { value: 'card_sort', label: '🃏 Card Sort' },
+              { value: 'tree_test', label: '🌳 Tree Test' },
+              { value: 'first_click', label: '👆 First Click Test' },
+              { value: 'five_second_test', label: '⏱️ 5-Second Test' },
+              { value: 'preference_test', label: '🔀 Preference Test (A/B)' },
+              { value: 'prototype_test', label: '🖥️ Prototype Test' },
+              { value: 'max_diff', label: '📊 MaxDiff (Best-Worst)' },
+              { value: 'design_survey', label: '🎨 Design Survey (Multi-Variant)' },
+              { value: 'heatmap', label: '🔥 Heatmap (Multi-Click)' },
+              { value: 'conjoint', label: '🧮 Conjoint Analysis' },
+              { value: 'kano', label: '📐 Kano Model' },
+              // Standardized Metrics
+              { value: 'sus', label: '📐 SUS (System Usability Scale)' },
+              { value: 'csat', label: '😊 CSAT (Customer Satisfaction)' },
+              { value: 'ces', label: '💪 CES (Customer Effort Score)' },
+            ]}
             value={localQuestion.question_type}
-            onChange={(e) => {
-              const newType = e.target.value;
+            onChange={(newType) => {
               const needsOptions = ['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group', 'matrix', 'ranking', 'image_choice'];
               const updates: any = { question_type: newType };
               if (newType === 'slider') { updates.question_config = { min_value: 0, max_value: 10, step: 1 }; updates.options = []; }
@@ -453,66 +504,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap','conjoint','kano','sus','csat','ces'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
-            className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
-          >
-            <optgroup label="Layout & Media">
-              <option value="section_header">Section / Tab</option>
-              <option value="instruction">Instruction Block</option>
-              <option value="text_block">Text Block</option>
-              <option value="divider">Divider Line</option>
-              <option value="image_block">Image</option>
-              <option value="video_block">Video</option>
-              <option value="audio_block">Audio</option>
-              <option value="embed_block">Embed / Webpage</option>
-            </optgroup>
-            <optgroup label="Text">
-              <option value="text_short">Short Text</option>
-              <option value="text_long">Long Text</option>
-            </optgroup>
-            <optgroup label="Choice">
-              <option value="single_choice">Single Choice</option>
-              <option value="multiple_choice">Multiple Choice</option>
-              <option value="checkbox_group">Checkbox Group</option>
-              <option value="dropdown">Dropdown</option>
-              <option value="yes_no">Yes / No</option>
-              <option value="image_choice">Image Choice</option>
-              <option value="matrix">Matrix / Grid</option>
-              <option value="ranking">Ranking</option>
-            </optgroup>
-            <optgroup label="Scale">
-              <option value="slider">Slider</option>
-              <option value="bipolar_scale">Bipolar Scale (-/+)</option>
-              <option value="rating">Rating</option>
-              <option value="likert_scale">Likert Scale</option>
-              <option value="nps">NPS (0-10)</option>
-            </optgroup>
-            <optgroup label="Data">
-              <option value="number">Number</option>
-              <option value="date">Date</option>
-              <option value="time">Time</option>
-              <option value="email">Email</option>
-              <option value="phone">Phone Number</option>
-              <option value="file_upload">File Upload</option>
-            </optgroup>
-            <optgroup label="UX Research">
-              <option value="card_sort">Card Sort</option>
-              <option value="tree_test">Tree Test</option>
-              <option value="first_click">First Click Test</option>
-              <option value="five_second_test">5-Second Test</option>
-              <option value="preference_test">Preference Test (A/B)</option>
-              <option value="prototype_test">Prototype Test</option>
-              <option value="max_diff">MaxDiff (Best-Worst)</option>
-              <option value="design_survey">Design Survey (Multi-Variant)</option>
-              <option value="heatmap">Heatmap (Multi-Click)</option>
-              <option value="conjoint">Conjoint Analysis</option>
-              <option value="kano">Kano Model</option>
-            </optgroup>
-            <optgroup label="📐 Standardized Metrics">
-              <option value="sus">SUS (System Usability Scale)</option>
-              <option value="csat">CSAT (Customer Satisfaction)</option>
-              <option value="ces">CES (Customer Effort Score)</option>
-            </optgroup>
-          </select>
+            placeholder="Select type"
+          />
         </div>
 
         {/* Section Header Configuration */}

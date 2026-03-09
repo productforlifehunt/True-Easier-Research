@@ -43,7 +43,7 @@ const IncentiveConfig: React.FC<Props> = ({ project, onUpdateProject }) => {
 
   const paymentMethods = [
     { id: 'manual', label: t('incentive.manualPayment'), desc: t('incentive.manualPaymentDesc'), icon: Mail },
-    { id: 'paypal', label: 'PayPal', desc: t('incentive.paypalDesc'), icon: Wallet },
+    { id: 'stripe', label: 'Stripe', desc: 'Process payments via Stripe', icon: CreditCard },
     { id: 'gift_card', label: t('incentive.giftCard'), desc: t('incentive.giftCardDesc'), icon: Gift },
     { id: 'bank_transfer', label: t('incentive.bankTransfer'), desc: t('incentive.bankTransferDesc'), icon: CreditCard },
   ];
