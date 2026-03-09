@@ -501,6 +501,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="max_diff">MaxDiff (Best-Worst)</option>
               <option value="design_survey">Design Survey (Multi-Variant)</option>
               <option value="heatmap">Heatmap (Multi-Click)</option>
+              <option value="conjoint">Conjoint Analysis</option>
+              <option value="kano">Kano Model</option>
             </optgroup>
           </select>
         </div>
