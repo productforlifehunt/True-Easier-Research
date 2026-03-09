@@ -184,7 +184,7 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
   };
 };
 
-const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate, onUpdateQuestionnaire }) => {
+const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, projectTitle, projectDescription, onUpdate, onUpdateQuestionnaire }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
