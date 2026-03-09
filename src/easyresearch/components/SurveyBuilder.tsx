@@ -39,6 +39,12 @@ import DataPipelineAPI from './DataPipelineAPI';
 import IncentiveManager from './IncentiveManager';
 import CollectionMonitor from './CollectionMonitor';
 import AuditTrail from './AuditTrail';
+import PowerAnalysisCalculator from './PowerAnalysisCalculator';
+import ResearchRepository from './ResearchRepository';
+import DataCleaningStudio from './DataCleaningStudio';
+import SessionReplayViewer from './SessionReplayViewer';
+import PanelRecruitmentHub from './PanelRecruitmentHub';
+import AdvancedSegmentation from './AdvancedSegmentation';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
