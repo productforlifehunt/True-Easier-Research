@@ -305,8 +305,9 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const editingElement = activeTab?.elements.find(e => e.id === editingElementId);
 
   const getElementIcon = (type: string) => {
-    const all = [...STATIC_CONTENT_ELEMENTS, ...LAYOUT_ELEMENTS];
-    return all.find(e => e.type === type)?.icon || '📋';
+    const all = [...FUNCTION_ELEMENTS, ...LAYOUT_ELEMENTS];
+    const found = all.find(e => e.type === type);
+    return found?.lucideIcon || 'FileText';
   };
 
   const getElementLabel = (el: LayoutElement) => {
