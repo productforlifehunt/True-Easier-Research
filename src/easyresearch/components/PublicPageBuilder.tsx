@@ -308,7 +308,6 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                             <button onClick={() => deleteBlock(page.id, block.id)} className="p-0.5 rounded hover:bg-red-50 text-stone-300 hover:text-red-500"><Trash2 size={12} /></button>
                           </div>
 
-                          {/* Block config panel / 块配置面板 */}
                           {isBlockExpanded && (
                             <div className="px-3 pb-3 border-t border-stone-100 pt-2 space-y-2">
                               {block.type === 'text' && (
@@ -317,29 +316,35 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   onChange={e => updateBlock(page.id, block.id, 'content', e.target.value)}
                                   className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 resize-none"
                                   rows={4}
-                                  placeholder="Enter text content...                 <input
+                                  placeholder="Enter text content..."
+                                />
+                              )}
+                              {block.type === 'image' && (
+                                <input
                                   value={block.image_url || ''}
                                   onChange={e => updateBlock(page.id, block.id, 'image_url', e.target.value)}
                                   className="w-full px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                                  placeholder="Image URL / 图片URL"
-                    />
-                  )}
-                  {block.type === 'spa                                                abel className="text-[11px] text-stone-400 mb-1 block">Height / 高度</label>
-                         <input
-                           value={block.style_height || '3                                 onC=> updateBlock(page.id, block.id, 'sht', e.target.value)}
+                                  placeholder="Image URL"
+                                />
+                              )}
+                              {block.type === 'spacer' && (
+                                <div>
+                                  <label className="text-[11px] text-stone-400 mb-1 block">Height</label>
+                                  <input
+                                    value={block.style_height || '32px'}
+                                    onChange={e => updateBlock(page.id, block.id, 'style_height', e.target.value)}
                                     className="w-32 px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
                                     placeholder="32px"
                                   />
                                 </div>
                               )}
-                              {/* Style controls for text and image / 文本和图片的样式控制 */}
                               {(block.type === 'text' || block.type === 'image') && (
                                 <div className="grid grid-cols-4 gap-2 pt-1">
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Align / 对齐</label>
-                           <select
-                                     lock.style_text_align || 'left'}
-                             onChange={e => updateBlock(plock.id, 'style_text_align', e.target.value)}
+                                    <label className="text-[10px] text-stone-400 block">Align</label>
+                                    <select
+                                      value={block.style_text_align || 'left'}
+                                      onChange={e => updateBlock(page.id, block.id, 'style_text_align', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                     >
                                       <option value="left">Left</option>
@@ -348,9 +353,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Size / 大小</label>
-                                                                         value={block.stylze || '14px'}
-                                      on => updateBlock(page.id, block.id, 'style_font_size', e.target.value)}
+                                    <label className="text-[10px] text-stone-400 block">Size</label>
+                                    <select
+                                      value={block.style_font_size || '14px'}
+                                      onChange={e => updateBlock(page.id, block.id, 'style_font_size', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                     >
                                       <option value="12px">Small</option>
@@ -361,9 +367,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Weight / 粗细</label>
+                                    <label className="text-[10px] text-stone-400 block">Weight</label>
                                     <select
-                             value={block.style_font_weight || '                                      onChange={e => updateBlock(page.id, block.id, 'style_font_weight', e.target.value)}
+                                      value={block.style_font_weight || 'normal'}
+                                      onChange={e => updateBlock(page.id, block.id, 'style_font_weight', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                     >
                                       <option value="normal">Normal</option>
@@ -373,9 +380,9 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Padding / 内边距</label>
+                                    <label className="text-[10px] text-stone-400 block">Padding</label>
                                     <input
-                          value={block.style_padding || ''}
+                                      value={block.style_padding || ''}
                                       onChange={e => updateBlock(page.id, block.id, 'style_padding', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                       placeholder="8px"
