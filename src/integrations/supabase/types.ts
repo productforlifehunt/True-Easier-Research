@@ -13688,6 +13688,51 @@ export type Database = {
           },
         ]
       }
+      high_risk_location: {
+        Row: {
+          alert_count: number
+          created_at: string | null
+          id: string
+          label: string
+          last_alert_at: string | null
+          latitude: number
+          longitude: number
+          notes: string | null
+          radius_meters: number
+          risk_level: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          alert_count?: number
+          created_at?: string | null
+          id?: string
+          label: string
+          last_alert_at?: string | null
+          latitude: number
+          longitude: number
+          notes?: string | null
+          radius_meters?: number
+          risk_level?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          alert_count?: number
+          created_at?: string | null
+          id?: string
+          label?: string
+          last_alert_at?: string | null
+          latitude?: number
+          longitude?: number
+          notes?: string | null
+          radius_meters?: number
+          risk_level?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       hunt_participations: {
         Row: {
           hunt_id: string
