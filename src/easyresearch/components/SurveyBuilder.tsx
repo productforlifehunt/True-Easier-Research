@@ -1449,6 +1449,18 @@ const SurveyBuilder: React.FC = () => {
         {activeTab === 'share_reports' && projectId && (
           <ShareableReportPortal projectId={projectId} />
         )}
+        {activeTab === 'card_sorting' && projectId && <CardSortingEngine projectId={projectId} />}
+        {activeTab === 'tree_testing' && projectId && <TreeTestingEngine projectId={projectId} />}
+        {activeTab === 'intercept' && projectId && <InterceptSurveyWidget projectId={projectId} />}
+        {activeTab === 'video_capture' && projectId && <VideoResponseCapture projectId={projectId} />}
+        {activeTab === 'reward_mgmt' && projectId && <IncentiveRewardManager projectId={projectId} />}
+        {activeTab === 'live_poll' && projectId && <LivePollPresentation projectId={projectId} />}
+        {activeTab === 'panel_market' && projectId && <PanelMarketplace projectId={projectId} />}
+        {activeTab === 'custom_scripts' && projectId && <CustomScriptInjector projectId={projectId} />}
+        {activeTab === 'irb_compliance' && projectId && <IRBComplianceModule projectId={projectId} />}
+        {activeTab === 'offline_collect' && projectId && <OfflineDataCollector projectId={projectId} />}
+        {activeTab === 'video_reels' && projectId && <VideoHighlightReels projectId={projectId} />}
+        {activeTab === 'regression' && projectId && <RegressionAnalysis projectId={projectId} />}
 
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
