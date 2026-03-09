@@ -330,18 +330,19 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     }
 
     // Non-editable (Preview tab) — still apply style overrides
+    const previewCustomStyle = el.config.style || {};
     const previewStyle: React.CSSProperties = {
-      ...(customStyle.opacity != null && customStyle.opacity !== 1 ? { opacity: customStyle.opacity } : {}),
-      ...(customStyle.bg_color ? { backgroundColor: customStyle.bg_color } : {}),
-      ...(customStyle.text_color && customStyle.text_color !== 'inherit' ? { color: customStyle.text_color } : {}),
-      ...(customStyle.padding ? { padding: customStyle.padding } : {}),
-      ...(customStyle.margin ? { margin: customStyle.margin } : {}),
-      ...(customStyle.border_radius ? { borderRadius: customStyle.border_radius } : {}),
-      ...(customStyle.border ? { border: customStyle.border } : {}),
-      ...(customStyle.shadow && customStyle.shadow !== 'none' ? { boxShadow: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.1)', xl: '0 20px 25px rgba(0,0,0,0.1)' }[customStyle.shadow] } : {}),
-      ...(customStyle.text_align ? { textAlign: customStyle.text_align as any } : {}),
-      ...(customStyle.font_size ? { fontSize: customStyle.font_size } : {}),
-      ...(customStyle.font_weight ? { fontWeight: customStyle.font_weight } : {}),
+      ...(previewCustomStyle.opacity != null && previewCustomStyle.opacity !== 1 ? { opacity: previewCustomStyle.opacity } : {}),
+      ...(previewCustomStyle.bg_color ? { backgroundColor: previewCustomStyle.bg_color } : {}),
+      ...(previewCustomStyle.text_color && previewCustomStyle.text_color !== 'inherit' ? { color: previewCustomStyle.text_color } : {}),
+      ...(previewCustomStyle.padding ? { padding: previewCustomStyle.padding } : {}),
+      ...(previewCustomStyle.margin ? { margin: previewCustomStyle.margin } : {}),
+      ...(previewCustomStyle.border_radius ? { borderRadius: previewCustomStyle.border_radius } : {}),
+      ...(previewCustomStyle.border ? { border: previewCustomStyle.border } : {}),
+      ...(previewCustomStyle.shadow && previewCustomStyle.shadow !== 'none' ? { boxShadow: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.1)', xl: '0 20px 25px rgba(0,0,0,0.1)' }[previewCustomStyle.shadow] } : {}),
+      ...(previewCustomStyle.text_align ? { textAlign: previewCustomStyle.text_align as any } : {}),
+      ...(previewCustomStyle.font_size ? { fontSize: previewCustomStyle.font_size } : {}),
+      ...(previewCustomStyle.font_weight ? { fontWeight: previewCustomStyle.font_weight } : {}),
     };
     return (
       <div
