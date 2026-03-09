@@ -29,6 +29,9 @@ import CustomVariablesManager, { type CustomVariable } from './CustomVariablesMa
 import SurveyVersioning from './SurveyVersioning';
 import ABTestingEngine from './ABTestingEngine';
 import ResponseScheduler from './ResponseScheduler';
+import SurveyThemingEngine from './SurveyThemingEngine';
+import DistributionManager from './DistributionManager';
+import AccessibilityChecker from './AccessibilityChecker';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -104,7 +107,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -956,6 +959,9 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'versioning' as TabId, label: 'Versions / 版本' }] : []),
     ...(projectId ? [{ id: 'ab_testing' as TabId, label: 'A/B Test / 实验' }] : []),
     ...(projectId ? [{ id: 'scheduler' as TabId, label: 'Schedule / 调度' }] : []),
+    { id: 'theming' as TabId, label: 'Theme / 主题' },
+    ...(projectId ? [{ id: 'distribute' as TabId, label: 'Distribute / 分发' }] : []),
+    { id: 'accessibility' as TabId, label: 'A11y / 无障碍' },
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1222,6 +1228,32 @@ const SurveyBuilder: React.FC = () => {
           <ResponseScheduler
             projectId={projectId}
             questionnaires={questionnaireConfigs}
+          />
+        )}
+
+        {/* Theming Tab / 主题定制 */}
+        {activeTab === 'theming' && (
+          <SurveyThemingEngine
+            projectId={projectId || ''}
+            theme={(project as any).theme_config}
+            onUpdate={(themeConfig) => setProject(prev => ({ ...prev, theme_config: themeConfig } as any))}
+          />
+        )}
+
+        {/* Distribution Tab / 分发管理 */}
+        {activeTab === 'distribute' && projectId && (
+          <DistributionManager
+            projectId={projectId}
+            surveyCode={project.survey_code}
+            surveyTitle={project.title}
+          />
+        )}
+
+        {/* Accessibility Tab / 无障碍检查 */}
+        {activeTab === 'accessibility' && (
+          <AccessibilityChecker
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+            theme={(project as any).theme_config}
           />
         )}
 

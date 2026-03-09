@@ -1758,18 +1758,89 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 33. COMPLETE SYSTEM INVENTORY / 完整系统清单
+## 33. SURVEY THEMING ENGINE / 调查主题引擎
+
+<!-- CRC STARTS -->
+- SurveyThemingEngine.tsx provides full brand customization for participant-facing surveys.
+- SurveyThemingEngine.tsx 为面向参与者的调查问卷提供完整的品牌自定义。
+- 6 preset themes (Professional, Warm, Clinical, Dark Modern, Minimalist, Playful) + full custom control.
+- 6个预设主题（专业、温暖、临床、暗黑现代、极简、活泼）+ 完全自定义控制。
+- Configurable: 9 color tokens, body/heading fonts, border radius, card style, spacing, progress bar style, dark mode, custom CSS.
+- 可配置：9个颜色令牌、正文/标题字体、圆角、卡片样式、间距、进度条样式、暗色模式、自定义CSS。
+- Branding: logo URL/position, cover image, favicon, completion message, redirect URL, "powered by" toggle.
+- 品牌化：Logo链接/位置、封面图片、网站图标、完成消息、完成跳转、"由...提供"开关。
+- Live preview with desktop/mobile toggle.
+- 带桌面/移动切换的实时预览。
+<!-- CRC ENDS -->
+
+## 34. DISTRIBUTION MANAGER / 分发管理器
+
+<!-- CRC STARTS -->
+- DistributionManager.tsx provides multi-channel survey distribution.
+- DistributionManager.tsx 提供多渠道调查分发。
+- 5 channels: Direct Link (with UTM params), Email (bulk invite), Embed (iframe + popup widget), QR Code (SVG download), Social (Twitter/LinkedIn/Facebook/WhatsApp/WeChat).
+- 5个渠道：直接链接（含UTM参数）、邮件（批量邀请）、嵌入（iframe+弹窗组件）、二维码（SVG下载）、社交（Twitter/LinkedIn/Facebook/WhatsApp/微信）。
+- Access modes: Open Link, Auth Required, Password Protected.
+- 访问模式：开放链接、需认证、密码保护。
+- Channel performance analytics (clicks, responses per channel).
+- 渠道表现分析（每渠道点击数、回复数）。
+<!-- CRC ENDS -->
+
+## 35. AUTOMATED REPORT GENERATOR / 自动报告生成器
+
+<!-- CRC STARTS -->
+- ReportGenerator.tsx produces downloadable HTML research reports.
+- ReportGenerator.tsx 生成可下载的HTML研究报告。
+- 3 report types: Executive Summary, Detailed Analysis, Data Tables.
+- 3种报告类型：执行摘要、详细分析、数据表格。
+- Configurable sections: charts, demographics, open-ended responses, statistical tests.
+- 可配置章节：图表、人口统计、开放题回答、统计检验。
+- Per-question analysis with mean, std dev, choice distribution charts.
+- 逐题分析包含均值、标准差、选择分布图表。
+- Print-friendly layout with CSS @media print support.
+- 支持CSS @media print的打印友好布局。
+<!-- CRC ENDS -->
+
+## 36. ACCESSIBILITY CHECKER / 无障碍检查器
+
+<!-- CRC STARTS -->
+- AccessibilityChecker.tsx validates WCAG 2.1 AA compliance for surveys.
+- AccessibilityChecker.tsx 验证调查问卷的WCAG 2.1 AA合规性。
+- 8+ automated checks: empty text, readability (>200 chars), missing alt text, missing captions, option overload, color-only differentiation, placeholder-only labels, required field indicators.
+- 8+自动检查：空文本、可读性（>200字符）、缺少替代文本、缺少字幕、选项过多、仅颜色区分、仅占位符标签、必填字段标识。
+- Scoring: 0-100 accessibility score based on error/warning/info severity.
+- 评分：基于错误/警告/信息严重度的0-100无障碍分数。
+- WCAG criteria references for each issue with bilingual suggestions.
+- 每个问题附带WCAG标准引用和双语建议。
+- Category breakdown: Color & Contrast, Readability, Navigation, Media, Language, Structure.
+- 类别细分：颜色对比、可读性、导航、媒体、语言、结构。
+<!-- CRC ENDS -->
+
+## 37. BENCHMARKING ENGINE / 基准对标引擎
+
+<!-- CRC STARTS -->
+- BenchmarkingEngine.tsx compares project metrics against industry norms (2024-2026 meta-analysis).
+- BenchmarkingEngine.tsx 将项目指标与行业标准（2024-2026元分析）进行对比。
+- 12 benchmark metrics across 4 categories: Engagement (completion rate, response time, drop-off), Quality (response quality score), UX (SUS, NPS, CSAT, CES), Research (Cronbach alpha, response rate, speeder/straightliner rates).
+- 12个基准指标跨4个类别：参与度（完成率、响应时间、流失率）、质量（回答质量分）、UX（SUS、NPS、CSAT、CES）、研究（克伦巴赫α、回复率、快速/直线回答率）。
+- Each metric shows: actual value, industry average, top/bottom quartile, performance rating (above/average/below), percentage difference.
+- 每个指标显示：实际值、行业平均、上/下四分位、表现评级（高于/平均/低于）、百分比差异。
+- Visual bar charts per metric comparing against benchmarks.
+- 每个指标的可视化柱状图与基准对比。
+<!-- CRC ENDS -->
+
+## 38. COMPLETE SYSTEM INVENTORY / 完整系统清单
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **17 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, responses)
-- **17 个构建器标签页**
-- **10 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality)
-- **10 个响应子视图**
+- **20 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, responses)
+- **20 个构建器标签页**
+- **12 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark)
+- **12 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Build → Preview → Publish → Recruit → Collect → Analyze → Export → Iterate
-- **完整研究生命周期：** 设计 → 构建 → 预览 → 发布 → 招募 → 收集 → 分析 → 导出 → 迭代
+- **Full Research Lifecycle:** Design → Theme → Build → Preview → Publish → Distribute → Recruit → Collect → Analyze → Benchmark → Report → Export → Iterate
+- **完整研究生命周期：** 设计 → 主题 → 构建 → 预览 → 发布 → 分发 → 招募 → 收集 → 分析 → 对标 → 报告 → 导出 → 迭代
 
 ---
