@@ -1286,6 +1286,21 @@ const SurveyBuilder: React.FC = () => {
           <ParticipantJourneyTracker projectId={projectId} />
         )}
 
+        {/* Incentives Tab / 激励 */}
+        {activeTab === 'incentives' && projectId && (
+          <IncentiveManager projectId={projectId} />
+        )}
+
+        {/* Live Monitor Tab / 实时监控 */}
+        {activeTab === 'monitor' && projectId && (
+          <CollectionMonitor projectId={projectId} />
+        )}
+
+        {/* Audit Trail Tab / 审计追踪 */}
+        {activeTab === 'audit' && projectId && (
+          <AuditTrail projectId={projectId} />
+        )}
+
         {/* API Access Tab / API 访问 */}
         {activeTab === 'api' && projectId && (
           <DataPipelineAPI projectId={projectId} />
