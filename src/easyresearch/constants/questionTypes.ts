@@ -56,6 +56,8 @@ export const SUPPORTED_QUESTION_TYPES = {
   MAX_DIFF: 'max_diff',
   DESIGN_SURVEY: 'design_survey',
   HEATMAP: 'heatmap',
+  CONJOINT: 'conjoint',
+  KANO: 'kano',
 
   // Layout Types
   SECTION_HEADER: 'section_header',
@@ -556,6 +558,41 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }
   },
+  {
+    type: SUPPORTED_QUESTION_TYPES.CONJOINT,
+    label: 'Conjoint Analysis',
+    description: 'Choice-based conjoint — participants choose preferred product profiles from attribute combinations',
+    icon: '🧮',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: {
+      conjoint_attributes: [
+        { name: 'Price', levels: ['$10', '$20', '$30'] },
+        { name: 'Color', levels: ['Red', 'Blue', 'Green'] },
+        { name: 'Size', levels: ['Small', 'Medium', 'Large'] }
+      ],
+      profiles_per_task: 3,
+      num_choice_tasks: 6,
+      include_none_option: true
+    }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.KANO,
+    label: 'Kano Model',
+    description: 'Kano analysis — paired functional/dysfunctional questions to classify feature importance',
+    icon: '📈',
+    category: 'advanced',
+    requiresOptions: true,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: {
+      kano_functional: 'How would you feel if this feature were present?',
+      kano_dysfunctional: 'How would you feel if this feature were absent?',
+      kano_categories: ['I like it', 'I expect it', 'I am neutral', 'I can tolerate it', 'I dislike it']
+    }
+  },
 ];
 
 // Helper functions
@@ -615,6 +652,11 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'design_survey': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
   'multi_variant': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
   'heatmap': SUPPORTED_QUESTION_TYPES.HEATMAP,
+  'conjoint': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'conjoint_analysis': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'choice_based_conjoint': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'kano': SUPPORTED_QUESTION_TYPES.KANO,
+  'kano_model': SUPPORTED_QUESTION_TYPES.KANO,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {

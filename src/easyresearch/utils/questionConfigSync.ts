@@ -113,6 +113,15 @@ const CONFIG_KEY_MAP: Record<string, string> = {
   // Design Survey config
   show_labels: 'cfg_show_labels',
   randomize_variants: 'cfg_randomize_variants',
+  // Conjoint Analysis config
+  conjoint_attributes: 'cfg_conjoint_attributes',
+  profiles_per_task: 'cfg_profiles_per_task',
+  include_none_option: 'cfg_include_none_option',
+  num_choice_tasks: 'cfg_num_choice_tasks',
+  // Kano Model config
+  kano_functional: 'cfg_kano_functional',
+  kano_dysfunctional: 'cfg_kano_dysfunctional',
+  kano_categories: 'cfg_kano_categories',
 };
 
 // Reverse map: DB column → config key

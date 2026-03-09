@@ -440,12 +440,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 }
               }
               else if (newType === 'heatmap') { updates.question_config = { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }; updates.options = []; }
+              else if (newType === 'conjoint') { updates.question_config = { conjoint_attributes: [{ name: 'Price', levels: ['$10', '$20', '$30'] }, { name: 'Color', levels: ['Red', 'Blue', 'Green'] }], profiles_per_task: 3, num_choice_tasks: 6, include_none_option: true }; updates.options = []; }
+              else if (newType === 'kano') { updates.question_config = { kano_functional: 'How would you feel if this feature were present?', kano_dysfunctional: 'How would you feel if this feature were absent?', kano_categories: ['I like it', 'I expect it', 'I am neutral', 'I can tolerate it', 'I dislike it'] }; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap','conjoint','kano'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
@@ -499,6 +501,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="max_diff">MaxDiff (Best-Worst)</option>
               <option value="design_survey">Design Survey (Multi-Variant)</option>
               <option value="heatmap">Heatmap (Multi-Click)</option>
+              <option value="conjoint">Conjoint Analysis</option>
+              <option value="kano">Kano Model</option>
             </optgroup>
           </select>
         </div>
@@ -1233,7 +1237,102 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         )}
 
-        {/* Response Type - First setting, only for response-collecting types */}
+        {/* Conjoint Analysis Configuration */}
+        {localQuestion.question_type === 'conjoint' && (
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">🧮 Conjoint Attributes</p>
+            {(localQuestion.question_config?.conjoint_attributes || []).map((attr: any, ai: number) => (
+              <div key={ai} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="flex gap-2">
+                  <input type="text" value={attr.name || ''} onChange={(e) => {
+                    const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
+                    attrs[ai] = { ...attrs[ai], name: e.target.value };
+                    updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+                  }} className="flex-1 px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Attribute name" />
+                  <button onClick={() => {
+                    const attrs = (localQuestion.question_config?.conjoint_attributes || []).filter((_: any, i: number) => i !== ai);
+                    updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+                  }} className="text-red-400 hover:text-red-600 text-[11px]">✕</button>
+                </div>
+                <div className="space-y-1">
+                  {(attr.levels || []).map((level: string, li: number) => (
+                    <div key={li} className="flex gap-1">
+                      <input type="text" value={level} onChange={(e) => {
+                        const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
+                        const levels = [...(attrs[ai].levels || [])];
+                        levels[li] = e.target.value;
+                        attrs[ai] = { ...attrs[ai], levels };
+                        updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+                      }} className="flex-1 px-2 py-1 rounded text-[11px] border border-stone-200" placeholder={`Level ${li + 1}`} />
+                      <button onClick={() => {
+                        const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
+                        attrs[ai] = { ...attrs[ai], levels: attrs[ai].levels.filter((_: any, i: number) => i !== li) };
+                        updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+                      }} className="text-red-300 text-[10px]">✕</button>
+                    </div>
+                  ))}
+                  <button onClick={() => {
+                    const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
+                    attrs[ai] = { ...attrs[ai], levels: [...(attrs[ai].levels || []), ''] };
+                    updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+                  }} className="text-[10px] text-emerald-500 hover:underline">+ Add level</button>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => {
+              const attrs = [...(localQuestion.question_config?.conjoint_attributes || []), { name: '', levels: ['', ''] }];
+              updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
+            }} className="text-[11px] text-blue-500 hover:underline">+ Add attribute</button>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] text-stone-400 mb-1">Profiles per task</label>
+                <input type="number" value={localQuestion.question_config?.profiles_per_task ?? 3} min={2} max={5}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, profiles_per_task: Number(e.target.value) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+              <div>
+                <label className="block text-[11px] text-stone-400 mb-1"># Choice tasks</label>
+                <input type="number" value={localQuestion.question_config?.num_choice_tasks ?? 6} min={1} max={20}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, num_choice_tasks: Number(e.target.value) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.include_none_option ?? true}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, include_none_option: e.target.checked } })}
+                className="rounded border-stone-300" />
+              Include "None of these" option
+            </label>
+          </div>
+        )}
+
+        {/* Kano Model Configuration */}
+        {localQuestion.question_type === 'kano' && (
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">📈 Kano Paired Questions</p>
+            <div>
+              <label className="block text-[11px] text-stone-400 mb-1">Functional question</label>
+              <input type="text" value={localQuestion.question_config?.kano_functional || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_functional: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were present?" />
+            </div>
+            <div>
+              <label className="block text-[11px] text-stone-400 mb-1">Dysfunctional question</label>
+              <input type="text" value={localQuestion.question_config?.kano_dysfunctional || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_dysfunctional: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were absent?" />
+            </div>
+            <div>
+              <label className="block text-[11px] text-stone-400 mb-1">Response categories (one per line)</label>
+              <textarea value={(localQuestion.question_config?.kano_categories || []).join('\n')}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_categories: e.target.value.split('\n').filter(Boolean) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[11px] border border-stone-200 resize-none" rows={5}
+                placeholder="I like it&#10;I expect it&#10;I am neutral&#10;I can tolerate it&#10;I dislike it" />
+            </div>
+            <p className="text-[10px] text-stone-400">Each option in the questionnaire represents a feature. For each, participants answer both the functional and dysfunctional questions. Results classify features as Must-be, Attractive, Performance, Indifferent, or Reverse.</p>
+          </div>
+        )}
+
         {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
           <div className="flex items-center justify-between pt-3 border-t border-stone-100">
             <label className="text-[12px] font-medium text-stone-400">Response Type</label>

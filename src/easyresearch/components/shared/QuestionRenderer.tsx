@@ -540,6 +540,110 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
       );
     }
+    case 'conjoint': {
+      const attrs = question.question_config?.conjoint_attributes || [];
+      const profilesPerTask = question.question_config?.profiles_per_task || 3;
+      const numTasks = question.question_config?.num_choice_tasks || 6;
+      const includeNone = question.question_config?.include_none_option ?? true;
+      const cjVal: { task?: number; choice?: number } = (typeof value === 'object' && value && !Array.isArray(value)) ? value : { task: 0 };
+      const currentTask = cjVal.task || 0;
+
+      // Generate deterministic profiles from attributes (simple round-robin for demo) / 从属性生成确定性配置文件
+      const generateProfiles = (taskIdx: number) => {
+        return Array.from({ length: profilesPerTask }, (_, pi) => {
+          const profile: Record<string, string> = {};
+          attrs.forEach((attr: any, ai: number) => {
+            const levels = attr.levels || [];
+            if (levels.length > 0) {
+              profile[attr.name] = levels[(taskIdx * profilesPerTask + pi + ai) % levels.length];
+            }
+          });
+          return profile;
+        });
+      };
+
+      const profiles = generateProfiles(currentTask);
+
+      return (
+        <div className="space-y-3">
+          <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtSm} text-indigo-700`}>
+            🧮 Task {currentTask + 1} of {numTasks} — Choose your preferred option
+          </div>
+          <div className={`grid gap-2 ${profilesPerTask <= 3 ? `grid-cols-${profilesPerTask}` : 'grid-cols-2'}`}>
+            {profiles.map((profile, pi) => (
+              <div key={pi} onClick={() => onResponse(question.id, { ...cjVal, choice: pi, [`task_${currentTask}`]: pi })}
+                className={`${pad} rounded-xl border-2 cursor-pointer transition-all ${cjVal.choice === pi ? 'border-indigo-400 bg-indigo-50 ring-2 ring-indigo-200' : 'border-stone-200 hover:border-indigo-200'}`}>
+                <p className={`${txtSm} font-bold text-center text-indigo-600 mb-2`}>Option {String.fromCharCode(65 + pi)}</p>
+                {Object.entries(profile).map(([attrName, level]) => (
+                  <div key={attrName} className="flex justify-between py-1 border-b border-stone-100 last:border-0">
+                    <span className={`${txtXs} text-stone-500`}>{attrName}</span>
+                    <span className={`${txtXs} font-medium text-stone-700`}>{level}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          {includeNone && (
+            <div onClick={() => onResponse(question.id, { ...cjVal, choice: -1, [`task_${currentTask}`]: -1 })}
+              className={`${pad} rounded-xl border-2 cursor-pointer text-center transition-all ${cjVal.choice === -1 ? 'border-stone-400 bg-stone-100' : 'border-stone-200 hover:border-stone-300'}`}>
+              <span className={`${txtSm} text-stone-500`}>None of these</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center pt-2">
+            <button disabled={currentTask === 0} onClick={() => onResponse(question.id, { ...cjVal, task: currentTask - 1, choice: cjVal[`task_${currentTask - 1}` as any] })}
+              className={`${txtXs} px-3 py-1 rounded-lg ${currentTask === 0 ? 'text-stone-300' : 'text-indigo-500 hover:bg-indigo-50'}`}>← Previous</button>
+            <span className={`${txtXs} text-stone-400`}>{currentTask + 1}/{numTasks}</span>
+            {currentTask < numTasks - 1 && (
+              <button onClick={() => onResponse(question.id, { ...cjVal, task: currentTask + 1, choice: cjVal[`task_${currentTask + 1}` as any] })}
+                className={`${txtXs} px-3 py-1 rounded-lg text-indigo-500 hover:bg-indigo-50`}>Next →</button>
+            )}
+          </div>
+        </div>
+      );
+    }
+    case 'kano': {
+      const kanoCats = question.question_config?.kano_categories || ['I like it', 'I expect it', 'I am neutral', 'I can tolerate it', 'I dislike it'];
+      const funcQ = question.question_config?.kano_functional || 'How would you feel if this feature were present?';
+      const dysfuncQ = question.question_config?.kano_dysfunctional || 'How would you feel if this feature were absent?';
+      const kanoVal: { functional?: string; dysfunctional?: string } = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+
+      // Each option = a feature; render paired questions for the feature described in question_text
+      return (
+        <div className="space-y-4">
+          {/* Functional question */}
+          <div className={`${pad} rounded-xl bg-emerald-50 border border-emerald-200`}>
+            <p className={`${txtSm} font-medium text-emerald-700 mb-2`}>✅ {funcQ}</p>
+            <div className="space-y-1.5">
+              {kanoCats.map((cat: string, ci: number) => (
+                <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.functional === cat ? 'border-emerald-400 bg-emerald-100' : 'border-stone-100 hover:border-emerald-200'}`}>
+                  <input type="radio" checked={kanoVal.functional === cat} onChange={() => onResponse(question.id, { ...kanoVal, functional: cat })}
+                    className="accent-emerald-500" />
+                  <span className={`${txtSm} text-stone-700`}>{cat}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {/* Dysfunctional question */}
+          <div className={`${pad} rounded-xl bg-red-50 border border-red-200`}>
+            <p className={`${txtSm} font-medium text-red-700 mb-2`}>❌ {dysfuncQ}</p>
+            <div className="space-y-1.5">
+              {kanoCats.map((cat: string, ci: number) => (
+                <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.dysfunctional === cat ? 'border-red-400 bg-red-100' : 'border-stone-100 hover:border-red-200'}`}>
+                  <input type="radio" checked={kanoVal.dysfunctional === cat} onChange={() => onResponse(question.id, { ...kanoVal, dysfunctional: cat })}
+                    className="accent-red-500" />
+                  <span className={`${txtSm} text-stone-700`}>{cat}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {kanoVal.functional && kanoVal.dysfunctional && (
+            <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtXs} text-blue-600`}>
+              📈 Classification will be calculated after submission
+            </div>
+          )}
+        </div>
+      );
+    }
     default:
       return <p className={`${txtSm} text-stone-400 italic`}>Unsupported: {question.question_type}</p>;
   }
