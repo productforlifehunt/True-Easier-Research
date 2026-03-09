@@ -504,6 +504,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="conjoint">Conjoint Analysis</option>
               <option value="kano">Kano Model</option>
             </optgroup>
+            <optgroup label="📐 Standardized Metrics">
+              <option value="sus">SUS (System Usability Scale)</option>
+              <option value="csat">CSAT (Customer Satisfaction)</option>
+              <option value="ces">CES (Customer Effort Score)</option>
+            </optgroup>
           </select>
         </div>
 
