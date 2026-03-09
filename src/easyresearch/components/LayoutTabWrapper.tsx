@@ -48,7 +48,7 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           <button
             key={tab.id}
             onClick={() => setActiveSubTab(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
               activeSubTab === tab.id
                 ? 'bg-white text-stone-800 shadow-sm'
                 : 'text-stone-400 hover:text-stone-600'
