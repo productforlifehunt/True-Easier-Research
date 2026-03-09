@@ -177,6 +177,9 @@ The question system supports **40 question types** across 7 categories, all stor
 - `five_second_test` — Timed exposure test. Config: cfg_test_image_url, cfg_test_duration, cfg_followup_question / 5秒测试
 - `preference_test` — A/B side-by-side comparison. Config: cfg_variant_a_url, cfg_variant_a_label, cfg_variant_b_url, cfg_variant_b_label, cfg_followup_question / 偏好测试
 - `prototype_test` — Embed Figma/InVision prototype with usability tasks. Config: cfg_prototype_url, cfg_prototype_platform, cfg_task_list (jsonb), cfg_embed_height / 原型测试
+- `max_diff` — Best-worst scaling (MaxDiff). Participants pick best/worst from item sets. Uses `question_option` for items. Config: cfg_items_per_set, cfg_best_label, cfg_worst_label / 最大差异分析（最佳-最差缩放），参与者从项目集中选择最佳/最差
+- `design_survey` — Multi-variant design comparison (3+ designs). Uses `question_option` for variants (option_value = image URL). Config: cfg_show_labels, cfg_randomize_variants, cfg_followup_question / 多变体设计比较（3+设计），使用选项表存储变体
+- `heatmap` — Multi-click heatmap on image. Participants click multiple areas to indicate attention/interest. Config: cfg_test_image_url, cfg_task_description, cfg_allow_multiple_clicks, cfg_max_clicks, cfg_followup_question / 多点击热图，参与者点击多个区域表示注意力/兴趣
 
 **A/B Test Questionnaires / A/B测试问卷:**
 Questionnaires support A/B testing at the questionnaire level. Two questionnaires with the same `ab_group_id` form a test group. Participants are randomly assigned to one variant based on `ab_split_percentage`.
