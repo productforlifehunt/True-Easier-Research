@@ -56,7 +56,7 @@ export interface AppTabElementRow {
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
   show_frequency?: boolean | null;
-  card_display_style?: string | null;
+  
   screening_criteria?: string | null;
   progress_style?: string | null;
   timeline_start_hour?: number | null;
