@@ -233,6 +233,30 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     onSubmit?.(qId);
   }, [onSubmit, onResponse, questionTimings, qConfig.track_time_per_question, qConfig.min_completion_time_seconds, qConfig.detect_straightlining, qConfig.detect_gibberish, qConfig.custom_thank_you_message, qConfig.redirect_url, detectStraightlining, detectGibberishText]);
 
+  // ── Custom thank-you screen / 自定义感谢页面 ──
+  if (showThankYou && activeQuestionnaireId === qConfig.id) {
+    return (
+      <div className={`${s.space} flex flex-col items-center justify-center py-12 text-center`}>
+        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+          <Check size={32} className="text-emerald-600" />
+        </div>
+        <h3 className={`${s.sectionH} font-bold text-stone-800 mb-2`}>
+          {qConfig.custom_thank_you_message || 'Thank you for your response!'}
+        </h3>
+        {qConfig.redirect_url && (
+          <p className={`${s.txtSm} text-stone-400 mt-2`}>Redirecting in 3 seconds...</p>
+        )}
+        {!qConfig.redirect_url && (
+          <button onClick={wrap(() => onCloseQuestionnaire())}
+            className={`mt-4 ${s.navPad} rounded-full font-medium text-white`}
+            style={{ backgroundColor: primaryColor }}>
+            Done
+          </button>
+        )}
+      </div>
+    );
+  }
+
   // ── Expanded view / 展开视图 ──
   if (activeQuestionnaireId === qConfig.id) {
     const tabSections = qConfig.tab_sections;
