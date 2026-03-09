@@ -1045,15 +1045,31 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
                 </label>
                 {layout.show_header !== false && (
-                  <div>
-                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
-                    <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                      placeholder={projectTitle || 'Auto (uses tab name)'}
-                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                    {projectTitle && !layout.header_title && (
-                      <p className="text-[9px] text-stone-400 mt-1">Default: synced from Settings title "{projectTitle}"</p>
-                    )}
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                      <input type="text"
+                        value={layout.header_title || projectTitle || ''}
+                        onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
+                        placeholder="Enter header title"
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                      {projectTitle && (
+                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Description</label>
+                      <textarea
+                        value={layout.header_description || projectDescription || ''}
+                        onChange={(e) => onUpdate({ ...layout, header_description: e.target.value })}
+                        placeholder="Enter description"
+                        rows={2}
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none" />
+                      {projectDescription && (
+                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 
