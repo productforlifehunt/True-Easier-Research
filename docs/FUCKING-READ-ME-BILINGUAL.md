@@ -1169,3 +1169,45 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 **一切都是扁平列或关系表。** 问题、选项、问卷、参与者类型、注册、布局标签、布局元素——全部存储在带有扁平列的适当表中。
 
 ---
+
+## 13b. PUBLIC PAGES / 公开页面
+
+Public pages are researcher-built web pages used for recruitment, study introductions, and landing pages. Each project can have multiple public pages. Pages are built using layout blocks (text, image, spacer, divider) with per-block styling.
+
+公开页面是研究员构建的网页，用于招募、研究介绍和落地页。每个项目可以有多个公开页面。页面使用布局块（文本、图片、间距、分割线）构建，每个块都有独立的样式。
+
+**`app_public_page` table** — one row per public page:
+
+**`app_public_page` 表** —— 每个公开页面一行：
+
+- `id` (uuid PK)
+- `project_id` (uuid FK → research_project)
+- `title` (text) — page title / 页面标题
+- `slug` (text) — URL-friendly path segment / URL友好的路径段
+- `description` (text) — page description / 页面描述
+- `enabled` (bool) — whether the page is live / 页面是否上线
+- `order_index` (int) — page ordering / 页面排序
+
+**`app_public_page_block` table** — one row per block within a page:
+
+**`app_public_page_block` 表** —— 页面内每个块一行：
+
+- `id` (uuid PK)
+- `page_id` (uuid FK → app_public_page)
+- `type` (text) — block type: 'text', 'image', 'spacer', 'divider' / 块类型
+- `content` (text) — text content for text blocks / 文本块的文本内容
+- `image_url` (text) — image URL for image blocks / 图片块的图片URL
+- `style_padding`, `style_background`, `style_text_color`, `style_text_align`, `style_font_size`, `style_font_weight`, `style_height`, `style_border_radius` (text) — per-block style overrides / 每个块的样式覆盖
+- `order_index` (int) — block ordering within page / 页面内块排序
+
+**Block types / 块类型:**
+- **`text`** — Rich text content with configurable font size, weight, alignment, padding. / 富文本内容，可配置字体大小、粗细、对齐、内边距。
+- **`image`** — Image display with URL source, alignment, and border radius. / 图片显示，带URL来源、对齐和圆角。
+- **`spacer`** — Empty space with configurable height. / 可配置高度的空白空间。
+- **`divider`** — Visual separator line. / 视觉分隔线。
+
+Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accessed via `LayoutTabWrapper.tsx` → `PublicPageBuilder.tsx`.
+
+公开页面在布局选项卡的第4个子选项卡"公开页面"中管理。通过 `LayoutTabWrapper.tsx` → `PublicPageBuilder.tsx` 访问。
+
+---
