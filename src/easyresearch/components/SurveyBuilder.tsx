@@ -57,6 +57,12 @@ import ScreenerBuilder from './ScreenerBuilder';
 import ResearchBriefGenerator from './ResearchBriefGenerator';
 import MultiLangPreview from './MultiLangPreview';
 import ABTestResults from './ABTestResults';
+import PrototypeTestingEngine from './PrototypeTestingEngine';
+import ConversationalSurveyMode from './ConversationalSurveyMode';
+import ContactListEmailCampaign from './ContactListEmailCampaign';
+import WorkflowAutomationBuilder from './WorkflowAutomationBuilder';
+import SaveAndContinueManager from './SaveAndContinueManager';
+import ShareableReportPortal from './ShareableReportPortal';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -132,7 +138,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -1424,6 +1430,24 @@ const SurveyBuilder: React.FC = () => {
         {/* A/B Test Results / A/B测试结果 */}
         {activeTab === 'ab_results' && projectId && (
           <ABTestResults projectId={projectId} />
+        )}
+        {activeTab === 'prototype_testing' && projectId && (
+          <PrototypeTestingEngine projectId={projectId} />
+        )}
+        {activeTab === 'conversational' && projectId && (
+          <ConversationalSurveyMode projectId={projectId} />
+        )}
+        {activeTab === 'contact_email' && projectId && (
+          <ContactListEmailCampaign projectId={projectId} />
+        )}
+        {activeTab === 'workflows' && projectId && (
+          <WorkflowAutomationBuilder projectId={projectId} />
+        )}
+        {activeTab === 'save_continue' && projectId && (
+          <SaveAndContinueManager projectId={projectId} />
+        )}
+        {activeTab === 'share_reports' && projectId && (
+          <ShareableReportPortal projectId={projectId} />
         )}
 
         {/* Responses Tab */}

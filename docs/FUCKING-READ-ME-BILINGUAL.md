@@ -2197,20 +2197,104 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 68. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
+## 69. PROTOTYPE TESTING ENGINE / 原型测试引擎
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/PrototypeTestingEngine.tsx`
+- 3 test types: First-Click, 5-Second Test, Task-Flow / 3种测试类型：首次点击、5秒测试、任务流
+- Screen management with hotspot overlay / 带热区叠加的屏幕管理
+- Click heatmap visualization and individual path tracking / 点击热图可视化和个人路径追踪
+- Success rate, avg time, avg clicks KPI cards / 成功率、平均时间、平均点击KPI卡片
+- Builder tab: `prototype_testing` / 构建器标签页：`prototype_testing`
+
+---
+
+## 70. CONVERSATIONAL SURVEY MODE / 对话式调查模式
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ConversationalSurveyMode.tsx`
+- Typeform-style one-question-at-a-time with 4 transition effects / Typeform风格逐题展示含4种过渡效果
+- 4 progress styles (bar, steps, percentage, fraction) / 4种进度样式
+- Keyboard navigation, auto-advance, skip/back controls / 键盘导航、自动前进、跳过/返回控制
+- Welcome & Thank You screen configuration / 欢迎和感谢屏幕配置
+- Desktop/mobile preview / 桌面/移动预览
+- Builder tab: `conversational` / 构建器标签页：`conversational`
+
+---
+
+## 71. CONTACT LIST & EMAIL CAMPAIGN ENGINE / 联系人与邮件活动引擎
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ContactListEmailCampaign.tsx`
+- 3 sub-tabs: Contacts, Templates, Campaigns / 3个子标签：联系人、模板、活动
+- CSV import, tag management, embedded data fields / CSV导入、标签管理、嵌入数据字段
+- Email templates with 7 merge fields (firstName, surveyLink, etc.) / 含7个合并字段的邮件模板
+- Campaign metrics: sent, opened, clicked, bounced with rates / 活动指标含开信率、点击率
+- Builder tab: `contact_email` / 构建器标签页：`contact_email`
+
+---
+
+## 72. WORKFLOW AUTOMATION BUILDER / 工作流自动化构建器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/WorkflowAutomationBuilder.tsx`
+- Visual IF/THEN rule builder (Qualtrics-style) / 可视化IF/THEN规则构建器
+- 7 triggers: completed, started, updated, quota met, quality flagged, abandoned, scheduled / 7种触发器
+- 7 actions: email, webhook, Slack, update contact, tag, notification, delay / 7种操作
+- AND/OR condition chains with 7 operators / 含7种运算符的AND/OR条件链
+- Builder tab: `workflows` / 构建器标签页：`workflows`
+
+---
+
+## 73. SAVE & CONTINUE (PARTIAL RESPONSES) / 保存并继续（部分回复）
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/SaveAndContinueManager.tsx`
+- 3 resume methods: unique link, email code, login / 3种恢复方式
+- Configurable auto-save interval, expiry days, max resumes / 可配置自动保存间隔、过期天数、最大恢复次数
+- Monitor tab: tracks active/resumed/expired/completed partial responses / 监控标签追踪部分回复状态
+- Builder tab: `save_continue` / 构建器标签页：`save_continue`
+
+---
+
+## 74. SHAREABLE REPORT PORTAL / 可共享报告门户
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ShareableReportPortal.tsx`
+- 4 access types: public, password, token, email allowlist / 4种访问类型
+- Configurable report sections (summary, charts, UX metrics, funnel, sentiment, raw table) / 可配置报告章节
+- Branding controls: logo, custom title, hide researcher name / 品牌控制
+- View count tracking and shareable URL with custom slug / 浏览次数追踪和自定义别名URL
+- Builder tab: `share_reports` / 构建器标签页：`share_reports`
+
+---
+
+## 75. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **45 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, templates, visualization, screener, brief, lang preview, ab results, responses)
-- **45 个构建器标签页**
+- **51 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, templates, visualization, screener, brief, lang preview, ab results, prototype testing, conversational, contact email, workflows, save continue, share reports, responses)
+- **51 个构建器标签页**
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
 - **12 Research Templates** (SUS, NPS, CSAT, Usability Test, Card Sort, Tree Test, Diary Study, Kano, Conjoint, Heuristic Eval, A11y Audit, MaxDiff)
 - **12 个研究模板**
-- **Full Research Lifecycle:** Templates → Brief → Power Analysis → Personas → Journey Maps → Screener → Consent/Ethics → Theme → Build → Preview → Multi-Lang Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Annotate → Analyze → Visualize → Sentiment → Cohort Compare → A/B Results → Benchmark → Calendar → Stakeholder Report → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
-- **完整研究生命周期：** 模板 → 简报 → 功效分析 → 用户画像 → 旅程图 → 筛选器 → 知情同意/伦理 → 主题 → 构建 → 预览 → 多语言预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 标注 → 分析 → 可视化 → 情感分析 → 队列比较 → A/B结果 → 对标 → 日历 → 利益相关者报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
+- **Full Research Lifecycle:** Templates → Brief → Power Analysis → Personas → Journey Maps → Screener → Consent/Ethics → Theme → Build → Conversational Mode → Preview → Multi-Lang Preview → Collaborate → Save & Continue → Publish → Distribute → Contact Lists → Email Campaigns → Recruit → Segment → Collect → Monitor → Session Replay → Prototype Testing → Quality Control → Data Cleaning → Annotate → Analyze → Visualize → Sentiment → Cohort Compare → A/B Results → Benchmark → Workflows → Calendar → Stakeholder Report → Share Reports → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
+- **完整研究生命周期：** 模板 → 简报 → 功效分析 → 用户画像 → 旅程图 → 筛选器 → 知情同意/伦理 → 主题 → 构建 → 对话模式 → 预览 → 多语言预览 → 协作 → 保存并继续 → 发布 → 分发 → 联系人列表 → 邮件活动 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 原型测试 → 质量控制 → 数据清洗 → 标注 → 分析 → 可视化 → 情感分析 → 队列比较 → A/B结果 → 对标 → 工作流 → 日历 → 利益相关者报告 → 共享报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
 
 ---
