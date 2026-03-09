@@ -946,6 +946,9 @@ User role is defined in profile table
 
 ## 7. USER ROLE / 用户角色
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can sumbit or can join a research, a user can be both researcher and a participant (join another researcher's research), the actual dashboard display logic is defined by user setting what he wants to get displayed
 
 用户角色在 profile 表的 is_researcher 开关 is_participant 开关中定义，用户可以同时是两者，这不应该覆盖用户是否可以提交或加入研究，用户可以同时是研究员和参与者（加入其他研究员的研究），实际的仪表板显示逻辑由用户设置他想要显示的内容来定义
