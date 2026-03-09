@@ -360,12 +360,21 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               else if (newType === 'divider') { updates.question_config = { style: 'solid', color: '#e5e7eb', thickness: 1 }; updates.options = []; updates.question_text = 'Divider'; }
               else if (newType === 'image_block') { updates.question_config = { image_url: '', caption: '', alt_text: '', max_width: '100%' }; updates.options = []; updates.question_text = 'Image'; }
               else if (newType === 'file_upload') { updates.question_config = { max_files: 1, max_size_mb: 10, accepted_types: 'image/*,.pdf,.doc,.docx' }; updates.options = []; }
+              else if (newType === 'video_block') { updates.question_config = { video_url: '', autoplay: false, loop: false, muted: true }; updates.options = []; updates.question_text = updates.question_text || 'Video'; }
+              else if (newType === 'audio_block') { updates.question_config = { audio_url: '', autoplay: false, loop: false }; updates.options = []; updates.question_text = updates.question_text || 'Audio'; }
+              else if (newType === 'embed_block') { updates.question_config = { embed_url: '', embed_type: 'iframe', embed_height: '400px', allow_fullscreen: true }; updates.options = []; updates.question_text = updates.question_text || 'Embed'; }
+              else if (newType === 'card_sort') { updates.question_config = { cards: ['Card 1', 'Card 2', 'Card 3'], categories: ['Category A', 'Category B'], sort_type: 'open' }; updates.options = []; }
+              else if (newType === 'tree_test') { updates.question_config = { tree_data: [{ label: 'Home', children: [{ label: 'Products', children: [] }, { label: 'About', children: [] }] }], task_description: 'Find the product page', correct_answer: 'Products' }; updates.options = []; }
+              else if (newType === 'first_click') { updates.question_config = { test_image_url: '', task_description: 'Where would you click to...?', followup_question: 'Why did you click there?' }; updates.options = []; }
+              else if (newType === 'five_second_test') { updates.question_config = { test_image_url: '', test_duration: 5, followup_question: 'What do you remember about this page?' }; updates.options = []; }
+              else if (newType === 'preference_test') { updates.question_config = { variant_a_url: '', variant_a_label: 'Design A', variant_b_url: '', variant_b_label: 'Design B', followup_question: 'Why do you prefer this design?' }; updates.options = []; }
+              else if (newType === 'prototype_test') { updates.question_config = { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','file_upload'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
