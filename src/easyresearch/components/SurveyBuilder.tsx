@@ -63,6 +63,18 @@ import ContactListEmailCampaign from './ContactListEmailCampaign';
 import WorkflowAutomationBuilder from './WorkflowAutomationBuilder';
 import SaveAndContinueManager from './SaveAndContinueManager';
 import ShareableReportPortal from './ShareableReportPortal';
+import CardSortingEngine from './CardSortingEngine';
+import TreeTestingEngine from './TreeTestingEngine';
+import InterceptSurveyWidget from './InterceptSurveyWidget';
+import VideoResponseCapture from './VideoResponseCapture';
+import IncentiveRewardManager from './IncentiveRewardManager';
+import LivePollPresentation from './LivePollPresentation';
+import PanelMarketplace from './PanelMarketplace';
+import CustomScriptInjector from './CustomScriptInjector';
+import IRBComplianceModule from './IRBComplianceModule';
+import OfflineDataCollector from './OfflineDataCollector';
+import VideoHighlightReels from './VideoHighlightReels';
+import RegressionAnalysis from './RegressionAnalysis';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
