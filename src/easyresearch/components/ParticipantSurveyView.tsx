@@ -629,6 +629,37 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         return;
       }
       
+      // === RUNTIME: Quality checks, quota enforcement, webhook firing ===
+      // === 运行时：质量检查、配额执行、Webhook 触发 ===
+      const totalTimeSeconds = Math.round((Date.now() - surveyStartTime) / 1000);
+      const qualityFlags = runQualityChecks(responses, questionTimings, totalTimeSeconds);
+
+      // Quota check (non-blocking for per-row insert model, but fire webhooks)
+      const quotaResult = await checkQuotas(projectId, responses);
+      if (!quotaResult.allowed) {
+        toast.error(quotaResult.reason || 'Survey quota reached.');
+        setSubmitting(false);
+        return;
+      }
+
+      // Fire completion webhook (non-blocking) / 触发完成 Webhook（非阻塞）
+      fireWebhooks(projectId, 'response.completed', {
+        enrollment_id: currentEnrollmentId,
+        total_time_seconds: totalTimeSeconds,
+        quality_score: qualityFlags.quality_score,
+        quality_flags: qualityFlags.flags,
+        response_count: responseInserts.length,
+      });
+
+      if (qualityFlags.quality_score < 50) {
+        fireWebhooks(projectId, 'quality.flagged', {
+          enrollment_id: currentEnrollmentId,
+          quality_score: qualityFlags.quality_score,
+          flags: qualityFlags.flags,
+        });
+      }
+      // === END RUNTIME ===
+
       // Update instance status if provided
       if (propInstanceId) {
         const { data: instance } = await supabase
