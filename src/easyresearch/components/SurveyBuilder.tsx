@@ -1195,6 +1195,36 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Versioning Tab / 版本管理 */}
+        {activeTab === 'versioning' && projectId && (
+          <SurveyVersioning
+            projectId={projectId}
+            questionnaires={questionnaireConfigs}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+            onRestore={(snapshot) => {
+              if (snapshot?.questionnaires) {
+                setQuestionnaireConfigs(snapshot.questionnaires);
+              }
+            }}
+          />
+        )}
+
+        {/* A/B Testing Tab / A/B测试 */}
+        {activeTab === 'ab_testing' && projectId && (
+          <ABTestingEngine
+            projectId={projectId}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+          />
+        )}
+
+        {/* Scheduler Tab / 调度 */}
+        {activeTab === 'scheduler' && projectId && (
+          <ResponseScheduler
+            projectId={projectId}
+            questionnaires={questionnaireConfigs}
+          />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
