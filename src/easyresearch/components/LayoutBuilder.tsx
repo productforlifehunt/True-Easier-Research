@@ -1017,20 +1017,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               </div>
             </div>
 
-            {/* Overflow (when height is set) */}
-            {el.config.style?.height && (
-              <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Overflow</label>
-                <div className="flex gap-1">
-                  {(['hidden', 'scroll', 'visible'] as const).map(o => (
-                    <button key={o} onClick={() => updateElement(el.id, { style: { ...el.config.style, overflow: o } })}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
-                        (el.config.style?.overflow || 'hidden') === o ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                      }`}>{o}</button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </details>
 
