@@ -99,7 +99,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     const created: PublicPage = { ...data, blocks: [] };
     setPages(prev => [...prev, created]);
     setExpandedId(created.id);
-    toast.success('Page created / 页面已创建');
+    toast.success('Page created');
   };
 
   // Delete page / 删除页面
