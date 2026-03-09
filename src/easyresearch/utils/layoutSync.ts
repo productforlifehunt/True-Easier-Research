@@ -56,8 +56,7 @@ export interface AppTabElementRow {
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
   show_frequency?: boolean | null;
-  
-  screening_criteria?: string | null;
+  ll;
   progress_style?: string | null;
   timeline_start_hour?: number | null;
   timeline_end_hour?: number | null;
@@ -200,8 +199,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
       show_frequency: (row as any).show_frequency ?? undefined,
-      card_display_style: (row as any).card_display_style || undefined,
-      screening_criteria: row.screening_criteria || undefined,
+      card_display_style: (row as any).caening_criteria || undefined,
       progress_style: (row.progress_style as any) || undefined,
       timeline_start_hour: row.timeline_start_hour ?? undefined,
       timeline_end_hour: row.timeline_end_hour ?? undefined,
