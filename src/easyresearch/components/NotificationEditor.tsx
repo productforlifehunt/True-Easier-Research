@@ -332,11 +332,10 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             </div>
 
-            {/* Participant Types / 参与者类型 */}
             {participantTypes.length > 0 && (
               <div>
                 <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-1.5 block">
-                  Participant Types / 参与者类型
+                  Participant Types
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {participantTypes.map(pt => {
