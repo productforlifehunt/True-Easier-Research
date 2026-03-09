@@ -221,7 +221,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
               <div className="px-4 pb-4 border-t border-stone-100 space-y-4">
                 <div className="grid grid-cols-2 gap-3 pt-3">
                   <div>
-                    <label className="text-[11px] text-stone-400 mb-1 block">Title / 标题</label>
+                    <label className="text-[11px] text-stone-400 mb-1 block">Title</label>
                     <input
                       value={page.title}
                       onChange={e => updatePage(page.id, 'title', e.target.value)}
