@@ -239,11 +239,6 @@ const CustomVariablesManager: React.FC<Props> = ({ projectId, surveyCode, variab
   );
 };
 
-// Hook to extract URL params at survey load / 在调查加载时提取 URL 参数的钩子
-function useMemo(fn: () => string, deps: any[]): string {
-  return React.useMemo(fn, deps);
-}
-
 export const extractUrlVariables = (variableDefinitions: CustomVariable[]): Record<string, string> => {
   const params = new URLSearchParams(window.location.search);
   const result: Record<string, string> = {};
