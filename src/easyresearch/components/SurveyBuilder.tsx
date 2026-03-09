@@ -1261,6 +1261,26 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Consent & Ethics Tab / 知情同意与伦理 */}
+        {activeTab === 'consent' && projectId && (
+          <ConsentEthicsManager projectId={projectId} />
+        )}
+
+        {/* Collaboration Tab / 协作 */}
+        {activeTab === 'collaboration' && projectId && (
+          <CollaborationEngine projectId={projectId} />
+        )}
+
+        {/* Participant Journeys Tab / 参与者旅程 */}
+        {activeTab === 'journeys' && projectId && (
+          <ParticipantJourneyTracker projectId={projectId} />
+        )}
+
+        {/* API Access Tab / API 访问 */}
+        {activeTab === 'api' && projectId && (
+          <DataPipelineAPI projectId={projectId} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
