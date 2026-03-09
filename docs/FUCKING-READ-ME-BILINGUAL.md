@@ -691,6 +691,9 @@ Dual-handle slider for selecting a numeric range (low–high). Participant choos
 
 ## 5. LOGIC / 逻辑规则
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 The logic system supports **12 categories** of conditional logic, all stored in ONE flat relational table: `research_logic`. No JSONB. No per-question columns. One table rules them all.
 
 逻辑系统支持 **12 大类** 条件逻辑，全部存储在一张扁平关系表 `research_logic` 中。没有JSONB。没有每个问题的列。一张表统治一切。
