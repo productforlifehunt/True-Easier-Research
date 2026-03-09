@@ -932,6 +932,46 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
+                              {/* A/B Test Configuration */}
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><GitBranch size={11} /> A/B Testing</h5>
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={q.is_ab_test || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { is_ab_test: e.target.checked })}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-emerald-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </label>
+                                </div>
+                                {q.is_ab_test && (
+                                  <div className="space-y-2 pt-1">
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="block text-[10px] font-medium text-stone-400 mb-1">Variant Name</label>
+                                        <input type="text" value={q.ab_variant_name || ''}
+                                          onChange={(e) => updateQuestionnaire(q.id, { ab_variant_name: e.target.value })}
+                                          className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200"
+                                          placeholder="e.g., Variant A" />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-medium text-stone-400 mb-1">Group ID</label>
+                                        <input type="text" value={q.ab_group_id || ''}
+                                          onChange={(e) => updateQuestionnaire(q.id, { ab_group_id: e.target.value })}
+                                          className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200"
+                                          placeholder="e.g., homepage-test" />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <label className="block text-[10px] font-medium text-stone-400 mb-1">Split % (this variant)</label>
+                                      <input type="number" value={q.ab_split_percentage ?? 50} min={1} max={99}
+                                        onChange={(e) => updateQuestionnaire(q.id, { ab_split_percentage: Number(e.target.value) })}
+                                        className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200" />
+                                    </div>
+                                    <p className="text-[10px] text-stone-400">Create another questionnaire with the same Group ID for the other variant. Participants randomly assigned by split %.</p>
+                                  </div>
+                                )}
+                              </div>
+
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
