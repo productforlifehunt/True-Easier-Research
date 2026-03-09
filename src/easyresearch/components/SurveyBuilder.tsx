@@ -935,9 +935,11 @@ const SurveyBuilder: React.FC = () => {
     { id: 'questionnaires', label: t('project.questionnaires') },
     { id: 'components', label: t('project.components') },
     { id: 'logic', label: t('project.logic') },
+    { id: 'flow', label: 'Flow / 流程' },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
     ...(projectId ? [{ id: 'participants' as TabId, label: t('project.participants') }] : []),
+    ...(projectId ? [{ id: 'quotas' as TabId, label: 'Quotas / 配额' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
