@@ -1166,6 +1166,8 @@ const SurveyBuilder: React.FC = () => {
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
             studyDuration={project.study_duration || 7}
+            projectTitle={project.title}
+            projectDescription={project.description}
             onUpdate={setAppLayout}
             onUpdateQuestionnaire={(id, updates) => {
               setQuestionnaireConfigs(prev => prev.map(q => q.id === id ? { ...q, ...updates } : q));
