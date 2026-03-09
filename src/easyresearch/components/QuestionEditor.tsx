@@ -440,12 +440,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 }
               }
               else if (newType === 'heatmap') { updates.question_config = { test_image_url: '', task_description: 'Click all areas that grab your attention', allow_multiple_clicks: true, max_clicks: 10, followup_question: '' }; updates.options = []; }
+              else if (newType === 'conjoint') { updates.question_config = { conjoint_attributes: [{ name: 'Price', levels: ['$10', '$20', '$30'] }, { name: 'Color', levels: ['Red', 'Blue', 'Green'] }], profiles_per_task: 3, num_choice_tasks: 6, include_none_option: true }; updates.options = []; }
+              else if (newType === 'kano') { updates.question_config = { kano_functional: 'How would you feel if this feature were present?', kano_dysfunctional: 'How would you feel if this feature were absent?', kano_categories: ['I like it', 'I expect it', 'I am neutral', 'I can tolerate it', 'I dislike it'] }; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap','conjoint','kano'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
