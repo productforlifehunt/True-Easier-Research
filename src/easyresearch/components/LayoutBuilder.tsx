@@ -85,6 +85,7 @@ export interface AppLayout {
   bottom_nav: { icon: string; label: string; tab_id: string }[];
   show_header: boolean;
   header_title: string;
+  header_description?: string;
   theme: {
     primary_color: string;
     background_color: string;
@@ -857,19 +858,32 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Padding */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Padding</label>
-              <div className="flex gap-1 mb-1.5">
-                {['0', '8px', '16px', '24px', '32px'].map(p => (
-                  <button key={p} onClick={() => updateElement(el.id, { style: { ...el.config.style, padding: p === '0' ? undefined : p } })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      (el.config.style?.padding || '0') === p || (!el.config.style?.padding && p === '0')
-                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}>{p}</button>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-medium text-stone-400">
+                  Padding: {parseInt(el.config.style?.padding || '0') || 0}px
+                </label>
+                {el.config.style?.padding && (
+                  <button onClick={() => updateElement(el.id, { style: { ...el.config.style, padding: undefined } })}
+                    className="text-[10px] text-stone-400 hover:text-stone-600 underline">Reset</button>
+                )}
               </div>
-              <input type="text" value={el.config.style?.padding || ''} placeholder="e.g. 16px, 8px 12px"
-                onChange={(e) => updateElement(el.id, { style: { ...el.config.style, padding: e.target.value || undefined } })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              <div className="relative h-6 flex items-center">
+                <div className="absolute inset-x-0 h-2 rounded-full bg-stone-100 border border-stone-200" />
+                <div className="absolute left-0 h-2 rounded-full bg-emerald-400"
+                  style={{ width: `${Math.min(100, (parseInt(el.config.style?.padding || '0') || 0) / 48 * 100)}%` }} />
+                <input type="range" min={0} max={48} step={4}
+                  value={parseInt(el.config.style?.padding || '0') || 0}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    updateElement(el.id, { style: { ...el.config.style, padding: v === 0 ? undefined : `${v}px` } });
+                  }}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                <div className="absolute h-4 w-4 rounded-full bg-white border-2 border-emerald-500 shadow-sm pointer-events-none"
+                  style={{ left: `calc(${Math.min(100, (parseInt(el.config.style?.padding || '0') || 0) / 48 * 100)}% - 8px)` }} />
+              </div>
+              <div className="flex justify-between text-[9px] text-stone-300 mt-1">
+                <span>0</span><span>12</span><span>24</span><span>36</span><span>48</span>
+              </div>
             </div>
 
             {/* Margin */}
@@ -955,22 +969,31 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Font Size */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Size</label>
-              <div className="flex gap-1 flex-wrap">
-                {[
-                  { value: undefined as string | undefined, label: 'Default' },
-                  { value: '11px', label: 'XS' },
-                  { value: '13px', label: 'SM' },
-                  { value: '15px', label: 'MD' },
-                  { value: '18px', label: 'LG' },
-                  { value: '24px', label: 'XL' },
-                ].map(f => (
-                  <button key={f.label} onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: f.value } })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      el.config.style?.font_size === f.value || (!el.config.style?.font_size && !f.value)
-                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}>{f.label}</button>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-medium text-stone-400">
+                  Font Size: {el.config.style?.font_size || 'Default'}
+                </label>
+                {el.config.style?.font_size && (
+                  <button onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: undefined } })}
+                    className="text-[10px] text-stone-400 hover:text-stone-600 underline">Reset</button>
+                )}
+              </div>
+              <div className="relative h-6 flex items-center">
+                <div className="absolute inset-x-0 h-2 rounded-full bg-stone-100 border border-stone-200" />
+                <div className="absolute left-0 h-2 rounded-full bg-emerald-400"
+                  style={{ width: `${((parseInt(el.config.style?.font_size || '14') - 10) / 22) * 100}%` }} />
+                <input type="range" min={10} max={32} step={1}
+                  value={parseInt(el.config.style?.font_size || '14')}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value);
+                    updateElement(el.id, { style: { ...el.config.style, font_size: v === 14 ? undefined : `${v}px` } });
+                  }}
+                  className="absolute inset-0 w-full opacity-0 cursor-pointer" />
+                <div className="absolute h-4 w-4 rounded-full bg-white border-2 border-emerald-500 shadow-sm pointer-events-none"
+                  style={{ left: `calc(${((parseInt(el.config.style?.font_size || '14') - 10) / 22) * 100}% - 8px)` }} />
+              </div>
+              <div className="flex justify-between text-[9px] text-stone-300 mt-1">
+                <span>10 XS</span><span>14 Default</span><span>20 LG</span><span>32 XL</span>
               </div>
             </div>
 
@@ -994,20 +1017,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               </div>
             </div>
 
-            {/* Overflow (when height is set) */}
-            {el.config.style?.height && (
-              <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Overflow</label>
-                <div className="flex gap-1">
-                  {(['hidden', 'scroll', 'visible'] as const).map(o => (
-                    <button key={o} onClick={() => updateElement(el.id, { style: { ...el.config.style, overflow: o } })}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-medium border transition-colors capitalize ${
-                        (el.config.style?.overflow || 'hidden') === o ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                      }`}>{o}</button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </details>
 
@@ -1044,15 +1053,31 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
                 </label>
                 {layout.show_header !== false && (
-                  <div>
-                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
-                    <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                      placeholder={projectTitle || 'Auto (uses tab name)'}
-                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                    {projectTitle && !layout.header_title && (
-                      <p className="text-[9px] text-stone-400 mt-1">Default: synced from Settings title "{projectTitle}"</p>
-                    )}
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                      <input type="text"
+                        value={layout.header_title || projectTitle || ''}
+                        onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
+                        placeholder="Enter header title"
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                      {projectTitle && (
+                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Description</label>
+                      <textarea
+                        value={layout.header_description || projectDescription || ''}
+                        onChange={(e) => onUpdate({ ...layout, header_description: e.target.value })}
+                        placeholder="Enter description"
+                        rows={2}
+                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none" />
+                      {projectDescription && (
+                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -1101,6 +1126,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                             activeTabId === tab.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
                           } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200' : ''}`}>
                           <GripVertical size={10} className="text-stone-300" />
+                          {getLucideIcon(tab.icon, 14, activeTabId === tab.id ? 'text-emerald-500' : 'text-stone-400')}
                           {tab.label}
                         </div>
                       )}

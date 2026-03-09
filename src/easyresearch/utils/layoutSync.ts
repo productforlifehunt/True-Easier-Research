@@ -55,7 +55,6 @@ export interface AppTabElementRow {
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
-  show_frequency?: boolean | null;
   screening_criteria?: string | null;
   progress_style?: string | null;
   timeline_start_hour?: number | null;
@@ -301,7 +300,6 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
-        show_frequency: (el.config as any).show_frequency ?? null,
         screening_criteria: el.config.screening_criteria || null,
         progress_style: el.config.progress_style || null,
         timeline_start_hour: el.config.timeline_start_hour ?? null,
