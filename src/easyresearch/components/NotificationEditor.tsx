@@ -194,10 +194,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </select>
             </div>
 
-            {/* Schedule Mode / 调度模式 */}
             <div>
               <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-1.5 block">
-                Schedule Mode / 调度模式
+                Schedule Mode
               </label>
               <div className="flex gap-2">
                 <button
@@ -208,7 +207,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                       : 'bg-white border-stone-200 text-stone-400 hover:border-stone-300'
                   }`}
                 >
-                  ⏱ Interval / 间隔模式
+                  Interval
                 </button>
                 <button
                   onClick={() => updateConfig(nc.id, { schedule_mode: 'specific_times' })}
@@ -218,7 +217,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                       : 'bg-white border-stone-200 text-stone-400 hover:border-stone-300'
                   }`}
                 >
-                  🕐 Specific Times / 指定时间
+                  Specific Times
                 </button>
               </div>
             </div>
