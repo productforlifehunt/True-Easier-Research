@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import QuestionRenderer from './QuestionRenderer';
@@ -6,36 +6,68 @@ import AIQuestionWrapper from './AIQuestionWrapper';
 import AIChatbotPopup from './AIChatbotPopup';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
 
+// ── Answer Piping Engine / 答案管道引擎 ──
+// Replaces {{Q1}}, {{Q2}} (1-based index) or {{uuid}} with the participant's prior answer.
+function applyPiping(text: string | undefined | null, allQuestions: any[], responses: Record<string, any>): string {
+  if (!text) return text || '';
+  return text.replace(/\{\{([^}]+)\}\}/g, (match, key: string) => {
+    const trimmed = key.trim();
+    // Try 1-based index like Q1, Q2...
+    const indexMatch = trimmed.match(/^[Qq](\d+)$/);
+    if (indexMatch) {
+      const idx = parseInt(indexMatch[1], 10) - 1;
+      if (idx >= 0 && idx < allQuestions.length) {
+        const val = responses[allQuestions[idx].id];
+        return formatPipedValue(val) || match;
+      }
+    }
+    // Try direct question ID
+    if (responses[trimmed] !== undefined) {
+      return formatPipedValue(responses[trimmed]) || match;
+    }
+    return match;
+  });
+}
+
+function formatPipedValue(val: any): string {
+  if (val === null || val === undefined) return '';
+  if (Array.isArray(val)) return val.join(', ');
+  if (typeof val === 'object') return JSON.stringify(val);
+  return String(val);
+}
+
+// ── Seeded shuffle for stable randomization / 种子随机洗牌 ──
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  const out = [...arr];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  }
+  for (let i = out.length - 1; i > 0; i--) {
+    h = (h * 16807 + 1) | 0;
+    const j = Math.abs(h) % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 interface QuestionnaireViewProps {
-  /** The questionnaire config to render */
   qConfig: QuestionnaireConfig;
-  /** Currently active questionnaire ID (to show expanded vs card) */
   activeQuestionnaireId: string | null;
-  /** Currently active section ID for tab sections */
   activeSectionId: string | null;
-  /** Current page index for pagination */
   currentPageIndex: number;
-  /** Responses map */
   responses: Record<string, any>;
-  /** Primary theme color */
   primaryColor?: string;
-  /** Label for the back button destination */
   backLabel?: string;
-  /** When true, uses compact sizes for phone preview */
   compact?: boolean;
-  /** Callbacks */
   onOpenQuestionnaire: (qId: string) => void;
   onCloseQuestionnaire: () => void;
   onSetSection: (sectionId: string | null) => void;
   onSetPage: (pageIndex: number) => void;
   onResponse: (questionId: string, value: any) => void;
-  /** Called when submit button is pressed (participant view). If not provided, just closes. */
   onSubmit?: (qId: string) => void;
-  /** Whether submission is in progress */
   submitting?: boolean;
-  /** Whether to stop event propagation on clicks (needed in phone preview) */
   stopPropagation?: boolean;
-  /** Card display options — configurable from layout builder */
   showQuestionCount?: boolean;
   showEstimatedTime?: boolean;
   showFrequency?: boolean;
@@ -61,19 +93,85 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
-  // Compact vs full sizes
   const s = compact
     ? { txt: 'text-[13px]', txtSm: 'text-[11px]', txtXs: 'text-[10px]', txtLg: 'text-[15px]', txtXl: 'text-[14px]', pad: 'p-3.5', pill: 'px-2.5 py-1 text-[10px]', pillGap: 'gap-1', barH: 'h-1.5', space: 'space-y-3', navPad: 'px-3 py-1.5 text-[12px]', navIcon: 12, backIcon: 14, cardPad: 'p-3.5', cardCircle: 'w-8 h-8', cardIcon: 14, sectionH: 'text-[15px]', descTxt: 'text-[12px]' }
     : { txt: 'text-[14px]', txtSm: 'text-[12px]', txtXs: 'text-[11px]', txtLg: 'text-[16px]', txtXl: 'text-[15px]', pad: 'p-4', pill: 'px-3 py-1.5 text-[12px]', pillGap: 'gap-1.5', barH: 'h-2', space: 'space-y-4', navPad: 'px-4 py-2 text-[13px]', navIcon: 14, backIcon: 16, cardPad: 'p-4', cardCircle: 'w-9 h-9', cardIcon: 16, sectionH: 'text-[16px]', descTxt: 'text-[13px]' };
 
-  const qs = qConfig.questions || [];
+  const rawQs = qConfig.questions || [];
 
-  // If this questionnaire is active/expanded
+  // ── Per-question timer / 每题计时器 ──
+  const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({});
+  const timerRef = useRef<{ questionId: string | null; startedAt: number }>({ questionId: null, startedAt: 0 });
+
+  // ── Randomization (stable per session) / 随机化（每次会话稳定） ──
+  const qs = useMemo(() => {
+    if (!qConfig.randomize_questions) return rawQs;
+    const NON_SHUFFLE = ['section_header', 'divider'];
+    const fixed: { idx: number; q: any }[] = [];
+    const shuffleable: any[] = [];
+    rawQs.forEach((q: any, i: number) => {
+      const t = normalizeLegacyQuestionType(q.question_type);
+      if (NON_SHUFFLE.includes(t)) fixed.push({ idx: i, q });
+      else shuffleable.push(q);
+    });
+    if (shuffleable.length <= 1) return rawQs;
+    const shuffled = seededShuffle(shuffleable, qConfig.id);
+    const result: any[] = [...shuffled];
+    fixed.forEach(({ idx, q }) => result.splice(Math.min(idx, result.length), 0, q));
+    return result;
+  }, [rawQs, qConfig.randomize_questions, qConfig.id]);
+
+  // ── Piping-enabled response handler / 带管道的响应处理器 ──
+  const handleResponse = useCallback((questionId: string, value: any) => {
+    // Record timing for previous question / 记录前一题的耗时
+    if (qConfig.track_time_per_question && timerRef.current.questionId && timerRef.current.questionId !== questionId) {
+      const elapsed = (Date.now() - timerRef.current.startedAt) / 1000;
+      setQuestionTimings(prev => ({
+        ...prev,
+        [timerRef.current.questionId!]: (prev[timerRef.current.questionId!] || 0) + elapsed,
+      }));
+    }
+    // Start timer for this question
+    if (qConfig.track_time_per_question && timerRef.current.questionId !== questionId) {
+      timerRef.current = { questionId, startedAt: Date.now() };
+    }
+    onResponse(questionId, value);
+  }, [onResponse, qConfig.track_time_per_question]);
+
+  // ── Timer: flush on page change / 页面切换时刷新计时 ──
+  useEffect(() => {
+    if (qConfig.track_time_per_question && timerRef.current.questionId) {
+      const elapsed = (Date.now() - timerRef.current.startedAt) / 1000;
+      if (elapsed > 0.5) {
+        setQuestionTimings(prev => ({
+          ...prev,
+          [timerRef.current.questionId!]: (prev[timerRef.current.questionId!] || 0) + elapsed,
+        }));
+      }
+      timerRef.current = { questionId: null, startedAt: 0 };
+    }
+  }, [currentPageIndex, qConfig.track_time_per_question]);
+
+  // ── Enhanced submit with timings / 带计时数据的提交 ──
+  const handleSubmit = useCallback((qId: string) => {
+    // Flush final timer
+    if (qConfig.track_time_per_question && timerRef.current.questionId) {
+      const elapsed = (Date.now() - timerRef.current.startedAt) / 1000;
+      const finalTimings = {
+        ...questionTimings,
+        [timerRef.current.questionId]: (questionTimings[timerRef.current.questionId] || 0) + elapsed,
+      };
+      // Store timings in responses under special key
+      onResponse('__question_timings__', finalTimings);
+    }
+    onSubmit?.(qId);
+  }, [onSubmit, onResponse, questionTimings, qConfig.track_time_per_question]);
+
+  // ── Expanded view / 展开视图 ──
   if (activeQuestionnaireId === qConfig.id) {
     const tabSections = qConfig.tab_sections;
     const hasTabSections = tabSections && tabSections.length > 0;
 
-    // Filter by tab section
     const matchesSection = (q: any, sectionId: string) => {
       const sec = tabSections!.find(s => s.id === sectionId);
       if (!sec) return false;
@@ -94,9 +192,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
 
     const displayQs = filteredQs.length > 0 ? filteredQs : qs;
 
-    // ── Determine questions_per_page ──
-    // Priority: active tab_section override → questionnaire default → 1 (legacy one-at-a-time)
-    // 优先级：活动标签区段覆盖 → 问卷默认值 → 1（遗留逐题模式）
     let perPage: number;
     const activeSection = activeSectionId && tabSections
       ? tabSections.find(sec => sec.id === activeSectionId)
@@ -106,13 +201,11 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     } else if (qConfig.questions_per_page != null) {
       perPage = qConfig.questions_per_page;
     } else {
-      perPage = 1; // default: one question at a time
+      perPage = 1;
     }
 
-    // perPage <= 0 or very large means show all / perPage <= 0 或非常大则显示全部
     const isUnlimited = perPage >= displayQs.length;
     const effectivePerPage = isUnlimited ? displayQs.length : perPage;
-
     const totalPages = Math.max(1, Math.ceil(displayQs.length / effectivePerPage));
     const currentPage = Math.max(0, Math.min(Math.floor(currentPageIndex / effectivePerPage), totalPages - 1));
     const pageStart = currentPage * effectivePerPage;
@@ -121,7 +214,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     const isLast = currentPage >= totalPages - 1;
     const progress = displayQs.length > 0 ? ((pageStart + pageQuestions.length) / displayQs.length) * 100 : 0;
 
-    // Track answered (non-display-only) questions
     const NON_INPUT_TYPES = ['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'];
     const answerableQs = displayQs.filter((q: any) =>
       !NON_INPUT_TYPES.includes(normalizeLegacyQuestionType(q.question_type))
@@ -136,7 +228,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
       touchStartX.current = e.touches[0].clientX;
       touchStartY.current = e.touches[0].clientY;
     };
-
     const handleTouchEnd = (e: React.TouchEvent) => {
       if (touchStartX.current === null || touchStartY.current === null) return;
       const dx = touchStartX.current - e.changedTouches[0].clientX;
@@ -148,7 +239,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
         else if (dx < 0 && !isFirst) onSetPage((currentPage - 1) * effectivePerPage);
       }
     };
-
     const touchHandlers = {
       onTouchStart: stopPropagation
         ? (e: React.TouchEvent) => { e.stopPropagation(); handleTouchStart(e); }
@@ -158,15 +248,21 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
         : handleTouchEnd,
     };
 
-    // ── Render question(s) ──
+    // ── Piping: apply {{Q1}} replacement in question text / 管道：在问题文本中替换 {{Q1}} ──
+    const enablePiping = qConfig.enable_piping;
+
     const renderQuestion = (q: any) => {
       const normalizedType = normalizeLegacyQuestionType(q.question_type);
+      // Apply piping to text and description / 将管道应用于文本和描述
+      const pipedText = enablePiping ? applyPiping(q.question_text, qs, responses) : q.question_text;
+      const pipedDesc = enablePiping ? applyPiping(q.question_description, qs, responses) : q.question_description;
+
       if (normalizedType === 'section_header') {
         return (
           <div key={q.id} className={`${compact ? 'py-6' : 'py-10'} text-center`}>
-            <h3 className={`${s.sectionH} font-bold text-stone-800`}>{q.question_text}</h3>
-            {q.question_description && (
-              <p className={`${s.descTxt} text-stone-400 mt-2`}>{q.question_description}</p>
+            <h3 className={`${s.sectionH} font-bold text-stone-800`}>{pipedText}</h3>
+            {pipedDesc && (
+              <p className={`${s.descTxt} text-stone-400 mt-2`}>{pipedDesc}</p>
             )}
             {effectivePerPage === 1 && (
               <p className={`${s.txtXs} text-stone-300 mt-4`}>Swipe or tap Next to continue →</p>
@@ -174,21 +270,25 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           </div>
         );
       }
+
+      // Clone question with piped text for renderer / 克隆带管道文本的问题给渲染器
+      const pipedQuestion = enablePiping ? { ...q, question_text: pipedText, question_description: pipedDesc } : q;
+
       return (
         <div key={q.id} className={`${compact ? 'p-4' : 'p-5'} rounded-2xl bg-white border border-stone-100 shadow-sm ${compact ? 'space-y-3' : 'space-y-4'}`}>
           <div>
             <h3 className={`${s.txtXl} font-semibold text-stone-800 leading-snug`}>
-              {q.question_text}
+              {pipedText}
               {q.required && <span className="text-red-400 ml-1">*</span>}
             </h3>
-            {q.question_description && (
-              <p className={`${s.descTxt} text-stone-400 mt-1.5`}>{q.question_description}</p>
+            {pipedDesc && (
+              <p className={`${s.descTxt} text-stone-400 mt-1.5`}>{pipedDesc}</p>
             )}
           </div>
           <AIQuestionWrapper
-            question={q}
+            question={pipedQuestion}
             value={responses[q.id]}
-            onResponse={onResponse}
+            onResponse={handleResponse}
             aiConfig={{
               allow_ai_assist: q.question_config?.allow_ai_assist || q.allow_ai_assist,
               allow_ai_auto_answer: q.question_config?.allow_ai_auto_answer,
@@ -197,18 +297,23 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
             compact={compact}
           >
             <QuestionRenderer
-              question={q}
+              question={pipedQuestion}
               value={responses[q.id]}
-              onResponse={onResponse}
+              onResponse={handleResponse}
               primaryColor={primaryColor}
               compact={compact}
             />
           </AIQuestionWrapper>
+          {/* Per-question timer indicator / 每题计时指示器 */}
+          {qConfig.track_time_per_question && questionTimings[q.id] != null && (
+            <p className={`${s.txtXs} text-stone-300 text-right`}>
+              ⏱ {Math.round(questionTimings[q.id])}s
+            </p>
+          )}
         </div>
       );
     };
 
-    // Single-question carousel mode (perPage === 1) vs multi-question list mode
     const isSingleMode = effectivePerPage === 1;
 
     return (
@@ -246,7 +351,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           <div className={`${s.barH} bg-stone-100 rounded-full overflow-hidden`}>
             <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: primaryColor }} />
           </div>
-          {/* Step indicators — only for single-question mode with few questions */}
           {isSingleMode && displayQs.length <= 14 ? (
             <div className="flex justify-center gap-1.5 mt-2.5">
               {displayQs.map((_: any, i: number) => (
@@ -275,7 +379,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
         {displayQs.length === 0 ? (
           <p className={`${s.txtSm} text-stone-400 italic py-8 text-center`}>No questions added yet.</p>
         ) : isSingleMode ? (
-          /* Single-question carousel mode */
           <div className="overflow-hidden" {...touchHandlers}>
             <div
               className="flex transition-transform duration-300 ease-in-out"
@@ -289,7 +392,6 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
             </div>
           </div>
         ) : (
-          /* Multi-question list mode — show all questions for current page */
           <div className={s.space} {...touchHandlers}>
             {pageQuestions.map((q: any) => renderQuestion(q))}
           </div>
@@ -306,7 +408,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
             </button>
             {isLast ? (
               <button type="button"
-                onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
+                onClick={wrap(() => handleSubmit(qConfig.id))}
                 disabled={submitting}
                 className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60 shadow-sm`}
                 style={{ backgroundColor: primaryColor }}>
@@ -323,11 +425,11 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           </div>
         )}
 
-        {/* Single-page submit button (when all questions fit on one page) */}
+        {/* Single-page submit */}
         {displayQs.length > 0 && totalPages <= 1 && (
           <div className={`flex justify-end ${compact ? 'pt-3 mt-3' : 'pt-4 mt-4'} border-t border-stone-100`}>
             <button type="button"
-              onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
+              onClick={wrap(() => handleSubmit(qConfig.id))}
               disabled={submitting}
               className={`flex items-center gap-1.5 ${compact ? 'px-4 py-1.5 text-[12px]' : 'px-5 py-2 text-[13px]'} rounded-full font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60 shadow-sm`}
               style={{ backgroundColor: primaryColor }}>
@@ -336,7 +438,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           </div>
         )}
 
-        {/* "All answered" quick-submit banner */}
+        {/* All answered banner */}
         {allAnswered && !isLast && totalPages > 1 && (
           <div className={`${compact ? 'mt-2.5 p-2.5' : 'mt-3 p-3'} rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between gap-2`}>
             <div className="flex items-center gap-2 min-w-0">
@@ -347,7 +449,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
             </div>
             <button
               type="button"
-              onClick={wrap(() => onSubmit ? onSubmit(qConfig.id) : onCloseQuestionnaire())}
+              onClick={wrap(() => handleSubmit(qConfig.id))}
               disabled={submitting}
               className={`${s.txtXs} font-semibold text-white px-3 py-1 rounded-full shrink-0 disabled:opacity-60 cursor-pointer hover:opacity-90`}
               style={{ backgroundColor: primaryColor }}>
@@ -362,7 +464,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
             questionnaireTitle={qConfig.title}
             questions={qs}
             responses={responses}
-            onResponse={onResponse}
+            onResponse={handleResponse}
             primaryColor={primaryColor}
             compact={compact}
           />
@@ -371,7 +473,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     );
   }
 
-  // Build subtitle parts from real data / 从真实数据构建副标题
+  // ── Card view (collapsed) / 卡片视图（折叠） ──
   const subtitleParts: string[] = [];
   if (showQuestionCount && qs.length > 0) subtitleParts.push(`${qs.length} questions`);
   if (showEstimatedTime && qConfig.estimated_duration) subtitleParts.push(`${qConfig.estimated_duration} min`);
@@ -380,9 +482,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
 
   const showIcon = cardDisplayStyle === 'icon' || cardDisplayStyle === 'both';
   const showButton = cardDisplayStyle === 'button' || cardDisplayStyle === 'both';
-  const isMinimal = cardDisplayStyle === 'minimal';
 
-  // Card view (collapsed)
   return (
     <button type="button"
       onClick={wrap(() => onOpenQuestionnaire(qConfig.id))}
