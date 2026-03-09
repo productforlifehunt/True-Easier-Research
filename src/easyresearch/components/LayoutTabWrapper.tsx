@@ -82,6 +82,10 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           participantTypes={participantTypes}
         />
       )}
+
+      {activeSubTab === 'public_pages' && (
+        <PublicPageBuilder projectId={projectId} />
+      )}
     </div>
   );
 };
