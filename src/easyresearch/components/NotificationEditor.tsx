@@ -116,9 +116,10 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
     updateConfig(configId, { specific_times: updated.sort() });
   };
 
-  // Group configs / 分组配置
+  // Group configs
   const projectConfigs = configs.filter(c => !c.questionnaire_id);
   const surveyQuestionnaires = questionnaires.filter(q => q.questionnaire_type === 'survey');
+  const componentQuestionnaires = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type));
 
   // Check if frequency is interval-compatible / 检查频率是否兼容间隔模式
   const isIntervalFrequency = (freq: string) => ['hourly', '2hours', '4hours'].includes(freq);
