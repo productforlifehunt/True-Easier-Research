@@ -10,6 +10,7 @@ import AITextAnalysis from './AITextAnalysis';
 import AdvancedExport from './AdvancedExport';
 import UXResearchVisualizer from './UXResearchVisualizer';
 import StatisticalAnalysis from './StatisticalAnalysis';
+import ResponseQualityEngine from './ResponseQualityEngine';
 
 interface Props {
   projectId: string;
