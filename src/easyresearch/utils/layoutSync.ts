@@ -255,6 +255,27 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
 
 // ── Save: in-memory AppLayout → flat DB rows ──
 // Optimized: parallel operations, upsert where possible, minimal round-trips
+// NOTE: Extended style columns may not exist on the external DB yet.
+// We try the full upsert first; on schema error, we retry with core columns only.
+
+// Core columns that always exist on the DB
+const CORE_ELEMENT_KEYS = [
+  'id', 'tab_id', 'project_id', 'type', 'order_index',
+  'questionnaire_id', 'title', 'content', 'visible', 'participant_types', 'width',
+  'style_padding', 'style_background', 'style_border_radius', 'style_height',
+  'button_action', 'button_label', 'image_url',
+  'show_question_count', 'show_estimated_time', 'screening_criteria',
+  'progress_style', 'timeline_start_hour', 'timeline_end_hour', 'timeline_days',
+  'todo_layout', 'todo_auto_scroll', 'questionnaire_ids',
+];
+
+function pickCoreColumns(row: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  for (const key of CORE_ELEMENT_KEYS) {
+    if (key in row) result[key] = row[key];
+  }
+  return result;
+}
 
 export async function saveLayoutToDb(projectId: string, layout: AppLayout): Promise<void> {
   // Prepare all data upfront before any DB calls
