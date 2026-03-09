@@ -226,7 +226,7 @@ const QuotaManager: React.FC<QuotaManagerProps> = ({ projectId, participantTypes
                       className="text-[11px] px-2 py-1.5 rounded-lg border border-stone-200 bg-white"
                     >
                       {participantTypes.map(pt => (
-                        <option key={pt.id} value={pt.id}>{pt.label}</option>
+                        <option key={pt.id} value={pt.id}>{pt.name}</option>
                       ))}
                     </select>
                   ) : (
