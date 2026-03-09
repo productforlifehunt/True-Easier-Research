@@ -1275,6 +1275,9 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 
 ## 13b. PUBLIC PAGES / 公开页面
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Public pages are researcher-built web pages used for recruitment, study introductions, and landing pages. Each project can have multiple public pages. Pages are built using layout blocks (text, image, spacer, divider) with per-block styling.
 
 公开页面是研究员构建的网页，用于招募、研究介绍和落地页。每个项目可以有多个公开页面。页面使用布局块（文本、图片、间距、分割线）构建，每个块都有独立的样式。
