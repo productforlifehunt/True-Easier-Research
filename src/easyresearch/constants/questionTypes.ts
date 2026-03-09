@@ -597,6 +597,40 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
       kano_categories: ['I like it', 'I expect it', 'I am neutral', 'I can tolerate it', 'I dislike it']
     }
   },
+  // Standardized UX Metrics
+  {
+    type: SUPPORTED_QUESTION_TYPES.SUS,
+    label: 'SUS (System Usability)',
+    description: 'System Usability Scale — 10-item standardized questionnaire yielding a 0-100 score',
+    icon: '📐',
+    category: 'scale',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { scale_type: 'sus' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.CSAT,
+    label: 'CSAT (Satisfaction)',
+    description: 'Customer Satisfaction Score — "How satisfied are you?" on a 1-5 scale',
+    icon: '😊',
+    category: 'scale',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { scale_type: 'csat', min_value: 1, max_value: 5, min_label: 'Very Unsatisfied', max_label: 'Very Satisfied' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.CES,
+    label: 'CES (Effort Score)',
+    description: 'Customer Effort Score — "How easy was it to...?" on a 1-7 scale',
+    icon: '💪',
+    category: 'scale',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { scale_type: 'ces', min_value: 1, max_value: 7, min_label: 'Very Difficult', max_label: 'Very Easy' }
+  },
 ];
 
 // Helper functions
