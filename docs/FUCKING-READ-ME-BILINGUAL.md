@@ -17,6 +17,9 @@
 
 ## 1. WHAT IS Easier Research / 什么是 Easier Research
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Easier Research (branded "Easier") is a sub-app living under `/easyresearch/*` within the larger True-Easier-Research platform. 
 
 Easier Research（品牌名为"Easier"）是一个子应用，位于更大的 True-Easier-Research 平台中的 `/easyresearch/*` 路径下。
@@ -32,6 +35,9 @@ Easier Research（品牌名为"Easier"）是一个子应用，位于更大的 Tr
 ---
 
 ## 2. RESEARCH PROJECT / 研究项目
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 Every study lives in the `research_project` table. A project can have multiple questionnaires (e.g. hourly, daily), and components (profile questions, FAQs) which are also questionnaires under the hood. 
 
@@ -110,6 +116,9 @@ Every study lives in the `research_project` table. A project can have multiple q
 
 ## 8. QUESTIONNAIRE / 问卷
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Each questionnaire is a row in the `questionnaire` table in the `care_connector` schema. It belongs to one project and has a type field that determines its purpose:
 
 问卷储存在 `questionnaire` table，通过
@@ -139,6 +148,9 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 问卷通过 `questionnaire_participant_type` 连接表链接到参与者类型——多对多关系。一个问卷可以分配给多个参与者类型，一个参与者类型可以有多个问卷。
 
 ## 9. QUESTIONS / 问题
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 The question system supports **37 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
@@ -679,6 +691,9 @@ Dual-handle slider for selecting a numeric range (low–high). Participant choos
 
 ## 5. LOGIC / 逻辑规则
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 The logic system supports **12 categories** of conditional logic, all stored in ONE flat relational table: `research_logic`. No JSONB. No per-question columns. One table rules them all.
 
 逻辑系统支持 **12 大类** 条件逻辑，全部存储在一张扁平关系表 `research_logic` 中。没有JSONB。没有每个问题的列。一张表统治一切。
@@ -897,6 +912,9 @@ QuestionnaireList中每个问题下的内联QuestionLogicEditor也支持全部19
 
 ## 5b. TEMPLATES / 模板
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 A template is NOT a separate table or a JSONB blob. A template is a row in the SAME table as real data with `is_template = true`. Never create a separate template table. Never dump template data into JSONB.
 
 模板不是单独的表或 JSONB blob。模板是与真实数据在同一表中的一行，带有 `is_template = true`。永远不要创建单独的模板表。永远不要将模板数据转储到 JSONB 中。
@@ -919,11 +937,17 @@ Template columns added to all three tables: `is_template` (bool), `template_is_p
 
 ## 6. USER PROFILE / 用户资料
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 User role is defined in profile table
 
 用户角色在 profile 表中定义
 
 ## 7. USER ROLE / 用户角色
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 user role is defined in profile table's is_researcher toggle is_participant toggle, a users can be both, this should not overide if a user can sumbit or can join a research, a user can be both researcher and a participant (join another researcher's research), the actual dashboard display logic is defined by user setting what he wants to get displayed
 
@@ -933,6 +957,9 @@ user role is defined in profile table's is_researcher toggle is_participant togg
 ---
 
 ## 10. PARTICIPANT TYPES / 参与者类型
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 Each participant type is a row in the `participant_type` table. It belongs to one project via `project_id` and defines a category of participant (e.g., "Primary Caregiver", "Family Member").
 
@@ -975,6 +1002,9 @@ Each participant type is a row in the `participant_type` table. It belongs to on
 
 ## 11. Layout and design / 布局和设计
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 There are only two layouts for this project, 1) desktop layout, for all desktop screen sizes, whether small or large; and we are using only one header, one footer, one siderbar for the entire desktop layout, the header and footer should be displayed on all public pages, and the sidebar should be displayed on all dashboard pages, 2) mobile layout, for all mobile and tablet screen sizes; and we are using only one mobile header, one mobile footer for all mobile pages, and they should persist on all pages, whether it's a research project or not
 
 此项目只有两种布局，1）桌面布局，适用于所有桌面屏幕尺寸，无论大小；我们为整个桌面布局只使用一个标题、一个页脚、一个侧边栏，标题和页脚应在所有公共页面上显示，侧边栏应在所有仪表板页面上显示，2）移动布局，适用于所有移动和平板屏幕尺寸；我们为所有移动页面只使用一个移动标题、一个移动页脚，它们应在所有页面上持续存在，无论是否是研究项目
@@ -1012,6 +1042,9 @@ remember: mobile footer should never be shown on public pages, to be precise, it
 记住：移动页脚永远不应在公共页面上显示，准确地说，它应该只在 /dashboard 路由上显示，并确保应用在仪表板路由上要么显示侧边栏（在大屏幕上），要么显示移动页脚（在平板/手机上），是其中之一，永远不是两者都不显示或都显示，并确保它们只在仪表板路由上显示。记住，桌面标题有加入研究、模板、参与者，不要将它们与同一页面或功能的仪表板版本混淆，这些桌面版本是供公众查看的，供访客使用，它们不是仪表板路由，它们只是标准公共路由，不显示移动页脚
 
 ## 12. Notification / 通知
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 每个研究项目可以设置所需要的推送，推送关联于研究项目(第一层级)和问卷(第二层级)，每个问卷(第二层级)可以设置多项推送，每项推送均可以设置独立的时间、频率、内容以及是否允许免打扰；研究项目(第一层级)也可以设置多项不与问卷关联的推送。每个研究项目和问卷均可以设置推送应用于哪一类参与者
 
@@ -1085,6 +1118,9 @@ All notification configs are stored in the unified `notification_config` table i
 ---
 
 ## 13. SURVEY BUILDER AND LAYOUT / 调查构建器和布局
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creating and editing research projects. It has tabs: settings, questionnaires, components, logic, layout, preview, participants, responses.
 
@@ -1238,6 +1274,9 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 ---
 
 ## 13b. PUBLIC PAGES / 公开页面
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
 
 Public pages are researcher-built web pages used for recruitment, study introductions, and landing pages. Each project can have multiple public pages. Pages are built using layout blocks (text, image, spacer, divider) with per-block styling.
 
