@@ -52,6 +52,11 @@ export const SUPPORTED_QUESTION_TYPES = {
   PREFERENCE_TEST: 'preference_test',
   PROTOTYPE_TEST: 'prototype_test',
 
+  // Advanced UX Research Types (Qualtrics/Conjoint-level)
+  MAX_DIFF: 'max_diff',
+  DESIGN_SURVEY: 'design_survey',
+  HEATMAP: 'heatmap',
+
   // Layout Types
   SECTION_HEADER: 'section_header',
   TEXT_BLOCK: 'text_block',
