@@ -317,7 +317,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   onChange={e => updateBlock(page.id, block.id, 'content', e.target.value)}
                                   className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 resize-none"
                                   rows={4}
-                                  placeholder="Enter text content...                            {block.type === 'image' && (
+                                  placeholder="Enter text content...    {block.type === 'image' && (
                                 <input
                                   value={block.image_url || ''}
                                   onChange={e => updateBlock(page.id, block.id, 'image_url', e.target.value)}
@@ -325,12 +325,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   placeholder="Image URL / 图片URL"
                     />
                   )}
-                  {block.type === 'spacer' && (
-                                <div>
+                  {block.type === 'spa                              <div>
                                   <label className="text-[11px] text-stone-400 mb-1 block">Height / 高度</label>
                          <input
-                           value={block.style_height || '32px'}
-                                    onChange={e => updateBlock(page.id, block.id, 'style_height', e.target.value)}
+                           value={block.style_height || '3                                 onChange={e => updateBlock(page.id, block.id, 'style_height', e.target.value)}
                                     className="w-32 px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
                                     placeholder="32px"
                                   />
@@ -342,7 +340,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   <div>
                                     <label className="text-[10px] text-stone-400 block">Align / 对齐</label>
                            <select
-                                      value={block.style_text_align || 'left'}
+                                     lock.style_text_align || 'left'}
                                       onChange={e => updateBlock(page.id, block.id, 'style_text_align', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                     >
@@ -353,8 +351,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   </div>
                                   <div>
                                     <label className="text-[10px] text-stone-400 block">Size / 大小</label>
-                                    <select
-                                      value={block.style_font_size || '14px'}
+                                                                         value={block.style_font_size || '14px'}
                                       onChange={e => updateBlock(page.id, block.id, 'style_font_size', e.target.value)}
                                       className="w-full px-2 py-1 text-xs border border-stone-200 rounded"
                                     >
