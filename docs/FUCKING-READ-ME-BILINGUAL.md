@@ -937,6 +937,9 @@ Template columns added to all three tables: `is_template` (bool), `template_is_p
 
 ## 6. USER PROFILE / 用户资料
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 User role is defined in profile table
 
 用户角色在 profile 表中定义
