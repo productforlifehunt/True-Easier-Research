@@ -1431,6 +1431,24 @@ const SurveyBuilder: React.FC = () => {
         {activeTab === 'ab_results' && projectId && (
           <ABTestResults projectId={projectId} />
         )}
+        {activeTab === 'prototype_testing' && projectId && (
+          <PrototypeTestingEngine projectId={projectId} />
+        )}
+        {activeTab === 'conversational' && projectId && (
+          <ConversationalSurveyMode projectId={projectId} />
+        )}
+        {activeTab === 'contact_email' && projectId && (
+          <ContactListEmailCampaign projectId={projectId} />
+        )}
+        {activeTab === 'workflows' && projectId && (
+          <WorkflowAutomationBuilder projectId={projectId} />
+        )}
+        {activeTab === 'save_continue' && projectId && (
+          <SaveAndContinueManager projectId={projectId} />
+        )}
+        {activeTab === 'share_reports' && projectId && (
+          <ShareableReportPortal projectId={projectId} />
+        )}
 
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
