@@ -210,11 +210,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
           {[
             { id: 'summary' as SubView, label: 'Summary', icon: BarChart3 },
-            { id: 'individual' as SubView, label: 'Individual', icon: User },
-            { id: 'table' as SubView, label: 'Table', icon: Table2 },
-            { id: 'cross_tab' as SubView, label: 'Cross-Tab', icon: ArrowLeftRight },
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
-            { id: 'participants' as SubView, label: 'Participants / 参与者', icon: Users },
           ].map(tab => (
             <button
               key={tab.id}
