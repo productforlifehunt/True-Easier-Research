@@ -49,6 +49,7 @@ const lazyImports = {
   InboxPage: () => import('./easyresearch/components/InboxPage'),
   ConversationView: () => import('./easyresearch/components/ConversationView'),
   FeaturesPage: () => import('./easyresearch/components/FeaturesPage'),
+  PublicPageRenderer: () => import('./easyresearch/components/PublicPageRenderer'),
 };
 
 const LandingPage = React.lazy(lazyImports.LandingPage);
