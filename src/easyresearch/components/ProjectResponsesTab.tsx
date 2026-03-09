@@ -17,7 +17,7 @@ interface Props {
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats' | 'quality';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
