@@ -140,9 +140,41 @@ Questionnaires are linked to participant types through the `questionnaire_partic
 
 ## 9. QUESTIONS / 问题
 
-The question system supports **27 question types** across 6 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
+The question system supports **37 question types** across 7 categories, all stored in ONE flat relational table: `question`. No JSONB config columns. Type-specific settings are flat `cfg_*` columns. Options live in `question_option`. Responses live in `survey_response`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
-问题系统支持 **27种问题类型**，分为6大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
+问题系统支持 **37种问题类型**，分为7大类别，全部存储在一张扁平关系表 `question` 中。没有 JSONB 配置列。类型特定设置为扁平 `cfg_*` 列。选项在 `question_option` 中。响应在 `survey_response` 中。规范类型列表在 `src/easyresearch/constants/questionTypes.ts` 中。
+
+**Categories / 类别:**
+1. Text: text_short, text_long / 文本：短文本、长文本
+2. Choice: single_choice, multiple_choice, dropdown, checkbox_group, yes_no, image_choice, matrix, ranking / 选择：单选、多选、下拉、复选框组、是否、图片选择、矩阵、排名
+3. Scale: slider, bipolar_scale, rating, likert_scale, nps, slider_range / 量表：滑块、双极量表、评分、李克特、NPS、范围滑块
+4. Data: number, date, time, email, phone, file_upload, address / 数据：数字、日期、时间、邮箱、电话、文件上传、地址
+5. Advanced: constant_sum, signature / 高级：常量总和、签名
+6. Layout & Media: section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block / 布局与媒体：章节标题、文本块、分隔线、图片块、说明、视频块、音频块、嵌入块
+7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试
+
+**Rich Media Types (Layout & Media category) / 富媒体类型:**
+- `video_block` — Embed YouTube, Vimeo, Loom, or direct MP4. Config: cfg_video_url, cfg_autoplay, cfg_loop, cfg_muted, cfg_poster_url / 嵌入视频
+- `audio_block` — Embed MP3, WAV, or streaming audio. Config: cfg_audio_url, cfg_autoplay, cfg_loop / 嵌入音频
+- `embed_block` — iFrame any webpage: Figma, Google Docs, Miro, Loom, Airtable, Notion, Typeform, or custom URL. Config: cfg_embed_url, cfg_embed_type, cfg_embed_height, cfg_allow_fullscreen / 嵌入任意网页
+
+**UX Research Types / UX研究类型:**
+- `card_sort` — Open/closed/hybrid card sorting. Config: cfg_cards (text[]), cfg_categories (text[]), cfg_sort_type / 卡片分类
+- `tree_test` — Test information architecture with tree navigation. Config: cfg_tree_data (jsonb), cfg_task_description, cfg_correct_answer / 树测试
+- `first_click` — Record first click on a design mockup. Config: cfg_test_image_url, cfg_task_description, cfg_followup_question / 首次点击测试
+- `five_second_test` — Timed exposure test. Config: cfg_test_image_url, cfg_test_duration, cfg_followup_question / 5秒测试
+- `preference_test` — A/B side-by-side comparison. Config: cfg_variant_a_url, cfg_variant_a_label, cfg_variant_b_url, cfg_variant_b_label, cfg_followup_question / 偏好测试
+- `prototype_test` — Embed Figma/InVision prototype with usability tasks. Config: cfg_prototype_url, cfg_prototype_platform, cfg_task_list (jsonb), cfg_embed_height / 原型测试
+
+**A/B Test Questionnaires / A/B测试问卷:**
+Questionnaires support A/B testing at the questionnaire level. Two questionnaires with the same `ab_group_id` form a test group. Participants are randomly assigned to one variant based on `ab_split_percentage`.
+问卷支持问卷级别的A/B测试。两个具有相同 `ab_group_id` 的问卷组成一个测试组。参与者根据 `ab_split_percentage` 随机分配到一个变体。
+
+Columns on `questionnaire` table / `questionnaire` 表上的列:
+- `is_ab_test` (bool) — whether this questionnaire is an A/B test variant / 是否为A/B测试变体
+- `ab_variant_name` (text) — variant identifier, e.g. "Variant A" / 变体标识符
+- `ab_group_id` (text) — shared group ID linking variants together / 链接变体的共享组ID
+- `ab_split_percentage` (int) — traffic split %, default 50 / 流量分配百分比，默认50
 
 Each question is a row in the `question` table (renamed from the old `survey_question` — NEVER use `survey_question` anymore). A question belongs to one project via `project_id` and optionally to one questionnaire via `questionnaire_id`.
 
