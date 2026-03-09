@@ -1119,6 +1119,9 @@ All notification configs are stored in the unified `notification_config` table i
 
 ## 13. SURVEY BUILDER AND LAYOUT / 调查构建器和布局
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 The survey builder (`SurveyBuilder.tsx`) is the main researcher tool for creating and editing research projects. It has tabs: settings, questionnaires, components, logic, layout, preview, participants, responses.
 
 调查构建器（`SurveyBuilder.tsx`）是研究员创建和编辑研究项目的主要工具。它有标签：设置、问卷、组件、逻辑、布局、预览、参与者、响应。
