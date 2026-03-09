@@ -644,6 +644,109 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
       );
     }
+    case 'sus': {
+      // System Usability Scale — 10 standard items, each rated 1-5
+      const SUS_ITEMS = [
+        'I think that I would like to use this system frequently.',
+        'I found the system unnecessarily complex.',
+        'I thought the system was easy to use.',
+        'I think that I would need the support of a technical person to use this system.',
+        'I found the various functions in this system were well integrated.',
+        'I thought there was too much inconsistency in this system.',
+        'I would imagine that most people would learn to use this system very quickly.',
+        'I found the system very cumbersome to use.',
+        'I felt very confident using the system.',
+        'I needed to learn a lot of things before I could get going with this system.',
+      ];
+      const SCALE_LABELS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+      const susVal: Record<string, number> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      const answered = Object.keys(susVal).length;
+
+      return (
+        <div className="space-y-3">
+          <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtXs} text-indigo-700`}>
+            📐 SUS — Rate each statement (1 = Strongly Disagree, 5 = Strongly Agree). {answered}/10 answered.
+          </div>
+          {SUS_ITEMS.map((item, idx) => (
+            <div key={idx} className={`${pad} rounded-xl border ${susVal[`q${idx}`] ? 'border-indigo-200 bg-indigo-50/30' : 'border-stone-100'}`}>
+              <p className={`${txtSm} text-stone-700 mb-2`}>{idx + 1}. {item}</p>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} onClick={() => onResponse(question.id, { ...susVal, [`q${idx}`]: n })}
+                    className={`flex-1 py-1.5 rounded-lg text-center ${txtXs} font-medium transition-all ${susVal[`q${idx}`] === n ? 'bg-indigo-500 text-white' : 'bg-stone-100 text-stone-500 hover:bg-indigo-100'}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className={`${txtXs} text-stone-300`}>{SCALE_LABELS[0]}</span>
+                <span className={`${txtXs} text-stone-300`}>{SCALE_LABELS[4]}</span>
+              </div>
+            </div>
+          ))}
+          {answered === 10 && (() => {
+            // Calculate SUS score: odd items (idx 0,2,4,6,8) = val-1, even items (1,3,5,7,9) = 5-val, sum * 2.5
+            let total = 0;
+            for (let i = 0; i < 10; i++) {
+              const v = susVal[`q${i}`] || 3;
+              total += i % 2 === 0 ? (v - 1) : (5 - v);
+            }
+            const score = Math.round(total * 2.5);
+            const grade = score >= 80 ? 'A' : score >= 68 ? 'B' : score >= 50 ? 'C' : score >= 35 ? 'D' : 'F';
+            return (
+              <div className={`${pad} rounded-xl bg-emerald-50 border border-emerald-200 text-center`}>
+                <p className={`${txtLg} font-bold text-emerald-700`}>SUS Score: {score}/100 (Grade {grade})</p>
+                <p className={`${txtXs} text-emerald-500 mt-1`}>{score >= 68 ? 'Above average usability' : 'Below average usability'}</p>
+              </div>
+            );
+          })()}
+        </div>
+      );
+    }
+    case 'csat': {
+      const csatLabels = ['Very Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Very Satisfied'];
+      const csatEmojis = ['😠', '😟', '😐', '😊', '🤩'];
+      return (
+        <div className="space-y-2">
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4, 5].map(n => (
+              <button key={n} onClick={() => onResponse(question.id, n)}
+                className={`flex flex-col items-center gap-1 ${pad} rounded-xl border-2 transition-all cursor-pointer ${value === n ? 'border-emerald-400 bg-emerald-50 scale-105' : 'border-stone-100 hover:border-emerald-200'}`}
+                style={{ minWidth: compact ? '48px' : '56px' }}>
+                <span className={compact ? 'text-xl' : 'text-2xl'}>{csatEmojis[n - 1]}</span>
+                <span className={`${txtXs} text-stone-500 text-center`}>{csatLabels[n - 1]}</span>
+              </button>
+            ))}
+          </div>
+          {value && (
+            <p className={`${txtXs} text-center text-stone-400`}>CSAT: {value}/5 — {csatLabels[(value as number) - 1]}</p>
+          )}
+        </div>
+      );
+    }
+    case 'ces': {
+      const cesLabels = ['Very Difficult', 'Difficult', 'Somewhat Difficult', 'Neutral', 'Somewhat Easy', 'Easy', 'Very Easy'];
+      return (
+        <div className="space-y-2">
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5, 6, 7].map(n => (
+              <button key={n} onClick={() => onResponse(question.id, n)}
+                className={`flex-1 py-2.5 rounded-xl text-center ${txtXs} font-medium transition-all cursor-pointer ${value === n ? 'text-white shadow-sm' : 'bg-stone-100 text-stone-500 hover:bg-blue-50'}`}
+                style={value === n ? { backgroundColor: `hsl(${(n - 1) * 20 + 0}, 70%, 50%)` } : {}}>
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-between">
+            <span className={`${txtXs} text-red-400`}>Very Difficult</span>
+            <span className={`${txtXs} text-emerald-400`}>Very Easy</span>
+          </div>
+          {value && (
+            <p className={`${txtXs} text-center text-stone-400`}>CES: {value}/7 — {cesLabels[(value as number) - 1]}</p>
+          )}
+        </div>
+      );
+    }
     default:
       return <p className={`${txtSm} text-stone-400 italic`}>Unsupported: {question.question_type}</p>;
   }
