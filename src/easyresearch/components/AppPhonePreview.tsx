@@ -57,6 +57,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const activeTab = layout.tabs.find(t => t.id === currentTabId);
   const primaryColor = layout.theme?.primary_color || '#10b981';
   const bgColor = layout.theme?.background_color || '#f5f5f4';
+  const cardStyle = layout.theme?.card_style || 'elevated';
 
   const handleResponse = (questionId: string, value: any) => setResponses({ ...responses, [questionId]: value });
 
