@@ -264,7 +264,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                 {/* Blocks / 块 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-stone-600 uppercase tracking-wide">Blocks / 内容块</span>
+                    <span className="text-xs font-semibold text-stone-600 uppercase tracking-wide">Blocks</span>
                     <div className="flex gap-1">
                       {BLOCK_TYPES.map(bt => (
                         <button
