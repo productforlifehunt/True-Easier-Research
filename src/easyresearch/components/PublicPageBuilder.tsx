@@ -204,7 +204,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
               <button
                 onClick={e => { e.stopPropagation(); updatePage(page.id, 'enabled', !page.enabled); }}
                 className="p-1 rounded hover:bg-stone-100"
-                title={page.enabled ? 'Disable / 禁用' : 'Enable / 启用'}
+                title={page.enabled ? 'Disable' : 'Enable'}
               >
                 {page.enabled ? <Eye size={14} className="text-emerald-500" /> : <EyeOff size={14} className="text-stone-300" />}
               </button>
