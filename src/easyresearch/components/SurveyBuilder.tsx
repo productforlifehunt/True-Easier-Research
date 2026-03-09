@@ -722,6 +722,9 @@ const SurveyBuilder: React.FC = () => {
           ab_variant_name: qc.ab_variant_name || null,
           ab_group_id: qc.ab_group_id || null,
           ab_split_percentage: qc.ab_split_percentage ?? 50,
+          randomize_questions: qc.randomize_questions ?? false,
+          enable_piping: qc.enable_piping ?? false,
+          track_time_per_question: qc.track_time_per_question ?? false,
         }));
         await supabase.from('questionnaire').upsert(allQPayloads, { onConflict: 'id' });
 
