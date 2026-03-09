@@ -39,7 +39,7 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   return (
     <div>
       {/* Sub-tab navigation / 子标签导航 */}
-      <div className="flex items-center gap-1 mb-5 bg-stone-100/80 rounded-xl p-1 w-fit">
+      <div className="grid grid-cols-4 gap-1 mb-5 bg-stone-100/80 rounded-xl p-1 w-full">
         {SUB_TABS.map(tab => (
           <button
             key={tab.id}

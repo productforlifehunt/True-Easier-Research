@@ -110,19 +110,19 @@ const ICON_OPTIONS = [
   { value: 'Layout', label: 'Layout', icon: 'Layout' },
 ];
 
-const STATIC_CONTENT_ELEMENTS = [
-  { type: 'ecogram', label: 'Ecogram', icon: '🔗', desc: 'Care network diagram' },
-  { type: 'progress', label: 'Progress', icon: '📊', desc: 'Study progress overview' },
-  { type: 'timeline', label: 'Timeline', icon: '📅', desc: 'Study timeline view' },
+const FUNCTION_ELEMENTS = [
+  { type: 'ecogram', label: 'Ecogram', lucideIcon: 'Link2', desc: 'Care network diagram' },
+  { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
+  { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
 ];
 
 const LAYOUT_ELEMENTS = [
-  { type: 'text_block', label: 'Text Block', icon: '📄', desc: 'Custom text or instructions' },
-  { type: 'todo_list', label: 'To-Do List', icon: '✅', desc: 'Task cards slider' },
-  { type: 'spacer', label: 'Spacer', icon: '↕️', desc: 'Add vertical space' },
-  { type: 'divider', label: 'Divider', icon: '➖', desc: 'Horizontal divider line' },
-  { type: 'button', label: 'Button', icon: '🔘', desc: 'Action button' },
-  { type: 'image', label: 'Image', icon: '🖼️', desc: 'Image block' },
+  { type: 'text_block', label: 'Text Block', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
+  { type: 'todo_list', label: 'To-Do List', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
+  { type: 'spacer', label: 'Spacer', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
+  { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
+  { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
+  { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
 ];
 
 const WIDTH_PRESETS = [
