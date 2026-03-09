@@ -275,6 +275,34 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         );
       case 'prototype_test':
         return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
+      case 'max_diff':
+        return (
+          <div className="space-y-1">
+            <p className="text-[10px] text-stone-400 font-semibold">Best-Worst Scaling</p>
+            {(localQuestion.options || []).slice(0, 3).map((opt: any, i: number) => (
+              <div key={opt.id} className="flex items-center justify-between text-[10px] text-stone-500 px-2 py-1 border border-stone-200 rounded">
+                <span className="text-emerald-500 text-[9px]">BEST</span>
+                <span className="truncate mx-2">{opt.option_text}</span>
+                <span className="text-red-400 text-[9px]">WORST</span>
+              </div>
+            ))}
+          </div>
+        );
+      case 'design_survey':
+        return (
+          <div className="grid grid-cols-3 gap-1">
+            {(localQuestion.options || []).slice(0, 3).map((opt: any) => (
+              <div key={opt.id} className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[9px] text-stone-500 text-center p-1">{opt.option_text}</div>
+            ))}
+            {(localQuestion.options || []).length > 3 && <span className="text-[9px] text-stone-400">+{(localQuestion.options || []).length - 3}</span>}
+          </div>
+        );
+      case 'heatmap':
+        return (
+          <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">
+            🔥 Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
+          </div>
+        );
       default: return null;
     }
   };
