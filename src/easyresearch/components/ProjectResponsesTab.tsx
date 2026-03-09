@@ -228,7 +228,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         </div>
 
         <div className="flex items-center gap-3">
-          {questionnaires.length > 1 && subView !== 'participants' && (
+          {questionnaires.length > 1 && (
             <select
               value={selectedQuestionnaire}
               onChange={e => setSelectedQuestionnaire(e.target.value)}
