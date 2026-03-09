@@ -113,8 +113,29 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
 
   const qs = qConfig.questions || [];
 
-  // If this questionnaire is active/expanded
-  if (activeQuestionnaireId === qConfig.id) {
+  // ── Per-question timer state / 每题计时状态 ──
+  const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({});
+  const timerRef = useRef<{ questionId: string | null; startedAt: number }>({ questionId: null, startedAt: 0 });
+
+  // ── Randomization (stable per session via questionnaire id as seed) / 随机化 ──
+  const randomizedQs = useMemo(() => {
+    if (!qConfig.randomize_questions) return qs;
+    const NON_SHUFFLE = ['section_header', 'divider'];
+    // Separate section headers (keep in place) from shuffleable questions
+    const fixed: { idx: number; q: any }[] = [];
+    const shuffleable: any[] = [];
+    qs.forEach((q: any, i: number) => {
+      const t = normalizeLegacyQuestionType(q.question_type);
+      if (NON_SHUFFLE.includes(t)) fixed.push({ idx: i, q });
+      else shuffleable.push(q);
+    });
+    if (shuffleable.length <= 1) return qs;
+    const shuffled = seededShuffle(shuffleable, qConfig.id);
+    // Re-insert fixed items at their original positions
+    const result: any[] = [...shuffled];
+    fixed.forEach(({ idx, q }) => result.splice(Math.min(idx, result.length), 0, q));
+    return result;
+  }, [qs, qConfig.randomize_questions, qConfig.id]);
     const tabSections = qConfig.tab_sections;
     const hasTabSections = tabSections && tabSections.length > 0;
 
