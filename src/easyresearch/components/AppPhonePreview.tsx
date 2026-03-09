@@ -251,6 +251,9 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                 ...(customStyle.border_radius ? { borderRadius: customStyle.border_radius } : {}),
                 ...(customStyle.border ? { border: customStyle.border } : {}),
                 ...(customStyle.shadow && customStyle.shadow !== 'none' ? { boxShadow: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.1)', xl: '0 20px 25px rgba(0,0,0,0.1)' }[customStyle.shadow] } : {}),
+                ...(customStyle.text_align ? { textAlign: customStyle.text_align as any } : {}),
+                ...(customStyle.font_size ? { fontSize: customStyle.font_size } : {}),
+                ...(customStyle.font_weight ? { fontWeight: customStyle.font_weight } : {}),
                 // Height MUST come after DnD styles to avoid being overridden
                 ...(hasFixedHeight ? {
                   height: activeHeight,
