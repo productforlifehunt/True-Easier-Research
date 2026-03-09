@@ -438,20 +438,36 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'help': {
       const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      const cardOpts = {
+        showQuestionCount: el.config.show_question_count !== false,
+        showEstimatedTime: el.config.show_estimated_time !== false,
+        showFrequency: false,
+        cardDisplayStyle: el.config.card_display_style || 'button' as const,
+        buttonLabel: el.config.button_label || 'View Help',
+        buttonBorderRadius: el.config.button_border_radius,
+      };
       if (linkedQ && activeQuestionnaireId === linkedQ.id) {
-        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title, cardOpts)}</>;
       }
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
           <h4 className={`${txt} font-semibold text-stone-800`}>❓ {el.config.title || 'Help & FAQ'}</h4>
           {linkedQ ? (
             <>
-              <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>
-              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
-                className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
-                style={{ borderRadius: el.config.button_border_radius || '8px' }}>
-                {el.config.button_label || 'View Help'}
-              </button>
+              {cardOpts.showQuestionCount && <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>}
+              {cardOpts.showEstimatedTime && <p className={`${txtXs} text-stone-400`}>~{linkedQ.estimated_duration || 5} min</p>}
+              {(cardOpts.cardDisplayStyle === 'button' || cardOpts.cardDisplayStyle === 'both') && (
+                <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                  className={`mt-2 px-3 py-1.5 ${txtSm} font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors`}
+                  style={{ borderRadius: cardOpts.buttonBorderRadius || '8px' }}>
+                  {cardOpts.buttonLabel}
+                </button>
+              )}
+              {(cardOpts.cardDisplayStyle === 'icon' || cardOpts.cardDisplayStyle === 'both') && (
+                <div className="flex justify-end mt-1 cursor-pointer" onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}>
+                  <ChevronRight size={16} className="text-stone-400" />
+                </div>
+              )}
             </>
           ) : (
             <p className={`${txtSm} text-stone-400 mt-1`}>Common questions and support{compact ? ' contact' : ''}</p>
