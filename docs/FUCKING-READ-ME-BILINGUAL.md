@@ -1601,7 +1601,10 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 11 | `translations` | i18n / 翻译 | SurveyTranslationManager | Multi-language support / 多语言支持 |
 | 12 | `variables` | Variables / 变量 | CustomVariablesManager | URL params & embedded data / URL参数与嵌入式数据 |
 | 13 | `webhooks` | Webhooks | WebhookManager | Event-driven integrations / 事件驱动集成 |
-| 14 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
+| 14 | `versioning` | Versions / 版本 | SurveyVersioning | Version history & collaboration / 版本历史与协作 |
+| 15 | `ab_testing` | A/B Test / 实验 | ABTestingEngine | Experiment variants & comparison / 实验变体与对比 |
+| 16 | `scheduler` | Schedule / 调度 | ResponseScheduler | Longitudinal scheduling & waves / 纵向调度与波次 |
+| 17 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
 
 ### Response Sub-Views / 回复子视图
 
@@ -1616,6 +1619,7 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 7 | Export | AdvancedExport | Multi-format export / 多格式导出 |
 | 8 | UX Results | UXResearchVisualizer | Heatmaps, card sort, tree test / 热图、卡片分类、树状测试 |
 | 9 | Stats | StatisticalAnalysis | Chi-square, t-test, weighting / 卡方、T检验、加权 |
+| 10 | Quality | ResponseQualityEngine | Fraud detection, quality scoring / 欺诈检测、质量评分 |
 
 ---
 
@@ -1681,5 +1685,91 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
   - Test webhook with sample payload / 测试webhook
   - Active/paused toggle per webhook / 每个webhook的活跃/暂停切换
   - Last triggered timestamp and status tracking / 最后触发时间戳和状态跟踪
+
+---
+
+## 29. RESPONSE QUALITY & FRAUD DETECTION / 响应质量与欺诈检测
+
+<!-- CRC STARTS -->
+- Pure frontend quality engine. No server-side ML dependencies. / 纯前端质量引擎。无服务端ML依赖。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/ResponseQualityEngine.tsx`
+- **Detection Types / 检测类型:**
+  - **Speeder:** < 30% of median completion time / 快速完成者：低于中位完成时间的30%
+  - **Bot Pattern:** < 10 seconds total / 机器人模式：总计低于10秒
+  - **Straightliner:** > 85% same answer across choice questions / 直线作答：85%以上选择题相同答案
+  - **Duplicate IP:** Multiple participants from same IP / 重复IP：同一IP多个参与者
+  - **Gibberish:** Shannon entropy < 1.5 on text responses / 乱码：文本响应香农熵低于1.5
+  - **Incomplete:** Missing required answers / 未完成：缺少必填答案
+- **Quality Score:** 0-100 scale, deductions per flag severity (critical=-40, high=-25, medium=-15, low=-5) / 质量分：0-100分，按标志严重性扣分
+- **Filters:** Severity level, flagged-only toggle / 过滤器：严重性级别，仅标记切换
+
+---
+
+## 30. SURVEY VERSIONING & COLLABORATION / 问卷版本管理与协作
+
+<!-- CRC STARTS -->
+- Version snapshots stored in `research_project.setting.versions` JSONB. Max 50 versions retained. / 版本快照存储在 `research_project.setting.versions` JSONB 中。最多保留50个版本。
+- Collaborator list stored in `research_project.setting.collaborators` JSONB. / 协作者列表存储在 `research_project.setting.collaborators` JSONB 中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/SurveyVersioning.tsx`
+- **Features / 功能:**
+  - Save labeled version snapshots (full questionnaire + question state) / 保存带标签的版本快照
+  - Version history timeline with preview / 版本历史时间线及预览
+  - One-click rollback to any previous version / 一键回滚到任何先前版本
+  - Collaborator management: add by email, editor/viewer roles / 协作者管理：通过邮箱添加，编辑者/查看者角色
+  - Change summary per version / 每个版本的变更摘要
+
+---
+
+## 31. A/B TESTING & EXPERIMENT ENGINE / A/B测试与实验引擎
+
+<!-- CRC STARTS -->
+- Experiment configs stored in `research_project.setting.experiments` JSONB. / 实验配置存储在 `research_project.setting.experiments` JSONB 中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/ABTestingEngine.tsx`
+- **Features / 功能:**
+  - Multi-variant experiments (2+ variants) / 多变体实验（2+变体）
+  - Weighted random assignment via hash-based bucketing / 基于哈希分桶的加权随机分配
+  - Control group designation / 对照组指定
+  - Primary metric selection: completion rate, avg score, or specific answer / 主要指标选择
+  - Per-variant results: sample size, conversion rate, uplift vs control / 每变体结果
+  - Experiment lifecycle: draft → running → completed / 实验生命周期
+
+---
+
+## 32. LONGITUDINAL SCHEDULER & WAVE MANAGEMENT / 纵向调度与波次管理
+
+<!-- CRC STARTS -->
+- Time points and waves stored in `research_project.setting.timePoints` and `research_project.setting.waves` JSONB. / 时间点和波次存储在 `research_project.setting` JSONB 中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/ResponseScheduler.tsx`
+- **Features / 功能:**
+  - **Time Points / 时间点:** Define measurement occasions (Baseline, Week 1, Month 3, etc.) with day offsets from enrollment / 定义测量时机
+  - **Response Windows / 响应窗口:** Configurable window in days per time point / 每个时间点可配置的窗口天数
+  - **Questionnaire Assignment / 问卷分配:** Link specific questionnaires to each time point / 将特定问卷链接到每个时间点
+  - **Waves / 波次:** Recruitment wave management with status tracking (planned/recruiting/active/completed) / 招募波次管理
+  - **Retention Curve / 留存曲线:** Visual retention analysis across time points / 跨时间点的视觉留存分析
+  - **Reminder Config / 提醒配置:** Hours before deadline to send reminders / 截止日期前几小时发送提醒
+
+---
+
+## 33. COMPLETE SYSTEM INVENTORY / 完整系统清单
+
+The Easier Research platform now contains:
+Easier Research 平台现包含：
+
+- **17 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, responses)
+- **17 个构建器标签页**
+- **10 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality)
+- **10 个响应子视图**
+- **47 Question Types** (see Section 14 for canonical list)
+- **47 种问题类型**（见第14节规范列表）
+- **Full Research Lifecycle:** Design → Build → Preview → Publish → Recruit → Collect → Analyze → Export → Iterate
+- **完整研究生命周期：** 设计 → 构建 → 预览 → 发布 → 招募 → 收集 → 分析 → 导出 → 迭代
 
 ---

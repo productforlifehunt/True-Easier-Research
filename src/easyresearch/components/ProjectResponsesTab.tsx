@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers, TrendingDown, Brain, FileSpreadsheet } from 'lucide-react';
+import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers, TrendingDown, Brain, FileSpreadsheet, Shield } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
@@ -10,13 +10,14 @@ import AITextAnalysis from './AITextAnalysis';
 import AdvancedExport from './AdvancedExport';
 import UXResearchVisualizer from './UXResearchVisualizer';
 import StatisticalAnalysis from './StatisticalAnalysis';
+import ResponseQualityEngine from './ResponseQualityEngine';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats' | 'quality';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -223,6 +224,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
             { id: 'ux_results' as SubView, label: 'UX Results', icon: Layers },
             { id: 'stats' as SubView, label: 'Stats', icon: BarChart3 },
+            { id: 'quality' as SubView, label: 'Quality', icon: Shield },
           ].map(tab => (
             <button
               key={tab.id}
@@ -577,6 +579,16 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                 questions={filteredQuestions}
                 responses={responses}
                 enrollments={enrollments}
+              />
+            </div>
+          )}
+
+          {/* QUALITY VIEW / 质量检测 */}
+          {subView === 'quality' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <ResponseQualityEngine
+                projectId={projectId}
+                questions={filteredQuestions}
               />
             </div>
           )}
