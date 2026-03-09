@@ -252,7 +252,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                   </div>
                 )}
                 <div>
-                  <label className="text-[11px] text-stone-400 mb-1 block">Description / 描述</label>
+                  <label className="text-[11px] text-stone-400 mb-1 block">Description</label>
                   <textarea
                     value={page.description || ''}
                     onChange={e => updatePage(page.id, 'description', e.target.value)}
