@@ -329,11 +329,25 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       );
     }
 
-    // Non-editable (Preview tab)
+    // Non-editable (Preview tab) — still apply style overrides
+    const previewStyle: React.CSSProperties = {
+      ...(customStyle.opacity != null && customStyle.opacity !== 1 ? { opacity: customStyle.opacity } : {}),
+      ...(customStyle.bg_color ? { backgroundColor: customStyle.bg_color } : {}),
+      ...(customStyle.text_color && customStyle.text_color !== 'inherit' ? { color: customStyle.text_color } : {}),
+      ...(customStyle.padding ? { padding: customStyle.padding } : {}),
+      ...(customStyle.margin ? { margin: customStyle.margin } : {}),
+      ...(customStyle.border_radius ? { borderRadius: customStyle.border_radius } : {}),
+      ...(customStyle.border ? { border: customStyle.border } : {}),
+      ...(customStyle.shadow && customStyle.shadow !== 'none' ? { boxShadow: { sm: '0 1px 2px rgba(0,0,0,0.05)', md: '0 4px 6px rgba(0,0,0,0.1)', lg: '0 10px 15px rgba(0,0,0,0.1)', xl: '0 20px 25px rgba(0,0,0,0.1)' }[customStyle.shadow] } : {}),
+      ...(customStyle.text_align ? { textAlign: customStyle.text_align as any } : {}),
+      ...(customStyle.font_size ? { fontSize: customStyle.font_size } : {}),
+      ...(customStyle.font_weight ? { fontWeight: customStyle.font_weight } : {}),
+    };
     return (
       <div
         key={el.id}
         className={`transition-all ${onElementClick ? 'cursor-pointer' : ''} ${isHighlighted ? 'ring-2 ring-emerald-400 rounded-xl' : ''}`}
+        style={previewStyle}
         onClick={() => onElementClick?.(el.id)}
       >
         {content}
