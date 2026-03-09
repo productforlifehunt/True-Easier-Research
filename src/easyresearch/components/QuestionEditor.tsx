@@ -450,7 +450,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap','conjoint','kano'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test','max_diff','design_survey','heatmap','conjoint','kano','sus','csat','ces'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
