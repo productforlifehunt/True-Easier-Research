@@ -29,6 +29,9 @@ import CustomVariablesManager, { type CustomVariable } from './CustomVariablesMa
 import SurveyVersioning from './SurveyVersioning';
 import ABTestingEngine from './ABTestingEngine';
 import ResponseScheduler from './ResponseScheduler';
+import SurveyThemingEngine from './SurveyThemingEngine';
+import DistributionManager from './DistributionManager';
+import AccessibilityChecker from './AccessibilityChecker';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
