@@ -65,32 +65,23 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      {/* Basic Info */}
-      <SectionCard icon={FileText} iconBg="from-emerald-50 to-teal-50" iconColor="text-emerald-600" title="Basic Info">
-        <div className="space-y-3">
-          <InputField label="Title" type="text" value={project.title} onChange={(e) => onUpdateProject({ ...project, title: (e.target as HTMLInputElement).value })} placeholder="Survey title" />
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Description</label>
-            <textarea value={project.description} onChange={(e) => onUpdateProject({ ...project, description: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Survey purpose and goals" />
-          </div>
+      {/* Title & Description — no section header needed */}
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 space-y-3">
+        <InputField label="Title" type="text" value={project.title} onChange={(e) => onUpdateProject({ ...project, title: (e.target as HTMLInputElement).value })} placeholder="Project title" />
+        <div>
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Description</label>
+          <textarea value={project.description} onChange={(e) => onUpdateProject({ ...project, description: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Project purpose and goals" />
         </div>
-      </SectionCard>
+      </div>
 
-      {/* Participant Types — the core configuration */}
-      <SectionCard icon={Users} iconBg="from-violet-50 to-purple-50" iconColor="text-violet-600" title="Participants & Enrollment">
-        <div className="space-y-4">
-          {/* No special consent UI — consent is just a questionnaire_type='consent' using the unified logic builder */}
-
-          {/* Participant Type Manager */}
-          <div className="border-t border-stone-100 pt-4">
-            <ParticipantTypeManager
-              participantTypes={participantTypes}
-              onUpdate={onUpdateParticipantTypes}
-              questionnaires={questionnaires.map(q => ({ id: q.id, title: q.title, questionnaire_type: q.questionnaire_type, assigned_participant_types: (q as any).assigned_participant_types || [] }))}
-            />
-          </div>
-        </div>
-      </SectionCard>
+      {/* Participant Types — no section label wrapper */}
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+        <ParticipantTypeManager
+          participantTypes={participantTypes}
+          onUpdate={onUpdateParticipantTypes}
+          questionnaires={questionnaires.map(q => ({ id: q.id, title: q.title, questionnaire_type: q.questionnaire_type, assigned_participant_types: (q as any).assigned_participant_types || [] }))}
+        />
+      </div>
 
       {/* Features */}
       <SectionCard icon={Settings} iconBg="from-sky-50 to-blue-50" iconColor="text-sky-600" title="Features">
@@ -101,15 +92,47 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Schedule */}
-      <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title="Schedule">
-        <div className="grid grid-cols-2 gap-3">
-          <InputField label="Start Date" type="datetime-local" value={project.start_at || ''} onChange={(e) => onUpdateProject({ ...project, start_at: (e.target as HTMLInputElement).value })} />
-          <InputField label="End Date" type="datetime-local" value={project.end_at || ''} onChange={(e) => onUpdateProject({ ...project, end_at: (e.target as HTMLInputElement).value })} />
+      {/* Study Type — One Time vs Longitudinal */}
+      <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title="Study Type">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Methodology</label>
+            <CustomDropdown
+              options={[
+                { value: 'one_time', label: 'One Time' },
+                { value: 'multi_time', label: 'Longitudinal' },
+              ]}
+              value={project.methodology_type || 'one_time'}
+              onChange={(v) => onUpdateProject({ ...project, methodology_type: v })}
+              placeholder="Select type"
+            />
+          </div>
+
+          {/* Longitudinal-specific: Duration dropdown */}
+          {isLongitudinal && (
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Duration</label>
+              <CustomDropdown options={[{value:'1',label:'1 Day'},{value:'3',label:'3 Days'},{value:'7',label:'1 Week'},{value:'14',label:'2 Weeks'},{value:'30',label:'1 Month'},{value:'90',label:'3 Months'}]} value={String(project.study_duration || '7')} onChange={(v) => onUpdateProject({ ...project, study_duration: parseInt(v) })} placeholder="Duration" />
+            </div>
+          )}
+
+          {/* Start & End Date — always shown */}
+          <div className="grid grid-cols-2 gap-3">
+            <InputField label="Start Date" type="datetime-local" value={project.start_at || ''} onChange={(e) => onUpdateProject({ ...project, start_at: (e.target as HTMLInputElement).value })} />
+            <InputField label="End Date" type="datetime-local" value={project.end_at || ''} onChange={(e) => onUpdateProject({ ...project, end_at: (e.target as HTMLInputElement).value })} />
+          </div>
+
+          {/* Longitudinal toggles */}
+          {isLongitudinal && (
+            <div className="divide-y divide-stone-100">
+              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Do Not Disturb" desc="Let participants set quiet hours" />
+              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Let participants choose when to begin" />
+            </div>
+          )}
         </div>
       </SectionCard>
 
-      {/* Participants limits */}
+      {/* Capacity */}
       <SectionCard icon={Users} iconBg="from-cyan-50 to-teal-50" iconColor="text-cyan-600" title="Capacity">
         <div className="space-y-3">
           <InputField label="Max Participants" type="number" value={project.max_participant || ''} onChange={(e) => onUpdateProject({ ...project, max_participant: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder="Unlimited" />
@@ -127,80 +150,23 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Longitudinal */}
-      {isLongitudinal && (
-        <SectionCard icon={Clock} iconBg="from-indigo-50 to-blue-50" iconColor="text-indigo-600" title="Longitudinal Configuration">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Duration</label>
-                <CustomDropdown options={[{value:'1',label:'1 Day'},{value:'3',label:'3 Days'},{value:'7',label:'1 Week'},{value:'14',label:'2 Weeks'},{value:'30',label:'1 Month'},{value:'90',label:'3 Months'}]} value={String(project.study_duration || '7')} onChange={(v) => onUpdateProject({ ...project, study_duration: parseInt(v) })} placeholder="Duration" />
-              </div>
-              <div>
-                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Frequency</label>
-                <CustomDropdown options={[{value:'hourly',label:'Hourly'},{value:'2hours',label:'Every 2h'},{value:'4hours',label:'Every 4h'},{value:'daily',label:'Daily'},{value:'twice_daily',label:'Twice Daily'},{value:'weekly',label:'Weekly'}]} value={project.survey_frequency || 'daily'} onChange={(v) => onUpdateProject({ ...project, survey_frequency: v })} placeholder="Frequency" />
-              </div>
-            </div>
-            <div className="divide-y divide-stone-100">
-              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Do Not Disturb" desc="Let participants set quiet hours" />
-              <Toggle enabled={project.onboarding_required || false} onChange={(v) => onUpdateProject({ ...project, onboarding_required: v })} label="Onboarding" desc="Show instructions before starting" />
-              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Let participants choose when to begin" />
-            </div>
-            {project.onboarding_required && (
-              <div>
-                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Onboarding Instructions</label>
-                <textarea value={project.onboarding_instruction || ''} onChange={(e) => onUpdateProject({ ...project, onboarding_instruction: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Welcome! This study will track..." />
-              </div>
-            )}
-          </div>
-        </SectionCard>
-      )}
-
-
-      {/* Profile Questions Builder — TODO: wire to profile_question table instead of JSONB */}
-      {/* Profile questions are now stored in the profile_question table, not on the project row */}
-
-      {/* Questionnaire Management */}
-      {isLongitudinal && project.id && (
-        <SectionCard icon={List} iconBg="from-emerald-50 to-teal-50" iconColor="text-emerald-600" title="Questionnaire Management">
-          <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-4">
-            {[{key: 'library' as const, icon: FileText, label: 'Library'}, {key: 'schedule' as const, icon: Calendar, label: 'Schedule'}].map(t => (
-              <button key={t.key} onClick={() => setQuestionnaireTab(t.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${
-                  questionnaireTab === t.key ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400'
-                }`}>
-                <t.icon size={13} /> {t.label}
-              </button>
-            ))}
-          </div>
-          {questionnaireTab === 'library' && (
-            <div className="text-center py-8">
-              <p className="text-[13px] text-stone-400 font-light">Questionnaire library available after saving the project.</p>
-            </div>
-          )}
-          {questionnaireTab === 'schedule' && project.id && (
-            <QuestionnaireScheduler projectId={project.id} studyDuration={project.study_duration || 7} />
-          )}
-        </SectionCard>
-      )}
-
-      {/* Share Survey — last section */}
+      {/* Share Study */}
       <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5">
         <div className="flex items-center gap-2.5 mb-3">
           <Share2 size={16} className="text-emerald-600" />
-          <h3 className="text-[14px] font-semibold text-stone-800">Share Survey</h3>
+          <h3 className="text-[14px] font-semibold text-stone-800">Share Study</h3>
         </div>
         <p className="text-[12px] text-stone-500 mb-4 font-light">Share this link or code with participants.</p>
 
         {!canShare && (
           <div className="p-3 rounded-xl bg-white/80 border border-emerald-100 mb-4">
-            <p className="text-[12px] text-stone-500">Save the survey first to generate a share link.</p>
+            <p className="text-[12px] text-stone-500">Save the project first to generate a share link.</p>
           </div>
         )}
 
         {project.survey_code && (
           <div className="mb-4">
-            <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Survey Code</label>
+            <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Study Code</label>
             <div className="flex items-center gap-2">
               <div className="px-4 py-2.5 rounded-xl bg-white border-2 border-emerald-300">
                 <span className="text-xl font-bold tracking-widest text-emerald-600">{project.survey_code}</span>
@@ -214,7 +180,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         )}
 
         <div>
-          <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Survey Link</label>
+          <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Study Link</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-stone-200">
               <Link2 size={14} className="text-emerald-500 shrink-0" />

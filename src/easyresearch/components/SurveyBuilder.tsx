@@ -997,6 +997,8 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
+  // Notifications tab is handled inside LayoutTabWrapper
+
 
   return (
     <div className="min-h-screen bg-stone-50/50">
