@@ -56,6 +56,8 @@ export const SUPPORTED_QUESTION_TYPES = {
   MAX_DIFF: 'max_diff',
   DESIGN_SURVEY: 'design_survey',
   HEATMAP: 'heatmap',
+  CONJOINT: 'conjoint',
+  KANO: 'kano',
 
   // Layout Types
   SECTION_HEADER: 'section_header',
