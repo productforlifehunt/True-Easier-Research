@@ -229,7 +229,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] text-stone-400 mb-1 block">Slug / 路径</label>
+                    <label className="text-[11px] text-stone-400 mb-1 block">Slug</label>
                     <input
                       value={page.slug}
                       onChange={e => updatePage(page.id, 'slug', e.target.value.replace(/[^a-z0-9-]/g, ''))}
