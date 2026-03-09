@@ -57,6 +57,12 @@ import ScreenerBuilder from './ScreenerBuilder';
 import ResearchBriefGenerator from './ResearchBriefGenerator';
 import MultiLangPreview from './MultiLangPreview';
 import ABTestResults from './ABTestResults';
+import PrototypeTestingEngine from './PrototypeTestingEngine';
+import ConversationalSurveyMode from './ConversationalSurveyMode';
+import ContactListEmailCampaign from './ContactListEmailCampaign';
+import WorkflowAutomationBuilder from './WorkflowAutomationBuilder';
+import SaveAndContinueManager from './SaveAndContinueManager';
+import ShareableReportPortal from './ShareableReportPortal';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
