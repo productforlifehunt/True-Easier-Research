@@ -1,10 +1,55 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo, useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import QuestionRenderer from './QuestionRenderer';
 import AIQuestionWrapper from './AIQuestionWrapper';
 import AIChatbotPopup from './AIChatbotPopup';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
+
+// ── Answer Piping Engine / 答案管道引擎 ──
+// Replaces {{Q1}}, {{Q2}} (1-based index) or {{uuid}} with the participant's prior answer.
+function applyPiping(text: string | undefined | null, allQuestions: any[], responses: Record<string, any>): string {
+  if (!text) return text || '';
+  return text.replace(/\{\{([^}]+)\}\}/g, (match, key: string) => {
+    const trimmed = key.trim();
+    // Try 1-based index like Q1, Q2...
+    const indexMatch = trimmed.match(/^[Qq](\d+)$/);
+    if (indexMatch) {
+      const idx = parseInt(indexMatch[1], 10) - 1;
+      if (idx >= 0 && idx < allQuestions.length) {
+        const val = responses[allQuestions[idx].id];
+        return formatPipedValue(val) || match;
+      }
+    }
+    // Try direct question ID
+    if (responses[trimmed] !== undefined) {
+      return formatPipedValue(responses[trimmed]) || match;
+    }
+    return match;
+  });
+}
+
+function formatPipedValue(val: any): string {
+  if (val === null || val === undefined) return '';
+  if (Array.isArray(val)) return val.join(', ');
+  if (typeof val === 'object') return JSON.stringify(val);
+  return String(val);
+}
+
+// ── Seeded shuffle for stable randomization / 种子随机洗牌 ──
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  const out = [...arr];
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  }
+  for (let i = out.length - 1; i > 0; i--) {
+    h = (h * 16807 + 1) | 0;
+    const j = Math.abs(h) % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 interface QuestionnaireViewProps {
   /** The questionnaire config to render */
