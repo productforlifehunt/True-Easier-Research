@@ -74,6 +74,8 @@ interface QuestionnaireViewProps {
   cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal';
   buttonLabel?: string;
   buttonBorderRadius?: string;
+  /** Theme card style: flat, elevated, outlined */
+  cardStyle?: 'flat' | 'elevated' | 'outlined';
 }
 
 const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
@@ -84,6 +86,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   stopPropagation = false,
   showQuestionCount = true, showEstimatedTime = true, showFrequency = true,
   cardDisplayStyle = 'icon', buttonLabel, buttonBorderRadius,
+  cardStyle = 'elevated',
 }) => {
   const wrap = (fn: () => void) => (e?: React.MouseEvent) => {
     if (stopPropagation) e?.stopPropagation();
@@ -573,10 +576,17 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   const showIcon = cardDisplayStyle === 'icon' || cardDisplayStyle === 'both';
   const showButton = cardDisplayStyle === 'button' || cardDisplayStyle === 'both';
 
+  // Build card classes based on card_style theme
+  const cardClasses = cardStyle === 'flat'
+    ? `w-full ${s.cardPad} rounded-xl bg-white transition-all text-left cursor-pointer hover:bg-stone-50`
+    : cardStyle === 'outlined'
+    ? `w-full ${s.cardPad} rounded-xl bg-white border-2 border-stone-200 transition-all text-left cursor-pointer hover:border-stone-300`
+    : `w-full ${s.cardPad} rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left cursor-pointer`;
+
   return (
     <button type="button"
       onClick={wrap(() => onOpenQuestionnaire(qConfig.id))}
-      className={`w-full ${s.cardPad} rounded-xl bg-white border border-stone-100 shadow-sm hover:shadow-md transition-all text-left cursor-pointer`}>
+      className={cardClasses}>
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <h4 className={`${s.txt} font-semibold text-stone-800`}>{qConfig.title}</h4>
