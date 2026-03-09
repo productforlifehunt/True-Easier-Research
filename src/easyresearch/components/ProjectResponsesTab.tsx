@@ -240,7 +240,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               ))}
             </select>
           )}
-          {subView !== 'participants' && (
+          {(
             <button
               onClick={exportCSV}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
