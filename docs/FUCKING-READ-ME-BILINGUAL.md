@@ -17,6 +17,9 @@
 
 ## 1. WHAT IS Easier Research / 什么是 Easier Research
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Easier Research (branded "Easier") is a sub-app living under `/easyresearch/*` within the larger True-Easier-Research platform. 
 
 Easier Research（品牌名为"Easier"）是一个子应用，位于更大的 True-Easier-Research 平台中的 `/easyresearch/*` 路径下。
