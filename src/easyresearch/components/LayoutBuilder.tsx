@@ -1362,7 +1362,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
 
           {/* Right: Element Config Panel — shows when an element is selected */}
-          <div className="xl:w-[320px] shrink-0">
+          <div className="hidden xl:block xl:w-[320px] shrink-0">
             {editingElement ? (
               <div className="sticky top-24">
                 {renderElementConfig(editingElement)}
