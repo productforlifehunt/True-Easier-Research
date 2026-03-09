@@ -1174,6 +1174,21 @@ const SurveyBuilder: React.FC = () => {
           <ParticipantPanel projectId={projectId} />
         )}
 
+        {/* Webhooks Tab */}
+        {activeTab === 'webhooks' && projectId && (
+          <WebhookManager projectId={projectId} />
+        )}
+
+        {/* Variables Tab */}
+        {activeTab === 'variables' && (
+          <CustomVariablesManager
+            projectId={projectId || ''}
+            surveyCode={project.survey_code}
+            variables={(project as any).custom_variables || []}
+            onUpdate={(vars) => setProject(prev => ({ ...prev, custom_variables: vars } as any))}
+          />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
