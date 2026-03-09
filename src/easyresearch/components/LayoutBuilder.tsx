@@ -1039,9 +1039,9 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left: Tab & Element Editor */}
-          <div className="flex-1 space-y-3">
+        <div className="flex flex-col xl:flex-row gap-4">
+          {/* Left: Tab & Element List (compact) */}
+          <div className="xl:w-[320px] shrink-0 space-y-3">
             {/* Theme & Global Settings — above tab editor */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
               <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Research Design</h5>
@@ -1104,7 +1104,6 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </div>
               </div>
 
-              {/* Bottom nav count */}
               <div className="pt-2 border-t border-stone-200">
                 <p className="text-[10px] text-stone-400">
                   <strong>{layout.tabs.length}</strong> tabs · <strong>{layout.bottom_nav.length}</strong> nav items · 
@@ -1141,90 +1140,77 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             </Droppable>
 
             {activeTab && (
-              <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-                <div className="flex items-center gap-3">
+              <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-3 space-y-2">
+                <div className="flex items-center gap-2">
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Tab Label</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Tab Label</label>
                       <input type="text" value={activeTab.label} onChange={(e) => updateTab(activeTab.id, { label: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Icon</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Icon</label>
                       <select value={activeTab.icon} onChange={(e) => updateTab(activeTab.id, { icon: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                        className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                         {ICON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
                   </div>
                   {layout.tabs.length > 1 && (
-                    <button onClick={() => removeTab(activeTab.id)} className="p-1.5 rounded-lg hover:bg-red-50 mt-4">
+                    <button onClick={() => removeTab(activeTab.id)} className="p-1.5 rounded-lg hover:bg-red-50 mt-3">
                       <Trash2 size={14} className="text-red-400" />
                     </button>
                   )}
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
+                  <h5 className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
                   <button onClick={() => setShowAddElement(!showAddElement)}
                     className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium">
-                    <Plus size={12} /> Add Element
+                    <Plus size={12} /> Add
                   </button>
                 </div>
 
                 {showAddElement && (
-                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3 max-h-[400px] overflow-y-auto">
-                    {/* Layout Elements — first */}
+                  <div className="p-2 bg-stone-50 rounded-xl border border-stone-200 space-y-2 max-h-[300px] overflow-y-auto">
                     <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
-                    <div className="grid grid-cols-3 gap-1.5">
+                    <div className="grid grid-cols-3 gap-1">
                       {LAYOUT_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
-                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
+                          className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-white transition-colors text-[9px] border border-transparent hover:border-stone-200">
+                          {getLucideIcon(et.lucideIcon, 14, 'text-stone-500')}
                           <span className="text-stone-500 font-medium">{et.label}</span>
                         </button>
                       ))}
                     </div>
 
-                    {/* Survey Questionnaires */}
                     {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Questionnaires</p>
-                        <div className="space-y-1">
-                          {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => {
-                            const countOnThisTab = activeTab?.elements.filter(e => e.type === 'questionnaire' && e.config.questionnaire_id === q.id).length || 0;
-                            return (
-                              <button key={q.id} onClick={() => addQuestionnaire(q)}
-                                className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <FileText size={16} className="text-emerald-500 shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-stone-700 font-medium truncate block">{q.title}</span>
-                                  <span className="text-[9px] text-stone-400">{q.questions?.length || 0} questions · {q.estimated_duration || 5} min{q.frequency ? ` · ${q.frequency}` : ''}</span>
-                                </div>
-                                {countOnThisTab > 0 && <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">×{countOnThisTab}</span>}
-                              </button>
-                            );
-                          })}
+                        <div className="space-y-0.5">
+                          {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
+                            <button key={q.id} onClick={() => addQuestionnaire(q)}
+                              className="w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
+                              <FileText size={14} className="text-emerald-500 shrink-0" />
+                              <span className="text-stone-700 font-medium truncate">{q.title}</span>
+                            </button>
+                          ))}
                         </div>
                       </>
                     )}
 
-                    {/* Forms & Components (consent/screening/profile/help) */}
                     {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).length > 0 && (
                       <>
                         <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Forms & Components</p>
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).map(q => {
                             const TypeIcon = q.questionnaire_type === 'consent' ? Shield : q.questionnaire_type === 'screening' ? ClipboardCheck : q.questionnaire_type === 'profile' ? User : q.questionnaire_type === 'help' ? HelpCircle : q.questionnaire_type === 'onboarding' ? Layers : Plus;
                             const iconColor = q.questionnaire_type === 'consent' ? 'text-amber-500' : q.questionnaire_type === 'screening' ? 'text-orange-500' : q.questionnaire_type === 'profile' ? 'text-blue-500' : q.questionnaire_type === 'help' ? 'text-violet-500' : 'text-emerald-500';
                             return (
                               <button key={q.id} onClick={() => addElement(q.questionnaire_type as any, { title: q.title, questionnaire_id: q.id })}
-                                className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <TypeIcon size={16} className={`${iconColor} shrink-0`} />
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-stone-700 font-medium truncate block">{q.title}</span>
-                                  <span className="text-[9px] text-stone-400">{q.questionnaire_type} · {q.questions?.length || 0} fields</span>
-                                </div>
+                                className="w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
+                                <TypeIcon size={14} className={`${iconColor} shrink-0`} />
+                                <span className="text-stone-700 font-medium truncate">{q.title}</span>
                               </button>
                             );
                           })}
@@ -1232,17 +1218,13 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    {/* Function Elements */}
                     <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Function Elements</p>
-                    <div className="grid grid-cols-2 gap-1.5">
+                    <div className="grid grid-cols-2 gap-1">
                       {FUNCTION_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200">
-                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
-                          <div>
-                            <span className="text-stone-600 font-medium">{et.label}</span>
-                            <p className="text-[9px] text-stone-400">{et.desc}</p>
-                          </div>
+                          className="flex items-center gap-1.5 p-1.5 rounded-lg text-left hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
+                          {getLucideIcon(et.lucideIcon, 14, 'text-stone-500')}
+                          <span className="text-stone-600 font-medium">{et.label}</span>
                         </button>
                       ))}
                     </div>
@@ -1252,49 +1234,40 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 <Droppable droppableId={`elements-${activeTab.id}`} type="ELEMENT">
                   {(provided, snapshot) => (
                     <div ref={provided.innerRef} {...provided.droppableProps}
-                      className={`space-y-1 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}>
+                      className={`space-y-0.5 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}>
                       {activeTab.elements.length === 0 ? (
-                        <div className="py-8 text-center text-[12px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
-                          Drag elements here or click "Add Element" above
+                        <div className="py-6 text-center text-[11px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
+                          Click "Add" above to add elements
                         </div>
                       ) : (
                         activeTab.elements.map((el, elIdx) => (
                           <Draggable key={el.id} draggableId={`el-${el.id}`} index={elIdx}>
                             {(provided, snapshot) => (
                               <div ref={provided.innerRef} {...provided.draggableProps}
-                                className={`rounded-xl border bg-white transition-all ${
+                                className={`rounded-lg border bg-white transition-all ${
                                   snapshot.isDragging ? 'shadow-lg border-emerald-300 ring-2 ring-emerald-100' : 'border-stone-100 hover:border-stone-200'
                                 } ${editingElementId === el.id ? 'border-emerald-300 ring-1 ring-emerald-100' : ''}`}>
                                 <div
-                                  className={`flex items-center gap-2 px-3 py-2.5 group cursor-pointer transition-colors ${editingElementId === el.id ? 'bg-emerald-50/30' : ''}`}
+                                  className={`flex items-center gap-1.5 px-2 py-2 group cursor-pointer transition-colors ${editingElementId === el.id ? 'bg-emerald-50/30' : ''}`}
                                   onClick={() => setEditingElementId(editingElementId === el.id ? null : el.id)}>
                                   <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100" onClick={(e) => e.stopPropagation()}>
-                                    <GripVertical size={14} className="text-stone-300" />
+                                    <GripVertical size={12} className="text-stone-300" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      {getLucideIcon(getElementIcon(el.type), 14, 'text-stone-500')}
-                                      <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
-                                      <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
-                                      {el.config.width && el.config.width !== '100%' && (
-                                        <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">{el.config.width}</span>
-                                      )}
+                                    <div className="flex items-center gap-1.5">
+                                      {getLucideIcon(getElementIcon(el.type), 12, 'text-stone-500')}
+                                      <span className="text-[11px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                    <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-1 hover:bg-stone-100 rounded">
-                                      {el.config.visible !== false ? <Eye size={12} className="text-emerald-500" /> : <EyeOff size={12} className="text-stone-300" />}
+                                    <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-0.5 hover:bg-stone-100 rounded">
+                                      {el.config.visible !== false ? <Eye size={11} className="text-emerald-500" /> : <EyeOff size={11} className="text-stone-300" />}
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); setEditingElementId(el.id); }} className="p-1 hover:bg-stone-100 rounded">
-                                      <Edit3 size={12} className="text-stone-400" />
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="p-1 hover:bg-red-50 rounded">
-                                      <Trash2 size={12} className="text-red-400" />
+                                    <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="p-0.5 hover:bg-red-50 rounded">
+                                      <Trash2 size={11} className="text-red-400" />
                                     </button>
                                   </div>
                                 </div>
-                                {/* Inline config panel — expands below the element row */}
-                                {editingElementId === el.id && renderElementConfig(el)}
                               </div>
                             )}
                           </Draggable>
@@ -1306,11 +1279,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </Droppable>
               </div>
             )}
-
           </div>
 
-          {/* Right: Live Phone Preview — uses the SAME renderer as Preview tab */}
-          <div className="lg:w-[430px] shrink-0">
+          {/* Center: Live Phone Preview */}
+          <div className="flex-1 flex justify-center">
             <div className="sticky top-24">
               {/* Device selector */}
               <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
@@ -1354,6 +1326,23 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               />
               <p className="text-[11px] text-stone-400 text-center mt-2 font-light">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
             </div>
+          </div>
+
+          {/* Right: Element Config Panel — shows when an element is selected */}
+          <div className="xl:w-[320px] shrink-0">
+            {editingElement ? (
+              <div className="sticky top-24">
+                {renderElementConfig(editingElement)}
+              </div>
+            ) : (
+              <div className="sticky top-24">
+                <div className="bg-stone-50 rounded-xl border border-dashed border-stone-200 p-6 text-center">
+                  <Edit3 size={20} className="text-stone-300 mx-auto mb-2" />
+                  <p className="text-[12px] text-stone-400 font-medium">Select an element</p>
+                  <p className="text-[10px] text-stone-300 mt-1">Click any element in the list or preview to edit its properties</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
