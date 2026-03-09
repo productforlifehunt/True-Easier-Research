@@ -234,7 +234,16 @@ const ParticipantAppView: React.FC = () => {
       }
 
       toast.success('Response submitted!');
-      setSubmittedQuestionnaireIds(prev => new Set([...prev, questionnaireId]));
+
+      // Runtime: quality + webhooks (non-blocking) / 运行时：质量+Webhook（非阻塞）
+      const qualityFlags = runQualityChecks(responses, {}, 60); // No per-question timing in app view
+      fireWebhooks(projectId!, 'response.completed', {
+        enrollment_id: enrollmentId,
+        questionnaire_id: questionnaireId,
+        quality_score: qualityFlags.quality_score,
+        quality_flags: qualityFlags.flags,
+      });
+
       setActiveQuestionnaireId(null);
       setCurrentPageIndex(0);
 
