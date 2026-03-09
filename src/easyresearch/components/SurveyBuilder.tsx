@@ -1231,6 +1231,32 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Theming Tab / 主题定制 */}
+        {activeTab === 'theming' && (
+          <SurveyThemingEngine
+            projectId={projectId || ''}
+            theme={(project as any).theme_config}
+            onUpdate={(themeConfig) => setProject(prev => ({ ...prev, theme_config: themeConfig } as any))}
+          />
+        )}
+
+        {/* Distribution Tab / 分发管理 */}
+        {activeTab === 'distribute' && projectId && (
+          <DistributionManager
+            projectId={projectId}
+            surveyCode={project.survey_code}
+            surveyTitle={project.title}
+          />
+        )}
+
+        {/* Accessibility Tab / 无障碍检查 */}
+        {activeTab === 'accessibility' && (
+          <AccessibilityChecker
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+            theme={(project as any).theme_config}
+          />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
