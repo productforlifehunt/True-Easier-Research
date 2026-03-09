@@ -953,6 +953,9 @@ const SurveyBuilder: React.FC = () => {
     { id: 'translations' as TabId, label: 'i18n / 翻译' },
     { id: 'variables' as TabId, label: 'Variables / 变量' },
     ...(projectId ? [{ id: 'webhooks' as TabId, label: 'Webhooks' }] : []),
+    ...(projectId ? [{ id: 'versioning' as TabId, label: 'Versions / 版本' }] : []),
+    ...(projectId ? [{ id: 'ab_testing' as TabId, label: 'A/B Test / 实验' }] : []),
+    ...(projectId ? [{ id: 'scheduler' as TabId, label: 'Schedule / 调度' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
