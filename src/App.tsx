@@ -248,6 +248,7 @@ function App() {
                     <Route path="/easyresearch/templates" element={<TemplateLibrary />} />
                     <Route path="/easyresearch/pricing" element={<PricingPage />} />
                     <Route path="/easyresearch/features" element={<FeaturesPage />} />
+                    <Route path="/easyresearch/page/:projectId/:slug" element={<PublicPageRenderer />} />
                     
                     {/* Unified dashboard - shows both owned & enrolled studies */}
                     <Route path="/easyresearch/dashboard" element={<ParticipantHome />} />
