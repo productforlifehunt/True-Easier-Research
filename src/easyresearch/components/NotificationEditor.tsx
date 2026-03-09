@@ -367,30 +367,30 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-stone-400">Loading notifications... / 加载通知中...</div>;
+    return <div className="text-center py-12 text-stone-400">Loading notifications...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Project-level notifications / 项目级通知 */}
+    <div className="space-y-8">
+      {/* Section 1: Project-level notifications */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-base font-semibold text-stone-800">Project Notifications / 项目通知</h3>
-            <p className="text-xs text-stone-400 mt-0.5">Not linked to any questionnaire / 不关联任何问卷</p>
+            <h3 className="text-base font-semibold text-stone-800">Project Notifications</h3>
+            <p className="text-xs text-stone-400 mt-0.5">Not linked to any questionnaire</p>
           </div>
           <button
             onClick={addProjectNotification}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
           >
-            <Plus size={14} /> Add / 添加
+            <Plus size={14} /> Add
           </button>
         </div>
 
         {projectConfigs.length === 0 && (
           <div className="text-center py-8 border-2 border-dashed border-stone-200 rounded-xl">
             <Bell size={24} className="mx-auto text-stone-300 mb-2" />
-            <p className="text-xs text-stone-400">No project-level notifications / 暂无项目级通知</p>
+            <p className="text-xs text-stone-400">No project-level notifications</p>
           </div>
         )}
 
@@ -399,36 +399,72 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
         </div>
       </div>
 
-      {/* Per-questionnaire notifications / 按问卷通知 */}
-      {surveyQuestionnaires.map(q => {
-        const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+      {/* Section 2: Questionnaire Notifications */}
+      {surveyQuestionnaires.length > 0 && (
+        <div>
+          <h3 className="text-base font-semibold text-stone-800 mb-1">Questionnaire Notifications</h3>
+          <p className="text-xs text-stone-400 mb-4">Notifications linked to specific questionnaires</p>
+          <div className="space-y-5">
+            {surveyQuestionnaires.map(q => {
+              const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+              return (
+                <div key={q.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-stone-700">{q.title}</h4>
+                    <button
+                      onClick={() => addQuestionnaireNotification(q.id)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                    >
+                      <Plus size={12} /> Add
+                    </button>
+                  </div>
+                  {qConfigs.length === 0 && (
+                    <div className="text-center py-4 border border-dashed border-stone-200 rounded-xl">
+                      <p className="text-[11px] text-stone-300">No notifications configured</p>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {qConfigs.map(renderConfigCard)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Section 3: Forms & Components Notifications — only show items that have notifications */}
+      {componentQuestionnaires.length > 0 && (() => {
+        const componentsWithNotifs = componentQuestionnaires.filter(c => configs.some(nc => nc.questionnaire_id === c.id));
+        if (componentsWithNotifs.length === 0) return null;
         return (
-          <div key={q.id}>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-sm font-semibold text-stone-700">📋 {q.title}</h3>
-                <p className="text-[11px] text-stone-400">Questionnaire notifications / 问卷通知</p>
-              </div>
-              <button
-                onClick={() => addQuestionnaireNotification(q.id)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
-              >
-                <Plus size={12} /> Add / 添加
-              </button>
-            </div>
-
-            {qConfigs.length === 0 && (
-              <div className="text-center py-6 border border-dashed border-stone-200 rounded-xl">
-                <p className="text-[11px] text-stone-300">No notifications for this questionnaire / 此问卷暂无通知</p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              {qConfigs.map(renderConfigCard)}
+          <div>
+            <h3 className="text-base font-semibold text-stone-800 mb-1">Forms & Components Notifications</h3>
+            <p className="text-xs text-stone-400 mb-4">Notifications linked to forms and components</p>
+            <div className="space-y-5">
+              {componentsWithNotifs.map(q => {
+                const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+                return (
+                  <div key={q.id}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-stone-700">{q.title}</h4>
+                      <button
+                        onClick={() => addQuestionnaireNotification(q.id)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                      >
+                        <Plus size={12} /> Add
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {qConfigs.map(renderConfigCard)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
-      })}
+      })()}
     </div>
   );
 };

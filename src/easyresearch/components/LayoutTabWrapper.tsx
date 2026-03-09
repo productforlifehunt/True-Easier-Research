@@ -55,7 +55,7 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
             }`}
           >
             {tab.icon}
-            {tab.label} / {tab.labelCn}
+            {tab.label}
           </button>
         ))}
       </div>

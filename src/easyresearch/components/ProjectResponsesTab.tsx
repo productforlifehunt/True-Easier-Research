@@ -257,7 +257,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
           <p className="text-[14px] font-medium text-stone-600 mb-1">No responses yet</p>
           <p className="text-[12px] text-stone-400">Responses will appear here as participants complete your questionnaires.</p>
         </div>
-      ) : subView !== 'participants' && (
+      ) : (
         <>
           {/* SUMMARY VIEW */}
           {subView === 'summary' && (
