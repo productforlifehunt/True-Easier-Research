@@ -1002,6 +1002,9 @@ Each participant type is a row in the `participant_type` table. It belongs to on
 
 ## 11. Layout and design / 布局和设计
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 There are only two layouts for this project, 1) desktop layout, for all desktop screen sizes, whether small or large; and we are using only one header, one footer, one siderbar for the entire desktop layout, the header and footer should be displayed on all public pages, and the sidebar should be displayed on all dashboard pages, 2) mobile layout, for all mobile and tablet screen sizes; and we are using only one mobile header, one mobile footer for all mobile pages, and they should persist on all pages, whether it's a research project or not
 
 此项目只有两种布局，1）桌面布局，适用于所有桌面屏幕尺寸，无论大小；我们为整个桌面布局只使用一个标题、一个页脚、一个侧边栏，标题和页脚应在所有公共页面上显示，侧边栏应在所有仪表板页面上显示，2）移动布局，适用于所有移动和平板屏幕尺寸；我们为所有移动页面只使用一个移动标题、一个移动页脚，它们应在所有页面上持续存在，无论是否是研究项目
