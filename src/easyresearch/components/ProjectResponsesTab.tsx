@@ -582,6 +582,16 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               />
             </div>
           )}
+
+          {/* QUALITY VIEW / 质量检测 */}
+          {subView === 'quality' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <ResponseQualityEngine
+                projectId={projectId}
+                questions={filteredQuestions}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
