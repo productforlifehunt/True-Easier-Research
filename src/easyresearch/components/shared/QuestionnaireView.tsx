@@ -102,6 +102,12 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
   // ── Per-question timer / 每题计时器 ──
   const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({});
   const timerRef = useRef<{ questionId: string | null; startedAt: number }>({ questionId: null, startedAt: 0 });
+  // Track when participant first opened this questionnaire (for speeder detection)
+  const sessionStartRef = useRef<number>(Date.now());
+  // Quality flags state / 质量标记状态
+  const [qualityWarning, setQualityWarning] = useState<string | null>(null);
+  // Completion state for custom thank-you / redirect
+  const [showThankYou, setShowThankYou] = useState(false);
 
   // ── Randomization (stable per session) / 随机化（每次会话稳定） ──
   const qs = useMemo(() => {
@@ -152,7 +158,34 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     }
   }, [currentPageIndex, qConfig.track_time_per_question]);
 
-  // ── Enhanced submit with timings / 带计时数据的提交 ──
+  // ── Quality checks / 质量检查 ──
+  const SCALE_TYPES = ['slider', 'bipolar_scale', 'rating', 'likert_scale', 'nps'];
+
+  const detectStraightlining = useCallback((): boolean => {
+    if (!qConfig.detect_straightlining) return false;
+    const scaleQs = qs.filter((q: any) => SCALE_TYPES.includes(normalizeLegacyQuestionType(q.question_type)));
+    if (scaleQs.length < 3) return false;
+    const vals = scaleQs.map((q: any) => responses[q.id]).filter(v => v !== undefined && v !== null);
+    if (vals.length < 3) return false;
+    return vals.every(v => String(v) === String(vals[0]));
+  }, [qs, responses, qConfig.detect_straightlining]);
+
+  const detectGibberishText = useCallback((): boolean => {
+    if (!qConfig.detect_gibberish) return false;
+    const textQs = qs.filter((q: any) => ['text_short', 'text_long'].includes(normalizeLegacyQuestionType(q.question_type)));
+    for (const q of textQs) {
+      const val = responses[q.id];
+      if (!val || typeof val !== 'string' || val.length < 5) continue;
+      // Simple gibberish heuristics: too many consonants in a row, or repeated chars
+      const repeatedChar = /(.)\1{4,}/.test(val);
+      const noVowels = val.length > 10 && !/[aeiouAEIOU\u4e00-\u9fff]/.test(val);
+      const allSameWord = val.split(/\s+/).length > 3 && new Set(val.toLowerCase().split(/\s+/)).size === 1;
+      if (repeatedChar || noVowels || allSameWord) return true;
+    }
+    return false;
+  }, [qs, responses, qConfig.detect_gibberish]);
+
+  // ── Enhanced submit with timings + quality checks / 带计时和质量检查的提交 ──
   const handleSubmit = useCallback((qId: string) => {
     // Flush final timer
     if (qConfig.track_time_per_question && timerRef.current.questionId) {
@@ -161,11 +194,44 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
         ...questionTimings,
         [timerRef.current.questionId]: (questionTimings[timerRef.current.questionId] || 0) + elapsed,
       };
-      // Store timings in responses under special key
       onResponse('__question_timings__', finalTimings);
     }
+
+    // ── Quality flag aggregation / 质量标记聚合 ──
+    const qualityFlags: string[] = [];
+
+    // Speeder check / 抢答检查
+    const sessionSeconds = (Date.now() - sessionStartRef.current) / 1000;
+    if (qConfig.min_completion_time_seconds && sessionSeconds < qConfig.min_completion_time_seconds) {
+      qualityFlags.push('speeder');
+    }
+
+    // Straightlining check / 直线作答检查
+    if (detectStraightlining()) qualityFlags.push('straightlining');
+
+    // Gibberish check / 乱码检查
+    if (detectGibberishText()) qualityFlags.push('gibberish');
+
+    // Store quality flags in responses / 将质量标记存储在响应中
+    if (qualityFlags.length > 0) {
+      onResponse('__quality_flags__', qualityFlags);
+      onResponse('__completion_time_seconds__', Math.round(sessionSeconds));
+    }
+
+    // If redirect_url or custom thank-you, handle post-submit
+    if (qConfig.custom_thank_you_message || qConfig.redirect_url) {
+      onSubmit?.(qId);
+      setShowThankYou(true);
+      if (qConfig.redirect_url) {
+        setTimeout(() => {
+          window.location.href = qConfig.redirect_url!;
+        }, 3000);
+      }
+      return;
+    }
+
     onSubmit?.(qId);
-  }, [onSubmit, onResponse, questionTimings, qConfig.track_time_per_question]);
+  }, [onSubmit, onResponse, questionTimings, qConfig.track_time_per_question, qConfig.min_completion_time_seconds, qConfig.detect_straightlining, qConfig.detect_gibberish, qConfig.custom_thank_you_message, qConfig.redirect_url, detectStraightlining, detectGibberishText]);
 
   // ── Expanded view / 展开视图 ──
   if (activeQuestionnaireId === qConfig.id) {
