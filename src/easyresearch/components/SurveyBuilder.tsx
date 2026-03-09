@@ -1139,11 +1139,13 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
-        {/* Flow Visualizer Tab / 流程可视化 */}
+        {/* Flow Visualizer Tab / 流程可视化 — editable, synced with Logic tab */}
         {activeTab === 'flow' && (
           <SurveyFlowVisualizer
             questionnaires={questionnaireConfigs}
             logicRules={logicRules}
+            projectId={projectId}
+            onUpdateLogic={setLogicRules}
           />
         )}
 
@@ -1164,6 +1166,8 @@ const SurveyBuilder: React.FC = () => {
             questionnaires={questionnaireConfigs}
             participantTypes={participantTypes}
             studyDuration={project.study_duration || 7}
+            projectTitle={project.title}
+            projectDescription={project.description}
             onUpdate={setAppLayout}
             onUpdateQuestionnaire={(id, updates) => {
               setQuestionnaireConfigs(prev => prev.map(q => q.id === id ? { ...q, ...updates } : q));

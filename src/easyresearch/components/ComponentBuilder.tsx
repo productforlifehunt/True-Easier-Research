@@ -19,8 +19,8 @@ interface ComponentBuilderProps {
 const COMPONENT_TYPES: { type: ComponentType; label: string; icon: React.ReactNode; desc: string; defaultTitle: string }[] = [
   { type: 'onboarding', label: 'Onboarding', icon: <Layers size={16} className="text-teal-500" />, desc: 'Welcome screens and instructions shown to new participants / 向新参与者展示的欢迎界面和说明', defaultTitle: 'Onboarding' },
   { type: 'consent', label: 'Consent Form', icon: <Shield size={16} className="text-amber-500" />, desc: 'Informed consent agreements participants must accept', defaultTitle: 'Consent Form' },
-  { type: 'screening', label: 'Screening', icon: <ClipboardCheck size={16} className="text-orange-500" />, desc: 'Eligibility screening questions with disqualification logic', defaultTitle: 'Screening Questions' },
-  { type: 'profile', label: 'Profile', icon: <User size={16} className="text-blue-500" />, desc: 'Participant demographics, contact info, and baseline data', defaultTitle: 'Participant Profile' },
+  { type: 'screening', label: 'Screening', icon: <ClipboardCheck size={16} className="text-orange-500" />, desc: 'Eligibility screening questions with disqualification logic, demographics, etc. / 带取消资格逻辑的资格筛选问题、人口统计等', defaultTitle: 'Screening Questions' },
+  { type: 'profile', label: 'Profile', icon: <User size={16} className="text-blue-500" />, desc: 'Participant demographics, contact info, baseline data, etc. / 参与者人口统计、联系信息、基线数据等', defaultTitle: 'Participant Profile' },
   { type: 'help', label: 'Help / FAQ', icon: <HelpCircle size={16} className="text-violet-500" />, desc: 'Help sections, FAQ, and support contact for participants', defaultTitle: 'Help & FAQ' },
   { type: 'custom', label: 'Custom', icon: <Plus size={16} className="text-emerald-500" />, desc: 'Create any custom component with your own name and fields', defaultTitle: 'Custom Component' },
 ];

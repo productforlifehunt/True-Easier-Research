@@ -14,6 +14,8 @@ interface LayoutTabWrapperProps {
   questionnaires: QuestionnaireConfig[];
   participantTypes: ParticipantType[];
   studyDuration: number;
+  projectTitle?: string;
+  projectDescription?: string;
   onUpdate: (layout: AppLayout) => void;
   onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
@@ -31,6 +33,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   questionnaires,
   participantTypes,
   studyDuration,
+  projectTitle,
+  projectDescription,
   onUpdate,
   onUpdateQuestionnaire,
 }) => {
@@ -39,12 +43,12 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   return (
     <div>
       {/* Sub-tab navigation / 子标签导航 */}
-      <div className="flex items-center gap-1 mb-5 bg-stone-100/80 rounded-xl p-1 w-fit">
+      <div className="grid grid-cols-4 gap-1 mb-5 bg-stone-100/80 rounded-xl p-1 w-full">
         {SUB_TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveSubTab(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
               activeSubTab === tab.id
                 ? 'bg-white text-stone-800 shadow-sm'
                 : 'text-stone-400 hover:text-stone-600'
@@ -63,6 +67,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           questionnaires={questionnaires}
           participantTypes={participantTypes}
           studyDuration={studyDuration}
+          projectTitle={projectTitle}
+          projectDescription={projectDescription}
           onUpdate={onUpdate}
           onUpdateQuestionnaire={onUpdateQuestionnaire}
         />

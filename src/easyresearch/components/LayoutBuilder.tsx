@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3 } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3, Link2, Calendar, CheckSquare, Maximize2, Minus, MousePointer, Image, Shield, ClipboardCheck, User, Layers, icons } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
@@ -97,32 +97,34 @@ interface LayoutBuilderProps {
   questionnaires: QuestionnaireConfig[];
   participantTypes: ParticipantType[];
   studyDuration?: number;
+  projectTitle?: string;
+  projectDescription?: string;
   onUpdate: (layout: AppLayout) => void;
   onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
 
 const ICON_OPTIONS = [
-  { value: 'Home', label: '🏠 Home' },
-  { value: 'FileText', label: '📄 Survey' },
-  { value: 'BarChart3', label: '📊 Progress' },
-  { value: 'HelpCircle', label: '❓ Help' },
-  { value: 'Settings', label: '⚙️ Settings' },
-  { value: 'Layout', label: '📐 Layout' },
+  { value: 'Home', label: 'Home', icon: 'Home' },
+  { value: 'FileText', label: 'Survey', icon: 'FileText' },
+  { value: 'BarChart3', label: 'Progress', icon: 'BarChart3' },
+  { value: 'HelpCircle', label: 'Help', icon: 'HelpCircle' },
+  { value: 'Settings', label: 'Settings', icon: 'Settings' },
+  { value: 'Layout', label: 'Layout', icon: 'Layout' },
 ];
 
-const STATIC_CONTENT_ELEMENTS = [
-  { type: 'ecogram', label: 'Ecogram', icon: '🔗', desc: 'Care network diagram' },
-  { type: 'progress', label: 'Progress', icon: '📊', desc: 'Study progress overview' },
-  { type: 'timeline', label: 'Timeline', icon: '📅', desc: 'Study timeline view' },
+const FUNCTION_ELEMENTS = [
+  { type: 'ecogram', label: 'Ecogram', lucideIcon: 'Link2', desc: 'Care network diagram' },
+  { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
+  { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
 ];
 
 const LAYOUT_ELEMENTS = [
-  { type: 'text_block', label: 'Text Block', icon: '📄', desc: 'Custom text or instructions' },
-  { type: 'todo_list', label: 'To-Do List', icon: '✅', desc: 'Task cards slider' },
-  { type: 'spacer', label: 'Spacer', icon: '↕️', desc: 'Add vertical space' },
-  { type: 'divider', label: 'Divider', icon: '➖', desc: 'Horizontal divider line' },
-  { type: 'button', label: 'Button', icon: '🔘', desc: 'Action button' },
-  { type: 'image', label: 'Image', icon: '🖼️', desc: 'Image block' },
+  { type: 'text_block', label: 'Text Block', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
+  { type: 'todo_list', label: 'To-Do List', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
+  { type: 'spacer', label: 'Spacer', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
+  { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
+  { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
+  { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
 ];
 
 const WIDTH_PRESETS = [
@@ -182,7 +184,7 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
   };
 };
 
-const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, onUpdate, onUpdateQuestionnaire }) => {
+const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, projectTitle, projectDescription, onUpdate, onUpdateQuestionnaire }) => {
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
@@ -304,9 +306,15 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
   const editingElement = activeTab?.elements.find(e => e.id === editingElementId);
 
+  const getLucideIcon = (iconName: string, size = 14, className = 'text-stone-500') => {
+    const Icon = icons[iconName as keyof typeof icons];
+    return Icon ? <Icon size={size} className={className} /> : <FileText size={size} className={className} />;
+  };
+
   const getElementIcon = (type: string) => {
-    const all = [...STATIC_CONTENT_ELEMENTS, ...LAYOUT_ELEMENTS];
-    return all.find(e => e.type === type)?.icon || '📋';
+    const all = [...FUNCTION_ELEMENTS, ...LAYOUT_ELEMENTS];
+    const found = all.find(e => e.type === type);
+    return found?.lucideIcon || 'FileText';
   };
 
   const getElementLabel = (el: LayoutElement) => {
@@ -730,10 +738,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         )}
 
         {el.type === 'image' && (
-          <div>
+          <div className="space-y-2">
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Image URL</label>
             <input type="text" value={el.config.image_url || ''} onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://..." />
+            <p className="text-[9px] text-stone-400">Paste an external URL or upload an image to your project's storage.</p>
           </div>
         )}
 
@@ -1025,7 +1034,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           <div className="flex-1 space-y-3">
             {/* Theme & Global Settings — above tab editor */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">App Design</h5>
+              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Research Design</h5>
               
               {/* Header */}
               <div className="space-y-2">
@@ -1037,8 +1046,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   <div>
                     <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
                     <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                      placeholder="Auto (uses tab name)"
+                      placeholder={projectTitle || 'Auto (uses tab name)'}
                       className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                    {projectTitle && !layout.header_title && (
+                      <p className="text-[9px] text-stone-400 mt-1">Default: synced from Settings title "{projectTitle}"</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1135,6 +1147,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                 {showAddElement && (
                   <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3 max-h-[400px] overflow-y-auto">
+                    {/* Layout Elements — first */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {LAYOUT_ELEMENTS.map(et => (
+                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
+                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
+                          <span className="text-stone-500 font-medium">{et.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
                     {/* Survey Questionnaires */}
                     {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
@@ -1145,7 +1169,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                             return (
                               <button key={q.id} onClick={() => addQuestionnaire(q)}
                                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <span className="text-lg">📋</span>
+                                <FileText size={16} className="text-emerald-500 shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
                                   <span className="text-[9px] text-stone-400">{q.questions?.length || 0} questions · {q.estimated_duration || 5} min{q.frequency ? ` · ${q.frequency}` : ''}</span>
@@ -1158,17 +1182,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    {/* Components (consent/screening/profile/help) */}
-                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).length > 0 && (
+                    {/* Forms & Components (consent/screening/profile/help) */}
+                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Components</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Forms & Components</p>
                         <div className="space-y-1">
-                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).map(q => {
-                            const typeIcon = q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'screening' ? '📝' : q.questionnaire_type === 'profile' ? '👤' : q.questionnaire_type === 'help' ? '❓' : '🧩';
+                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).map(q => {
+                            const TypeIcon = q.questionnaire_type === 'consent' ? Shield : q.questionnaire_type === 'screening' ? ClipboardCheck : q.questionnaire_type === 'profile' ? User : q.questionnaire_type === 'help' ? HelpCircle : q.questionnaire_type === 'onboarding' ? Layers : Plus;
+                            const iconColor = q.questionnaire_type === 'consent' ? 'text-amber-500' : q.questionnaire_type === 'screening' ? 'text-orange-500' : q.questionnaire_type === 'profile' ? 'text-blue-500' : q.questionnaire_type === 'help' ? 'text-violet-500' : 'text-emerald-500';
                             return (
                               <button key={q.id} onClick={() => addElement(q.questionnaire_type as any, { title: q.title, questionnaire_id: q.id })}
                                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <span className="text-lg">{typeIcon}</span>
+                                <TypeIcon size={16} className={`${iconColor} shrink-0`} />
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
                                   <span className="text-[9px] text-stone-400">{q.questionnaire_type} · {q.questions?.length || 0} fields</span>
@@ -1180,26 +1205,17 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content Elements</p>
+                    {/* Function Elements */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Function Elements</p>
                     <div className="grid grid-cols-2 gap-1.5">
-                      {STATIC_CONTENT_ELEMENTS.map(et => (
+                      {FUNCTION_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
                           className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200">
-                          <span>{et.icon}</span>
+                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
                           <div>
                             <span className="text-stone-600 font-medium">{et.label}</span>
                             <p className="text-[9px] text-stone-400">{et.desc}</p>
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {LAYOUT_ELEMENTS.map(et => (
-                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
-                          <span className="text-lg">{et.icon}</span>
-                          <span className="text-stone-500 font-medium">{et.label}</span>
                         </button>
                       ))}
                     </div>
@@ -1230,7 +1246,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-sm">{getElementIcon(el.type)}</span>
+                                      {getLucideIcon(getElementIcon(el.type), 14, 'text-stone-500')}
                                       <span className="text-[12px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
                                       <span className="text-[9px] uppercase font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded shrink-0">{el.type.replace('_', ' ')}</span>
                                       {el.config.width && el.config.width !== '100%' && (
