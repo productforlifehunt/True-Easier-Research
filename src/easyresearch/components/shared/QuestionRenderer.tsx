@@ -252,6 +252,183 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     }
     case 'section_header':
       return null;
+    case 'video_block': {
+      const videoUrl = question.question_config?.video_url || '';
+      const ytMatch = videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+      const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
+      if (ytMatch) {
+        return <iframe src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=${question.question_config?.autoplay ? 1 : 0}&mute=${question.question_config?.muted ? 1 : 0}&loop=${question.question_config?.loop ? 1 : 0}`} className="w-full rounded-xl" style={{ height: '240px' }} allowFullScreen allow="autoplay" />;
+      }
+      if (vimeoMatch) {
+        return <iframe src={`https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=${question.question_config?.autoplay ? 1 : 0}&muted=${question.question_config?.muted ? 1 : 0}&loop=${question.question_config?.loop ? 1 : 0}`} className="w-full rounded-xl" style={{ height: '240px' }} allowFullScreen allow="autoplay" />;
+      }
+      return videoUrl ? (
+        <video src={videoUrl} controls autoPlay={question.question_config?.autoplay} loop={question.question_config?.loop} muted={question.question_config?.muted} poster={question.question_config?.poster_url} className="w-full rounded-xl" />
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🎬 No video configured</div>;
+    }
+    case 'audio_block': {
+      const audioUrl = question.question_config?.audio_url || '';
+      return audioUrl ? (
+        <audio src={audioUrl} controls autoPlay={question.question_config?.autoplay} loop={question.question_config?.loop} className="w-full" />
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🔊 No audio configured</div>;
+    }
+    case 'embed_block': {
+      const embedUrl = question.question_config?.embed_url || '';
+      const embedH = question.question_config?.embed_height || '400px';
+      return embedUrl ? (
+        <iframe src={embedUrl} className="w-full rounded-xl border border-stone-200" style={{ height: embedH }} allowFullScreen={question.question_config?.allow_fullscreen !== false} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" />
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🌐 No embed configured</div>;
+    }
+    case 'card_sort': {
+      const cards = question.question_config?.cards || [];
+      const cats = question.question_config?.categories || [];
+      const sortType = question.question_config?.sort_type || 'open';
+      const csVal: Record<string, string[]> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
+      return (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-1.5">
+            {cards.filter((c: string) => !Object.values(csVal).flat().includes(c)).map((card: string, i: number) => (
+              <div key={i} className={`${pad} rounded-lg border-2 border-dashed border-stone-300 bg-white ${txtSm} text-stone-700 cursor-grab`}>{card}</div>
+            ))}
+          </div>
+          {sortType !== 'open' && (
+            <div className="grid grid-cols-2 gap-2">
+              {cats.map((cat: string, i: number) => (
+                <div key={i} className="border border-stone-200 rounded-xl p-2 min-h-[60px]">
+                  <p className={`${txtXs} font-semibold text-stone-500 mb-1`}>{cat}</p>
+                  <div className="space-y-1">
+                    {(csVal[cat] || []).map((c: string, j: number) => (
+                      <div key={j} className={`${txtXs} px-2 py-1 rounded bg-emerald-50 border border-emerald-200 text-emerald-700`}>{c}</div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {sortType === 'open' && <p className={`${txtXs} text-stone-400 italic`}>Drag cards to create and organize into your own categories</p>}
+        </div>
+      );
+    }
+    case 'tree_test': {
+      const tree = question.question_config?.tree_data || [];
+      const taskDesc = question.question_config?.task_description || '';
+      const renderNode = (node: any, depth: number = 0): any => (
+        <div key={node.label} style={{ paddingLeft: depth * 16 }}>
+          <button onClick={() => onResponse(question.id, { path: node.label, timestamp: Date.now() })}
+            className={`w-full text-left px-3 py-2 rounded-lg ${txt} hover:bg-emerald-50 transition-colors ${value?.path === node.label ? 'bg-emerald-100 text-emerald-700 font-medium' : 'text-stone-700'}`}>
+            {node.children?.length > 0 ? '📁 ' : '📄 '}{node.label}
+          </button>
+          {node.children?.map((child: any) => renderNode(child, depth + 1))}
+        </div>
+      );
+      return (
+        <div className="space-y-2">
+          {taskDesc && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>📋 {taskDesc}</div>}
+          <div className="border border-stone-200 rounded-xl p-2 max-h-[300px] overflow-y-auto">
+            {tree.map((node: any) => renderNode(node))}
+          </div>
+        </div>
+      );
+    }
+    case 'first_click': {
+      const imgUrl = question.question_config?.test_image_url || '';
+      const task = question.question_config?.task_description || '';
+      return (
+        <div className="space-y-2">
+          {task && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>🖱️ {task}</div>}
+          {imgUrl ? (
+            <div className="relative cursor-crosshair" onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+              const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+              onResponse(question.id, { x: Number(x), y: Number(y), timestamp: Date.now() });
+            }}>
+              <img src={imgUrl} alt="Test" className="w-full rounded-xl border border-stone-200" />
+              {value?.x != null && (
+                <div className="absolute w-6 h-6 -ml-3 -mt-3 rounded-full border-3 border-red-500 bg-red-500/30"
+                  style={{ left: `${value.x}%`, top: `${value.y}%` }} />
+              )}
+            </div>
+          ) : <div className={`h-32 rounded-xl border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center ${txtSm} text-stone-400`}>Upload test image</div>}
+        </div>
+      );
+    }
+    case 'five_second_test': {
+      const imgUrl5 = question.question_config?.test_image_url || '';
+      const dur = question.question_config?.test_duration ?? 5;
+      const followup = question.question_config?.followup_question || 'What do you remember?';
+      // Simple implementation: show image, then show follow-up
+      const hasStarted = value?.started;
+      const hasFinished = value?.finished;
+      if (!hasStarted) {
+        return (
+          <div className="text-center space-y-3">
+            <p className={`${txt} text-stone-600`}>You'll see an image for {dur} seconds. Pay attention!</p>
+            <button onClick={() => {
+              onResponse(question.id, { started: true, startTime: Date.now() });
+              setTimeout(() => onResponse(question.id, { started: true, finished: true, startTime: Date.now() - dur * 1000 }), dur * 1000);
+            }} className={`px-6 py-2 rounded-xl bg-emerald-500 text-white ${txt} font-medium hover:bg-emerald-600`}>Start Test</button>
+          </div>
+        );
+      }
+      if (!hasFinished && imgUrl5) {
+        return <img src={imgUrl5} alt="Test" className="w-full rounded-xl" />;
+      }
+      return (
+        <div className="space-y-2">
+          <p className={`${txt} text-stone-700 font-medium`}>{followup}</p>
+          <textarea value={value?.answer || ''} onChange={(e) => onResponse(question.id, { ...value, answer: e.target.value })}
+            className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} rows={3} placeholder="Your answer..." />
+        </div>
+      );
+    }
+    case 'preference_test': {
+      const aUrl = question.question_config?.variant_a_url || '';
+      const bUrl = question.question_config?.variant_b_url || '';
+      const aLabel = question.question_config?.variant_a_label || 'Design A';
+      const bLabel = question.question_config?.variant_b_label || 'Design B';
+      const followup = question.question_config?.followup_question || '';
+      return (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            {[{ url: aUrl, label: aLabel, val: 'A' }, { url: bUrl, label: bLabel, val: 'B' }].map(v => (
+              <div key={v.val} onClick={() => onResponse(question.id, { choice: v.val, reason: value?.reason })}
+                className={`cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${value?.choice === v.val ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-stone-200 hover:border-stone-300'}`}>
+                {v.url ? <img src={v.url} alt={v.label} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400">{v.label}</div>}
+                <p className={`text-center py-2 ${txtSm} font-medium ${value?.choice === v.val ? 'text-emerald-600' : 'text-stone-600'}`}>{v.label}</p>
+              </div>
+            ))}
+          </div>
+          {followup && value?.choice && (
+            <div>
+              <p className={`${txtSm} text-stone-500 mb-1`}>{followup}</p>
+              <textarea value={value?.reason || ''} onChange={(e) => onResponse(question.id, { ...value, reason: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl border border-stone-200 ${txtSm} resize-none`} rows={2} placeholder="Your reason..." />
+            </div>
+          )}
+        </div>
+      );
+    }
+    case 'prototype_test': {
+      const protoUrl = question.question_config?.prototype_url || '';
+      const protoH = question.question_config?.embed_height || '600px';
+      const tasks = question.question_config?.task_list || [];
+      return (
+        <div className="space-y-2">
+          {tasks.length > 0 && (
+            <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200`}>
+              <p className={`${txtSm} text-blue-700 font-medium mb-1`}>📋 Tasks:</p>
+              {tasks.map((t: any, i: number) => (
+                <p key={i} className={`${txtXs} text-blue-600`}>{i + 1}. {t.task}</p>
+              ))}
+            </div>
+          )}
+          {protoUrl ? (
+            <iframe src={protoUrl} className="w-full rounded-xl border border-stone-200" style={{ height: protoH }} allowFullScreen sandbox="allow-scripts allow-same-origin allow-popups allow-forms" />
+          ) : <div className={`h-32 rounded-xl border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center ${txtSm} text-stone-400`}>Configure prototype URL</div>}
+        </div>
+      );
+    }
     default:
       return <p className={`${txtSm} text-stone-400 italic`}>Unsupported: {question.question_type}</p>;
   }
