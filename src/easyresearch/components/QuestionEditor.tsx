@@ -370,12 +370,15 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
           >
-            <optgroup label="Layout">
+            <optgroup label="Layout & Media">
               <option value="section_header">Section / Tab</option>
               <option value="instruction">Instruction Block</option>
               <option value="text_block">Text Block</option>
               <option value="divider">Divider Line</option>
               <option value="image_block">Image</option>
+              <option value="video_block">Video</option>
+              <option value="audio_block">Audio</option>
+              <option value="embed_block">Embed / Webpage</option>
             </optgroup>
             <optgroup label="Text">
               <option value="text_short">Short Text</option>
@@ -405,6 +408,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="email">Email</option>
               <option value="phone">Phone Number</option>
               <option value="file_upload">File Upload</option>
+            </optgroup>
+            <optgroup label="UX Research">
+              <option value="card_sort">Card Sort</option>
+              <option value="tree_test">Tree Test</option>
+              <option value="first_click">First Click Test</option>
+              <option value="five_second_test">5-Second Test</option>
+              <option value="preference_test">Preference Test</option>
+              <option value="prototype_test">Prototype Test</option>
             </optgroup>
           </select>
         </div>
