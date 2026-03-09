@@ -238,8 +238,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                 </div>
                 {isIntervalFrequency(nc.frequency) && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Start / 开始</label>
+                     <div>
+                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Start</label>
                       <select
                         value={nc.interval_start_hour}
                         onChange={(e) => updateConfig(nc.id, { interval_start_hour: parseInt(e.target.value) })}
