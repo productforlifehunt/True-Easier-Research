@@ -305,10 +305,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             )}
 
-            {/* Minutes before + DND */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Minutes Before / 提前分钟</label>
+                <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Minutes Before</label>
                 <input
                   type="number"
                   min={0}
