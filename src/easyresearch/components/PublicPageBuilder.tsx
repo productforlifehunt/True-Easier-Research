@@ -317,8 +317,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   onChange={e => updateBlock(page.id, block.id, 'content', e.target.value)}
                                   className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 resize-none"
                                   rows={4}
-                                  placeholder="Enter text content...          />
-                              )}
+                                  placeholder="Enter text content...                   )}
                               {block.type === 'image' && (
                                 <input
                                   value={block.image_url || ''}
@@ -326,11 +325,11 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   className="w-full px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
                                   placeholder="Image URL / 图片URL"
                     />
-                              )}
+                  )}
                               {block.type === 'spacer' && (
                                 <div>
                                   <label className="text-[11px] text-stone-400 mb-1 block">Height / 高度</label>
-                                  <input
+                         <input
                                     value={block.style_height || '32px'}
                                     onChange={e => updateBlock(page.id, block.id, 'style_height', e.target.value)}
                                     className="w-32 px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
