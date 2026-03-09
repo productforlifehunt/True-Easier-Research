@@ -171,9 +171,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               />
             </div>
 
-            {/* Body / 正文 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Body / 正文</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Body</label>
               <textarea
                 value={nc.body}
                 onChange={(e) => updateConfig(nc.id, { body: e.target.value })}
