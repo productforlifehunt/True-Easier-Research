@@ -251,12 +251,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         </div>
       </div>
 
-      {/* PARTICIPANTS SUB-VIEW */}
-      {subView === 'participants' && (
-        <ProjectParticipantsTab projectId={projectId} />
-      )}
-
-      {subView !== 'participants' && responses.length === 0 ? (
+      {responses.length === 0 ? (
         <div className="bg-white rounded-xl border border-stone-100 p-16 text-center">
           <MessageSquare size={32} className="text-stone-200 mx-auto mb-3" />
           <p className="text-[14px] font-medium text-stone-600 mb-1">No responses yet</p>
