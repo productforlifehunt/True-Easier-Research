@@ -21,6 +21,8 @@ import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
 import SurveyFlowVisualizer from './SurveyFlowVisualizer';
+import SurveyTranslationManager from './SurveyTranslationManager';
+import ParticipantPanel from './ParticipantPanel';
 import QuotaManager from './QuotaManager';
 import { useI18n } from '../hooks/useI18n';
 
