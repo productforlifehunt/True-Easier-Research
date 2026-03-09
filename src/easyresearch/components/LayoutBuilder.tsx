@@ -85,6 +85,7 @@ export interface AppLayout {
   bottom_nav: { icon: string; label: string; tab_id: string }[];
   show_header: boolean;
   header_title: string;
+  header_description?: string;
   theme: {
     primary_color: string;
     background_color: string;
