@@ -559,6 +559,27 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               />
             </div>
           )}
+
+          {/* UX RESULTS VIEW / UX 研究结果 */}
+          {subView === 'ux_results' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <UXResearchVisualizer
+                questions={filteredQuestions}
+                responses={responses}
+              />
+            </div>
+          )}
+
+          {/* STATS VIEW / 统计分析 */}
+          {subView === 'stats' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <StatisticalAnalysis
+                questions={filteredQuestions}
+                responses={responses}
+                enrollments={enrollments}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
