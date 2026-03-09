@@ -730,6 +730,11 @@ const SurveyBuilder: React.FC = () => {
           randomize_questions: qc.randomize_questions ?? false,
           enable_piping: qc.enable_piping ?? false,
           track_time_per_question: qc.track_time_per_question ?? false,
+          min_completion_time_seconds: qc.min_completion_time_seconds ?? null,
+          detect_straightlining: qc.detect_straightlining ?? false,
+          detect_gibberish: qc.detect_gibberish ?? false,
+          custom_thank_you_message: qc.custom_thank_you_message || null,
+          redirect_url: qc.redirect_url || null,
         }));
         await supabase.from('questionnaire').upsert(allQPayloads, { onConflict: 'id' });
 
