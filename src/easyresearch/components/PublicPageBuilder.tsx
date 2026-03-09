@@ -174,11 +174,11 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-stone-800">Public Pages / 公开页面</h3>
-          <p className="text-xs text-stone-400 mt-0.5">Build recruitment, introduction, and landing pages for your study / 为您的研究构建招募、介绍和落地页</p>
+          <h3 className="text-base font-semibold text-stone-800">Public Pages</h3>
+          <p className="text-xs text-stone-400 mt-0.5">Build recruitment, introduction, and landing pages for your study</p>
         </div>
         <button onClick={addPage} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors">
-          <Plus size={14} /> Add Page / 添加页面
+          <Plus size={14} /> Add Page
         </button>
       </div>
 
