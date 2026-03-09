@@ -83,6 +83,9 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [isRecording, setIsRecording] = useState<string | null>(null);
   const [questionsPerPage, setQuestionsPerPage] = useState<number | null>(1); // null = unlimited
+  const [surveyStartTime] = useState<number>(Date.now()); // Track when survey started / 追踪问卷开始时间
+  const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({}); // Per-question time / 每题用时
+  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
     if (projectId) {
