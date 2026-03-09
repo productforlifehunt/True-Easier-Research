@@ -1619,6 +1619,7 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 7 | Export | AdvancedExport | Multi-format export / 多格式导出 |
 | 8 | UX Results | UXResearchVisualizer | Heatmaps, card sort, tree test / 热图、卡片分类、树状测试 |
 | 9 | Stats | StatisticalAnalysis | Chi-square, t-test, weighting / 卡方、T检验、加权 |
+| 10 | Quality | ResponseQualityEngine | Fraud detection, quality scoring / 欺诈检测、质量评分 |
 
 ---
 
