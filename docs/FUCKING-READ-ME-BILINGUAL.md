@@ -2111,18 +2111,106 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 61. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
+## 62. RESEARCH TEMPLATES LIBRARY / 研究模板库
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ResearchTemplatesLibrary.tsx`
+- 12 professional templates: SUS, NPS, CSAT, Usability Test, Card Sort, Tree Test, Diary Study, Kano, Conjoint, Heuristic Eval, A11y Audit, MaxDiff / 12个专业模板
+- Category filtering, popularity sorting, tag-based search / 类别筛选、热门排序、标签搜索
+- Template preview modal with section breakdown / 带章节分解的模板预览弹窗
+- One-click apply to project / 一键应用到项目
+- Builder tab: `templates` / 构建器标签页：`templates`
+
+---
+
+## 63. DATA VISUALIZATION STUDIO / 数据可视化工作室
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/DataVisualizationStudio.tsx`
+- 8 chart types: Bar, Pie, Line, Donut, Scatter, Heatmap, Radar, Treemap / 8种图表类型
+- Drag-to-arrange dashboard canvas with configurable widths (1/3, 1/2, full) / 可拖拽仪表板画布，支持配置宽度
+- 6 color schemes, 6 aggregation modes / 6种配色方案、6种聚合模式
+- Real-time chart preview with mock data / 带模拟数据的实时图表预览
+- Builder tab: `visualization` / 构建器标签页：`visualization`
+
+---
+
+## 64. SCREENER BUILDER / 筛选器构建器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ScreenerBuilder.tsx`
+- Visual qualification criteria editor with AND/OR logic / 带AND/OR逻辑的可视化资格标准编辑器
+- Per-option qualify/disqualify toggle / 每选项合格/不合格切换
+- Estimated qualification rate calculator / 预计合格率计算器
+- Interactive preview mode simulating participant experience / 模拟参与者体验的交互式预览模式
+- Flow visualization (Start → Q1 → Q2 → Qualified) / 流程可视化
+- Builder tab: `screener` / 构建器标签页：`screener`
+
+---
+
+## 65. RESEARCH BRIEF GENERATOR / 研究简报生成器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ResearchBriefGenerator.tsx`
+- AI-powered proposal builder with 9 configurable sections / AI驱动的提案构建器，含9个可配置章节
+- Sections: Background, Objectives, Methodology, Participants, Timeline, Deliverables, Ethics, Budget, Risks / 章节：背景、目标、方法论、参与者、时间线、交付物、伦理、预算、风险
+- 7 methodology presets, 5 timeline options / 7种方法论预设、5种时间线选项
+- Export to Markdown, copy to clipboard / 导出为Markdown、复制到剪贴板
+- Builder tab: `brief` / 构建器标签页：`brief`
+
+---
+
+## 66. MULTI-LANGUAGE PREVIEW / 多语言预览
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/MultiLangPreview.tsx`
+- Side-by-side language comparison with 10 supported languages / 并排语言比较，支持10种语言
+- Languages: EN, ZH, ES, FR, DE, JA, KO, PT, AR, HI
+- Translation coverage dashboard with completion percentages / 翻译覆盖率仪表板含完成百分比
+- Desktop/mobile device toggle for responsive preview / 桌面/移动设备切换响应式预览
+- Builder tab: `lang_preview` / 构建器标签页：`lang_preview`
+
+---
+
+## 67. A/B TEST RESULTS DASHBOARD / A/B测试结果仪表板
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ABTestResults.tsx`
+- Multi-variant comparison with statistical significance testing / 多变体比较含统计显著性检验
+- 5 metrics: Completion Rate, Avg Time, Drop-off, Satisfaction, Conversion / 5个指标
+- Configurable confidence levels (90%, 95%, 99%) / 可配置置信度水平
+- Winner detection with z-score and p-value calculations / 带z分数和p值计算的胜者检测
+- Visual bar chart comparison / 可视化柱状图比较
+- Builder tab: `ab_results` / 构建器标签页：`ab_results`
+
+---
+
+## 68. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **39 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, responses)
-- **39 个构建器标签页**
+- **45 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, templates, visualization, screener, brief, lang preview, ab results, responses)
+- **45 个构建器标签页**
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Power Analysis → Personas → Journey Maps → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Annotate → Analyze → Sentiment → Cohort Compare → Benchmark → Calendar → Stakeholder Report → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
-- **完整研究生命周期：** 设计 → 功效分析 → 用户画像 → 旅程图 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 标注 → 分析 → 情感分析 → 队列比较 → 对标 → 日历 → 利益相关者报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
+- **12 Research Templates** (SUS, NPS, CSAT, Usability Test, Card Sort, Tree Test, Diary Study, Kano, Conjoint, Heuristic Eval, A11y Audit, MaxDiff)
+- **12 个研究模板**
+- **Full Research Lifecycle:** Templates → Brief → Power Analysis → Personas → Journey Maps → Screener → Consent/Ethics → Theme → Build → Preview → Multi-Lang Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Annotate → Analyze → Visualize → Sentiment → Cohort Compare → A/B Results → Benchmark → Calendar → Stakeholder Report → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
+- **完整研究生命周期：** 模板 → 简报 → 功效分析 → 用户画像 → 旅程图 → 筛选器 → 知情同意/伦理 → 主题 → 构建 → 预览 → 多语言预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 标注 → 分析 → 可视化 → 情感分析 → 队列比较 → A/B结果 → 对标 → 日历 → 利益相关者报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
 
 ---

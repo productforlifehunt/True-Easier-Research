@@ -51,6 +51,12 @@ import ThemeAnnotator from './ThemeAnnotator';
 import ResearchCalendar from './ResearchCalendar';
 import StakeholderDashboard from './StakeholderDashboard';
 import ParticipantCRM from './ParticipantCRM';
+import ResearchTemplatesLibrary from './ResearchTemplatesLibrary';
+import DataVisualizationStudio from './DataVisualizationStudio';
+import ScreenerBuilder from './ScreenerBuilder';
+import ResearchBriefGenerator from './ResearchBriefGenerator';
+import MultiLangPreview from './MultiLangPreview';
+import ABTestResults from './ABTestResults';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -126,7 +132,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -1388,6 +1394,36 @@ const SurveyBuilder: React.FC = () => {
         {/* Participant CRM Tab / 参与者CRM */}
         {activeTab === 'crm' && projectId && (
           <ParticipantCRM projectId={projectId} />
+        )}
+
+        {/* Research Templates Library / 研究模板库 */}
+        {activeTab === 'templates' && projectId && (
+          <ResearchTemplatesLibrary projectId={projectId} />
+        )}
+
+        {/* Data Visualization Studio / 数据可视化工作室 */}
+        {activeTab === 'visualization' && projectId && (
+          <DataVisualizationStudio projectId={projectId} />
+        )}
+
+        {/* Screener Builder / 筛选器构建器 */}
+        {activeTab === 'screener' && projectId && (
+          <ScreenerBuilder projectId={projectId} />
+        )}
+
+        {/* Research Brief Generator / 研究简报生成器 */}
+        {activeTab === 'brief' && projectId && (
+          <ResearchBriefGenerator projectId={projectId} projectTitle={project.title} />
+        )}
+
+        {/* Multi-Language Preview / 多语言预览 */}
+        {activeTab === 'lang_preview' && projectId && (
+          <MultiLangPreview projectId={projectId} />
+        )}
+
+        {/* A/B Test Results / A/B测试结果 */}
+        {activeTab === 'ab_results' && projectId && (
+          <ABTestResults projectId={projectId} />
         )}
 
         {/* Responses Tab */}
