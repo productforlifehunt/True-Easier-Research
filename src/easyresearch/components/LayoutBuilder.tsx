@@ -736,10 +736,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         )}
 
         {el.type === 'image' && (
-          <div>
+          <div className="space-y-2">
             <label className="block text-[11px] font-medium text-stone-400 mb-1">Image URL</label>
             <input type="text" value={el.config.image_url || ''} onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://..." />
+            <p className="text-[9px] text-stone-400">Paste an external URL or upload an image to your project's storage.</p>
           </div>
         )}
 
