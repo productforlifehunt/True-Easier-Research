@@ -1295,6 +1295,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                     </button>
                                   </div>
                                 </div>
+                                {/* Inline config panel — expands below the element row */}
+                                {editingElementId === el.id && (
+                                  <div className="border-t border-stone-100 bg-stone-50/50 p-2 xl:hidden">
+                                    {renderElementConfig(el)}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </Draggable>
@@ -1356,7 +1362,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </div>
 
           {/* Right: Element Config Panel — shows when an element is selected */}
-          <div className="xl:w-[320px] shrink-0">
+          <div className="hidden xl:block xl:w-[320px] shrink-0">
             {editingElement ? (
               <div className="sticky top-24">
                 {renderElementConfig(editingElement)}
