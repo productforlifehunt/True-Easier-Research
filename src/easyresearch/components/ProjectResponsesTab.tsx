@@ -386,6 +386,18 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                             )}
                           </div>
                         )}
+
+                        {/* Advanced per-type analytics / 高级题型分析 */}
+                        {['nps', 'sus', 'csat', 'ces', 'likert_scale', 'rating', 'slider', 'bipolar_scale', 'max_diff', 'kano'].includes(q.question_type) && (
+                          <div className="mt-4 pt-4 border-t border-stone-100">
+                            <AdvancedQuestionAnalytics
+                              questionType={q.question_type}
+                              responses={responses.filter(r => r.question_id === q.id)}
+                              questionConfig={q.question_config}
+                              options={q.options?.map((o: any) => o.option_text)}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
