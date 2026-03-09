@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers } from 'lucide-react';
+import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers, TrendingDown, Brain, FileSpreadsheet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
 import CrossTabAnalysis from './CrossTabAnalysis';
+import FunnelAnalysis from './FunnelAnalysis';
+import AITextAnalysis from './AITextAnalysis';
+import AdvancedExport from './AdvancedExport';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -213,6 +216,9 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'individual' as SubView, label: 'Individual', icon: User },
             { id: 'table' as SubView, label: 'Table', icon: Table2 },
             { id: 'cross_tab' as SubView, label: 'Cross-Tab', icon: ArrowLeftRight },
+            { id: 'funnel' as SubView, label: 'Funnel', icon: TrendingDown },
+            { id: 'ai_text' as SubView, label: 'AI Text', icon: Brain },
+            { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
           ].map(tab => (
             <button
               key={tab.id}
@@ -511,6 +517,41 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               <CrossTabAnalysis
                 questions={filteredQuestions}
                 responses={responses}
+              />
+            </div>
+          )}
+
+          {/* FUNNEL VIEW / 漏斗分析 */}
+          {subView === 'funnel' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <FunnelAnalysis
+                projectId={projectId}
+                questionnaires={questionnaires}
+              />
+            </div>
+          )}
+
+          {/* AI TEXT VIEW / AI 文本分析 */}
+          {subView === 'ai_text' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <AITextAnalysis
+                projectId={projectId}
+                responses={responses}
+                questions={filteredQuestions}
+              />
+            </div>
+          )}
+
+          {/* EXPORT VIEW / 高级导出 */}
+          {subView === 'export' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <AdvancedExport
+                projectId={projectId}
+                projectTitle={questionnaires[0]?.title || 'Export'}
+                responses={responses}
+                questions={filteredQuestions}
+                enrollments={enrollments}
+                questionnaires={questionnaires}
               />
             </div>
           )}

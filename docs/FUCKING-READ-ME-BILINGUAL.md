@@ -1492,3 +1492,125 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 **Source of truth / 权威来源:** `src/easyresearch/constants/questionTypes.ts`
 
 ---
+
+## 19. PARTICIPANT PANEL & SEGMENTATION / 参与者面板与分组
+
+<!-- CRC STARTS -->
+- Panel management is accessed via the "Panel / 面板" tab in the survey builder.
+- 面板管理通过调查构建器中的"Panel / 面板"标签访问。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/ParticipantPanel.tsx`
+- **功能 / Features:**
+  - Full participant table with sort, search, bulk select / 完整的参与者表格，支持排序、搜索、批量选择
+  - Custom segments with multi-filter rules (status, type, response count, quality) / 自定义分组，支持多条件过滤
+  - Quality flags display (speeder, straightlining, gibberish) / 质量标记显示
+  - Bulk actions: export, remove, flag / 批量操作：导出、移除、标记
+  - Stats cards: total, active, completed, flagged, avg responses / 统计卡片
+  - CSV export of filtered participants / 过滤后参与者的 CSV 导出
+
+---
+
+## 20. FUNNEL & DROP-OFF ANALYSIS / 漏斗与流失分析
+
+<!-- CRC STARTS -->
+- Funnel analysis lives inside the Responses tab as a "Funnel" sub-view.
+- 漏斗分析位于回复标签内的"Funnel"子视图中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/FunnelAnalysis.tsx`
+- **功能 / Features:**
+  - Per-question completion funnel with bar visualization / 每个问题的完成漏斗条形图
+  - Drop-off rate calculation between consecutive questions / 连续问题之间的流失率计算
+  - Average time-per-question from `__question_timings__` data / 从 `__question_timings__` 数据获取每个问题的平均用时
+  - Summary stats: completion rate, worst drop-off point, avg time / 摘要统计
+  - Questionnaire-level filtering / 问卷级别过滤
+
+---
+
+## 21. AI TEXT & SENTIMENT ANALYSIS / AI 文本与情感分析
+
+<!-- CRC STARTS -->
+- AI analysis uses the OpenRouter API (gemini-2.0-flash) for theme extraction and sentiment.
+- AI 分析使用 OpenRouter API（gemini-2.0-flash）进行主题提取和情感分析。
+- Local word frequency computation runs without AI (instant). / 本地词频计算无需 AI（即时）。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/AITextAnalysis.tsx`
+- **功能 / Features:**
+  - Automatic word frequency cloud (local, no API) / 自动词频云（本地，无需 API）
+  - AI-powered theme extraction with example responses / AI 驱动的主题提取及示例回复
+  - Sentiment breakdown: positive/neutral/negative counts / 情感分布
+  - Key insights generation / 关键发现生成
+  - Raw response browser / 原始回复浏览器
+
+---
+
+## 22. ADVANCED DATA EXPORT / 高级数据导出
+
+<!-- CRC STARTS -->
+- Export lives inside the Responses tab as an "Export" sub-view.
+- 导出位于回复标签内的"Export"子视图中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/AdvancedExport.tsx`
+- **功能 / Features:**
+  - **CSV Wide:** One row per participant, columns per question / 宽格式：每行一个参与者
+  - **CSV Long:** One row per response (R/Python-friendly) / 长格式：每行一条回复
+  - **SPSS:** CSV + .sps syntax file with variable labels / SPSS：CSV + 语法文件
+  - **JSON:** Nested structured export / JSON：嵌套结构化导出
+  - Configurable: date format (ISO/local/unix), missing value, metadata, timings, quality flags / 可配置项
+  - UTF-8 BOM support for Excel compatibility / UTF-8 BOM 支持 Excel 兼容
+
+---
+
+## 23. MULTI-LANGUAGE SURVEY SUPPORT / 多语言调查支持
+
+<!-- CRC STARTS -->
+- Translations are stored in `question_config.translations` JSONB per question.
+- 翻译存储在每个问题的 `question_config.translations` JSONB 中。
+- Active locales list stored in `question_config.active_locales`.
+- 活跃语言列表存储在 `question_config.active_locales` 中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/SurveyTranslationManager.tsx`
+- **Supported locales / 支持的语言:** en, zh, es, fr, de, ja, ko, pt, ar, hi, ru, th, vi, ms (14 languages / 14种语言)
+- **功能 / Features:**
+  - Side-by-side translation editor (source → target) / 并排翻译编辑器
+  - AI auto-translate via OpenRouter (batch up to 50 questions) / AI 自动翻译
+  - Coverage stats per locale / 每种语言的覆盖率统计
+  - Option-level translation / 选项级别翻译
+  - Saves back to `question` table `question_config` column / 保存回 `question` 表
+
+---
+
+## 24. COMPLETE BUILDER TAB INVENTORY / 完整构建器标签清单
+
+| # | Tab ID | Label | Component | Description |
+|---|--------|-------|-----------|-------------|
+| 1 | `settings` | Settings / 设置 | SurveySettings | Project configuration / 项目配置 |
+| 2 | `questionnaires` | Questionnaires / 问卷 | QuestionnaireList | Survey content editor / 调查内容编辑器 |
+| 3 | `components` | Components / 组件 | ComponentBuilder | Non-survey instruments / 非调查工具 |
+| 4 | `logic` | Logic / 逻辑 | SurveyLogic | Skip/show/hide rules / 跳转规则 |
+| 5 | `flow` | Flow / 流程 | SurveyFlowVisualizer | Survey flow diagram / 调查流程图 |
+| 6 | `layout` | Layout / 布局 | LayoutBuilder | Participant app UI / 参与者 App UI |
+| 7 | `preview` | Preview / 预览 | SurveyPreview | Live preview / 实时预览 |
+| 8 | `participants` | Participants / 参与者 | ProjectParticipantsTab | Basic participant list / 基础参与者列表 |
+| 9 | `panel` | Panel / 面板 | ParticipantPanel | Advanced panel & segmentation / 高级面板与分组 |
+| 10 | `quotas` | Quotas / 配额 | QuotaManager | Sample quota management / 样本配额管理 |
+| 11 | `translations` | i18n / 翻译 | SurveyTranslationManager | Multi-language support / 多语言支持 |
+| 12 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
+
+### Response Sub-Views / 回复子视图
+
+| # | Sub-View | Component | Description |
+|---|----------|-----------|-------------|
+| 1 | Summary | Built-in + AdvancedQuestionAnalytics | Statistical visualizations / 统计可视化 |
+| 2 | Individual | Built-in | Per-participant review / 按参与者查看 |
+| 3 | Table | Built-in | Filterable spreadsheet / 可过滤电子表格 |
+| 4 | Cross-Tab | CrossTabAnalysis | Frequency matrix / 频率矩阵 |
+| 5 | Funnel | FunnelAnalysis | Drop-off analysis / 流失分析 |
+| 6 | AI Text | AITextAnalysis | Sentiment & themes / 情感与主题 |
+| 7 | Export | AdvancedExport | Multi-format export / 多格式导出 |
+
+---

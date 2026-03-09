@@ -21,6 +21,8 @@ import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
 import SurveyFlowVisualizer from './SurveyFlowVisualizer';
+import SurveyTranslationManager from './SurveyTranslationManager';
+import ParticipantPanel from './ParticipantPanel';
 import QuotaManager from './QuotaManager';
 import { useI18n } from '../hooks/useI18n';
 
@@ -97,7 +99,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -941,7 +943,9 @@ const SurveyBuilder: React.FC = () => {
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
     ...(projectId ? [{ id: 'participants' as TabId, label: t('project.participants') }] : []),
+    ...(projectId ? [{ id: 'panel' as TabId, label: 'Panel / 面板' }] : []),
     ...(projectId ? [{ id: 'quotas' as TabId, label: 'Quotas / 配额' }] : []),
+    { id: 'translations' as TabId, label: 'i18n / 翻译' },
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1143,6 +1147,29 @@ const SurveyBuilder: React.FC = () => {
             }}
           />
         )}
+        {/* Translations Tab / 翻译 */}
+        {activeTab === 'translations' && (
+          <SurveyTranslationManager
+            projectId={projectId || ''}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+            onQuestionsUpdate={(updatedQuestions) => {
+              // Map updated questions back to their questionnaires
+              setQuestionnaireConfigs(prev => prev.map(qc => ({
+                ...qc,
+                questions: (qc.questions || []).map(q => {
+                  const updated = updatedQuestions.find(uq => uq.id === q.id);
+                  return updated || q;
+                }),
+              })));
+            }}
+          />
+        )}
+
+        {/* Panel Tab / 参与者面板 */}
+        {activeTab === 'panel' && projectId && (
+          <ParticipantPanel projectId={projectId} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
