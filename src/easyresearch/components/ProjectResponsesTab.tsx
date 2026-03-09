@@ -504,6 +504,16 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               </div>
             </div>
           )}
+
+          {/* CROSS-TAB VIEW / 交叉分析 */}
+          {subView === 'cross_tab' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <CrossTabAnalysis
+                questions={filteredQuestions}
+                responses={responses}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
