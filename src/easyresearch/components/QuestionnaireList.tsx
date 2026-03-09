@@ -30,6 +30,11 @@ export interface QuestionnaireConfig {
   }>;
   ai_chatbot_enabled?: boolean;
   notifications?: NotificationConfig[];
+  // A/B Test fields
+  is_ab_test?: boolean;
+  ab_variant_name?: string;
+  ab_group_id?: string;
+  ab_split_percentage?: number;
 }
 
 interface QuestionnaireListProps {
