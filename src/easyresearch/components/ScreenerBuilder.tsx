@@ -230,7 +230,4 @@ const ScreenerBuilder: React.FC<Props> = ({ projectId }) => {
   );
 };
 
-// Need useMemo import
-import { useMemo } from 'react';
-
 export default ScreenerBuilder;

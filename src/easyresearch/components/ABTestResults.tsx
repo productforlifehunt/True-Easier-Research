@@ -192,7 +192,4 @@ const ABTestResults: React.FC<Props> = ({ projectId }) => {
   );
 };
 
-// Need the import
-import { CheckCircle2 } from 'lucide-react';
-
 export default ABTestResults;
