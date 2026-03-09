@@ -222,11 +222,10 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             </div>
 
-            {/* Interval mode controls / 间隔模式控制 */}
             {nc.schedule_mode === 'interval' && (
               <div className="space-y-3 p-3 bg-stone-50 rounded-lg border border-stone-100">
                 <div>
-                  <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Frequency / 频率</label>
+                  <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Frequency</label>
                   <select
                     value={nc.frequency}
                     onChange={(e) => updateConfig(nc.id, { frequency: e.target.value })}
