@@ -355,7 +355,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                     );
                   })}
                   <span className="text-[10px] text-stone-300 self-center ml-1">
-                    {nc.assigned_participant_types.length === 0 ? '(all types / 所有类型)' : ''}
+                    {nc.assigned_participant_types.length === 0 ? '(all types)' : ''}
                   </span>
                 </div>
               </div>
