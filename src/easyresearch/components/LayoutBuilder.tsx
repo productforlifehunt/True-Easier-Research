@@ -509,47 +509,74 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help' || el.type === 'custom') && (
-          <div className="space-y-2">
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Component</label>
-            <select value={el.config.questionnaire_id || ''} onChange={(e) => {
-              const selected = questionnaires.find(q => q.id === e.target.value);
-              updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || el.config.title });
-            }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-              <option value="">— Select {el.type} component —</option>
-              {questionnaires.filter(q => q.questionnaire_type === el.type || (el.type === 'custom' && q.questionnaire_type === 'custom')).map(q => (
-                <option key={q.id} value={q.id}>{q.title} ({q.questions?.length || 0} fields)</option>
-              ))}
-            </select>
-            {el.config.questionnaire_id && (
-              <div className="text-[10px] text-emerald-600 bg-emerald-50 rounded-lg px-2 py-1.5 border border-emerald-100">
-                ✓ Linked to "{questionnaires.find(q => q.id === el.config.questionnaire_id)?.title}" — {questionnaires.find(q => q.id === el.config.questionnaire_id)?.questions?.length || 0} fields
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help' || el.type === 'custom') && (() => {
+          const linkedQ = el.config.questionnaire_id ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
+          return (
+            <div className="space-y-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Linked Component</label>
+                <select value={el.config.questionnaire_id || ''} onChange={(e) => {
+                  const selected = questionnaires.find(q => q.id === e.target.value);
+                  updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || el.config.title });
+                }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                  <option value="">— Select {el.type} component —</option>
+                  {questionnaires.filter(q => q.questionnaire_type === el.type || (el.type === 'custom' && q.questionnaire_type === 'custom')).map(q => (
+                    <option key={q.id} value={q.id}>{q.title} ({q.questions?.length || 0} fields)</option>
+                  ))}
+                </select>
               </div>
-            )}
-            {!el.config.questionnaire_id && (
-              <p className="text-[10px] text-stone-400 italic">No component linked. Create one in the Components tab first.</p>
-            )}
-            <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
-              <input type="text" value={el.config.button_label || ''} 
-                placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
-                onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
-                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
-              <div className="flex gap-1">
-                {['4px', '8px', '12px', '999px'].map(r => (
-                  <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
-                      (el.config.button_border_radius || '8px') === r
-                        ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
-                    }`}>{r === '999px' ? 'Pill' : r}</button>
-                ))}
+              {linkedQ && (
+                <div className="text-[11px] text-stone-500 bg-white rounded-lg p-2 border border-stone-100">
+                  <p><strong>{linkedQ.questions?.length || 0}</strong> fields · <strong>{linkedQ.estimated_duration || 5}</strong> min</p>
+                </div>
+              )}
+              {!el.config.questionnaire_id && (
+                <p className="text-[10px] text-stone-400 italic">No component linked. Create one in the Forms & Components tab first.</p>
+              )}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={el.config.show_question_count !== false} onChange={(e) => updateElement(el.id, { show_question_count: e.target.checked })} className="rounded border-stone-300" />
+                <span className="text-[11px] text-stone-600">Show field count</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={el.config.show_estimated_time !== false} onChange={(e) => updateElement(el.id, { show_estimated_time: e.target.checked })} className="rounded border-stone-300" />
+                <span className="text-[11px] text-stone-600">Show estimated time</span>
+              </label>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
+                <select value={el.config.card_display_style || 'icon'} onChange={(e) => updateElement(el.id, { card_display_style: e.target.value as any })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
+                  <option value="icon">Icon (chevron arrow)</option>
+                  <option value="button">Text Button</option>
+                  <option value="both">Icon + Button</option>
+                  <option value="minimal">Minimal (no icon/button)</option>
+                </select>
               </div>
+              {(el.config.card_display_style === 'button' || el.config.card_display_style === 'both') && (
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+                    <input type="text" value={el.config.button_label || ''} 
+                      placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
+                      onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Radius</label>
+                    <div className="flex gap-1">
+                      {['4px', '8px', '12px', '999px'].map(r => (
+                        <button key={r} onClick={() => updateElement(el.id, { button_border_radius: r })}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                            (el.config.button_border_radius || '8px') === r
+                              ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'
+                          }`}>{r === '999px' ? 'Pill' : r}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {el.type === 'text_block' && (
           <div>
