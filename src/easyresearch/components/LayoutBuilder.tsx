@@ -1118,6 +1118,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                             activeTabId === tab.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
                           } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-emerald-200' : ''}`}>
                           <GripVertical size={10} className="text-stone-300" />
+                          {getLucideIcon(tab.icon, 14, activeTabId === tab.id ? 'text-emerald-500' : 'text-stone-400')}
                           {tab.label}
                         </div>
                       )}
