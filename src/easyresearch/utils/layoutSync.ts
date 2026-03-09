@@ -196,6 +196,9 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       },
       button_action: row.button_action || undefined,
       button_label: row.button_label || undefined,
+      button_border_radius: row.button_border_radius || undefined,
+      card_display_style: (row.card_display_style as any) || undefined,
+      show_frequency: row.show_frequency ?? undefined,
       
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
