@@ -625,6 +625,20 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               />
             </div>
           )}
+
+          {/* SENTIMENT VIEW / 情感分析 */}
+          {subView === 'sentiment' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <SentimentDashboard projectId={projectId} responses={responses} questions={filteredQuestions} />
+            </div>
+          )}
+
+          {/* COHORT VIEW / 队列比较 */}
+          {subView === 'cohort' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <CohortComparisonEngine projectId={projectId} responses={responses} questions={filteredQuestions} enrollments={enrollments} />
+            </div>
+          )}
         </>
       )}
     </div>
