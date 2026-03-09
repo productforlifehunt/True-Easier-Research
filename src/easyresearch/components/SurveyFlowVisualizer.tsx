@@ -1,21 +1,18 @@
 /**
- * Survey Flow Visualizer — Visual node-based flow diagram
- * 调查流程可视化 — 可视化节点流程图
- * 
- * Shows the survey structure as a flowchart with:
- * - Question nodes (color-coded by type)
- * - Logic rule arrows (skip, show/hide, disqualify)
- * - Section grouping
- * - Screening/branching paths
+ * Survey Flow Visualizer — Visual node-based flow diagram with inline editing
+ * 调查流程可视化 — 可视化节点流程图（支持内联编辑）
  */
-import React, { useMemo } from 'react';
-import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, Layers } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, Layers, Plus, Trash2, Edit3 } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { LogicRule } from '../utils/logicEngine';
 
 interface SurveyFlowVisualizerProps {
   questionnaires: QuestionnaireConfig[];
   logicRules: LogicRule[];
+  projectId?: string;
+  onUpdateLogic?: (rules: LogicRule[]) => void;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -41,8 +38,30 @@ const ACTION_ICONS: Record<string, { icon: typeof ArrowRight; color: string; lab
   end_survey: { icon: Shield, color: '#ef4444', label: 'End' },
 };
 
-const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnaires, logicRules }) => {
-  // Build flat question list with questionnaire context
+const CONDITIONS = [
+  { value: 'equals', label: 'Equals' },
+  { value: 'not_equals', label: 'Not Equals' },
+  { value: 'contains', label: 'Contains' },
+  { value: 'greater_than', label: 'Greater Than' },
+  { value: 'less_than', label: 'Less Than' },
+  { value: 'is_empty', label: 'Is Empty' },
+  { value: 'is_not_empty', label: 'Is Not Empty' },
+];
+
+const ACTIONS = [
+  { value: 'skip', label: 'Skip to' },
+  { value: 'show', label: 'Show' },
+  { value: 'hide', label: 'Hide' },
+  { value: 'disqualify', label: 'Disqualify' },
+  { value: 'end_survey', label: 'End Survey' },
+  { value: 'show_questionnaire', label: 'Show Questionnaire' },
+  { value: 'hide_questionnaire', label: 'Hide Questionnaire' },
+];
+
+const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnaires, logicRules, projectId, onUpdateLogic }) => {
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+
+  // Build flat question list
   const allQuestions = useMemo(() => {
     return questionnaires.flatMap(qc =>
       (qc.questions || []).map(q => ({ ...q, questionnaireName: qc.title, questionnaireId: qc.id }))
@@ -68,13 +87,41 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
       title: qc.title,
       type: qc.questionnaire_type,
       questions: (qc.questions || []).filter(q => q.question_type !== 'section_header'),
-      sections: (qc.questions || []).filter(q => q.question_type === 'section_header'),
     }));
   }, [questionnaires]);
 
   const getQuestionLabel = (id: string) => {
     const q = allQuestions.find(q => q.id === id);
     return q ? (q.question_text || 'Untitled').substring(0, 40) : id.substring(0, 8);
+  };
+
+  const updateRule = (ruleId: string, field: string, value: any) => {
+    if (!onUpdateLogic) return;
+    onUpdateLogic(logicRules.map(r => r.id === ruleId ? { ...r, [field]: value } : r));
+  };
+
+  const deleteRule = (ruleId: string) => {
+    if (!onUpdateLogic) return;
+    onUpdateLogic(logicRules.filter(r => r.id !== ruleId));
+    if (editingRuleId === ruleId) setEditingRuleId(null);
+  };
+
+  const addRuleForQuestion = (questionId: string, questionnaireId: string) => {
+    if (!onUpdateLogic || !projectId) return;
+    const newRule: LogicRule = {
+      id: crypto.randomUUID(),
+      projectId,
+      questionnaireId,
+      sourceQuestionId: questionId,
+      condition: 'equals',
+      value: '',
+      action: 'skip',
+      targetQuestionId: '',
+      orderIndex: logicRules.length,
+      enabled: true,
+    };
+    onUpdateLogic([...logicRules, newRule]);
+    setEditingRuleId(newRule.id);
   };
 
   if (questionnaires.length === 0) {
@@ -88,7 +135,7 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
 
   return (
     <div className="space-y-6">
-      {/* Legend / 图例 */}
+      {/* Legend */}
       <div className="flex flex-wrap gap-3 text-[10px]">
         {[
           { label: 'Text / 文本', color: '#3b82f6' },
@@ -106,7 +153,7 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
         ))}
       </div>
 
-      {/* Flow diagram / 流程图 */}
+      {/* Flow diagram */}
       <div className="relative">
         {groupedQuestions.map((group, gi) => (
           <div key={group.id} className="mb-8">
@@ -147,29 +194,81 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
                               <GitBranch size={8} /> {rules.length} rule{rules.length > 1 ? 's' : ''}
                             </span>
                           )}
+                          {/* Add rule button — visible on hover */}
+                          {onUpdateLogic && (
+                            <button
+                              onClick={() => addRuleForQuestion(q.id, group.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-500 hover:bg-emerald-100 flex items-center gap-0.5"
+                            >
+                              <Plus size={8} /> Rule
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Logic rule branches / 逻辑分支 */}
+                    {/* Logic rule branches with inline edit */}
                     {rules.map(rule => {
                       const actionInfo = ACTION_ICONS[rule.action] || ACTION_ICONS.skip;
                       const ActionIcon = actionInfo.icon;
+                      const isEditing = editingRuleId === rule.id;
+
                       return (
-                        <div key={rule.id} className="ml-9 flex items-center gap-2 py-1 text-[10px]">
-                          <div className="w-8 border-t border-dashed" style={{ borderColor: actionInfo.color }} />
-                          <ActionIcon size={10} style={{ color: actionInfo.color }} />
-                          <span style={{ color: actionInfo.color }} className="font-medium">{actionInfo.label}</span>
-                          <span className="text-stone-400">
-                            if {rule.condition} "{String(rule.value).substring(0, 20)}"
-                          </span>
-                          {rule.targetQuestionId && (
-                            <>
-                              <ChevronRight size={10} className="text-stone-300" />
-                              <span className="text-stone-500 font-medium truncate max-w-[200px]">
-                                {getQuestionLabel(rule.targetQuestionId)}
-                              </span>
-                            </>
+                        <div key={rule.id} className="ml-9">
+                          <div className="flex items-center gap-2 py-1 text-[10px] group/rule">
+                            <div className="w-8 border-t border-dashed" style={{ borderColor: actionInfo.color }} />
+                            <ActionIcon size={10} style={{ color: actionInfo.color }} />
+                            <span style={{ color: actionInfo.color }} className="font-medium">{actionInfo.label}</span>
+                            <span className="text-stone-400">
+                              if {rule.condition} "{String(rule.value).substring(0, 20)}"
+                            </span>
+                            {rule.targetQuestionId && (
+                              <>
+                                <ChevronRight size={10} className="text-stone-300" />
+                                <span className="text-stone-500 font-medium truncate max-w-[200px]">
+                                  {getQuestionLabel(rule.targetQuestionId)}
+                                </span>
+                              </>
+                            )}
+                            {/* Edit / Delete buttons */}
+                            {onUpdateLogic && (
+                              <div className="opacity-0 group-hover/rule:opacity-100 transition-opacity flex items-center gap-0.5 ml-auto">
+                                <button onClick={() => setEditingRuleId(isEditing ? null : rule.id)} className="p-0.5 rounded hover:bg-stone-100">
+                                  <Edit3 size={9} className="text-stone-400" />
+                                </button>
+                                <button onClick={() => deleteRule(rule.id)} className="p-0.5 rounded hover:bg-red-50">
+                                  <Trash2 size={9} className="text-red-400" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Inline editor */}
+                          {isEditing && onUpdateLogic && (
+                            <div className="ml-10 mt-1 mb-2 p-2.5 bg-stone-50 rounded-lg border border-stone-200 grid grid-cols-4 gap-2">
+                              <div>
+                                <label className="block text-[9px] text-stone-400 mb-0.5">Condition</label>
+                                <CustomDropdown options={CONDITIONS} value={rule.condition} onChange={(v) => updateRule(rule.id, 'condition', v)} placeholder="Condition" />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] text-stone-400 mb-0.5">Value</label>
+                                <input type="text" value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
+                                  className="w-full px-2 py-1.5 rounded-lg text-[11px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Value..." />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] text-stone-400 mb-0.5">Action</label>
+                                <CustomDropdown options={ACTIONS} value={rule.action} onChange={(v) => updateRule(rule.id, 'action', v)} placeholder="Action" />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] text-stone-400 mb-0.5">Target</label>
+                                <CustomDropdown
+                                  options={allQuestions.map((tq, i) => ({ value: tq.id, label: `Q${i + 1}: ${(tq.question_text || '').substring(0, 20)}` }))}
+                                  value={rule.targetQuestionId || ''}
+                                  onChange={(v) => updateRule(rule.id, 'targetQuestionId', v)}
+                                  placeholder="Target..."
+                                />
+                              </div>
+                            </div>
                           )}
                         </div>
                       );

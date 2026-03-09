@@ -1139,11 +1139,13 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
-        {/* Flow Visualizer Tab / 流程可视化 */}
+        {/* Flow Visualizer Tab / 流程可视化 — editable, synced with Logic tab */}
         {activeTab === 'flow' && (
           <SurveyFlowVisualizer
             questionnaires={questionnaireConfigs}
             logicRules={logicRules}
+            projectId={projectId}
+            onUpdateLogic={setLogicRules}
           />
         )}
 
