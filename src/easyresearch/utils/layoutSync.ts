@@ -51,7 +51,7 @@ export interface AppTabElementRow {
   style_overflow?: string | null;
   button_action?: string | null;
   button_label?: string | null;
-  button_border_radius?: string | null;
+  
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;
@@ -195,7 +195,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       },
       button_action: row.button_action || undefined,
       button_label: row.button_label || undefined,
-      button_border_radius: (row as any).button_border_radius || undefined,
+      
       image_url: row.image_url || undefined,
       show_question_count: row.show_question_count ?? undefined,
       show_estimated_time: row.show_estimated_time ?? undefined,
@@ -300,7 +300,6 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         style_overflow: el.config.style?.overflow || null,
         button_action: el.config.button_action || null,
         button_label: el.config.button_label || null,
-        button_border_radius: (el.config as any).button_border_radius || null,
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
@@ -373,9 +372,9 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
     }).eq('id', projectId),
     supabase.from('app_tab_element').select('id').eq('project_id', projectId),
     supabase.from('app_tab').select('id').eq('project_id', projectId),
-    supabase.from('app_element_todo_card').select('id, element_id').eq('element_id', 'placeholder_skip'),
-    supabase.from('app_element_help_section').select('id, element_id').eq('element_id', 'placeholder_skip'),
-    supabase.from('app_element_tab_section').select('id, element_id').eq('element_id', 'placeholder_skip'),
+    Promise.resolve({ data: [] }),
+    Promise.resolve({ data: [] }),
+    Promise.resolve({ data: [] }),
   ]);
 
   const existingElementIds = (existingElRes.data || []).map(e => e.id);

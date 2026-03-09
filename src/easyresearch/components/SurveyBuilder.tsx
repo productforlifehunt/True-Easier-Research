@@ -18,6 +18,7 @@ import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/log
 import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
 import { loadNotificationConfigs, saveNotificationConfigs, type NotificationConfig } from '../utils/notificationConfigSync';
 import ComponentBuilder from './ComponentBuilder';
+import NotificationEditor from './NotificationEditor';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
 import SurveyFlowVisualizer from './SurveyFlowVisualizer';
@@ -150,7 +151,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports' | 'card_sorting' | 'tree_testing' | 'intercept' | 'video_capture' | 'reward_mgmt' | 'live_poll' | 'panel_market' | 'custom_scripts' | 'irb_compliance' | 'offline_collect' | 'video_reels' | 'regression';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'notifications' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports' | 'card_sorting' | 'tree_testing' | 'intercept' | 'video_capture' | 'reward_mgmt' | 'live_poll' | 'panel_market' | 'custom_scripts' | 'irb_compliance' | 'offline_collect' | 'video_reels' | 'regression';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -991,6 +992,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'components', label: t('project.components') },
     { id: 'logic', label: t('project.logic') },
     { id: 'flow', label: t('project.flow') },
+    { id: 'notifications', label: t('project.notifications') },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
     { id: 'translations' as TabId, label: t('project.translations') },
@@ -1155,6 +1157,15 @@ const SurveyBuilder: React.FC = () => {
             projectId={projectId}
             participantTypes={participantTypes}
             questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+          />
+        )}
+
+        {/* Notifications Tab / 通知标签 */}
+        {activeTab === 'notifications' && (
+          <NotificationEditor
+            projectId={projectId}
+            questionnaires={questionnaireConfigs}
+            participantTypes={participantTypes}
           />
         )}
 

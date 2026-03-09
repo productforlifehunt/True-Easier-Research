@@ -201,6 +201,7 @@ const translations: TranslationDict = {
   'project.flow': { en: 'Flow', zh: '流程', es: 'Flujo', fr: 'Flux', de: 'Ablauf', ja: 'フロー', ko: '흐름', pt: 'Fluxo', ar: 'التدفق', hi: 'प्रवाह', ru: 'Поток', it: 'Flusso' },
   'project.translations': { en: 'Translation', zh: '翻译', es: 'Traducción', fr: 'Traduction', de: 'Übersetzung', ja: '翻訳', ko: '번역', pt: 'Tradução', ar: 'الترجمة', hi: 'अनुवाद', ru: 'Перевод', it: 'Traduzione' },
   'project.logic': { en: 'Logic', zh: '逻辑', es: 'Lógica', fr: 'Logique', de: 'Logik', ja: 'ロジック', ko: '로직', pt: 'Lógica', ar: 'المنطق', hi: 'लॉजिक', ru: 'Логика', it: 'Logica' },
+  'project.notifications': { en: 'Notifications', zh: '通知', es: 'Notificaciones', fr: 'Notifications', de: 'Benachrichtigungen', ja: '通知', ko: '알림', pt: 'Notificações', ar: 'الإشعارات', hi: 'सूचनाएं', ru: 'Уведомления', it: 'Notifiche' },
   'project.layout': { en: 'Layout', zh: '布局', es: 'Diseño', fr: 'Mise en page', de: 'Layout', ja: 'レイアウト', ko: '레이아웃', pt: 'Layout', ar: 'التخطيط', hi: 'लेआउट', ru: 'Макет', it: 'Layout' },
   'project.preview': { en: 'Preview', zh: '预览', es: 'Vista previa', fr: 'Aperçu', de: 'Vorschau', ja: 'プレビュー', ko: '미리보기', pt: 'Visualizar', ar: 'معاينة', hi: 'पूर्वावलोकन', ru: 'Предпросмотр', it: 'Anteprima' },
   'project.unpublish': { en: 'Unpublish', zh: '取消发布', es: 'Despublicar', fr: 'Dépublier', de: 'Veröffentlichung aufheben', ja: '非公開にする', ko: '게시 취소', pt: 'Despublicar', ar: 'إلغاء النشر', hi: 'अप्रकाशित करें', ru: 'Снять с публикации', it: 'Annulla pubblicazione' },
