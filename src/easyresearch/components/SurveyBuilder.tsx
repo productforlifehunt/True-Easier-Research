@@ -994,6 +994,12 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'sessions' as TabId, label: '🎬 Sessions / 会话' }] : []),
     ...(projectId ? [{ id: 'recruitment' as TabId, label: '📢 Recruit / 招募' }] : []),
     ...(projectId ? [{ id: 'segmentation' as TabId, label: '🎯 Segments / 分群' }] : []),
+    ...(projectId ? [{ id: 'personas' as TabId, label: '👤 Personas / 画像' }] : []),
+    ...(projectId ? [{ id: 'journey_maps' as TabId, label: '🗺️ Journeys / 旅程图' }] : []),
+    ...(projectId ? [{ id: 'annotations' as TabId, label: '🏷️ Annotate / 标注' }] : []),
+    ...(projectId ? [{ id: 'calendar' as TabId, label: '📅 Calendar / 日历' }] : []),
+    ...(projectId ? [{ id: 'stakeholder' as TabId, label: '📊 Executive / 管理层' }] : []),
+    ...(projectId ? [{ id: 'crm' as TabId, label: '💼 CRM' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
