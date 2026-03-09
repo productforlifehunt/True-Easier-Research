@@ -1159,6 +1159,15 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Notifications Tab / 通知标签 */}
+        {activeTab === 'notifications' && (
+          <NotificationEditor
+            projectId={projectId}
+            questionnaires={questionnaireConfigs}
+            participantTypes={participantTypes}
+          />
+        )}
+
         {/* Layout Tab */}
         {activeTab === 'layout' && appLayout && (
           <LayoutTabWrapper
