@@ -1295,6 +1295,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                     </button>
                                   </div>
                                 </div>
+                                {/* Inline config panel — expands below the element row */}
+                                {editingElementId === el.id && (
+                                  <div className="border-t border-stone-100 bg-stone-50/50 p-2 xl:hidden">
+                                    {renderElementConfig(el)}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </Draggable>
