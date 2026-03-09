@@ -1005,6 +1005,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 <p className="text-[10px] text-stone-400">Randomization shuffles non-section questions. Piping inserts previous answers into question text using {"{{Q1}}"} or {"{{question_id}}"}. Timer records response duration per question.</p>
                               </div>
 
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
                                   <button onClick={() => {
