@@ -2286,15 +2286,33 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **51 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, templates, visualization, screener, brief, lang preview, ab results, prototype testing, conversational, contact email, workflows, save continue, share reports, responses)
-- **51 个构建器标签页**
+### ACTIVE BUILDER TABS (11) / 活跃构建器标签页（11个）
+These tabs are visible and available to users in the project editor:
+以下标签页在项目编辑器中对用户可见和可用：
+
+1. **Settings** / 设置
+2. **Questionnaires** / 问卷
+3. **Components** / 组件
+4. **Logic** / 逻辑
+5. **Flow** / 流程
+6. **Layout** / 布局
+7. **Preview** / 预览
+8. **Participants** / 参与者
+9. **Panel** / 面板
+10. **Translation** / 翻译
+11. **Responses** / 回复
+
+### TYPE 3 FUTURE FEATURES — DO NOT SHOW TO USERS YET / 三类未来功能 — 暂不向用户展示
+The following tabs are fully implemented in code but hidden from the UI. They will be exposed in future releases:
+以下标签页已在代码中完整实现，但在UI中隐藏。将在未来版本中开放：
+
+- Quotas / 配额, Variables / 变量, Webhooks, Versioning / 版本, A/B Testing / A/B 实验, Scheduler / 调度, Theming / 主题, Distribute / 分发, Accessibility / 无障碍, Consent / 知情同意, Collaboration / 协作, Journeys / 旅程, Incentives / 激励, Live Monitor / 实时监控, Audit Trail / 审计, API / 接口, Power Analysis / 功效分析, Insights Repository / 洞察仓库, Data Cleaning / 数据清洗, Session Replay / 会话回放, Recruitment Hub / 招募中心, Segmentation / 分群, Personas / 画像, Journey Maps / 旅程图, Annotations / 标注, Calendar / 日历, Stakeholder Dashboard / 利益相关者仪表板, CRM, Templates Library / 模板库, Data Visualization / 数据可视化, Screener Builder / 筛选器构建器, Research Brief / 研究简报, Multi-Lang Preview / 多语言预览, A/B Results / A/B 结果, Prototype Testing / 原型测试, Conversational Mode / 对话模式, Contact List & Email Campaigns / 联系人与邮件活动, Workflow Automation / 工作流自动化, Save & Continue / 保存并继续, Shareable Reports / 共享报告, Card Sorting / 卡片分类, Tree Testing / 树测试, Intercept Surveys / 拦截调查, Video Capture / 视频捕获, Incentive Rewards / 激励奖励, Live Poll / 实时投票, Panel Marketplace / 面板市场, Custom Scripts / 自定义脚本, IRB Compliance / IRB合规, Offline Collection / 离线采集, Video Highlight Reels / 视频精华剪辑, Regression Analysis / 回归分析
+
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
 - **12 Research Templates** (SUS, NPS, CSAT, Usability Test, Card Sort, Tree Test, Diary Study, Kano, Conjoint, Heuristic Eval, A11y Audit, MaxDiff)
 - **12 个研究模板**
-- **Full Research Lifecycle:** Templates → Brief → Power Analysis → Personas → Journey Maps → Screener → Consent/Ethics → Theme → Build → Conversational Mode → Preview → Multi-Lang Preview → Collaborate → Save & Continue → Publish → Distribute → Contact Lists → Email Campaigns → Recruit → Segment → Collect → Monitor → Session Replay → Prototype Testing → Quality Control → Data Cleaning → Annotate → Analyze → Visualize → Sentiment → Cohort Compare → A/B Results → Benchmark → Workflows → Calendar → Stakeholder Report → Share Reports → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
-- **完整研究生命周期：** 模板 → 简报 → 功效分析 → 用户画像 → 旅程图 → 筛选器 → 知情同意/伦理 → 主题 → 构建 → 对话模式 → 预览 → 多语言预览 → 协作 → 保存并继续 → 发布 → 分发 → 联系人列表 → 邮件活动 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 原型测试 → 质量控制 → 数据清洗 → 标注 → 分析 → 可视化 → 情感分析 → 队列比较 → A/B结果 → 对标 → 工作流 → 日历 → 利益相关者报告 → 共享报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
 
 ---
