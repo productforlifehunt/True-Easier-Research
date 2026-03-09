@@ -13,13 +13,15 @@ import StatisticalAnalysis from './StatisticalAnalysis';
 import ResponseQualityEngine from './ResponseQualityEngine';
 import ReportGenerator from './ReportGenerator';
 import BenchmarkingEngine from './BenchmarkingEngine';
+import SentimentDashboard from './SentimentDashboard';
+import CohortComparisonEngine from './CohortComparisonEngine';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats' | 'quality' | 'report' | 'benchmark';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats' | 'quality' | 'report' | 'benchmark' | 'sentiment' | 'cohort';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -229,6 +231,8 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'quality' as SubView, label: 'Quality', icon: Shield },
             { id: 'report' as SubView, label: 'Report / 报告', icon: FileText },
             { id: 'benchmark' as SubView, label: 'Benchmark / 对标', icon: Target },
+            { id: 'sentiment' as SubView, label: 'Sentiment / 情感', icon: Brain },
+            { id: 'cohort' as SubView, label: 'Cohort / 队列', icon: ArrowLeftRight },
           ].map(tab => (
             <button
               key={tab.id}
@@ -619,6 +623,20 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                 questions={filteredQuestions}
                 enrollments={enrollments}
               />
+            </div>
+          )}
+
+          {/* SENTIMENT VIEW / 情感分析 */}
+          {subView === 'sentiment' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <SentimentDashboard projectId={projectId} responses={responses} questions={filteredQuestions} />
+            </div>
+          )}
+
+          {/* COHORT VIEW / 队列比较 */}
+          {subView === 'cohort' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <CohortComparisonEngine projectId={projectId} responses={responses} questions={filteredQuestions} enrollments={enrollments} />
             </div>
           )}
         </>
