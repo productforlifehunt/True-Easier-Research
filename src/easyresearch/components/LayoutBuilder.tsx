@@ -1025,7 +1025,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           <div className="flex-1 space-y-3">
             {/* Theme & Global Settings — above tab editor */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">App Design</h5>
+              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Research Design</h5>
               
               {/* Header */}
               <div className="space-y-2">
