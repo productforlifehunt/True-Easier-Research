@@ -609,6 +609,12 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'five_second_test': SUPPORTED_QUESTION_TYPES.FIVE_SECOND_TEST,
   'preference_test': SUPPORTED_QUESTION_TYPES.PREFERENCE_TEST,
   'prototype_test': SUPPORTED_QUESTION_TYPES.PROTOTYPE_TEST,
+  'max_diff': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'maxdiff': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'best_worst': SUPPORTED_QUESTION_TYPES.MAX_DIFF,
+  'design_survey': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
+  'multi_variant': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
+  'heatmap': SUPPORTED_QUESTION_TYPES.HEATMAP,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {

@@ -103,6 +103,16 @@ const CONFIG_KEY_MAP: Record<string, string> = {
   prototype_url: 'cfg_prototype_url',
   prototype_platform: 'cfg_prototype_platform',
   task_list: 'cfg_task_list',
+  // MaxDiff config
+  items_per_set: 'cfg_items_per_set',
+  best_label: 'cfg_best_label',
+  worst_label: 'cfg_worst_label',
+  // Heatmap config
+  allow_multiple_clicks: 'cfg_allow_multiple_clicks',
+  max_clicks: 'cfg_max_clicks',
+  // Design Survey config
+  show_labels: 'cfg_show_labels',
+  randomize_variants: 'cfg_randomize_variants',
 };
 
 // Reverse map: DB column → config key
