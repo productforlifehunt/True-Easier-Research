@@ -467,6 +467,10 @@ const SurveyBuilder: React.FC = () => {
             display_mode: qr.display_mode || 'one_per_page',
             questions_per_page: qr.questions_per_page ?? null,
             notifications: notifByQ.get(qr.id) || [],
+            is_ab_test: qr.is_ab_test ?? false,
+            ab_variant_name: qr.ab_variant_name || undefined,
+            ab_group_id: qr.ab_group_id || undefined,
+            ab_split_percentage: qr.ab_split_percentage ?? 50,
           }));
 
           if (questionsData && mounted) {
@@ -711,6 +715,10 @@ const SurveyBuilder: React.FC = () => {
           display_mode: qc.display_mode || 'one_per_page',
           questions_per_page: qc.questions_per_page ?? null,
           ai_chatbot_enabled: qc.ai_chatbot_enabled ?? false,
+          is_ab_test: qc.is_ab_test ?? false,
+          ab_variant_name: qc.ab_variant_name || null,
+          ab_group_id: qc.ab_group_id || null,
+          ab_split_percentage: qc.ab_split_percentage ?? 50,
         }));
         await supabase.from('questionnaire').upsert(allQPayloads, { onConflict: 'id' });
 

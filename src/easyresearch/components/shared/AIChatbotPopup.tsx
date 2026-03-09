@@ -40,7 +40,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
   // Filter to response-collecting questions only
   const responseQuestions = questions.filter(q => {
     const t = normalizeLegacyQuestionType(q.question_type);
-    return !['section_header', 'text_block', 'instruction', 'divider', 'image_block'].includes(t);
+    return !['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(t);
   });
 
   const unansweredRequired = responseQuestions.filter(q => {

@@ -39,6 +39,19 @@ export const SUPPORTED_QUESTION_TYPES = {
   ADDRESS: 'address',
   SLIDER_RANGE: 'slider_range',
 
+  // Rich Media Types
+  VIDEO_BLOCK: 'video_block',
+  AUDIO_BLOCK: 'audio_block',
+  EMBED_BLOCK: 'embed_block',
+
+  // UX Research Types
+  CARD_SORT: 'card_sort',
+  TREE_TEST: 'tree_test',
+  FIRST_CLICK: 'first_click',
+  FIVE_SECOND_TEST: 'five_second_test',
+  PREFERENCE_TEST: 'preference_test',
+  PROTOTYPE_TEST: 'prototype_test',
+
   // Layout Types
   SECTION_HEADER: 'section_header',
   TEXT_BLOCK: 'text_block',
@@ -403,6 +416,108 @@ export const QUESTION_TYPE_DEFINITIONS: QuestionTypeDefinition[] = [
     supportsNone: false,
     defaultConfig: { image_url: '', caption: '', alt_text: '', max_width: '100%' }
   },
+  // Rich Media Types
+  {
+    type: SUPPORTED_QUESTION_TYPES.VIDEO_BLOCK,
+    label: 'Video',
+    description: 'Embed or upload video (YouTube, Vimeo, MP4, or direct URL)',
+    icon: '🎬',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { video_url: '', autoplay: false, loop: false, muted: true }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.AUDIO_BLOCK,
+    label: 'Audio',
+    description: 'Embed audio clips (MP3, WAV, or streaming URL)',
+    icon: '🔊',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { audio_url: '', autoplay: false, loop: false }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.EMBED_BLOCK,
+    label: 'Embed / Webpage',
+    description: 'Embed any webpage, iframe, Figma, Google Docs, Miro, Loom, or custom HTML',
+    icon: '🌐',
+    category: 'layout',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { embed_url: '', embed_type: 'iframe', embed_height: '400px', allow_fullscreen: true }
+  },
+
+  // UX Research Types
+  {
+    type: SUPPORTED_QUESTION_TYPES.CARD_SORT,
+    label: 'Card Sort',
+    description: 'Participants organize cards into categories (open or closed sort)',
+    icon: '🃏',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { cards: ['Card 1', 'Card 2', 'Card 3'], categories: ['Category A', 'Category B'], sort_type: 'open' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.TREE_TEST,
+    label: 'Tree Test',
+    description: 'Test information architecture — participants navigate a tree to find items',
+    icon: '🌳',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { tree_data: [{ label: 'Home', children: [{ label: 'Products', children: [] }, { label: 'About', children: [] }] }], task_description: 'Find the product page', correct_answer: 'Products' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.FIRST_CLICK,
+    label: 'First Click Test',
+    description: 'Record where participants click first on an image/design',
+    icon: '🖱️',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { test_image_url: '', task_description: 'Where would you click to...?', followup_question: 'Why did you click there?' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.FIVE_SECOND_TEST,
+    label: '5-Second Test',
+    description: 'Show a design for 5 seconds, then ask recall questions',
+    icon: '⏱️',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { test_image_url: '', test_duration: 5, followup_question: 'What do you remember about this page?' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.PREFERENCE_TEST,
+    label: 'Preference Test',
+    description: 'A/B comparison — participants choose between two design variants',
+    icon: '⚖️',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { variant_a_url: '', variant_a_label: 'Design A', variant_b_url: '', variant_b_label: 'Design B', followup_question: 'Why do you prefer this design?' }
+  },
+  {
+    type: SUPPORTED_QUESTION_TYPES.PROTOTYPE_TEST,
+    label: 'Prototype Test',
+    description: 'Embed a Figma/InVision prototype and track usability tasks',
+    icon: '📱',
+    category: 'advanced',
+    requiresOptions: false,
+    supportsOther: false,
+    supportsNone: false,
+    defaultConfig: { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }
+  },
 ];
 
 // Helper functions
@@ -447,6 +562,15 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'address': SUPPORTED_QUESTION_TYPES.ADDRESS,
   'slider_range': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
   'range_slider': SUPPORTED_QUESTION_TYPES.SLIDER_RANGE,
+  'video_block': SUPPORTED_QUESTION_TYPES.VIDEO_BLOCK,
+  'audio_block': SUPPORTED_QUESTION_TYPES.AUDIO_BLOCK,
+  'embed_block': SUPPORTED_QUESTION_TYPES.EMBED_BLOCK,
+  'card_sort': SUPPORTED_QUESTION_TYPES.CARD_SORT,
+  'tree_test': SUPPORTED_QUESTION_TYPES.TREE_TEST,
+  'first_click': SUPPORTED_QUESTION_TYPES.FIRST_CLICK,
+  'five_second_test': SUPPORTED_QUESTION_TYPES.FIVE_SECOND_TEST,
+  'preference_test': SUPPORTED_QUESTION_TYPES.PREFERENCE_TEST,
+  'prototype_test': SUPPORTED_QUESTION_TYPES.PROTOTYPE_TEST,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {

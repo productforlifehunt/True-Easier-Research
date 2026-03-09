@@ -122,7 +122,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
     const progress = displayQs.length > 0 ? ((pageStart + pageQuestions.length) / displayQs.length) * 100 : 0;
 
     // Track answered (non-display-only) questions
-    const NON_INPUT_TYPES = ['section_header', 'text_block', 'instruction', 'divider', 'image_block'];
+    const NON_INPUT_TYPES = ['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'];
     const answerableQs = displayQs.filter((q: any) =>
       !NON_INPUT_TYPES.includes(normalizeLegacyQuestionType(q.question_type))
     );

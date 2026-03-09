@@ -245,6 +245,36 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{localQuestion.question_config.caption}</p>}
           </div>
         );
+      case 'video_block':
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🎬 {localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
+      case 'audio_block':
+        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🔊 {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
+      case 'embed_block':
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🌐 {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
+      case 'card_sort':
+        return (
+          <div className="flex flex-wrap gap-1">
+            {(localQuestion.question_config?.cards || []).slice(0, 4).map((c: string, i: number) => (
+              <div key={i} className="px-2 py-1 rounded border border-dashed border-stone-300 text-[10px] text-stone-500">{c}</div>
+            ))}
+            {(localQuestion.question_config?.cards || []).length > 4 && <span className="text-[10px] text-stone-400">+{(localQuestion.question_config?.cards || []).length - 4}</span>}
+          </div>
+        );
+      case 'tree_test':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🌳 Tree navigation test</div>;
+      case 'first_click':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🖱️ First click test</div>;
+      case 'five_second_test':
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">⏱️ {localQuestion.question_config?.test_duration ?? 5}s exposure test</div>;
+      case 'preference_test':
+        return (
+          <div className="grid grid-cols-2 gap-1">
+            <div className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[10px] text-stone-500">{localQuestion.question_config?.variant_a_label || 'A'}</div>
+            <div className="h-10 rounded-lg bg-stone-100 flex items-center justify-center text-[10px] text-stone-500">{localQuestion.question_config?.variant_b_label || 'B'}</div>
+          </div>
+        );
+      case 'prototype_test':
+        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
       default: return null;
     }
   };
@@ -360,22 +390,34 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               else if (newType === 'divider') { updates.question_config = { style: 'solid', color: '#e5e7eb', thickness: 1 }; updates.options = []; updates.question_text = 'Divider'; }
               else if (newType === 'image_block') { updates.question_config = { image_url: '', caption: '', alt_text: '', max_width: '100%' }; updates.options = []; updates.question_text = 'Image'; }
               else if (newType === 'file_upload') { updates.question_config = { max_files: 1, max_size_mb: 10, accepted_types: 'image/*,.pdf,.doc,.docx' }; updates.options = []; }
+              else if (newType === 'video_block') { updates.question_config = { video_url: '', autoplay: false, loop: false, muted: true }; updates.options = []; updates.question_text = updates.question_text || 'Video'; }
+              else if (newType === 'audio_block') { updates.question_config = { audio_url: '', autoplay: false, loop: false }; updates.options = []; updates.question_text = updates.question_text || 'Audio'; }
+              else if (newType === 'embed_block') { updates.question_config = { embed_url: '', embed_type: 'iframe', embed_height: '400px', allow_fullscreen: true }; updates.options = []; updates.question_text = updates.question_text || 'Embed'; }
+              else if (newType === 'card_sort') { updates.question_config = { cards: ['Card 1', 'Card 2', 'Card 3'], categories: ['Category A', 'Category B'], sort_type: 'open' }; updates.options = []; }
+              else if (newType === 'tree_test') { updates.question_config = { tree_data: [{ label: 'Home', children: [{ label: 'Products', children: [] }, { label: 'About', children: [] }] }], task_description: 'Find the product page', correct_answer: 'Products' }; updates.options = []; }
+              else if (newType === 'first_click') { updates.question_config = { test_image_url: '', task_description: 'Where would you click to...?', followup_question: 'Why did you click there?' }; updates.options = []; }
+              else if (newType === 'five_second_test') { updates.question_config = { test_image_url: '', test_duration: 5, followup_question: 'What do you remember about this page?' }; updates.options = []; }
+              else if (newType === 'preference_test') { updates.question_config = { variant_a_url: '', variant_a_label: 'Design A', variant_b_url: '', variant_b_label: 'Design B', followup_question: 'Why do you prefer this design?' }; updates.options = []; }
+              else if (newType === 'prototype_test') { updates.question_config = { prototype_url: '', prototype_platform: 'figma', task_list: [{ task: 'Complete the checkout flow', success_url: '' }], embed_height: '600px' }; updates.options = []; }
               else if (needsOptions.includes(newType) && (!localQuestion.options || localQuestion.options.length === 0)) {
                 updates.options = [
                   { id: crypto.randomUUID(), option_text: 'Option 1', option_value: '', order_index: 0, is_other: false },
                   { id: crypto.randomUUID(), option_text: 'Option 2', option_value: '', order_index: 1, is_other: false }
                 ];
-              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','file_upload'].includes(newType)) { updates.options = []; updates.question_config = {}; }
+              } else if (!needsOptions.includes(newType) && !['slider','bipolar_scale','section_header','yes_no','instruction','text_block','divider','image_block','video_block','audio_block','embed_block','file_upload','card_sort','tree_test','first_click','five_second_test','preference_test','prototype_test'].includes(newType)) { updates.options = []; updates.question_config = {}; }
               updateLocal(updates);
             }}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
           >
-            <optgroup label="Layout">
+            <optgroup label="Layout & Media">
               <option value="section_header">Section / Tab</option>
               <option value="instruction">Instruction Block</option>
               <option value="text_block">Text Block</option>
               <option value="divider">Divider Line</option>
               <option value="image_block">Image</option>
+              <option value="video_block">Video</option>
+              <option value="audio_block">Audio</option>
+              <option value="embed_block">Embed / Webpage</option>
             </optgroup>
             <optgroup label="Text">
               <option value="text_short">Short Text</option>
@@ -405,6 +447,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <option value="email">Email</option>
               <option value="phone">Phone Number</option>
               <option value="file_upload">File Upload</option>
+            </optgroup>
+            <optgroup label="UX Research">
+              <option value="card_sort">Card Sort</option>
+              <option value="tree_test">Tree Test</option>
+              <option value="first_click">First Click Test</option>
+              <option value="five_second_test">5-Second Test</option>
+              <option value="preference_test">Preference Test</option>
+              <option value="prototype_test">Prototype Test</option>
             </optgroup>
           </select>
         </div>
@@ -785,8 +835,279 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         )}
 
+        {/* Video Block Configuration */}
+        {localQuestion.question_type === 'video_block' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Video URL</label>
+              <input type="text" value={localQuestion.question_config?.video_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, video_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                placeholder="YouTube, Vimeo, or direct MP4 URL" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Poster Image (optional)</label>
+              <input type="text" value={localQuestion.question_config?.poster_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, poster_url: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="Thumbnail URL" />
+            </div>
+            <div className="space-y-2">
+              {[{ key: 'autoplay', label: 'Autoplay' }, { key: 'loop', label: 'Loop' }, { key: 'muted', label: 'Start muted' }].map(opt => (
+                <label key={opt.key} className="flex items-center gap-2 text-[12px] text-stone-600">
+                  <input type="checkbox" checked={localQuestion.question_config?.[opt.key] || false}
+                    onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, [opt.key]: e.target.checked } })}
+                    className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+            <p className="text-[11px] text-stone-400">Supports YouTube, Vimeo, Loom, and direct video URLs.</p>
+          </div>
+        )}
+
+        {/* Audio Block Configuration */}
+        {localQuestion.question_type === 'audio_block' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Audio URL</label>
+              <input type="text" value={localQuestion.question_config?.audio_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, audio_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                placeholder="https://example.com/audio.mp3" />
+            </div>
+            <div className="space-y-2">
+              {[{ key: 'autoplay', label: 'Autoplay' }, { key: 'loop', label: 'Loop' }].map(opt => (
+                <label key={opt.key} className="flex items-center gap-2 text-[12px] text-stone-600">
+                  <input type="checkbox" checked={localQuestion.question_config?.[opt.key] || false}
+                    onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, [opt.key]: e.target.checked } })}
+                    className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Embed / Webpage Configuration */}
+        {localQuestion.question_type === 'embed_block' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Embed URL</label>
+              <input type="text" value={localQuestion.question_config?.embed_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                placeholder="Figma, Google Docs, Miro, or any URL" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Type</label>
+                <select value={localQuestion.question_config?.embed_type || 'iframe'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_type: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                  <option value="iframe">iFrame</option><option value="figma">Figma</option><option value="google_docs">Google Docs</option>
+                  <option value="miro">Miro</option><option value="loom">Loom</option><option value="airtable">Airtable</option>
+                  <option value="notion">Notion</option><option value="typeform">Typeform</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+                <select value={localQuestion.question_config?.embed_height || '400px'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_height: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                  <option value="200px">Small</option><option value="400px">Medium</option><option value="600px">Large</option><option value="800px">XL</option>
+                </select>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-[12px] text-stone-600">
+              <input type="checkbox" checked={localQuestion.question_config?.allow_fullscreen !== false}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_fullscreen: e.target.checked } })}
+                className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+              Allow fullscreen
+            </label>
+          </div>
+        )}
+
+        {/* Card Sort Configuration */}
+        {localQuestion.question_type === 'card_sort' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Sort Type</label>
+              <select value={localQuestion.question_config?.sort_type || 'open'}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, sort_type: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 bg-white">
+                <option value="open">Open Sort (participants create categories)</option>
+                <option value="closed">Closed Sort (predefined categories)</option>
+                <option value="hybrid">Hybrid (predefined + custom)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Cards (one per line)</label>
+              <textarea value={(localQuestion.question_config?.cards || []).join('\n')}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, cards: e.target.value.split('\n').filter((l: string) => l.trim()) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" rows={5} placeholder="Navigation&#10;Search&#10;Cart" />
+            </div>
+            {localQuestion.question_config?.sort_type !== 'open' && (
+              <div>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Categories (one per line)</label>
+                <textarea value={(localQuestion.question_config?.categories || []).join('\n')}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, categories: e.target.value.split('\n').filter((l: string) => l.trim()) } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" rows={3} placeholder="Header&#10;Sidebar&#10;Footer" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tree Test Configuration */}
+        {localQuestion.question_type === 'tree_test' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task Description</label>
+              <textarea value={localQuestion.question_config?.task_description || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Find pricing info" />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tree Structure (JSON)</label>
+              <textarea value={JSON.stringify(localQuestion.question_config?.tree_data || [], null, 2)}
+                onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, tree_data: JSON.parse(e.target.value) } }); } catch {} }}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={6} />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Correct Answer (node label)</label>
+              <input type="text" value={localQuestion.question_config?.correct_answer || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, correct_answer: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+            </div>
+          </div>
+        )}
+
+        {/* First Click Test Configuration */}
+        {localQuestion.question_type === 'first_click' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <input type="text" value={localQuestion.question_config?.test_image_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/mockup.png" />
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task</label>
+              <textarea value={localQuestion.question_config?.task_description || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Where would you click to...?" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <input type="text" value={localQuestion.question_config?.followup_question || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="Why did you click there?" />
+            </div>
+          </div>
+        )}
+
+        {/* 5-Second Test Configuration */}
+        {localQuestion.question_type === 'five_second_test' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <input type="text" value={localQuestion.question_config?.test_image_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/design.png" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Duration (sec)</label>
+              <input type="number" value={localQuestion.question_config?.test_duration ?? 5} min={1} max={30}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_duration: Number(e.target.value) } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <input type="text" value={localQuestion.question_config?.followup_question || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="What do you remember?" />
+            </div>
+          </div>
+        )}
+
+        {/* Preference Test Configuration */}
+        {localQuestion.question_type === 'preference_test' && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Variant A URL</label>
+                <input type="text" value={localQuestion.question_config?.variant_a_url || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_url: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design A" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Label A</label>
+                <input type="text" value={localQuestion.question_config?.variant_a_label || 'Design A'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Variant B URL</label>
+                <input type="text" value={localQuestion.question_config?.variant_b_url || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_b_url: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design B" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Label B</label>
+                <input type="text" value={localQuestion.question_config?.variant_b_label || 'Design B'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_b_label: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <input type="text" value={localQuestion.question_config?.followup_question || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="Why?" />
+            </div>
+          </div>
+        )}
+
+        {/* Prototype Test Configuration */}
+        {localQuestion.question_type === 'prototype_test' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Prototype URL</label>
+              <input type="text" value={localQuestion.question_config?.prototype_url || ''}
+                onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, prototype_url: e.target.value } })}
+                className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://figma.com/proto/..." />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Platform</label>
+                <select value={localQuestion.question_config?.prototype_platform || 'figma'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, prototype_platform: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                  <option value="figma">Figma</option><option value="invision">InVision</option><option value="sketch">Sketch</option>
+                  <option value="adobe_xd">Adobe XD</option><option value="custom">Custom</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+                <select value={localQuestion.question_config?.embed_height || '600px'}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_height: e.target.value } })}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
+                  <option value="400px">400px</option><option value="600px">600px</option><option value="800px">800px</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tasks (JSON)</label>
+              <textarea value={JSON.stringify(localQuestion.question_config?.task_list || [], null, 2)}
+                onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, task_list: JSON.parse(e.target.value) } }); } catch {} }}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={4} />
+            </div>
+          </div>
+        )}
+
         {/* Response Type - First setting, only for response-collecting types */}
-        {!['section_header', 'text_block', 'instruction', 'divider', 'image_block'].includes(localQuestion.question_type) && (
+        {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
           <div className="flex items-center justify-between pt-3 border-t border-stone-100">
             <label className="text-[12px] font-medium text-stone-400">Response Type</label>
             <select value={localQuestion.response_required || 'optional'} onChange={(e) => {
@@ -907,7 +1228,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
 
           {/* AI Features Configuration */}
-          {!['section_header', 'text_block', 'instruction', 'divider', 'image_block'].includes(localQuestion.question_type) && (
+          {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
             <div className="space-y-2 pt-2 border-t border-stone-100">
               <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">🤖 AI Features</p>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
