@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
+import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submissionRuntime';
 import { useAuth } from '../../hooks/useAuth';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionRenderer from './shared/QuestionRenderer';
@@ -233,6 +234,16 @@ const ParticipantAppView: React.FC = () => {
       }
 
       toast.success('Response submitted!');
+
+      // Runtime: quality + webhooks (non-blocking) / 运行时：质量+Webhook（非阻塞）
+      const qualityFlags = runQualityChecks(responses, {}, 60); // No per-question timing in app view
+      fireWebhooks(projectId!, 'response.completed', {
+        enrollment_id: enrollmentId,
+        questionnaire_id: questionnaireId,
+        quality_score: qualityFlags.quality_score,
+        quality_flags: qualityFlags.flags,
+      });
+
       setSubmittedQuestionnaireIds(prev => new Set([...prev, questionnaireId]));
       setActiveQuestionnaireId(null);
       setCurrentPageIndex(0);

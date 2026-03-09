@@ -4,6 +4,7 @@ import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Mic, X, ChevronRight, ChevronLeft, Check, Clock, Edit2, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submissionRuntime';
 import { validateSurveyResponse } from '../services/validationService';
 import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
@@ -82,6 +83,9 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [isRecording, setIsRecording] = useState<string | null>(null);
   const [questionsPerPage, setQuestionsPerPage] = useState<number | null>(1); // null = unlimited
+  const [surveyStartTime] = useState<number>(Date.now()); // Track when survey started / 追踪问卷开始时间
+  const [questionTimings, setQuestionTimings] = useState<Record<string, number>>({}); // Per-question time / 每题用时
+  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
 
   useEffect(() => {
     if (projectId) {
@@ -278,6 +282,17 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
   };
 
   const handleResponseChange = (questionId: string, value: any) => {
+    // Track per-question timing / 追踪每题用时
+    const now = Date.now();
+    if (lastAnsweredId && lastAnsweredId !== questionId) {
+      const elapsed = Math.round((now - questionStartTime) / 1000);
+      setQuestionTimings(prev => ({
+        ...prev,
+        [lastAnsweredId]: (prev[lastAnsweredId] || 0) + elapsed,
+      }));
+    }
+    setQuestionStartTime(now);
+
     setResponses(prev => ({
       ...prev,
       [questionId]: value
@@ -614,6 +629,37 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         return;
       }
       
+      // === RUNTIME: Quality checks, quota enforcement, webhook firing ===
+      // === 运行时：质量检查、配额执行、Webhook 触发 ===
+      const totalTimeSeconds = Math.round((Date.now() - surveyStartTime) / 1000);
+      const qualityFlags = runQualityChecks(responses, questionTimings, totalTimeSeconds);
+
+      // Quota check (non-blocking for per-row insert model, but fire webhooks)
+      const quotaResult = await checkQuotas(projectId, responses);
+      if (!quotaResult.allowed) {
+        toast.error(quotaResult.reason || 'Survey quota reached.');
+        setSubmitting(false);
+        return;
+      }
+
+      // Fire completion webhook (non-blocking) / 触发完成 Webhook（非阻塞）
+      fireWebhooks(projectId, 'response.completed', {
+        enrollment_id: currentEnrollmentId,
+        total_time_seconds: totalTimeSeconds,
+        quality_score: qualityFlags.quality_score,
+        quality_flags: qualityFlags.flags,
+        response_count: responseInserts.length,
+      });
+
+      if (qualityFlags.quality_score < 50) {
+        fireWebhooks(projectId, 'quality.flagged', {
+          enrollment_id: currentEnrollmentId,
+          quality_score: qualityFlags.quality_score,
+          flags: qualityFlags.flags,
+        });
+      }
+      // === END RUNTIME ===
+
       // Update instance status if provided
       if (propInstanceId) {
         const { data: instance } = await supabase
