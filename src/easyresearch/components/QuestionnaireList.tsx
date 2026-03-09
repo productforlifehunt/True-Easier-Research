@@ -633,98 +633,15 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         </div>
       </div>
 
-      {/* Project-Level Notifications */}
+      {/* Project-Level Notifications — redirect to Notifications tab in Layout */}
       {onUpdateProjectNotifications && (
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-[13px] font-semibold text-stone-700 flex items-center gap-1.5"><Bell size={13} /> Project-Level Notifications</h4>
-            <button onClick={() => {
-              const newNotif: NotificationConfig = {
-                id: crypto.randomUUID(),
-                project_id: projectId,
-                questionnaire_id: null,
-                enabled: true,
-                title: 'Study reminder',
-                body: 'Please check in with the study.',
-                notification_type: 'push',
-                frequency: 'daily',
-                schedule_mode: 'interval',
-                interval_start_hour: 8,
-                interval_end_hour: 19,
-                specific_times: [],
-                minutes_before: 0,
-                dnd_allowed: true,
-                order_index: projectNotifications.length,
-                assigned_participant_types: [],
-              };
-              onUpdateProjectNotifications([...projectNotifications, newNotif]);
-            }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
-              <Plus size={10} /> Add
-            </button>
+        <div className="bg-white rounded-2xl border border-stone-100 p-4">
+          <div className="flex items-center gap-1.5">
+            <Bell size={13} className="text-stone-400" />
+            <p className="text-[12px] text-stone-500">
+              You can configure project-level notifications (not tied to any questionnaire) in the <strong>Layout → Notifications</strong> tab.
+            </p>
           </div>
-          <p className="text-[10px] text-stone-400">Notifications not tied to any specific questionnaire. Sent at the project level.</p>
-          {projectNotifications.length === 0 && (
-            <p className="text-[11px] text-stone-400 italic">No project-level notifications. Click Add to create one.</p>
-          )}
-          {projectNotifications.map((notif, ni) => (
-            <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium text-stone-600">#{ni + 1}</span>
-                <div className="flex items-center gap-1.5">
-                  <button onClick={() => {
-                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
-                    onUpdateProjectNotifications(updated);
-                  }} className={`relative w-8 h-4 rounded-full transition-colors shrink-0 ${notif.enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
-                    <span className="absolute top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform" style={{ left: notif.enabled ? '17px' : '2px' }} />
-                  </button>
-                  <button onClick={() => {
-                    const updated = projectNotifications.filter(n => n.id !== notif.id);
-                    onUpdateProjectNotifications(updated);
-                  }} className="p-0.5 text-red-400 hover:bg-red-50 rounded">
-                    <Trash2 size={10} />
-                  </button>
-                </div>
-              </div>
-              <input type="text" value={notif.title} onChange={(e) => {
-                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
-                onUpdateProjectNotifications(updated);
-              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
-              <textarea value={notif.body} onChange={(e) => {
-                const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
-                onUpdateProjectNotifications(updated);
-              }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder="Notification body" />
-              <div className="flex items-center gap-2 flex-wrap">
-                <select value={notif.notification_type} onChange={(e) => {
-                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, notification_type: e.target.value } : n);
-                  onUpdateProjectNotifications(updated);
-                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                  <option value="push">Push</option>
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                  <option value="push_email">Push+Email</option>
-                </select>
-                <select value={notif.frequency} onChange={(e) => {
-                  const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
-                  onUpdateProjectNotifications(updated);
-                }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                  <option value="once">Once</option>
-                  <option value="hourly">Hourly</option>
-                  <option value="2hours">Every 2h</option>
-                  <option value="4hours">Every 4h</option>
-                  <option value="daily">Daily</option>
-                  <option value="twice_daily">Twice daily</option>
-                  <option value="weekly">Weekly</option>
-                </select>
-                <label className="flex items-center gap-1 text-[10px] text-stone-400">
-                  <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
-                    const updated = projectNotifications.map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
-                    onUpdateProjectNotifications(updated);
-                  }} className="w-3 h-3 rounded" />
-                  DND allowed
-                </label>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
