@@ -18,7 +18,7 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
   const [isLive, setIsLive] = useState(false);
   const [liveCount, setLiveCount] = useState(0);
   const [votes, setVotes] = useState<Map<string, number[]>>(new Map());
-  const [wordCloudWords, setWordCloudWords] = useState<string[]>(['innovative', 'fast', 'clean', 'modern', 'intuitive', 'sleek', 'powerful', 'easy', 'elegant', 'responsive', 'smart', 'fresh']));
+  const [wordCloudWords] = useState<string[]>(['innovative', 'fast', 'clean', 'modern', 'intuitive', 'sleek', 'powerful', 'easy', 'elegant', 'responsive', 'smart', 'fresh']);
 
   // Simulate live votes / 模拟实时投票
   useEffect(() => {
