@@ -36,6 +36,9 @@ Easier Research（品牌名为"Easier"）是一个子应用，位于更大的 Tr
 
 ## 2. RESEARCH PROJECT / 研究项目
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 Every study lives in the `research_project` table. A project can have multiple questionnaires (e.g. hourly, daily), and components (profile questions, FAQs) which are also questionnaires under the hood. 
 
 每个研究都存储在 `research_project` table（第一层级)，每一个项目可以有多个问卷（如每小时、每日），以及组件（个人资料问题、FAQ），问卷和组件都储存在 'questionnaire` table(第二层级)，每个问卷有多个具体问题，比如单选、多选题，具体问题都储存在question` table (第三层级)
