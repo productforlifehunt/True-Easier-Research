@@ -652,6 +652,11 @@ export const LEGACY_TYPE_MAPPING: Record<string, SupportedQuestionType> = {
   'design_survey': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
   'multi_variant': SUPPORTED_QUESTION_TYPES.DESIGN_SURVEY,
   'heatmap': SUPPORTED_QUESTION_TYPES.HEATMAP,
+  'conjoint': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'conjoint_analysis': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'choice_based_conjoint': SUPPORTED_QUESTION_TYPES.CONJOINT,
+  'kano': SUPPORTED_QUESTION_TYPES.KANO,
+  'kano_model': SUPPORTED_QUESTION_TYPES.KANO,
 };
 
 export const normalizeLegacyQuestionType = (type: string): SupportedQuestionType => {
