@@ -33,6 +33,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   questionnaires,
   participantTypes,
   studyDuration,
+  projectTitle,
+  projectDescription,
   onUpdate,
   onUpdateQuestionnaire,
 }) => {
