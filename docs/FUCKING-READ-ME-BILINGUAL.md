@@ -295,6 +295,13 @@ These are flat database columns (NOT JSONB) on the `question` table. Each questi
 - `cfg_max_clicks` (int) — max clicks for heatmap / 热图最大点击数
 - `cfg_show_labels` (bool) — show variant labels in design_survey / 设计调查显示变体标签
 - `cfg_randomize_variants` (bool) — randomize variant order in design_survey / 设计调查随机变体顺序
+- `cfg_conjoint_attributes` (jsonb) — array of {name, levels[]} for conjoint analysis / 联合分析的属性数组
+- `cfg_profiles_per_task` (int) — profiles shown per conjoint task (2-5) / 每个联合任务显示的配置数
+- `cfg_num_choice_tasks` (int) — number of conjoint choice tasks (1-20) / 联合选择任务数
+- `cfg_include_none_option` (bool) — include "None" in conjoint / 联合分析包含"无"选项
+- `cfg_kano_functional` (text) — functional question text for Kano / 卡诺功能问题文本
+- `cfg_kano_dysfunctional` (text) — dysfunctional question text for Kano / 卡诺非功能问题文本
+- `cfg_kano_categories` (text[]) — response categories for Kano (e.g. Like/Expect/Neutral/Tolerate/Dislike) / 卡诺响应类别
 
 **Validation rule columns (`vr_*`, 8 columns) / 验证规则列:**
 
