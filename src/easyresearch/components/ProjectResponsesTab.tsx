@@ -8,6 +8,8 @@ import CrossTabAnalysis from './CrossTabAnalysis';
 import FunnelAnalysis from './FunnelAnalysis';
 import AITextAnalysis from './AITextAnalysis';
 import AdvancedExport from './AdvancedExport';
+import UXResearchVisualizer from './UXResearchVisualizer';
+import StatisticalAnalysis from './StatisticalAnalysis';
 
 interface Props {
   projectId: string;
