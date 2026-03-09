@@ -184,7 +184,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
 
       {pages.length === 0 && (
         <div className="text-center py-12 text-stone-400 text-sm border border-dashed border-stone-200 rounded-xl">
-          No public pages yet. Add one to get started. / 还没有公开页面。添加一个开始。
+          No public pages yet. Add one to get started.
         </div>
       )}
 
