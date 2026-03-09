@@ -8,13 +8,15 @@ import CrossTabAnalysis from './CrossTabAnalysis';
 import FunnelAnalysis from './FunnelAnalysis';
 import AITextAnalysis from './AITextAnalysis';
 import AdvancedExport from './AdvancedExport';
+import UXResearchVisualizer from './UXResearchVisualizer';
+import StatisticalAnalysis from './StatisticalAnalysis';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'funnel' | 'ai_text' | 'export' | 'ux_results' | 'stats';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -219,6 +221,8 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'funnel' as SubView, label: 'Funnel', icon: TrendingDown },
             { id: 'ai_text' as SubView, label: 'AI Text', icon: Brain },
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
+            { id: 'ux_results' as SubView, label: 'UX Results', icon: Layers },
+            { id: 'stats' as SubView, label: 'Stats', icon: BarChart3 },
           ].map(tab => (
             <button
               key={tab.id}
@@ -552,6 +556,27 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                 questions={filteredQuestions}
                 enrollments={enrollments}
                 questionnaires={questionnaires}
+              />
+            </div>
+          )}
+
+          {/* UX RESULTS VIEW / UX 研究结果 */}
+          {subView === 'ux_results' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <UXResearchVisualizer
+                questions={filteredQuestions}
+                responses={responses}
+              />
+            </div>
+          )}
+
+          {/* STATS VIEW / 统计分析 */}
+          {subView === 'stats' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <StatisticalAnalysis
+                questions={filteredQuestions}
+                responses={responses}
+                enrollments={enrollments}
               />
             </div>
           )}

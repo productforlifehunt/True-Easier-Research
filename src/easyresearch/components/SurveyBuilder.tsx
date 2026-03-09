@@ -24,6 +24,8 @@ import SurveyFlowVisualizer from './SurveyFlowVisualizer';
 import SurveyTranslationManager from './SurveyTranslationManager';
 import ParticipantPanel from './ParticipantPanel';
 import QuotaManager from './QuotaManager';
+import WebhookManager from './WebhookManager';
+import CustomVariablesManager, { type CustomVariable } from './CustomVariablesManager';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -99,7 +101,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -946,6 +948,8 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'panel' as TabId, label: 'Panel / 面板' }] : []),
     ...(projectId ? [{ id: 'quotas' as TabId, label: 'Quotas / 配额' }] : []),
     { id: 'translations' as TabId, label: 'i18n / 翻译' },
+    { id: 'variables' as TabId, label: 'Variables / 变量' },
+    ...(projectId ? [{ id: 'webhooks' as TabId, label: 'Webhooks' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1168,6 +1172,21 @@ const SurveyBuilder: React.FC = () => {
         {/* Panel Tab / 参与者面板 */}
         {activeTab === 'panel' && projectId && (
           <ParticipantPanel projectId={projectId} />
+        )}
+
+        {/* Webhooks Tab */}
+        {activeTab === 'webhooks' && projectId && (
+          <WebhookManager projectId={projectId} />
+        )}
+
+        {/* Variables Tab */}
+        {activeTab === 'variables' && (
+          <CustomVariablesManager
+            projectId={projectId || ''}
+            surveyCode={project.survey_code}
+            variables={(project as any).custom_variables || []}
+            onUpdate={(vars) => setProject(prev => ({ ...prev, custom_variables: vars } as any))}
+          />
         )}
 
         {/* Responses Tab */}

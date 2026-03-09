@@ -1599,7 +1599,9 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 9 | `panel` | Panel / 面板 | ParticipantPanel | Advanced panel & segmentation / 高级面板与分组 |
 | 10 | `quotas` | Quotas / 配额 | QuotaManager | Sample quota management / 样本配额管理 |
 | 11 | `translations` | i18n / 翻译 | SurveyTranslationManager | Multi-language support / 多语言支持 |
-| 12 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
+| 12 | `variables` | Variables / 变量 | CustomVariablesManager | URL params & embedded data / URL参数与嵌入式数据 |
+| 13 | `webhooks` | Webhooks | WebhookManager | Event-driven integrations / 事件驱动集成 |
+| 14 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
 
 ### Response Sub-Views / 回复子视图
 
@@ -1612,5 +1614,72 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 5 | Funnel | FunnelAnalysis | Drop-off analysis / 流失分析 |
 | 6 | AI Text | AITextAnalysis | Sentiment & themes / 情感与主题 |
 | 7 | Export | AdvancedExport | Multi-format export / 多格式导出 |
+| 8 | UX Results | UXResearchVisualizer | Heatmaps, card sort, tree test / 热图、卡片分类、树状测试 |
+| 9 | Stats | StatisticalAnalysis | Chi-square, t-test, weighting / 卡方、T检验、加权 |
+
+---
+
+## 25. UX RESEARCH RESULT VISUALIZERS / UX 研究结果可视化器
+
+<!-- CRC STARTS -->
+- Aggregated visualizations for heatmap, first_click, card_sort, tree_test, five_second_test, preference_test question types.
+- 针对热图、首次点击、卡片分类、树状测试、5秒测试、偏好测试问题类型的聚合可视化。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/UXResearchVisualizer.tsx`
+- **Features / 功能:**
+  - Click heatmap overlay with quadrant distribution / 点击热图覆盖层及象限分布
+  - Card sort categorization table + similarity matrix / 卡片分类表 + 相似度矩阵
+  - Tree test success rate, directness, path frequency / 树状测试成功率、直接性、路径频率
+  - 5-second test recall word cloud / 5秒测试回忆词云
+  - Preference test variant comparison / 偏好测试变体比较
+
+---
+
+## 26. STATISTICAL ANALYSIS ENGINE / 统计分析引擎
+
+<!-- CRC STARTS -->
+- Pure frontend statistical calculations (no server-side dependencies). / 纯前端统计计算（无服务端依赖）。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/StatisticalAnalysis.tsx`
+- **Tests / 测试类型:**
+  - Descriptive: N, mean, median, mode, SD, variance, range, Q1/Q3, IQR, skewness, kurtosis, 95% CI / 描述性统计
+  - Chi-Square: contingency table, χ², df, p-value, significance / 卡方检验
+  - T-Test (Welch's): t-statistic, df, p-value, Cohen's d effect size / T检验
+  - Response Weighting: target vs actual percentages, computed weights / 响应加权
+
+---
+
+## 27. CUSTOM VARIABLES & URL PARAMETERS / 自定义变量与URL参数
+
+<!-- CRC STARTS -->
+- Variables stored in project-level config, extracted at survey load time. / 变量存储在项目级配置中，在调查加载时提取。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/CustomVariablesManager.tsx`
+- **Types / 类型:** URL Parameter, Embedded Data, Computed
+- **Features / 功能:**
+  - Auto-capture URL params with responses / 自动捕获URL参数
+  - Pipe syntax `{{variable_name}}` for question text / 导流语法
+  - Distribution URL builder with example / 分发链接构建器
+  - Export helper: `extractUrlVariables()` / 导出辅助函数
+
+---
+
+## 28. WEBHOOKS & INTEGRATIONS / Webhooks与集成
+
+<!-- CRC STARTS -->
+- Webhook configs stored in `research_project.setting.webhooks` JSONB. / Webhook配置存储在 `research_project.setting.webhooks` JSONB 中。
+<!-- CRC ENDS -->
+
+- **Component:** `src/easyresearch/components/WebhookManager.tsx`
+- **Events / 事件:** response.created, response.completed, enrollment.created, enrollment.completed, quota.reached, quality.flagged, survey.published, survey.closed
+- **Features / 功能:**
+  - HTTP POST to external endpoints / 向外部端点发送 HTTP POST
+  - Custom headers support / 自定义请求头
+  - Test webhook with sample payload / 测试webhook
+  - Active/paused toggle per webhook / 每个webhook的活跃/暂停切换
+  - Last triggered timestamp and status tracking / 最后触发时间戳和状态跟踪
 
 ---
