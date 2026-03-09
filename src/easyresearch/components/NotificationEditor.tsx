@@ -161,9 +161,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
 
         {isExpanded && (
           <div className="border-t border-stone-100 px-4 py-4 space-y-3">
-            {/* Title / 标题 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Title / 标题</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Title</label>
               <input
                 type="text"
                 value={nc.title}
