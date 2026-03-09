@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FlaskConical, TrendingUp, TrendingDown, Minus, Trophy, BarChart3, AlertTriangle } from 'lucide-react';
+import { FlaskConical, TrendingUp, TrendingDown, Minus, Trophy, BarChart3, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface Variant {
   id: string;
