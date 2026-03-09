@@ -304,6 +304,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
   const editingElement = activeTab?.elements.find(e => e.id === editingElementId);
 
+  const getLucideIcon = (iconName: string, size = 14, className = 'text-stone-500') => {
+    const Icon = icons[iconName as keyof typeof icons];
+    return Icon ? <Icon size={size} className={className} /> : <FileText size={size} className={className} />;
+  };
+
   const getElementIcon = (type: string) => {
     const all = [...FUNCTION_ELEMENTS, ...LAYOUT_ELEMENTS];
     const found = all.find(e => e.type === type);
