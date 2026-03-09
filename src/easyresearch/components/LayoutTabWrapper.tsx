@@ -67,6 +67,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           questionnaires={questionnaires}
           participantTypes={participantTypes}
           studyDuration={studyDuration}
+          projectTitle={projectTitle}
+          projectDescription={projectDescription}
           onUpdate={onUpdate}
           onUpdateQuestionnaire={onUpdateQuestionnaire}
         />
