@@ -300,7 +300,6 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         style_overflow: el.config.style?.overflow || null,
         button_action: el.config.button_action || null,
         button_label: el.config.button_label || null,
-        button_border_radius: (el.config as any).button_border_radius || null,
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
