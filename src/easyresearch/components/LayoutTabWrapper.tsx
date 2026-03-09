@@ -90,7 +90,7 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
       )}
 
       {activeSubTab === 'public_pages' && (
-        <PublicPageBuilder projectId={projectId} />
+        <PublicPageBuilder projectId={projectId} questionnaires={questionnaires} />
       )}
     </div>
   );

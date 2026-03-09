@@ -116,6 +116,7 @@ const FUNCTION_ELEMENTS = [
   { type: 'ecogram', label: 'Ecogram', lucideIcon: 'Link2', desc: 'Care network diagram' },
   { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
   { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
+  { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
 ];
 
 const LAYOUT_ELEMENTS = [
