@@ -520,6 +520,41 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               />
             </div>
           )}
+
+          {/* FUNNEL VIEW / 漏斗分析 */}
+          {subView === 'funnel' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <FunnelAnalysis
+                projectId={projectId}
+                questionnaires={questionnaires}
+              />
+            </div>
+          )}
+
+          {/* AI TEXT VIEW / AI 文本分析 */}
+          {subView === 'ai_text' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <AITextAnalysis
+                projectId={projectId}
+                responses={responses}
+                questions={filteredQuestions}
+              />
+            </div>
+          )}
+
+          {/* EXPORT VIEW / 高级导出 */}
+          {subView === 'export' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <AdvancedExport
+                projectId={projectId}
+                projectTitle={questionnaires[0]?.title || 'Export'}
+                responses={responses}
+                questions={filteredQuestions}
+                enrollments={enrollments}
+                questionnaires={questionnaires}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
