@@ -59,7 +59,11 @@ export const SUPPORTED_QUESTION_TYPES = {
   CONJOINT: 'conjoint',
   KANO: 'kano',
 
-  // Layout Types
+  // Standardized UX Metrics
+  SUS: 'sus',
+  CSAT: 'csat',
+  CES: 'ces',
+
   SECTION_HEADER: 'section_header',
   TEXT_BLOCK: 'text_block',
   DIVIDER: 'divider',
