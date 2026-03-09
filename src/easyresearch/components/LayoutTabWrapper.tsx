@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Layout, Layers, Bell } from 'lucide-react';
+import { Layout, Layers, Bell, Globe } from 'lucide-react';
 import LayoutBuilder, { type AppLayout, type LayoutTab, type LayoutElement } from './LayoutBuilder';
 import PopupBuilder from './PopupBuilder';
 import NotificationEditor from './NotificationEditor';
+import PublicPageBuilder from './PublicPageBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 
-type SubTab = 'layout' | 'popups' | 'notifications';
-
+type SubTab = 'layout' | 'popups' | 'notifications' | 'public_pages';
 interface LayoutTabWrapperProps {
   projectId: string;
   layout: AppLayout;
@@ -22,6 +22,7 @@ const SUB_TABS: { id: SubTab; label: string; labelCn: string; icon: React.ReactN
   { id: 'layout', label: 'Layout', labelCn: '布局', icon: <Layout size={14} /> },
   { id: 'popups', label: 'Popups', labelCn: '弹窗', icon: <Layers size={14} /> },
   { id: 'notifications', label: 'Notifications', labelCn: '通知', icon: <Bell size={14} /> },
+  { id: 'public_pages', label: 'Public Pages', labelCn: '公开页面', icon: <Globe size={14} /> },
 ];
 
 const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
@@ -80,6 +81,10 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           questionnaires={questionnaires}
           participantTypes={participantTypes}
         />
+      )}
+
+      {activeSubTab === 'public_pages' && (
+        <PublicPageBuilder projectId={projectId} />
       )}
     </div>
   );
