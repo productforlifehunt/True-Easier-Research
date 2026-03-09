@@ -1085,6 +1085,23 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Flow Visualizer Tab / 流程可视化 */}
+        {activeTab === 'flow' && (
+          <SurveyFlowVisualizer
+            questionnaires={questionnaireConfigs}
+            logicRules={logicRules}
+          />
+        )}
+
+        {/* Quotas Tab / 配额管理 */}
+        {activeTab === 'quotas' && projectId && (
+          <QuotaManager
+            projectId={projectId}
+            participantTypes={participantTypes}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
+          />
+        )}
+
         {/* Layout Tab */}
         {activeTab === 'layout' && appLayout && (
           <LayoutTabWrapper
