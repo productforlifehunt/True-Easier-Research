@@ -180,6 +180,8 @@ The question system supports **42 question types** across 7 categories, all stor
 - `max_diff` — Best-worst scaling (MaxDiff). Participants pick best/worst from item sets. Uses `question_option` for items. Config: cfg_items_per_set, cfg_best_label, cfg_worst_label / 最大差异分析（最佳-最差缩放），参与者从项目集中选择最佳/最差
 - `design_survey` — Multi-variant design comparison (3+ designs). Uses `question_option` for variants (option_value = image URL). Config: cfg_show_labels, cfg_randomize_variants, cfg_followup_question / 多变体设计比较（3+设计），使用选项表存储变体
 - `heatmap` — Multi-click heatmap on image. Participants click multiple areas to indicate attention/interest. Config: cfg_test_image_url, cfg_task_description, cfg_allow_multiple_clicks, cfg_max_clicks, cfg_followup_question / 多点击热图，参与者点击多个区域表示注意力/兴趣
+- `conjoint` — Choice-based conjoint analysis. Participants choose preferred product profiles from attribute combinations. Config: cfg_conjoint_attributes (jsonb), cfg_profiles_per_task, cfg_num_choice_tasks, cfg_include_none_option / 联合分析（基于选择），参与者从属性组合中选择首选产品配置
+- `kano` — Kano model analysis. Paired functional/dysfunctional questions to classify features as Must-be, Attractive, Performance, Indifferent, or Reverse. Config: cfg_kano_functional, cfg_kano_dysfunctional, cfg_kano_categories (text[]) / 卡诺模型分析。成对的功能/非功能问题，将功能分类为必备、魅力、性能、无差异或反向
 
 **A/B Test Questionnaires / A/B测试问卷:**
 Questionnaires support A/B testing at the questionnaire level. Two questionnaires with the same `ab_group_id` form a test group. Participants are randomly assigned to one variant based on `ab_split_percentage`.
