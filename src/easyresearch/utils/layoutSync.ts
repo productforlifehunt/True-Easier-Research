@@ -372,9 +372,9 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
     }).eq('id', projectId),
     supabase.from('app_tab_element').select('id').eq('project_id', projectId),
     supabase.from('app_tab').select('id').eq('project_id', projectId),
-    supabase.from('app_element_todo_card').select('id, element_id').eq('element_id', 'placeholder_skip'),
-    supabase.from('app_element_help_section').select('id, element_id').eq('element_id', 'placeholder_skip'),
-    supabase.from('app_element_tab_section').select('id, element_id').eq('element_id', 'placeholder_skip'),
+    Promise.resolve({ data: [] }),
+    Promise.resolve({ data: [] }),
+    Promise.resolve({ data: [] }),
   ]);
 
   const existingElementIds = (existingElRes.data || []).map(e => e.id);
