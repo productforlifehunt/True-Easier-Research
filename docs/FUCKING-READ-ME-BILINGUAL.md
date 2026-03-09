@@ -2032,18 +2032,97 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 54. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
+## 55. PERSONA BUILDER / 用户画像构建器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/PersonaBuilder.tsx`
+- Creates research-driven personas with goals, pain points, behaviors, and demographic details / 创建基于研究的用户画像，包含目标、痛点、行为和人口统计信息
+- Gauges for tech comfort and motivation levels (0–100) / 技术舒适度和动机水平仪表（0-100）
+- Persona cards with avatar placeholders and tag-based categorization / 带头像占位符和标签分类的画像卡片
+- Builder tab: `personas` / 构建器标签页：`personas`
+
+---
+
+## 56. JOURNEY MAP DESIGNER / 用户旅程图设计器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/JourneyMapDesigner.tsx`
+- Multi-stage journey visualization with touchpoints and channels / 多阶段旅程可视化，包含接触点和渠道
+- Emotion curve tracking (positive / neutral / negative per stage) / 情感曲线追踪（每阶段积极/中性/消极）
+- Opportunity and pain-point annotations per stage / 每阶段的机会和痛点标注
+- Builder tab: `journey_maps` / 构建器标签页：`journey_maps`
+
+---
+
+## 57. QUALITATIVE THEME ANNOTATOR / 定性主题标注器
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ThemeAnnotator.tsx`
+- Code open-text responses with thematic tags / 用主题标签编码开放文本回复
+- Theme distribution bar chart visualization / 主题分布柱状图可视化
+- Inline annotation with color-coded theme chips / 带颜色编码主题标签的内联标注
+- Builder tab: `annotations` / 构建器标签页：`annotations`
+
+---
+
+## 58. RESEARCH CALENDAR / 研究日历
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ResearchCalendar.tsx`
+- Project milestone and deadline management / 项目里程碑和截止日期管理
+- 8 event types: Milestone, Deadline, IRB Review, Data Collection, Analysis, Presentation, Team Meeting, Other / 8种事件类型：里程碑、截止日期、IRB审查、数据采集、分析、演示、团队会议、其他
+- Status tracking: Upcoming, In Progress, Completed, Overdue / 状态追踪：即将到来、进行中、已完成、逾期
+- Builder tab: `calendar` / 构建器标签页：`calendar`
+
+---
+
+## 59. STAKEHOLDER DASHBOARD / 利益相关者仪表板
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/StakeholderDashboard.tsx`
+- Executive KPI cards: Total Responses, Completion Rate, Avg Time, Active Projects / 管理层KPI卡片：总回复数、完成率、平均时间、活跃项目
+- 14-day response trend line chart / 14天回复趋势折线图
+- Participant recruitment pipeline (Invited → Screened → Enrolled → Completed → Dropped) / 参与者招募管道（邀请 → 筛选 → 入组 → 完成 → 退出）
+- Builder tab: `stakeholder` / 构建器标签页：`stakeholder`
+
+---
+
+## 60. PARTICIPANT CRM / 参与者关系管理
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+- **File / 文件:** `src/easyresearch/components/ParticipantCRM.tsx`
+- Full relationship management with engagement scoring (0–100) / 完整的关系管理，含参与度评分（0-100）
+- Custom tagging system for participant segmentation / 用于参与者分群的自定义标签系统
+- CSV export of participant records / 参与者记录CSV导出
+- Search and filter by name, email, status, or tags / 按姓名、邮箱、状态或标签搜索和筛选
+- Builder tab: `crm` / 构建器标签页：`crm`
+
+---
+
+## 61. COMPLETE SYSTEM INVENTORY (FINAL) / 完整系统清单（最终版）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **33 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, responses)
-- **33 个构建器标签页**
+- **39 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, power analysis, repository, data cleaning, sessions, recruitment, segmentation, personas, journey maps, annotations, calendar, stakeholder, crm, responses)
+- **39 个构建器标签页**
 - **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
 - **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Power Analysis → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Analyze → Sentiment → Cohort Compare → Benchmark → Journey Track → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
-- **完整研究生命周期：** 设计 → 功效分析 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 分析 → 情感分析 → 队列比较 → 对标 → 旅程追踪 → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
+- **Full Research Lifecycle:** Design → Power Analysis → Personas → Journey Maps → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Segment → Collect → Monitor → Session Replay → Quality Control → Data Cleaning → Annotate → Analyze → Sentiment → Cohort Compare → Benchmark → Calendar → Stakeholder Report → CRM → Incentivize → Report → Insights Repository → Export → API Access → Audit → Iterate
+- **完整研究生命周期：** 设计 → 功效分析 → 用户画像 → 旅程图 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 分群 → 收集 → 监控 → 会话回放 → 质量控制 → 数据清洗 → 标注 → 分析 → 情感分析 → 队列比较 → 对标 → 日历 → 利益相关者报告 → CRM → 激励 → 报告 → 洞察仓库 → 导出 → API 访问 → 审计 → 迭代
 
 ---
