@@ -51,6 +51,9 @@ export interface AppTabElementRow {
   style_overflow?: string | null;
   button_action?: string | null;
   button_label?: string | null;
+  button_border_radius?: string | null;
+  card_display_style?: string | null;
+  show_frequency?: boolean | null;
   
   image_url?: string | null;
   show_question_count?: boolean | null;
