@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ShieldCheck, Plus, Trash2, ArrowRight, GitBranch, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 
 interface ScreenerCriteria {
