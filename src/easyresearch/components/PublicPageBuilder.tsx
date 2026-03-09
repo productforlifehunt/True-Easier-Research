@@ -99,19 +99,13 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     const created: PublicPage = { ...data, blocks: [] };
     setPages(prev => [...prev, created]);
     setExpandedId(created.id);
-    toast.success('Page created');
-  };
-
-  // Delete page / 删除页面
+    toast.success('Page createdete page / 删除页面
   const deletePage = async (id: string) => {
     const { error } = await (supabase as any).from('app_public_page').delete().eq('id', id);
     if (error) { toast.error('Failed to delete'); return; }
     setPages(prev => prev.filter(p => p.id !== id));
     if (expandedId === id) setExpandedId(null);
-    toast.success('Page deleted / 页面已删除');
-  };
-
-  // Update page field / 更新页面字段
+    toast.success('Page deleted / 页面已删除ate page field / 更新页面字段
   const updatePage = async (id: string, field: string, value: any) => {
     setPages(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
     const { error } = await (supabase as any).from('app_public_page').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id);

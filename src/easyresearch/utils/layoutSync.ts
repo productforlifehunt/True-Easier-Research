@@ -304,7 +304,6 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
         show_frequency: (el.config as any).show_frequency ?? null,
-        card_display_style: (el.config as any).card_display_style || null,
         screening_criteria: el.config.screening_criteria || null,
         progress_style: el.config.progress_style || null,
         timeline_start_hour: el.config.timeline_start_hour ?? null,
