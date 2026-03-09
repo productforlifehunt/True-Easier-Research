@@ -1601,7 +1601,10 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 | 11 | `translations` | i18n / 翻译 | SurveyTranslationManager | Multi-language support / 多语言支持 |
 | 12 | `variables` | Variables / 变量 | CustomVariablesManager | URL params & embedded data / URL参数与嵌入式数据 |
 | 13 | `webhooks` | Webhooks | WebhookManager | Event-driven integrations / 事件驱动集成 |
-| 14 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
+| 14 | `versioning` | Versions / 版本 | SurveyVersioning | Version history & collaboration / 版本历史与协作 |
+| 15 | `ab_testing` | A/B Test / 实验 | ABTestingEngine | Experiment variants & comparison / 实验变体与对比 |
+| 16 | `scheduler` | Schedule / 调度 | ResponseScheduler | Longitudinal scheduling & waves / 纵向调度与波次 |
+| 17 | `responses` | Responses / 回复 | ProjectResponsesTab | Analysis & export hub / 分析与导出中心 |
 
 ### Response Sub-Views / 回复子视图
 
