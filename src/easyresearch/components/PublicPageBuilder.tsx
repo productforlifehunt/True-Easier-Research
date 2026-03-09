@@ -244,7 +244,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                     <Globe size={12} className="text-stone-400 shrink-0" />
                     <code className="text-[11px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{page.slug}</code>
                     <button
-                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${page.slug}`); toast.success('URL copied / 链接已复制'); }}
+                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${page.slug}`); toast.success('URL copied'); }}
                       className="text-[10px] text-emerald-600 hover:text-emerald-700 font-medium shrink-0"
                     >
                       <Copy size={12} />
