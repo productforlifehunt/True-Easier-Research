@@ -106,6 +106,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         cardDisplayStyle={cardOptions?.cardDisplayStyle}
         buttonLabel={cardOptions?.buttonLabel}
         buttonBorderRadius={cardOptions?.buttonBorderRadius}
+        cardStyle={cardStyle}
       />
     );
   };
