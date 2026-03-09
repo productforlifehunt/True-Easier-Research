@@ -959,6 +959,9 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'versioning' as TabId, label: 'Versions / 版本' }] : []),
     ...(projectId ? [{ id: 'ab_testing' as TabId, label: 'A/B Test / 实验' }] : []),
     ...(projectId ? [{ id: 'scheduler' as TabId, label: 'Schedule / 调度' }] : []),
+    { id: 'theming' as TabId, label: 'Theme / 主题' },
+    ...(projectId ? [{ id: 'distribute' as TabId, label: 'Distribute / 分发' }] : []),
+    { id: 'accessibility' as TabId, label: 'A11y / 无障碍' },
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
