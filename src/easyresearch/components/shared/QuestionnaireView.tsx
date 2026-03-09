@@ -74,6 +74,8 @@ interface QuestionnaireViewProps {
   cardDisplayStyle?: 'icon' | 'button' | 'both' | 'minimal';
   buttonLabel?: string;
   buttonBorderRadius?: string;
+  /** Theme card style: flat, elevated, outlined */
+  cardStyle?: 'flat' | 'elevated' | 'outlined';
 }
 
 const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
