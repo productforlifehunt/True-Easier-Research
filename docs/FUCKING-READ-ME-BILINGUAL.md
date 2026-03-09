@@ -912,6 +912,9 @@ QuestionnaireList中每个问题下的内联QuestionLogicEditor也支持全部19
 
 ## 5b. TEMPLATES / 模板
 
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
 A template is NOT a separate table or a JSONB blob. A template is a row in the SAME table as real data with `is_template = true`. Never create a separate template table. Never dump template data into JSONB.
 
 模板不是单独的表或 JSONB blob。模板是与真实数据在同一表中的一行，带有 `is_template = true`。永远不要创建单独的模板表。永远不要将模板数据转储到 JSONB 中。
