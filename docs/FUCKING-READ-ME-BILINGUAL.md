@@ -1906,18 +1906,68 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 
 ---
 
-## 43. COMPLETE SYSTEM INVENTORY (UPDATED) / 完整系统清单（已更新）
+## 43. SENTIMENT ANALYSIS DASHBOARD / 情感分析仪表板
+
+<!-- CRC STARTS -->
+- Component: `SentimentDashboard.tsx` — response sub-view `sentiment`
+- Lexicon-based sentiment engine (positive/negative/neutral/mixed) with confidence scoring, key phrase extraction (bigrams), sentiment timeline (stacked area chart), and individual response drill-down
+- 基于词典的情感引擎，带置信度评分、关键短语提取、情感趋势时间线和逐条响应查看
+<!-- CRC ENDS -->
+
+---
+
+## 44. COHORT COMPARISON ENGINE / 队列比较引擎
+
+<!-- CRC STARTS -->
+- Component: `CohortComparisonEngine.tsx` — response sub-view `cohort`
+- Segment responses by any categorical question, compare numeric (mean/median/stdDev) or categorical distributions across cohorts with Chi-Square and Welch's t-test significance testing
+- 按任意分类问题分群，跨队列比较数值或分类分布，支持卡方和 Welch t 检验显著性测试
+<!-- CRC ENDS -->
+
+---
+
+## 45. INCENTIVE & REWARDS MANAGER / 激励与奖励管理器
+
+<!-- CRC STARTS -->
+- Component: `IncentiveManager.tsx` — builder tab `incentives`
+- 5 incentive types (fixed, per-response, lottery, gift card, points), multi-currency support, budget tracking with utilization bar, disbursement records with status tracking
+- 5 种激励类型、多币种支持、预算追踪、发放记录与状态追踪
+<!-- CRC ENDS -->
+
+---
+
+## 46. REAL-TIME COLLECTION MONITOR / 实时采集监控器
+
+<!-- CRC STARTS -->
+- Component: `CollectionMonitor.tsx` — builder tab `monitor`
+- Auto-refreshing live dashboard (10/30/60s intervals) with hourly and daily velocity charts, active-now detection, completion rate tracking, and activity feed
+- 自动刷新实时仪表板，含每小时/每日速度图、当前活跃检测、完成率追踪和活动流
+<!-- CRC ENDS -->
+
+---
+
+## 47. AUDIT TRAIL & COMPLIANCE LOG / 审计追踪与合规日志
+
+<!-- CRC STARTS -->
+- Component: `AuditTrail.tsx` — builder tab `audit`
+- Timestamped log of all project changes grouped by date, searchable/filterable by entity type and user, 9 entity types tracked, exportable for IRB compliance
+- 按日期分组的所有项目更改时间戳日志，可按实体类型和用户搜索/筛选，追踪9种实体类型，可导出用于 IRB 合规
+<!-- CRC ENDS -->
+
+---
+
+## 48. COMPLETE SYSTEM INVENTORY (UPDATED) / 完整系统清单（已更新）
 
 The Easier Research platform now contains:
 Easier Research 平台现包含：
 
-- **24 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, api, responses)
-- **24 个构建器标签页**
-- **12 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark)
-- **12 个响应子视图**
+- **27 Builder Tabs** (settings, questionnaires, components, logic, flow, layout, preview, participants, panel, quotas, i18n, variables, webhooks, versioning, A/B test, scheduler, theme, distribute, accessibility, consent, collaboration, journeys, incentives, monitor, audit, api, responses)
+- **27 个构建器标签页**
+- **14 Response Sub-Views** (summary, individual, table, cross-tab, funnel, AI text, export, UX results, stats, quality, report, benchmark, sentiment, cohort)
+- **14 个响应子视图**
 - **47 Question Types** (see Section 14 for canonical list)
 - **47 种问题类型**（见第14节规范列表）
-- **Full Research Lifecycle:** Design → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Collect → Quality Control → Analyze → Benchmark → Journey Track → Report → Export → API Access → Iterate
-- **完整研究生命周期：** 设计 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 收集 → 质量控制 → 分析 → 对标 → 旅程追踪 → 报告 → 导出 → API 访问 → 迭代
+- **Full Research Lifecycle:** Design → Consent/Ethics → Theme → Build → Preview → Collaborate → Publish → Distribute → Recruit → Collect → Monitor → Quality Control → Analyze → Sentiment → Cohort Compare → Benchmark → Journey Track → Incentivize → Report → Export → API Access → Audit → Iterate
+- **完整研究生命周期：** 设计 → 知情同意/伦理 → 主题 → 构建 → 预览 → 协作 → 发布 → 分发 → 招募 → 收集 → 监控 → 质量控制 → 分析 → 情感分析 → 队列比较 → 对标 → 旅程追踪 → 激励 → 报告 → 导出 → API 访问 → 审计 → 迭代
 
 ---
