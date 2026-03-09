@@ -21,6 +21,10 @@ export interface NotificationConfig {
   body: string;
   notification_type: string; // 'push' | 'email' | 'sms' | 'push_email'
   frequency: string; // 'once' | 'hourly' | '2hours' | '4hours' | 'daily' | 'twice_daily' | 'weekly'
+  schedule_mode: 'interval' | 'specific_times'; // interval = recurring in range; specific_times = exact HH:MM list
+  interval_start_hour: number; // 0-23, default 8
+  interval_end_hour: number; // 0-23, default 19
+  specific_times: string[]; // HH:MM strings
   minutes_before: number;
   dnd_allowed: boolean;
   order_index: number;
