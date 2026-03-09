@@ -11,6 +11,8 @@ import AdvancedExport from './AdvancedExport';
 import UXResearchVisualizer from './UXResearchVisualizer';
 import StatisticalAnalysis from './StatisticalAnalysis';
 import ResponseQualityEngine from './ResponseQualityEngine';
+import ReportGenerator from './ReportGenerator';
+import BenchmarkingEngine from './BenchmarkingEngine';
 
 interface Props {
   projectId: string;
