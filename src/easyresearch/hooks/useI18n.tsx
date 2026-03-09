@@ -197,7 +197,9 @@ const translations: TranslationDict = {
   // Project builder tabs
   'project.settings': { en: 'Settings', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ja: '設定', ko: '설정', pt: 'Configurações', ar: 'الإعدادات', hi: 'सेटिंग्स', ru: 'Настройки', it: 'Impostazioni' },
   'project.questionnaires': { en: 'Questionnaires', zh: '问卷', es: 'Cuestionarios', fr: 'Questionnaires', de: 'Fragebögen', ja: 'アンケート', ko: '설문지', pt: 'Questionários', ar: 'الاستبيانات', hi: 'प्रश्नावली', ru: 'Анкеты', it: 'Questionari' },
-  'project.components': { en: 'Components', zh: '组件', es: 'Componentes', fr: 'Composants', de: 'Komponenten', ja: 'コンポーネント', ko: '구성 요소', pt: 'Componentes', ar: 'المكونات', hi: 'घटक', ru: 'Компоненты', it: 'Componenti' },
+  'project.components': { en: 'Forms & Components', zh: '表单与组件', es: 'Formularios y Componentes', fr: 'Formulaires et Composants', de: 'Formulare & Komponenten', ja: 'フォーム＆コンポーネント', ko: '양식 및 구성 요소', pt: 'Formulários e Componentes', ar: 'النماذج والمكونات', hi: 'फॉर्म और घटक', ru: 'Формы и компоненты', it: 'Moduli e Componenti' },
+  'project.flow': { en: 'Flow', zh: '流程', es: 'Flujo', fr: 'Flux', de: 'Ablauf', ja: 'フロー', ko: '흐름', pt: 'Fluxo', ar: 'التدفق', hi: 'प्रवाह', ru: 'Поток', it: 'Flusso' },
+  'project.translations': { en: 'Translation', zh: '翻译', es: 'Traducción', fr: 'Traduction', de: 'Übersetzung', ja: '翻訳', ko: '번역', pt: 'Tradução', ar: 'الترجمة', hi: 'अनुवाद', ru: 'Перевод', it: 'Traduzione' },
   'project.logic': { en: 'Logic', zh: '逻辑', es: 'Lógica', fr: 'Logique', de: 'Logik', ja: 'ロジック', ko: '로직', pt: 'Lógica', ar: 'المنطق', hi: 'लॉजिक', ru: 'Логика', it: 'Logica' },
   'project.layout': { en: 'Layout', zh: '布局', es: 'Diseño', fr: 'Mise en page', de: 'Layout', ja: 'レイアウト', ko: '레이아웃', pt: 'Layout', ar: 'التخطيط', hi: 'लेआउट', ru: 'Макет', it: 'Layout' },
   'project.preview': { en: 'Preview', zh: '预览', es: 'Vista previa', fr: 'Aperçu', de: 'Vorschau', ja: 'プレビュー', ko: '미리보기', pt: 'Visualizar', ar: 'معاينة', hi: 'पूर्वावलोकन', ru: 'Предпросмотр', it: 'Anteprima' },
