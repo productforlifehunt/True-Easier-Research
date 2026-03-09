@@ -250,8 +250,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                         ))}
                       </select>
                     </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">End / 结束</label>
+                     <div>
+                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">End</label>
                       <select
                         value={nc.interval_end_hour}
                         onChange={(e) => updateConfig(nc.id, { interval_end_hour: parseInt(e.target.value) })}
