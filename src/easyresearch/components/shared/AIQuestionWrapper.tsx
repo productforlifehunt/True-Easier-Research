@@ -34,7 +34,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
 
   const normalizedType = normalizeLegacyQuestionType(question.question_type);
   const isTextType = ['text_short', 'text_long'].includes(normalizedType);
-  const isNonResponse = ['section_header', 'text_block', 'instruction', 'divider', 'image_block'].includes(normalizedType);
+  const isNonResponse = ['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(normalizedType);
   const hasAnyAI = aiConfig?.allow_ai_assist || aiConfig?.allow_ai_auto_answer || aiConfig?.allow_voice;
 
   const callAI = useCallback(async (action: string, extra: any = {}) => {
