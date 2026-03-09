@@ -1046,8 +1046,11 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   <div>
                     <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
                     <input type="text" value={layout.header_title || ''} onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                      placeholder="Auto (uses tab name)"
+                      placeholder={projectTitle || 'Auto (uses tab name)'}
                       className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                    {projectTitle && !layout.header_title && (
+                      <p className="text-[9px] text-stone-400 mt-1">Default: synced from Settings title "{projectTitle}"</p>
+                    )}
                   </div>
                 )}
               </div>
