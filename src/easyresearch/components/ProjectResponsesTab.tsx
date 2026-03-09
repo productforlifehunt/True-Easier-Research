@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, FileSpreadsheet, Users } from 'lucide-react';
+import { BarChart3, Download, ChevronDown, ChevronRight, MessageSquare, FileSpreadsheet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
-import CrossTabAnalysis from './CrossTabAnalysis';
 import AdvancedExport from './AdvancedExport';
-import ProjectParticipantsTab from './ProjectParticipantsTab';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table' | 'cross_tab' | 'export' | 'participants';
+type SubView = 'summary' | 'export';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -210,11 +208,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
           {[
             { id: 'summary' as SubView, label: 'Summary', icon: BarChart3 },
-            { id: 'individual' as SubView, label: 'Individual', icon: User },
-            { id: 'table' as SubView, label: 'Table', icon: Table2 },
-            { id: 'cross_tab' as SubView, label: 'Cross-Tab', icon: ArrowLeftRight },
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
-            { id: 'participants' as SubView, label: 'Participants / 参与者', icon: Users },
           ].map(tab => (
             <button
               key={tab.id}
@@ -232,7 +226,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         </div>
 
         <div className="flex items-center gap-3">
-          {questionnaires.length > 1 && subView !== 'participants' && (
+          {questionnaires.length > 1 && (
             <select
               value={selectedQuestionnaire}
               onChange={e => setSelectedQuestionnaire(e.target.value)}
@@ -244,7 +238,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
               ))}
             </select>
           )}
-          {subView !== 'participants' && (
+          {(
             <button
               onClick={exportCSV}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors"
@@ -255,18 +249,13 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
         </div>
       </div>
 
-      {/* PARTICIPANTS SUB-VIEW */}
-      {subView === 'participants' && (
-        <ProjectParticipantsTab projectId={projectId} />
-      )}
-
-      {subView !== 'participants' && responses.length === 0 ? (
+      {responses.length === 0 ? (
         <div className="bg-white rounded-xl border border-stone-100 p-16 text-center">
           <MessageSquare size={32} className="text-stone-200 mx-auto mb-3" />
           <p className="text-[14px] font-medium text-stone-600 mb-1">No responses yet</p>
           <p className="text-[12px] text-stone-400">Responses will appear here as participants complete your questionnaires.</p>
         </div>
-      ) : subView !== 'participants' && (
+      ) : (
         <>
           {/* SUMMARY VIEW */}
           {subView === 'summary' && (
@@ -415,114 +404,6 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             </div>
           )}
 
-          {/* INDIVIDUAL VIEW */}
-          {subView === 'individual' && (
-            <div className="bg-white rounded-xl border border-stone-100">
-              <div className="flex border-b border-stone-100">
-                {/* Participant list sidebar */}
-                <div className="w-64 border-r border-stone-100 max-h-[600px] overflow-y-auto">
-                  {submissions.map((sub, i) => (
-                    <button
-                      key={sub.enrollmentId}
-                      onClick={() => setIndividualIndex(i)}
-                      className={`w-full text-left px-4 py-3 border-b border-stone-50 transition-colors ${
-                        i === individualIndex ? 'bg-emerald-50/50' : 'hover:bg-stone-50/50'
-                      }`}
-                    >
-                      <p className="text-[12px] font-medium text-stone-800 truncate">{sub.email}</p>
-                      <p className="text-[10px] text-stone-400">{sub.count} answers · {new Date(sub.submittedAt).toLocaleDateString()}</p>
-                    </button>
-                  ))}
-                  {submissions.length === 0 && (
-                    <p className="text-[12px] text-stone-400 p-4">No submissions</p>
-                  )}
-                </div>
-
-                {/* Response detail */}
-                <div className="flex-1 max-h-[600px] overflow-y-auto">
-                  {submissions[individualIndex] ? (
-                    <div className="p-5 space-y-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="text-[14px] font-semibold text-stone-800">{submissions[individualIndex].email}</p>
-                          <p className="text-[11px] text-stone-400">{new Date(submissions[individualIndex].submittedAt).toLocaleString()}</p>
-                        </div>
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
-                          {submissions[individualIndex].count} answers
-                        </span>
-                      </div>
-                      {submissions[individualIndex].responses.map((r: any) => {
-                        const q = questionnaires.flatMap(qc => qc.questions || []).find(q => q.id === r.question_id) ||
-                          questions.find(q => q.id === r.question_id);
-                        const answer = r.response_text || (r.response_value != null
-                          ? (Array.isArray(r.response_value) ? r.response_value.join(', ') : String(r.response_value))
-                          : '—');
-                        return (
-                          <div key={r.id} className="border-b border-stone-50 pb-3">
-                            <p className="text-[11px] text-stone-400 mb-0.5">{q?.question_text || 'Unknown question'}</p>
-                            <p className="text-[13px] font-medium text-stone-700">{answer}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center text-[12px] text-stone-400">Select a participant</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TABLE VIEW */}
-          {subView === 'table' && (
-            <div className="bg-white rounded-xl border border-stone-100 overflow-hidden">
-              <div className="overflow-x-auto max-h-[600px]">
-                <table className="w-full text-[12px]">
-                  <thead className="sticky top-0 bg-stone-50 z-10">
-                    <tr>
-                      <th className="text-left px-3 py-2.5 text-stone-400 font-medium uppercase tracking-wider border-b border-stone-100">Time</th>
-                      <th className="text-left px-3 py-2.5 text-stone-400 font-medium uppercase tracking-wider border-b border-stone-100">Participant</th>
-                      <th className="text-left px-3 py-2.5 text-stone-400 font-medium uppercase tracking-wider border-b border-stone-100">Questionnaire</th>
-                      <th className="text-left px-3 py-2.5 text-stone-400 font-medium uppercase tracking-wider border-b border-stone-100">Question</th>
-                      <th className="text-left px-3 py-2.5 text-stone-400 font-medium uppercase tracking-wider border-b border-stone-100">Answer</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-50">
-                    {responses
-                      .filter(r => selectedQuestionnaire === 'all' || questionnaires.find(qc => qc.id === selectedQuestionnaire)?.questions?.some(q => q.id === r.question_id))
-                      .map(r => {
-                        const q = questionnaires.flatMap(qc => qc.questions || []).find(q => q.id === r.question_id) ||
-                          questions.find(q => q.id === r.question_id);
-                        const qc = questionnaires.find(qc => (qc.questions || []).some(qq => qq.id === r.question_id));
-                        const e = enrollmentById.get(r.enrollment_id);
-                        const answer = r.response_text || (r.response_value != null
-                          ? (Array.isArray(r.response_value) ? r.response_value.join(', ') : String(r.response_value))
-                          : '—');
-                        return (
-                          <tr key={r.id} className="hover:bg-stone-50/50 transition-colors">
-                            <td className="px-3 py-2 text-stone-400 whitespace-nowrap">{new Date(r.created_at).toLocaleString()}</td>
-                            <td className="px-3 py-2 text-stone-600">{e?.participant_email || 'Anonymous'}</td>
-                            <td className="px-3 py-2 text-stone-500">{qc?.title || '—'}</td>
-                            <td className="px-3 py-2 text-stone-600 max-w-xs truncate">{q?.question_text || 'Unknown'}</td>
-                            <td className="px-3 py-2 text-stone-800 font-medium max-w-xs truncate">{answer}</td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* CROSS-TAB VIEW / 交叉分析 */}
-          {subView === 'cross_tab' && (
-            <div className="bg-white rounded-xl border border-stone-100 p-5">
-              <CrossTabAnalysis
-                questions={filteredQuestions}
-                responses={responses}
-              />
-            </div>
-          )}
 
           {/* EXPORT VIEW / 高级导出 */}
           {subView === 'export' && (

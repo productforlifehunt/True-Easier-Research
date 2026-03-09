@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 
 // Block types available for public pages / 公开页面可用的块类型
 const BLOCK_TYPES = [
-  { value: 'text', label: 'Text / 文本', icon: <Type size={14} /> },
-  { value: 'image', label: 'Image / 图片', icon: <Image size={14} /> },
-  { value: 'spacer', label: 'Spacer / 间距', icon: <Square size={14} /> },
-  { value: 'divider', label: 'Divider / 分割线', icon: <Minus size={14} /> },
+  { value: 'text', label: 'Text', icon: <Type size={14} /> },
+  { value: 'image', label: 'Image', icon: <Image size={14} /> },
+  { value: 'spacer', label: 'Spacer', icon: <Square size={14} /> },
+  { value: 'divider', label: 'Divider', icon: <Minus size={14} /> },
 ] as const;
 
 type BlockType = typeof BLOCK_TYPES[number]['value'];
@@ -99,19 +99,19 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     const created: PublicPage = { ...data, blocks: [] };
     setPages(prev => [...prev, created]);
     setExpandedId(created.id);
-    toast.success('Page created / 页面已创建');
+    toast.success('Page created');
   };
 
-  // Delete page / 删除页面
+  // Delete page
   const deletePage = async (id: string) => {
     const { error } = await (supabase as any).from('app_public_page').delete().eq('id', id);
     if (error) { toast.error('Failed to delete'); return; }
     setPages(prev => prev.filter(p => p.id !== id));
     if (expandedId === id) setExpandedId(null);
-    toast.success('Page deleted / 页面已删除');
+    toast.success('Page deleted');
   };
 
-  // Update page field / 更新页面字段
+  // Update page field
   const updatePage = async (id: string, field: string, value: any) => {
     setPages(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
     const { error } = await (supabase as any).from('app_public_page').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id);
@@ -168,23 +168,23 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
     ));
   };
 
-  if (loading) return <div className="text-stone-400 text-sm py-8 text-center">Loading public pages... / 加载公开页面中...</div>;
+  if (loading) return <div className="text-stone-400 text-sm py-8 text-center">Loading public pages...</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-stone-800">Public Pages / 公开页面</h3>
-          <p className="text-xs text-stone-400 mt-0.5">Build recruitment, introduction, and landing pages for your study / 为您的研究构建招募、介绍和落地页</p>
+          <h3 className="text-base font-semibold text-stone-800">Public Pages</h3>
+          <p className="text-xs text-stone-400 mt-0.5">Build recruitment, introduction, and landing pages for your study</p>
         </div>
         <button onClick={addPage} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors">
-          <Plus size={14} /> Add Page / 添加页面
+          <Plus size={14} /> Add Page
         </button>
       </div>
 
       {pages.length === 0 && (
         <div className="text-center py-12 text-stone-400 text-sm border border-dashed border-stone-200 rounded-xl">
-          No public pages yet. Add one to get started. / 还没有公开页面。添加一个开始。
+          No public pages yet. Add one to get started.
         </div>
       )}
 
@@ -204,7 +204,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
               <button
                 onClick={e => { e.stopPropagation(); updatePage(page.id, 'enabled', !page.enabled); }}
                 className="p-1 rounded hover:bg-stone-100"
-                title={page.enabled ? 'Disable / 禁用' : 'Enable / 启用'}
+                title={page.enabled ? 'Disable' : 'Enable'}
               >
                 {page.enabled ? <Eye size={14} className="text-emerald-500" /> : <EyeOff size={14} className="text-stone-300" />}
               </button>
@@ -221,7 +221,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
               <div className="px-4 pb-4 border-t border-stone-100 space-y-4">
                 <div className="grid grid-cols-2 gap-3 pt-3">
                   <div>
-                    <label className="text-[11px] text-stone-400 mb-1 block">Title / 标题</label>
+                    <label className="text-[11px] text-stone-400 mb-1 block">Title</label>
                     <input
                       value={page.title}
                       onChange={e => updatePage(page.id, 'title', e.target.value)}
@@ -229,7 +229,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] text-stone-400 mb-1 block">Slug / 路径</label>
+                    <label className="text-[11px] text-stone-400 mb-1 block">Slug</label>
                     <input
                       value={page.slug}
                       onChange={e => updatePage(page.id, 'slug', e.target.value.replace(/[^a-z0-9-]/g, ''))}
@@ -244,7 +244,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                     <Globe size={12} className="text-stone-400 shrink-0" />
                     <code className="text-[11px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{page.slug}</code>
                     <button
-                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${page.slug}`); toast.success('URL copied / 链接已复制'); }}
+                      onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${page.slug}`); toast.success('URL copied'); }}
                       className="text-[10px] text-emerald-600 hover:text-emerald-700 font-medium shrink-0"
                     >
                       <Copy size={12} />
@@ -252,7 +252,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                   </div>
                 )}
                 <div>
-                  <label className="text-[11px] text-stone-400 mb-1 block">Description / 描述</label>
+                  <label className="text-[11px] text-stone-400 mb-1 block">Description</label>
                   <textarea
                     value={page.description || ''}
                     onChange={e => updatePage(page.id, 'description', e.target.value)}
@@ -264,7 +264,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                 {/* Blocks / 块 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-stone-600 uppercase tracking-wide">Blocks / 内容块</span>
+                    <span className="text-xs font-semibold text-stone-600 uppercase tracking-wide">Blocks</span>
                     <div className="flex gap-1">
                       {BLOCK_TYPES.map(bt => (
                         <button
@@ -273,7 +273,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                           className="flex items-center gap-1 px-2 py-1 text-[10px] border border-stone-200 rounded-md hover:bg-stone-50 text-stone-500 transition-colors"
                           title={bt.label}
                         >
-                          {bt.icon} {bt.label.split(' / ')[0]}
+                          {bt.icon} {bt.label}
                         </button>
                       ))}
                     </div>
@@ -281,7 +281,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
 
                   {page.blocks.length === 0 && (
                     <div className="text-center py-6 text-stone-300 text-xs border border-dashed border-stone-200 rounded-lg">
-                      Add blocks above / 从上方添加内容块
+                      Add blocks above to build your page
                     </div>
                   )}
 
@@ -308,7 +308,6 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                             <button onClick={() => deleteBlock(page.id, block.id)} className="p-0.5 rounded hover:bg-red-50 text-stone-300 hover:text-red-500"><Trash2 size={12} /></button>
                           </div>
 
-                          {/* Block config panel / 块配置面板 */}
                           {isBlockExpanded && (
                             <div className="px-3 pb-3 border-t border-stone-100 pt-2 space-y-2">
                               {block.type === 'text' && (
@@ -317,7 +316,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   onChange={e => updateBlock(page.id, block.id, 'content', e.target.value)}
                                   className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300 resize-none"
                                   rows={4}
-                                  placeholder="Enter text content... / 输入文本内容..."
+                                  placeholder="Enter text content..."
                                 />
                               )}
                               {block.type === 'image' && (
@@ -325,12 +324,12 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   value={block.image_url || ''}
                                   onChange={e => updateBlock(page.id, block.id, 'image_url', e.target.value)}
                                   className="w-full px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                                  placeholder="Image URL / 图片URL"
+                                  placeholder="Image URL"
                                 />
                               )}
                               {block.type === 'spacer' && (
                                 <div>
-                                  <label className="text-[11px] text-stone-400 mb-1 block">Height / 高度</label>
+                                  <label className="text-[11px] text-stone-400 mb-1 block">Height</label>
                                   <input
                                     value={block.style_height || '32px'}
                                     onChange={e => updateBlock(page.id, block.id, 'style_height', e.target.value)}
@@ -339,11 +338,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                   />
                                 </div>
                               )}
-                              {/* Style controls for text and image / 文本和图片的样式控制 */}
                               {(block.type === 'text' || block.type === 'image') && (
                                 <div className="grid grid-cols-4 gap-2 pt-1">
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Align / 对齐</label>
+                                    <label className="text-[10px] text-stone-400 block">Align</label>
                                     <select
                                       value={block.style_text_align || 'left'}
                                       onChange={e => updateBlock(page.id, block.id, 'style_text_align', e.target.value)}
@@ -355,7 +353,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Size / 大小</label>
+                                    <label className="text-[10px] text-stone-400 block">Size</label>
                                     <select
                                       value={block.style_font_size || '14px'}
                                       onChange={e => updateBlock(page.id, block.id, 'style_font_size', e.target.value)}
@@ -369,7 +367,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Weight / 粗细</label>
+                                    <label className="text-[10px] text-stone-400 block">Weight</label>
                                     <select
                                       value={block.style_font_weight || 'normal'}
                                       onChange={e => updateBlock(page.id, block.id, 'style_font_weight', e.target.value)}
@@ -382,7 +380,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId }) => {
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="text-[10px] text-stone-400 block">Padding / 内边距</label>
+                                    <label className="text-[10px] text-stone-400 block">Padding</label>
                                     <input
                                       value={block.style_padding || ''}
                                       onChange={e => updateBlock(page.id, block.id, 'style_padding', e.target.value)}

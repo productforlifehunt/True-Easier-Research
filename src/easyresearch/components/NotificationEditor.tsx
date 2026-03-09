@@ -19,13 +19,13 @@ const NOTIFICATION_TYPES = [
 ];
 
 const FREQUENCY_OPTIONS = [
-  { value: 'once', label: 'Once / 一次' },
-  { value: 'hourly', label: 'Hourly / 每小时' },
-  { value: '2hours', label: 'Every 2 Hours / 每2小时' },
-  { value: '4hours', label: 'Every 4 Hours / 每4小时' },
-  { value: 'daily', label: 'Daily / 每日' },
-  { value: 'twice_daily', label: 'Twice Daily / 每日两次' },
-  { value: 'weekly', label: 'Weekly / 每周' },
+  { value: 'once', label: 'Once' },
+  { value: 'hourly', label: 'Hourly' },
+  { value: '2hours', label: 'Every 2 Hours' },
+  { value: '4hours', label: 'Every 4 Hours' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'twice_daily', label: 'Twice Daily' },
+  { value: 'weekly', label: 'Weekly' },
 ];
 
 // Generate hour options 0-23 / 生成 0-23 小时选项
@@ -50,7 +50,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
   const save = useCallback(async (updated: NotificationConfig[]) => {
     setConfigs(updated);
     await saveNotificationConfigs(projectId, updated);
-    toast.success('Notifications saved / 通知已保存');
+    toast.success('Notifications saved');
   }, [projectId]);
 
   const addProjectNotification = () => {
@@ -116,9 +116,10 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
     updateConfig(configId, { specific_times: updated.sort() });
   };
 
-  // Group configs / 分组配置
+  // Group configs
   const projectConfigs = configs.filter(c => !c.questionnaire_id);
   const surveyQuestionnaires = questionnaires.filter(q => q.questionnaire_type === 'survey');
+  const componentQuestionnaires = questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type));
 
   // Check if frequency is interval-compatible / 检查频率是否兼容间隔模式
   const isIntervalFrequency = (freq: string) => ['hourly', '2hours', '4hours'].includes(freq);
@@ -136,7 +137,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
             <span className="text-sm font-medium text-stone-700 truncate">{nc.title || 'Untitled'}</span>
             <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">
               {nc.schedule_mode === 'specific_times'
-                ? `${nc.specific_times.length} times / 次`
+                ? `${nc.specific_times.length} times`
                 : (FREQUENCY_OPTIONS.find(f => f.value === nc.frequency)?.label || nc.frequency)
               }
             </span>
@@ -160,9 +161,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
 
         {isExpanded && (
           <div className="border-t border-stone-100 px-4 py-4 space-y-3">
-            {/* Title / 标题 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Title / 标题</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Title</label>
               <input
                 type="text"
                 value={nc.title}
@@ -171,9 +171,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               />
             </div>
 
-            {/* Body / 正文 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Body / 正文</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Body</label>
               <textarea
                 value={nc.body}
                 onChange={(e) => updateConfig(nc.id, { body: e.target.value })}
@@ -182,9 +181,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               />
             </div>
 
-            {/* Type / 类型 */}
             <div>
-              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Type / 类型</label>
+              <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Type</label>
               <select
                 value={nc.notification_type}
                 onChange={(e) => updateConfig(nc.id, { notification_type: e.target.value })}
@@ -196,10 +194,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </select>
             </div>
 
-            {/* Schedule Mode / 调度模式 */}
             <div>
               <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-1.5 block">
-                Schedule Mode / 调度模式
+                Schedule Mode
               </label>
               <div className="flex gap-2">
                 <button
@@ -210,7 +207,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                       : 'bg-white border-stone-200 text-stone-400 hover:border-stone-300'
                   }`}
                 >
-                  ⏱ Interval / 间隔模式
+                  Interval
                 </button>
                 <button
                   onClick={() => updateConfig(nc.id, { schedule_mode: 'specific_times' })}
@@ -220,16 +217,15 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                       : 'bg-white border-stone-200 text-stone-400 hover:border-stone-300'
                   }`}
                 >
-                  🕐 Specific Times / 指定时间
+                  Specific Times
                 </button>
               </div>
             </div>
 
-            {/* Interval mode controls / 间隔模式控制 */}
             {nc.schedule_mode === 'interval' && (
               <div className="space-y-3 p-3 bg-stone-50 rounded-lg border border-stone-100">
                 <div>
-                  <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Frequency / 频率</label>
+                  <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Frequency</label>
                   <select
                     value={nc.frequency}
                     onChange={(e) => updateConfig(nc.id, { frequency: e.target.value })}
@@ -242,8 +238,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                 </div>
                 {isIntervalFrequency(nc.frequency) && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Start / 开始</label>
+                     <div>
+                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Start</label>
                       <select
                         value={nc.interval_start_hour}
                         onChange={(e) => updateConfig(nc.id, { interval_start_hour: parseInt(e.target.value) })}
@@ -254,8 +250,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                         ))}
                       </select>
                     </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">End / 结束</label>
+                     <div>
+                      <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">End</label>
                       <select
                         value={nc.interval_end_hour}
                         onChange={(e) => updateConfig(nc.id, { interval_end_hour: parseInt(e.target.value) })}
@@ -271,22 +267,21 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             )}
 
-            {/* Specific times mode / 指定时间模式 */}
             {nc.schedule_mode === 'specific_times' && (
               <div className="space-y-2 p-3 bg-stone-50 rounded-lg border border-stone-100">
                 <div className="flex items-center justify-between">
                   <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">
-                    Times / 时间列表 ({nc.specific_times.length})
+                    Times ({nc.specific_times.length})
                   </label>
                   <button
                     onClick={() => addSpecificTime(nc.id)}
                     className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-50 transition-colors"
                   >
-                    <Plus size={10} /> Add Time / 添加
+                    <Plus size={10} /> Add Time
                   </button>
                 </div>
                 {nc.specific_times.length === 0 && (
-                  <p className="text-[11px] text-stone-300 text-center py-3">No times set. Click "Add Time". / 未设置时间，点击"添加"。</p>
+                  <p className="text-[11px] text-stone-300 text-center py-3">No times set. Click "Add Time".</p>
                 )}
                 <div className="flex flex-wrap gap-2">
                   {nc.specific_times.map((time, idx) => (
@@ -310,10 +305,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             )}
 
-            {/* Minutes before + DND */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Minutes Before / 提前分钟</label>
+                <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Minutes Before</label>
                 <input
                   type="number"
                   min={0}
@@ -330,19 +324,18 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                     onChange={(e) => updateConfig(nc.id, { dnd_allowed: e.target.checked })}
                     className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-300"
                   />
-                  <span className="text-xs text-stone-600">
+                   <span className="text-xs text-stone-600">
                     {nc.dnd_allowed ? <BellOff size={11} className="inline mr-1" /> : <Bell size={11} className="inline mr-1" />}
-                    Allow DND / 允许免打扰
+                    Allow DND
                   </span>
                 </label>
               </div>
             </div>
 
-            {/* Participant Types / 参与者类型 */}
             {participantTypes.length > 0 && (
               <div>
                 <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-1.5 block">
-                  Participant Types / 参与者类型
+                  Participant Types
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {participantTypes.map(pt => {
@@ -362,7 +355,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                     );
                   })}
                   <span className="text-[10px] text-stone-300 self-center ml-1">
-                    {nc.assigned_participant_types.length === 0 ? '(all types / 所有类型)' : ''}
+                    {nc.assigned_participant_types.length === 0 ? '(all types)' : ''}
                   </span>
                 </div>
               </div>
@@ -374,30 +367,30 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-stone-400">Loading notifications... / 加载通知中...</div>;
+    return <div className="text-center py-12 text-stone-400">Loading notifications...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Project-level notifications / 项目级通知 */}
+    <div className="space-y-8">
+      {/* Section 1: Project-level notifications */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-base font-semibold text-stone-800">Project Notifications / 项目通知</h3>
-            <p className="text-xs text-stone-400 mt-0.5">Not linked to any questionnaire / 不关联任何问卷</p>
+            <h3 className="text-base font-semibold text-stone-800">Project Notifications</h3>
+            <p className="text-xs text-stone-400 mt-0.5">Not linked to any questionnaire</p>
           </div>
           <button
             onClick={addProjectNotification}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
           >
-            <Plus size={14} /> Add / 添加
+            <Plus size={14} /> Add
           </button>
         </div>
 
         {projectConfigs.length === 0 && (
           <div className="text-center py-8 border-2 border-dashed border-stone-200 rounded-xl">
             <Bell size={24} className="mx-auto text-stone-300 mb-2" />
-            <p className="text-xs text-stone-400">No project-level notifications / 暂无项目级通知</p>
+            <p className="text-xs text-stone-400">No project-level notifications</p>
           </div>
         )}
 
@@ -406,36 +399,72 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
         </div>
       </div>
 
-      {/* Per-questionnaire notifications / 按问卷通知 */}
-      {surveyQuestionnaires.map(q => {
-        const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+      {/* Section 2: Questionnaire Notifications */}
+      {surveyQuestionnaires.length > 0 && (
+        <div>
+          <h3 className="text-base font-semibold text-stone-800 mb-1">Questionnaire Notifications</h3>
+          <p className="text-xs text-stone-400 mb-4">Notifications linked to specific questionnaires</p>
+          <div className="space-y-5">
+            {surveyQuestionnaires.map(q => {
+              const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+              return (
+                <div key={q.id}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-stone-700">{q.title}</h4>
+                    <button
+                      onClick={() => addQuestionnaireNotification(q.id)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                    >
+                      <Plus size={12} /> Add
+                    </button>
+                  </div>
+                  {qConfigs.length === 0 && (
+                    <div className="text-center py-4 border border-dashed border-stone-200 rounded-xl">
+                      <p className="text-[11px] text-stone-300">No notifications configured</p>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {qConfigs.map(renderConfigCard)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Section 3: Forms & Components Notifications — only show items that have notifications */}
+      {componentQuestionnaires.length > 0 && (() => {
+        const componentsWithNotifs = componentQuestionnaires.filter(c => configs.some(nc => nc.questionnaire_id === c.id));
+        if (componentsWithNotifs.length === 0) return null;
         return (
-          <div key={q.id}>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-sm font-semibold text-stone-700">📋 {q.title}</h3>
-                <p className="text-[11px] text-stone-400">Questionnaire notifications / 问卷通知</p>
-              </div>
-              <button
-                onClick={() => addQuestionnaireNotification(q.id)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
-              >
-                <Plus size={12} /> Add / 添加
-              </button>
-            </div>
-
-            {qConfigs.length === 0 && (
-              <div className="text-center py-6 border border-dashed border-stone-200 rounded-xl">
-                <p className="text-[11px] text-stone-300">No notifications for this questionnaire / 此问卷暂无通知</p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              {qConfigs.map(renderConfigCard)}
+          <div>
+            <h3 className="text-base font-semibold text-stone-800 mb-1">Forms & Components Notifications</h3>
+            <p className="text-xs text-stone-400 mb-4">Notifications linked to forms and components</p>
+            <div className="space-y-5">
+              {componentsWithNotifs.map(q => {
+                const qConfigs = configs.filter(c => c.questionnaire_id === q.id);
+                return (
+                  <div key={q.id}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-stone-700">{q.title}</h4>
+                      <button
+                        onClick={() => addQuestionnaireNotification(q.id)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                      >
+                        <Plus size={12} /> Add
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {qConfigs.map(renderConfigCard)}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
-      })}
+      })()}
     </div>
   );
 };
