@@ -51,7 +51,7 @@ export interface AppTabElementRow {
   style_overflow?: string | null;
   button_action?: string | null;
   button_label?: string | null;
-  button_border_radius?: string | null;
+  
   image_url?: string | null;
   show_question_count?: boolean | null;
   show_estimated_time?: boolean | null;

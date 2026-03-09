@@ -991,6 +991,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'components', label: t('project.components') },
     { id: 'logic', label: t('project.logic') },
     { id: 'flow', label: t('project.flow') },
+    { id: 'notifications', label: t('project.notifications') },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
     { id: 'translations' as TabId, label: t('project.translations') },
