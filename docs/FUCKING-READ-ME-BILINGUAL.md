@@ -163,7 +163,7 @@ The question system supports **40 question types** across 7 categories, all stor
 4. Data: number, date, time, email, phone, file_upload, address / 数据：数字、日期、时间、邮箱、电话、文件上传、地址
 5. Advanced: constant_sum, signature / 高级：常量总和、签名
 6. Layout & Media: section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block / 布局与媒体：章节标题、文本块、分隔线、图片块、说明、视频块、音频块、嵌入块
-7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试
+7. UX Research: card_sort, tree_test, first_click, five_second_test, preference_test, prototype_test, max_diff, design_survey, heatmap / UX研究：卡片分类、树测试、首次点击、5秒测试、偏好测试、原型测试、最大差异分析、设计调查（多变体）、热图
 
 **Rich Media Types (Layout & Media category) / 富媒体类型:**
 - `video_block` — Embed YouTube, Vimeo, Loom, or direct MP4. Config: cfg_video_url, cfg_autoplay, cfg_loop, cfg_muted, cfg_poster_url / 嵌入视频
