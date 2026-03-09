@@ -221,6 +221,8 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'funnel' as SubView, label: 'Funnel', icon: TrendingDown },
             { id: 'ai_text' as SubView, label: 'AI Text', icon: Brain },
             { id: 'export' as SubView, label: 'Export', icon: FileSpreadsheet },
+            { id: 'ux_results' as SubView, label: 'UX Results', icon: Layers },
+            { id: 'stats' as SubView, label: 'Stats', icon: BarChart3 },
           ].map(tab => (
             <button
               key={tab.id}
