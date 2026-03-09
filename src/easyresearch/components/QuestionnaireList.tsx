@@ -1015,6 +1015,53 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 <p className="text-[10px] text-stone-400">Randomization shuffles non-section questions. Piping inserts previous answers into question text using {"{{Q1}}"} or {"{{question_id}}"}. Timer records response duration per question.</p>
                               </div>
 
+                              {/* Response Quality Controls */}
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">🛡️ Quality Controls</h5>
+                                <label className="flex items-center justify-between">
+                                  <span className="text-[11px] text-stone-600">Detect straightlining</span>
+                                  <div className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={(q as any).detect_straightlining || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { detect_straightlining: e.target.checked } as any)}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-amber-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </div>
+                                </label>
+                                <label className="flex items-center justify-between">
+                                  <span className="text-[11px] text-stone-600">Detect gibberish text</span>
+                                  <div className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked={(q as any).detect_gibberish || false}
+                                      onChange={(e) => updateQuestionnaire(q.id, { detect_gibberish: e.target.checked } as any)}
+                                      className="sr-only peer" />
+                                    <div className="w-8 h-4 bg-stone-200 peer-checked:bg-amber-500 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+                                  </div>
+                                </label>
+                                <div>
+                                  <label className="block text-[11px] text-stone-500 mb-1">Min completion time (seconds)</label>
+                                  <input type="number" value={(q as any).min_completion_time_seconds || ''} min={0}
+                                    onChange={(e) => updateQuestionnaire(q.id, { min_completion_time_seconds: e.target.value ? Number(e.target.value) : null } as any)}
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Auto (disabled)" />
+                                </div>
+                                <p className="text-[10px] text-stone-400">Flags responses completed too fast (speeders) or with identical answers across scale questions (straightliners). Flagged responses are kept but marked for review.</p>
+                              </div>
+
+                              {/* Completion Actions */}
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">✅ Completion</h5>
+                                <div>
+                                  <label className="block text-[11px] text-stone-500 mb-1">Thank-you message</label>
+                                  <textarea value={(q as any).custom_thank_you_message || ''} rows={2}
+                                    onChange={(e) => updateQuestionnaire(q.id, { custom_thank_you_message: e.target.value } as any)}
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder="Thank you for participating! Your response has been recorded." />
+                                </div>
+                                <div>
+                                  <label className="block text-[11px] text-stone-500 mb-1">Redirect URL (after completion)</label>
+                                  <input type="url" value={(q as any).redirect_url || ''}
+                                    onChange={(e) => updateQuestionnaire(q.id, { redirect_url: e.target.value } as any)}
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://example.com/thank-you" />
+                                </div>
+                              </div>
+
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
