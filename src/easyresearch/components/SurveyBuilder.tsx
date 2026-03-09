@@ -20,6 +20,8 @@ import { loadNotificationConfigs, saveNotificationConfigs, type NotificationConf
 import ComponentBuilder from './ComponentBuilder';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
+import SurveyFlowVisualizer from './SurveyFlowVisualizer';
+import QuotaManager from './QuotaManager';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -95,7 +97,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -935,9 +937,11 @@ const SurveyBuilder: React.FC = () => {
     { id: 'questionnaires', label: t('project.questionnaires') },
     { id: 'components', label: t('project.components') },
     { id: 'logic', label: t('project.logic') },
+    { id: 'flow', label: 'Flow / 流程' },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
     ...(projectId ? [{ id: 'participants' as TabId, label: t('project.participants') }] : []),
+    ...(projectId ? [{ id: 'quotas' as TabId, label: 'Quotas / 配额' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1078,6 +1082,23 @@ const SurveyBuilder: React.FC = () => {
             projectId={projectId}
             logicRules={logicRules}
             onUpdateLogic={setLogicRules}
+          />
+        )}
+
+        {/* Flow Visualizer Tab / 流程可视化 */}
+        {activeTab === 'flow' && (
+          <SurveyFlowVisualizer
+            questionnaires={questionnaireConfigs}
+            logicRules={logicRules}
+          />
+        )}
+
+        {/* Quotas Tab / 配额管理 */}
+        {activeTab === 'quotas' && projectId && (
+          <QuotaManager
+            projectId={projectId}
+            participantTypes={participantTypes}
+            questions={questionnaireConfigs.flatMap(q => q.questions || [])}
           />
         )}
 

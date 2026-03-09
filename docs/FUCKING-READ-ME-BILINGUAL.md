@@ -1349,3 +1349,146 @@ Public pages are managed in the Layout tab's 4th sub-tab "Public Pages". Accesse
 公开页面在布局选项卡的第4个子选项卡"公开页面"中管理。通过 `LayoutTabWrapper.tsx` → `PublicPageBuilder.tsx` 访问。
 
 ---
+
+## 15. ADVANCED ANALYTICS ENGINE / 高级分析引擎
+
+<!-- CRC STARTS -->
+- Analytics are per-question-type, not generic. Each type has specialized visualization.
+- 分析按题型定制，非通用。每种类型有专门的可视化。
+- Cross-tabulation enables segment comparison between any two questions.
+- 交叉分析支持任意两个问题之间的细分比较。
+<!-- CRC ENDS -->
+
+**Per-question-type visualizations / 按题型可视化:**
+
+- **NPS:** Gauge score (-100 to +100), promoter/passive/detractor percentage breakdown, 0-10 distribution histogram / NPS仪表评分、推荐者/中立者/贬低者百分比、0-10分布直方图
+- **SUS:** Score gauge (0-100) with letter grade (A-F), progress bar, per-item breakdown / SUS评分仪表带字母等级、进度条
+- **CSAT:** Emoji distribution (😡😞😐😊😍), CSAT% score (% satisfied ≥ 4), average score / 表情分布、CSAT%评分、平均分
+- **CES:** 7-point color-gradient bar chart, average effort score / 7点颜色渐变柱状图、平均努力分数
+- **Likert/Scale/Rating:** Mean, median, std dev, distribution histogram / 均值、中位数、标准差、分布直方图
+- **MaxDiff:** Best-worst preference ranking with B-W score / 最优最差偏好排名
+- **Kano:** Feature classification pie chart (Must-be, Attractive, One-dimensional, etc.) / 特性分类饼图
+- **Quality Flags:** Speeder, straightlining, gibberish flag counts / 质量标记计数
+
+**Component:** `src/easyresearch/components/shared/AdvancedQuestionAnalytics.tsx`
+**Integrated into:** `ProjectResponsesTab.tsx` summary view — auto-renders for supported question types.
+
+**Cross-Tabulation / 交叉分析:**
+
+- Select any two questions → generates a frequency matrix with row/column totals and percentage heat shading
+- 选择任意两个问题 → 生成频率矩阵，含行列合计和百分比热力着色
+- **Component:** `src/easyresearch/components/CrossTabAnalysis.tsx`
+- **Access:** 4th sub-tab ("Cross-Tab") in the Responses tab
+
+**Data Export / 数据导出:**
+
+- CSV, JSON, Excel (XML Spreadsheet), PDF (print dialog) — all available from Analytics Dashboard
+- CSV、JSON、Excel（XML电子表格）、PDF（打印对话框）—均可从分析仪表盘导出
+- Per-project CSV export also available in Responses tab
+- 按项目CSV导出也可在回复选项卡中使用
+
+---
+
+## 16. SURVEY FLOW VISUALIZER / 调查流程可视化
+
+<!-- CRC STARTS -->
+- Visual node-based flow diagram showing the entire survey structure at a glance.
+- 可视化节点流程图，一览整个调查结构。
+<!-- CRC ENDS -->
+
+- Displays each questionnaire as a grouped section with numbered question nodes
+- 将每个问卷显示为带编号问题节点的分组
+- Color-coded by question type category (text=blue, choice=purple, scale=amber, data=cyan, UX=red, media=indigo)
+- 按问题类型类别着色
+- Logic rules shown as branching arrows with condition + action labels
+- 逻辑规则显示为带条件和动作标签的分支箭头
+- Supports: skip, show, hide, disqualify, end_survey actions
+- 支持：跳过、显示、隐藏、取消资格、结束调查
+- **Component:** `src/easyresearch/components/SurveyFlowVisualizer.tsx`
+- **Access:** "Flow / 流程" tab in SurveyBuilder (between Logic and Layout)
+
+---
+
+## 17. QUOTA MANAGEMENT / 配额管理
+
+<!-- CRC STARTS -->
+- Quotas control sample composition by segment, auto-closing when targets are met.
+- 配额按细分控制样本构成，达到目标时自动关闭。
+<!-- CRC ENDS -->
+
+**Database columns on `research_project` / 数据库列:**
+
+- `quota_config` (jsonb) — array of quota rules: `{ id, field, fieldLabel, value, target, current, autoClose }`
+- `target_participants` (int, default 100) — overall target sample size
+
+**Features / 功能:**
+
+- Define quotas by participant type or screening question answers / 按参与者类型或筛选问题答案定义配额
+- Real-time progress bars per quota segment / 每个配额细分的实时进度条
+- Auto-close toggle per segment (stops accepting when full) / 每个细分的自动关闭开关
+- Warning when quota targets don't sum to total target / 配额目标不等于总目标时警告
+- **Component:** `src/easyresearch/components/QuotaManager.tsx`
+- **Access:** "Quotas / 配额" tab in SurveyBuilder (only shown after project save)
+
+---
+
+## 18. COMPLETE QUESTION TYPE INVENTORY (45 types) / 完整问题类型清单（45种）
+
+<!-- CRC STARTS -->
+- This is the canonical list. If a type is not here, it does not exist.
+- 这是权威列表。如果类型不在这里，则不存在。
+<!-- CRC ENDS -->
+
+| # | Type Key | Category | Label EN | Label CN |
+|---|----------|----------|----------|----------|
+| 1 | `text_short` | text | Short Text | 简答 |
+| 2 | `text_long` | text | Long Text | 长文本 |
+| 3 | `single_choice` | choice | Single Choice | 单选 |
+| 4 | `multiple_choice` | choice | Multiple Choice | 多选 |
+| 5 | `dropdown` | choice | Dropdown | 下拉 |
+| 6 | `checkbox_group` | choice | Checkbox Group | 复选框组 |
+| 7 | `slider` | scale | Slider | 滑块 |
+| 8 | `bipolar_scale` | scale | Bipolar Scale | 双极量表 |
+| 9 | `rating` | scale | Rating Scale | 评分 |
+| 10 | `likert_scale` | scale | Likert Scale | 李克特量表 |
+| 11 | `nps` | scale | NPS Score | NPS评分 |
+| 12 | `number` | data | Number | 数字 |
+| 13 | `date` | data | Date | 日期 |
+| 14 | `time` | data | Time | 时间 |
+| 15 | `email` | data | Email | 邮箱 |
+| 16 | `matrix` | choice | Matrix / Grid | 矩阵 |
+| 17 | `ranking` | choice | Ranking | 排序 |
+| 18 | `file_upload` | data | File Upload | 文件上传 |
+| 19 | `phone` | data | Phone Number | 电话 |
+| 20 | `image_choice` | choice | Image Choice | 图片选择 |
+| 21 | `yes_no` | choice | Yes / No | 是/否 |
+| 22 | `instruction` | layout | Instruction | 说明 |
+| 23 | `constant_sum` | advanced | Constant Sum | 固定总和 |
+| 24 | `signature` | advanced | Signature | 签名 |
+| 25 | `address` | data | Address | 地址 |
+| 26 | `slider_range` | scale | Range Slider | 范围滑块 |
+| 27 | `section_header` | layout | Section Header | 章节标题 |
+| 28 | `text_block` | layout | Text Block | 文本块 |
+| 29 | `divider` | layout | Divider | 分隔线 |
+| 30 | `image_block` | layout | Image Block | 图片块 |
+| 31 | `video_block` | layout | Video | 视频 |
+| 32 | `audio_block` | layout | Audio | 音频 |
+| 33 | `embed_block` | layout | Embed / iFrame | 嵌入 |
+| 34 | `card_sort` | advanced | Card Sort | 卡片分类 |
+| 35 | `tree_test` | advanced | Tree Test | 树状测试 |
+| 36 | `first_click` | advanced | First Click Test | 首次点击 |
+| 37 | `five_second_test` | advanced | 5-Second Test | 5秒测试 |
+| 38 | `preference_test` | advanced | Preference Test | 偏好测试 |
+| 39 | `prototype_test` | advanced | Prototype Test | 原型测试 |
+| 40 | `max_diff` | advanced | MaxDiff (Best-Worst) | MaxDiff |
+| 41 | `design_survey` | advanced | Design Survey (Multi) | 多变体设计调查 |
+| 42 | `heatmap` | advanced | Heatmap (Multi-Click) | 热图 |
+| 43 | `conjoint` | advanced | Conjoint Analysis | 联合分析 |
+| 44 | `kano` | advanced | Kano Model | Kano模型 |
+| 45 | `sus` | scale | SUS (System Usability) | SUS系统可用性 |
+| 46 | `csat` | scale | CSAT (Satisfaction) | CSAT满意度 |
+| 47 | `ces` | scale | CES (Effort Score) | CES努力度 |
+
+**Source of truth / 权威来源:** `src/easyresearch/constants/questionTypes.ts`
+
+---

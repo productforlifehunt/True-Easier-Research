@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare } from 'lucide-react';
+import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
+import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
+import CrossTabAnalysis from './CrossTabAnalysis';
 
 interface Props {
   projectId: string;
   questionnaires: QuestionnaireConfig[];
 }
 
-type SubView = 'summary' | 'individual' | 'table';
+type SubView = 'summary' | 'individual' | 'table' | 'cross_tab';
 
 const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
@@ -210,6 +212,7 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
             { id: 'summary' as SubView, label: 'Summary', icon: BarChart3 },
             { id: 'individual' as SubView, label: 'Individual', icon: User },
             { id: 'table' as SubView, label: 'Table', icon: Table2 },
+            { id: 'cross_tab' as SubView, label: 'Cross-Tab', icon: ArrowLeftRight },
           ].map(tab => (
             <button
               key={tab.id}
@@ -383,6 +386,18 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                             )}
                           </div>
                         )}
+
+                        {/* Advanced per-type analytics / 高级题型分析 */}
+                        {['nps', 'sus', 'csat', 'ces', 'likert_scale', 'rating', 'slider', 'bipolar_scale', 'max_diff', 'kano'].includes(q.question_type) && (
+                          <div className="mt-4 pt-4 border-t border-stone-100">
+                            <AdvancedQuestionAnalytics
+                              questionType={q.question_type}
+                              responses={responses.filter(r => r.question_id === q.id)}
+                              questionConfig={q.question_config}
+                              options={q.options?.map((o: any) => o.option_text)}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -487,6 +502,16 @@ const ProjectResponsesTab: React.FC<Props> = ({ projectId, questionnaires }) => 
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* CROSS-TAB VIEW / 交叉分析 */}
+          {subView === 'cross_tab' && (
+            <div className="bg-white rounded-xl border border-stone-100 p-5">
+              <CrossTabAnalysis
+                questions={filteredQuestions}
+                responses={responses}
+              />
             </div>
           )}
         </>
