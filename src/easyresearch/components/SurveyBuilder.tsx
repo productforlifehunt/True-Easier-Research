@@ -32,6 +32,10 @@ import ResponseScheduler from './ResponseScheduler';
 import SurveyThemingEngine from './SurveyThemingEngine';
 import DistributionManager from './DistributionManager';
 import AccessibilityChecker from './AccessibilityChecker';
+import ConsentEthicsManager from './ConsentEthicsManager';
+import CollaborationEngine from './CollaborationEngine';
+import ParticipantJourneyTracker from './ParticipantJourneyTracker';
+import DataPipelineAPI from './DataPipelineAPI';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -107,7 +111,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -1255,6 +1259,26 @@ const SurveyBuilder: React.FC = () => {
             questions={questionnaireConfigs.flatMap(q => q.questions || [])}
             theme={(project as any).theme_config}
           />
+        )}
+
+        {/* Consent & Ethics Tab / 知情同意与伦理 */}
+        {activeTab === 'consent' && projectId && (
+          <ConsentEthicsManager projectId={projectId} />
+        )}
+
+        {/* Collaboration Tab / 协作 */}
+        {activeTab === 'collaboration' && projectId && (
+          <CollaborationEngine projectId={projectId} />
+        )}
+
+        {/* Participant Journeys Tab / 参与者旅程 */}
+        {activeTab === 'journeys' && projectId && (
+          <ParticipantJourneyTracker projectId={projectId} />
+        )}
+
+        {/* API Access Tab / API 访问 */}
+        {activeTab === 'api' && projectId && (
+          <DataPipelineAPI projectId={projectId} />
         )}
 
         {/* Responses Tab */}
