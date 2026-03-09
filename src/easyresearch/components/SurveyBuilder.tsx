@@ -45,6 +45,12 @@ import DataCleaningStudio from './DataCleaningStudio';
 import SessionReplayViewer from './SessionReplayViewer';
 import PanelRecruitmentHub from './PanelRecruitmentHub';
 import AdvancedSegmentation from './AdvancedSegmentation';
+import PersonaBuilder from './PersonaBuilder';
+import JourneyMapDesigner from './JourneyMapDesigner';
+import ThemeAnnotator from './ThemeAnnotator';
+import ResearchCalendar from './ResearchCalendar';
+import StakeholderDashboard from './StakeholderDashboard';
+import ParticipantCRM from './ParticipantCRM';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
@@ -120,7 +126,7 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation';
+type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -988,6 +994,12 @@ const SurveyBuilder: React.FC = () => {
     ...(projectId ? [{ id: 'sessions' as TabId, label: '🎬 Sessions / 会话' }] : []),
     ...(projectId ? [{ id: 'recruitment' as TabId, label: '📢 Recruit / 招募' }] : []),
     ...(projectId ? [{ id: 'segmentation' as TabId, label: '🎯 Segments / 分群' }] : []),
+    ...(projectId ? [{ id: 'personas' as TabId, label: '👤 Personas / 画像' }] : []),
+    ...(projectId ? [{ id: 'journey_maps' as TabId, label: '🗺️ Journeys / 旅程图' }] : []),
+    ...(projectId ? [{ id: 'annotations' as TabId, label: '🏷️ Annotate / 标注' }] : []),
+    ...(projectId ? [{ id: 'calendar' as TabId, label: '📅 Calendar / 日历' }] : []),
+    ...(projectId ? [{ id: 'stakeholder' as TabId, label: '📊 Executive / 管理层' }] : []),
+    ...(projectId ? [{ id: 'crm' as TabId, label: '💼 CRM' }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1346,6 +1358,36 @@ const SurveyBuilder: React.FC = () => {
         {/* Advanced Segmentation Tab / 高级分群 */}
         {activeTab === 'segmentation' && projectId && (
           <AdvancedSegmentation projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Persona Builder Tab / 用户画像 */}
+        {activeTab === 'personas' && projectId && (
+          <PersonaBuilder projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Journey Map Tab / 旅程地图 */}
+        {activeTab === 'journey_maps' && projectId && (
+          <JourneyMapDesigner projectId={projectId} />
+        )}
+
+        {/* Theme Annotator Tab / 主题标注 */}
+        {activeTab === 'annotations' && projectId && (
+          <ThemeAnnotator projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Research Calendar Tab / 研究日历 */}
+        {activeTab === 'calendar' && projectId && (
+          <ResearchCalendar projectId={projectId} />
+        )}
+
+        {/* Stakeholder Dashboard Tab / 利益相关者仪表板 */}
+        {activeTab === 'stakeholder' && projectId && (
+          <StakeholderDashboard projectId={projectId} questionnaires={questionnaireConfigs} />
+        )}
+
+        {/* Participant CRM Tab / 参与者CRM */}
+        {activeTab === 'crm' && projectId && (
+          <ParticipantCRM projectId={projectId} />
         )}
 
         {/* Responses Tab */}
