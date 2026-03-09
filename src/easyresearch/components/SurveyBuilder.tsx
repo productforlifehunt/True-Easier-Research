@@ -45,6 +45,12 @@ import DataCleaningStudio from './DataCleaningStudio';
 import SessionReplayViewer from './SessionReplayViewer';
 import PanelRecruitmentHub from './PanelRecruitmentHub';
 import AdvancedSegmentation from './AdvancedSegmentation';
+import PersonaBuilder from './PersonaBuilder';
+import JourneyMapDesigner from './JourneyMapDesigner';
+import ThemeAnnotator from './ThemeAnnotator';
+import ResearchCalendar from './ResearchCalendar';
+import StakeholderDashboard from './StakeholderDashboard';
+import ParticipantCRM from './ParticipantCRM';
 import { useI18n } from '../hooks/useI18n';
 
 import toast from 'react-hot-toast';
