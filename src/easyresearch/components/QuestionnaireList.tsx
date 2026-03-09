@@ -39,6 +39,12 @@ export interface QuestionnaireConfig {
   randomize_questions?: boolean;
   enable_piping?: boolean;
   track_time_per_question?: boolean;
+  // Response quality controls / 响应质量控制
+  min_completion_time_seconds?: number;
+  detect_straightlining?: boolean;
+  detect_gibberish?: boolean;
+  custom_thank_you_message?: string;
+  redirect_url?: string;
 }
 
 interface QuestionnaireListProps {
