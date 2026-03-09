@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Mic, GripVertical, X, Save, Check } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
+import CustomDropdown from './CustomDropdown';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import toast from 'react-hot-toast';
 
