@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers } from 'lucide-react';
+import { BarChart3, User, Table2, Download, ChevronDown, ChevronRight, MessageSquare, ArrowLeftRight, Layers, TrendingDown, Brain, FileSpreadsheet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
 import CrossTabAnalysis from './CrossTabAnalysis';
+import FunnelAnalysis from './FunnelAnalysis';
+import AITextAnalysis from './AITextAnalysis';
+import AdvancedExport from './AdvancedExport';
 
 interface Props {
   projectId: string;
