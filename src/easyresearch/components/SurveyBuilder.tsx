@@ -1396,6 +1396,36 @@ const SurveyBuilder: React.FC = () => {
           <ParticipantCRM projectId={projectId} />
         )}
 
+        {/* Research Templates Library / 研究模板库 */}
+        {activeTab === 'templates' && projectId && (
+          <ResearchTemplatesLibrary projectId={projectId} />
+        )}
+
+        {/* Data Visualization Studio / 数据可视化工作室 */}
+        {activeTab === 'visualization' && projectId && (
+          <DataVisualizationStudio projectId={projectId} />
+        )}
+
+        {/* Screener Builder / 筛选器构建器 */}
+        {activeTab === 'screener' && projectId && (
+          <ScreenerBuilder projectId={projectId} />
+        )}
+
+        {/* Research Brief Generator / 研究简报生成器 */}
+        {activeTab === 'brief' && projectId && (
+          <ResearchBriefGenerator projectId={projectId} projectTitle={project.title} />
+        )}
+
+        {/* Multi-Language Preview / 多语言预览 */}
+        {activeTab === 'lang_preview' && projectId && (
+          <MultiLangPreview projectId={projectId} />
+        )}
+
+        {/* A/B Test Results / A/B测试结果 */}
+        {activeTab === 'ab_results' && projectId && (
+          <ABTestResults projectId={projectId} />
+        )}
+
         {/* Responses Tab */}
         {activeTab === 'responses' && projectId && (
           <ProjectResponsesTab
