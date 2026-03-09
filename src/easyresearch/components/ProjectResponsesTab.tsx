@@ -5,7 +5,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import AdvancedQuestionAnalytics from './shared/AdvancedQuestionAnalytics';
 import CrossTabAnalysis from './CrossTabAnalysis';
-import type { QuestionnaireConfig } from './QuestionnaireList';
 
 interface Props {
   projectId: string;
