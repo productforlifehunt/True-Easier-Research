@@ -137,7 +137,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
             <span className="text-sm font-medium text-stone-700 truncate">{nc.title || 'Untitled'}</span>
             <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-stone-100 text-stone-400">
               {nc.schedule_mode === 'specific_times'
-                ? `${nc.specific_times.length} times / 次`
+                ? `${nc.specific_times.length} times`
                 : (FREQUENCY_OPTIONS.find(f => f.value === nc.frequency)?.label || nc.frequency)
               }
             </span>
