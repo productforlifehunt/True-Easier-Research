@@ -1141,6 +1141,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                 {showAddElement && (
                   <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-3 max-h-[400px] overflow-y-auto">
+                    {/* Layout Elements — first */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {LAYOUT_ELEMENTS.map(et => (
+                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
+                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
+                          <span className="text-stone-500 font-medium">{et.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
                     {/* Survey Questionnaires */}
                     {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
@@ -1151,7 +1163,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                             return (
                               <button key={q.id} onClick={() => addQuestionnaire(q)}
                                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <span className="text-lg">📋</span>
+                                <FileText size={16} className="text-emerald-500 shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
                                   <span className="text-[9px] text-stone-400">{q.questions?.length || 0} questions · {q.estimated_duration || 5} min{q.frequency ? ` · ${q.frequency}` : ''}</span>
@@ -1164,17 +1176,18 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    {/* Components (consent/screening/profile/help) */}
-                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).length > 0 && (
+                    {/* Forms & Components (consent/screening/profile/help) */}
+                    {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Components</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Forms & Components</p>
                         <div className="space-y-1">
-                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom'].includes(q.questionnaire_type)).map(q => {
-                            const typeIcon = q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'screening' ? '📝' : q.questionnaire_type === 'profile' ? '👤' : q.questionnaire_type === 'help' ? '❓' : '🧩';
+                          {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).map(q => {
+                            const TypeIcon = q.questionnaire_type === 'consent' ? Shield : q.questionnaire_type === 'screening' ? ClipboardCheck : q.questionnaire_type === 'profile' ? User : q.questionnaire_type === 'help' ? HelpCircle : q.questionnaire_type === 'onboarding' ? Layers : Plus;
+                            const iconColor = q.questionnaire_type === 'consent' ? 'text-amber-500' : q.questionnaire_type === 'screening' ? 'text-orange-500' : q.questionnaire_type === 'profile' ? 'text-blue-500' : q.questionnaire_type === 'help' ? 'text-violet-500' : 'text-emerald-500';
                             return (
                               <button key={q.id} onClick={() => addElement(q.questionnaire_type as any, { title: q.title, questionnaire_id: q.id })}
                                 className="w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors text-[11px] border border-transparent hover:bg-white hover:border-stone-200">
-                                <span className="text-lg">{typeIcon}</span>
+                                <TypeIcon size={16} className={`${iconColor} shrink-0`} />
                                 <div className="flex-1 min-w-0">
                                   <span className="text-stone-700 font-medium truncate block">{q.title}</span>
                                   <span className="text-[9px] text-stone-400">{q.questionnaire_type} · {q.questions?.length || 0} fields</span>
@@ -1186,26 +1199,17 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Content Elements</p>
+                    {/* Function Elements */}
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Function Elements</p>
                     <div className="grid grid-cols-2 gap-1.5">
-                      {STATIC_CONTENT_ELEMENTS.map(et => (
+                      {FUNCTION_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
                           className="flex items-center gap-2 p-2 rounded-lg text-left hover:bg-white transition-colors text-[11px] border border-transparent hover:border-stone-200">
-                          <span>{et.icon}</span>
+                          {getLucideIcon(et.lucideIcon, 16, 'text-stone-500')}
                           <div>
                             <span className="text-stone-600 font-medium">{et.label}</span>
                             <p className="text-[9px] text-stone-400">{et.desc}</p>
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {LAYOUT_ELEMENTS.map(et => (
-                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
-                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
-                          <span className="text-lg">{et.icon}</span>
-                          <span className="text-stone-500 font-medium">{et.label}</span>
                         </button>
                       ))}
                     </div>
