@@ -191,6 +191,13 @@ Columns on `questionnaire` table / `questionnaire` 表上的列:
 - `ab_group_id` (text) — shared group ID linking variants together / 链接变体的共享组ID
 - `ab_split_percentage` (int) — traffic split %, default 50 / 流量分配百分比，默认50
 
+**Questionnaire-Level Research Features / 问卷级研究功能:**
+
+Columns on `questionnaire` table / `questionnaire` 表上的列:
+- `randomize_questions` (bool) — shuffle non-section question order for each participant / 为每个参与者随机排列非章节问题顺序
+- `enable_piping` (bool) — enable answer piping using `{{Q1}}` or `{{question_id}}` template syntax in question text / 启用答案传递，在问题文本中使用 `{{Q1}}` 或 `{{question_id}}` 模板语法
+- `track_time_per_question` (bool) — record response duration per question for analytics / 记录每个问题的响应时长用于分析
+
 Each question is a row in the `question` table (renamed from the old `survey_question` — NEVER use `survey_question` anymore). A question belongs to one project via `project_id` and optionally to one questionnaire via `questionnaire_id`.
 
 每个问题是 `question` 表中的一行（从旧的 `survey_question` 重命名——永远不要再使用 `survey_question`）。一个问题通过 `project_id` 属于一个项目，可选地通过 `questionnaire_id` 属于一个问卷。
