@@ -64,12 +64,12 @@ interface QuestionnaireListProps {
 
 const frequencyOptions = [
   { value: 'once', label: 'One-time' },
-  { value: 'hourly', label: 'Hourly' },
-  { value: '2hours', label: 'Every 2 hours' },
-  { value: '4hours', label: 'Every 4 hours' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'twice_daily', label: 'Twice daily' },
-  { value: 'weekly', label: 'Weekly' },
+  { value: 'hourly', label: 'Multiple time — Hourly' },
+  { value: '2hours', label: 'Multiple time — Every 2 hours' },
+  { value: '4hours', label: 'Multiple time — Every 4 hours' },
+  { value: 'daily', label: 'Multiple time — Daily' },
+  { value: 'twice_daily', label: 'Multiple time — Twice daily' },
+  { value: 'weekly', label: 'Multiple time — Weekly' },
 ];
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
