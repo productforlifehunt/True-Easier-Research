@@ -255,7 +255,7 @@ const ParticipantHome: React.FC = () => {
                         study.role === 'owner' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
                       }`}>
                         {study.role === 'owner' ? (
-                          <span className="flex items-center gap-0.5"><FlaskConical size={9} /> {t('dashboard.owner')}</span>
+                          <span className="flex items-center gap-0.5"><BarChart3 size={9} /> {t('dashboard.owner')}</span>
                         ) : (
                           <span className="flex items-center gap-0.5"><Users size={9} /> {t('dashboard.participant')}</span>
                         )}
