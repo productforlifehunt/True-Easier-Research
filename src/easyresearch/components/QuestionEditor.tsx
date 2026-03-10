@@ -1241,7 +1241,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Conjoint Analysis Configuration */}
         {localQuestion.question_type === 'conjoint' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">🧮 Conjoint Attributes</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Conjoint Attributes</p>
             {(localQuestion.question_config?.conjoint_attributes || []).map((attr: any, ai: number) => (
               <div key={ai} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex gap-2">
