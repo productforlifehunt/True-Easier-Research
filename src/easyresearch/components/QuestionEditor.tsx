@@ -209,7 +209,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'file_upload':
-        return <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">📎 Drop file here</div>;
+        return <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">Drop file here</div>;
       case 'image_choice':
         return (
           <div className="flex gap-1">
