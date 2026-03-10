@@ -58,17 +58,17 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
       <rect x="29" y="24" width="9" height="26" rx="2" fill={`url(#${uid}-bar)`} />
       <rect x="29" y="24" width="9" height="13" rx="2" fill={`url(#${uid}-sheen)`} />
 
-      {/* Bar 3 / Letter "E" — vertical stroke same 9px as other bars */}
-      <rect x="42" y="12" width="9" height="38" rx="2" fill={`url(#${uid}-bar)`} />
-      <rect x="42" y="12" width="9" height="19" rx="2" fill={`url(#${uid}-sheen)`} />
+      {/* Bar 3 / Letter "E" — equal height with L axis (top at y=6, bottom at y=50) */}
+      <rect x="42" y="6" width="9" height="44" rx="2" fill={`url(#${uid}-bar)`} />
+      <rect x="42" y="6" width="9" height="22" rx="2" fill={`url(#${uid}-sheen)`} />
 
       {/* E horizontals — 3.5px thick (matches L-frame stroke), wider for natural E shape */}
       {/* Top bar */}
-      <rect x="49" y="12" width="11" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="12" width="11" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
+      <rect x="49" y="6" width="11" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="6" width="11" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
       {/* Middle bar — slightly shorter */}
-      <rect x="49" y="29.25" width="9" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="29.25" width="9" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
+      <rect x="49" y="26.25" width="9" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="26.25" width="9" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
       {/* Bottom bar */}
       <rect x="49" y="46.5" width="11" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
       <rect x="49" y="46.5" width="11" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
