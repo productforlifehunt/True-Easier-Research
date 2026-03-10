@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ExternalLink, Hash, Network, MessageSquare } from 'lucide-react';
+import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, Hash, MessageSquare, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,6 +17,14 @@ interface Enrollment {
   created_at: string;
   profile_data?: any;
   study_start_date?: string;
+}
+
+interface ParticipantType {
+  id: string;
+  name: string;
+  color?: string;
+  numbering_enabled?: boolean;
+  number_prefix?: string;
 }
 
 interface ParticipantProfile {
@@ -43,9 +51,11 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   const navigate = useNavigate();
   const [subView, setSubView] = useState<SubView>('manage');
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [participantTypes, setParticipantTypes] = useState<ParticipantType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteTypeId, setInviteTypeId] = useState<string>('');
   const [sendingInvite, setSendingInvite] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -59,7 +69,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   const [librarySearch, setLibrarySearch] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
 
-  useEffect(() => { loadEnrollments(); }, [projectId]);
+  useEffect(() => { loadEnrollments(); loadParticipantTypes(); }, [projectId]);
 
   const startConversation = async (enrollment: Enrollment) => {
     if (!user || !enrollment.participant_id) {
@@ -67,7 +77,6 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
       return;
     }
     try {
-      // Check for existing conversation
       const { data: existing } = await supabase.from('conversations')
         .select('id')
         .eq('project_id', projectId)
@@ -78,7 +87,6 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
         navigate(`/easyresearch/inbox/${existing.id}`);
         return;
       }
-      // Create new conversation
       const { data: newConv, error } = await supabase.from('conversations').insert({
         project_id: projectId,
         researcher_user_id: user.id,
@@ -93,7 +101,17 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
       toast.error('Failed to start conversation');
     }
   };
+
   useEffect(() => { if (subView === 'find') loadLibrary(); }, [subView]);
+
+  const loadParticipantTypes = async () => {
+    try {
+      const { data } = await supabase.from('participant_type')
+        .select('id, name, color, numbering_enabled, number_prefix')
+        .eq('project_id', projectId).order('order_index');
+      setParticipantTypes((data || []) as ParticipantType[]);
+    } catch (e) { console.error('Error loading participant types:', e); }
+  };
 
   const loadEnrollments = async () => {
     setLoading(true);
@@ -136,6 +154,21 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
     finally { setResponsesLoading(false); }
   };
 
+  // Generate participant_number based on type prefix and existing count
+  // 根据类型前缀和已有数量生成参与者编号
+  const generateParticipantNumber = async (typeId?: string): Promise<string | null> => {
+    if (!typeId) {
+      // Global numbering fallback: count all enrollments in project
+      const count = enrollments.filter(e => !e.participant_type_id).length;
+      return `P${String(count + 1).padStart(3, '0')}`;
+    }
+    const pType = participantTypes.find(t => t.id === typeId);
+    if (!pType || !pType.numbering_enabled) return null;
+    const prefix = pType.number_prefix || 'P';
+    const count = enrollments.filter(e => e.participant_type_id === typeId).length;
+    return `${prefix}${String(count + 1).padStart(3, '0')}`;
+  };
+
   const sendInvitation = async () => {
     if (!inviteEmail.trim()) { toast.error('Please enter a valid email'); return; }
     setSendingInvite(true);
@@ -143,10 +176,21 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
       const emailLower = inviteEmail.trim().toLowerCase();
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectId).eq('participant_email', emailLower).maybeSingle();
       if (existing) { toast.error('This participant is already enrolled'); setSendingInvite(false); return; }
-      const { error } = await supabase.from('enrollment').insert({ project_id: projectId, participant_email: emailLower, status: 'invited' });
+
+      const participantNumber = await generateParticipantNumber(inviteTypeId || undefined);
+
+      const insertData: any = {
+        project_id: projectId,
+        participant_email: emailLower,
+        status: 'invited',
+      };
+      if (inviteTypeId) insertData.participant_type_id = inviteTypeId;
+      if (participantNumber) insertData.participant_number = participantNumber;
+
+      const { error } = await supabase.from('enrollment').insert(insertData);
       if (error) throw error;
       toast.success(`${t('nav.participants')}: ${emailLower} added`);
-      setShowInviteModal(false); setInviteEmail(''); loadEnrollments();
+      setShowInviteModal(false); setInviteEmail(''); setInviteTypeId(''); loadEnrollments();
     } catch (error: any) { console.error('Error sending invitation:', error); toast.error('Failed to create invitation'); }
     finally { setSendingInvite(false); }
   };
@@ -157,11 +201,24 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
     try {
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectId).eq('participant_email', email.toLowerCase()).maybeSingle();
       if (existing) { toast.error('Already enrolled'); return; }
-      const { error } = await supabase.from('enrollment').insert({ project_id: projectId, participant_email: email.toLowerCase(), status: 'invited', participant_id: profile.user_id });
+      const participantNumber = await generateParticipantNumber(undefined);
+      const { error } = await supabase.from('enrollment').insert({
+        project_id: projectId,
+        participant_email: email.toLowerCase(),
+        status: 'invited',
+        participant_id: profile.user_id,
+        ...(participantNumber ? { participant_number: participantNumber } : {}),
+      });
       if (error) throw error;
       toast.success(`Invited ${profile.full_name}`);
       loadEnrollments();
     } catch (e: any) { toast.error('Failed to invite'); }
+  };
+
+  // Lookup helpers
+  const getTypeName = (typeId?: string | null) => {
+    if (!typeId) return null;
+    return participantTypes.find(t => t.id === typeId);
   };
 
   const getStatusBadge = (status: string) => {
@@ -186,7 +243,6 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
     const matchesSearch = !librarySearch || p.full_name?.toLowerCase().includes(librarySearch.toLowerCase()) ||
       p.occupation?.toLowerCase().includes(librarySearch.toLowerCase());
     const matchesCountry = !countryFilter || p.country === countryFilter;
-    // Exclude already enrolled
     const enrolled = enrollments.some(e => e.participant_id === p.user_id || e.participant_email === p.email?.toLowerCase());
     return matchesSearch && matchesCountry && !enrolled;
   });
@@ -195,11 +251,15 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
 
   const exportToCSV = () => {
     if (filteredEnrollments.length === 0) return;
-    const headers = ['Email', 'Participant #', 'Role', 'Status', 'Enrolled At', 'Study Start'];
-    const csvData = filteredEnrollments.map(e => [
-      e.participant_email, e.participant_number || '',
-      e.status, new Date(e.created_at).toLocaleString(), e.study_start_date || ''
-    ]);
+    const headers = ['Email', 'Participant #', 'Type', 'Status', 'Enrolled At', 'Study Start'];
+    const csvData = filteredEnrollments.map(e => {
+      const pType = getTypeName(e.participant_type_id);
+      return [
+        e.participant_email, e.participant_number || '',
+        pType?.name || '', e.status,
+        new Date(e.created_at).toLocaleString(), e.study_start_date || ''
+      ];
+    });
     const csv = [headers.join(','), ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -300,42 +360,58 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
                   <thead>
                     <tr className="border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
                       <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('nav.participants')}</th>
-                      <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">ID / Role</th>
+                      <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">ID</th>
+                      <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Type</th>
                       <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Status</th>
                       <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('project.enrolled')}</th>
                       <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {filteredEnrollments.map(enrollment => (
-                      <tr key={enrollment.id} className="hover:bg-emerald-50/30 transition-colors cursor-pointer"
-                        onClick={() => { setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }}>
-                        <td className="px-4 py-3 text-[13px] font-medium text-stone-800">{enrollment.participant_email}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5">
+                    {filteredEnrollments.map(enrollment => {
+                      const pType = getTypeName(enrollment.participant_type_id);
+                      return (
+                        <tr key={enrollment.id} className="hover:bg-emerald-50/30 transition-colors cursor-pointer"
+                          onClick={() => { setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }}>
+                          <td className="px-4 py-3 text-[13px] font-medium text-stone-800">{enrollment.participant_email}</td>
+                          <td className="px-4 py-3">
                             {enrollment.participant_number && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
                                 {enrollment.participant_number}
                               </span>
                             )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
-                        <td className="px-4 py-3 text-[12px] text-stone-400">{new Date(enrollment.created_at).toLocaleDateString()}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); startConversation(enrollment); }}
-                              className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors" title="Message participant"
-                            >
-                              <MessageSquare size={14} className="text-emerald-500" />
-                            </button>
-                            <Eye size={14} className="text-stone-300 hover:text-emerald-500 transition-colors cursor-pointer"
-                              onClick={(e) => { e.stopPropagation(); setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-4 py-3">
+                            {pType ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                                style={{
+                                  backgroundColor: pType.color ? `${pType.color}15` : '#f5f5f4',
+                                  color: pType.color || '#78716c',
+                                  borderColor: pType.color ? `${pType.color}30` : '#e7e5e4',
+                                }}>
+                                {pType.name}
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-stone-300">—</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">{getStatusBadge(enrollment.status)}</td>
+                          <td className="px-4 py-3 text-[12px] text-stone-400">{new Date(enrollment.created_at).toLocaleDateString()}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); startConversation(enrollment); }}
+                                className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors" title="Message participant / 发送消息"
+                              >
+                                <MessageSquare size={14} className="text-emerald-500" />
+                              </button>
+                              <Eye size={14} className="text-stone-300 hover:text-emerald-500 transition-colors cursor-pointer"
+                                onClick={(e) => { e.stopPropagation(); setSelectedEnrollment(enrollment); loadEnrollmentResponses(enrollment.id); }} />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -401,7 +477,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
         </div>
       )}
 
-      {/* Invite Modal */}
+      {/* Invite Modal — with participant type selection / 邀请弹窗——含参与者类型选择 */}
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={() => setShowInviteModal(false)}>
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
@@ -416,6 +492,20 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
                   className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                   onKeyDown={(e) => e.key === 'Enter' && sendInvitation()} />
               </div>
+              {participantTypes.length > 0 && (
+                <div>
+                  <label className="block text-[12px] font-medium text-stone-400 mb-1.5">
+                    Participant Type / 参与者类型
+                  </label>
+                  <select value={inviteTypeId} onChange={(e) => setInviteTypeId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400">
+                    <option value="">— No type / 无类型 —</option>
+                    {participantTypes.map(pt => (
+                      <option key={pt.id} value={pt.id}>{pt.name}{pt.number_prefix ? ` (${pt.number_prefix}...)` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex gap-2">
                 <button onClick={() => setShowInviteModal(false)}
                   className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50">{t('common.cancel')}</button>
@@ -429,19 +519,43 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
         </div>
       )}
 
-      {/* Participant Detail Modal */}
+      {/* Participant Detail Modal — shows ID, type, responses, and message shortcut */}
       {selectedEnrollment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={() => setSelectedEnrollment(null)}>
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
               <div>
                 <h2 className="text-[15px] font-semibold text-stone-800">{selectedEnrollment.participant_email}</h2>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
                   {getStatusBadge(selectedEnrollment.status)}
+                  {selectedEnrollment.participant_number && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      {selectedEnrollment.participant_number}
+                    </span>
+                  )}
+                  {(() => {
+                    const pType = getTypeName(selectedEnrollment.participant_type_id);
+                    return pType ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                        style={{
+                          backgroundColor: pType.color ? `${pType.color}15` : '#f5f5f4',
+                          color: pType.color || '#78716c',
+                          borderColor: pType.color ? `${pType.color}30` : '#e7e5e4',
+                        }}>
+                        {pType.name}
+                      </span>
+                    ) : null;
+                  })()}
                   <span className="text-[11px] text-stone-400">{new Date(selectedEnrollment.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
-              <button onClick={() => setSelectedEnrollment(null)} className="p-1 rounded-lg hover:bg-stone-50"><X size={16} className="text-stone-400" /></button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => startConversation(selectedEnrollment)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors">
+                  <MessageSquare size={13} /> Message / 消息
+                </button>
+                <button onClick={() => setSelectedEnrollment(null)} className="p-1 rounded-lg hover:bg-stone-50"><X size={16} className="text-stone-400" /></button>
+              </div>
             </div>
             <div className="p-5">
               {responsesLoading ? (
