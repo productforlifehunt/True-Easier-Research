@@ -511,7 +511,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help' || el.type === 'custom') && (() => {
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'help' || el.type === 'custom') && (() => {
           const linkedQ = el.config.questionnaire_id ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
           return (
             <div className="space-y-2">
