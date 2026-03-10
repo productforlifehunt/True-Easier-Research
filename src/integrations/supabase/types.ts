@@ -15831,45 +15831,6 @@ export type Database = {
         }
         Relationships: []
       }
-      notification_preferences: {
-        Row: {
-          achievement_notifications: boolean | null
-          created_at: string | null
-          daily_digest: boolean | null
-          enable_email: boolean | null
-          enable_push: boolean | null
-          progress_updates: boolean | null
-          streak_reminders: boolean | null
-          tool_suggestions: boolean | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          achievement_notifications?: boolean | null
-          created_at?: string | null
-          daily_digest?: boolean | null
-          enable_email?: boolean | null
-          enable_push?: boolean | null
-          progress_updates?: boolean | null
-          streak_reminders?: boolean | null
-          tool_suggestions?: boolean | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          achievement_notifications?: boolean | null
-          created_at?: string | null
-          daily_digest?: boolean | null
-          enable_email?: boolean | null
-          enable_push?: boolean | null
-          progress_updates?: boolean | null
-          streak_reminders?: boolean | null
-          tool_suggestions?: boolean | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       nrt_products: {
         Row: {
           active_ingredient: string | null
@@ -26269,10 +26230,6 @@ export type Database = {
           count: number
           day: string
         }[]
-      }
-      get_notification_preferences: {
-        Args: { p_channel: string; p_type_id: string; p_user_id: string }
-        Returns: boolean
       }
       get_notifications: {
         Args: { p_user_id: string }

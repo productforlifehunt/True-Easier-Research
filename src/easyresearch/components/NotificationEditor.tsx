@@ -305,6 +305,67 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
               </div>
             )}
 
+            {/* Link to Questionnaire Schedule / 关联问卷调度时间 */}
+            {nc.questionnaire_id && (() => {
+              const linkedQ = questionnaires.find(q => q.id === nc.questionnaire_id);
+              const scheduleTimes = linkedQ?.schedule_config?.daySchedules || [];
+              const allTimes = [...new Set(scheduleTimes.flatMap(ds => ds.times))].sort();
+              if (allTimes.length === 0) return null;
+
+              const linkedTimes = (nc as any).linked_schedule_times as string[] | undefined;
+              const isLinked = Array.isArray(linkedTimes);
+              const selectedTimes = isLinked ? linkedTimes : allTimes;
+
+              return (
+                <div className="p-3 bg-sky-50 rounded-lg border border-sky-100 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isLinked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            updateConfig(nc.id, { linked_schedule_times: [...allTimes] } as any);
+                          } else {
+                            updateConfig(nc.id, { linked_schedule_times: undefined } as any);
+                          }
+                        }}
+                        className="rounded border-stone-300 text-sky-500 focus:ring-sky-300"
+                      />
+                      <span className="text-[11px] font-medium text-sky-700">
+                        🔗 Link to Questionnaire Schedule / 关联问卷调度时间
+                      </span>
+                    </label>
+                  </div>
+                  {isLinked && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {allTimes.map(time => {
+                        const active = selectedTimes.includes(time);
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => {
+                              const next = active
+                                ? selectedTimes.filter(t => t !== time)
+                                : [...selectedTimes, time].sort();
+                              updateConfig(nc.id, { linked_schedule_times: next } as any);
+                            }}
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-medium border transition-colors ${
+                              active
+                                ? 'bg-sky-100 border-sky-300 text-sky-700'
+                                : 'bg-white border-stone-200 text-stone-400'
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Minutes Before</label>

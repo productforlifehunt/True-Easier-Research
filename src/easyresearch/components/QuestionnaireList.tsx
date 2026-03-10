@@ -7,6 +7,7 @@ import QuestionEditor from './QuestionEditor';
 import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 import { type LogicRule } from '../utils/logicEngine';
 import { type NotificationConfig } from '../utils/notificationConfigSync';
+import QuestionnaireScheduleEditor, { type ScheduleConfig, getDefaultScheduleConfig } from './QuestionnaireScheduleEditor';
 
 export interface QuestionnaireConfig {
   id: string;
@@ -45,6 +46,7 @@ export interface QuestionnaireConfig {
   detect_gibberish?: boolean;
   custom_thank_you_message?: string;
   redirect_url?: string;
+  schedule_config?: ScheduleConfig;
 }
 
 interface QuestionnaireListProps {
@@ -57,6 +59,7 @@ interface QuestionnaireListProps {
   onUpdateLogic?: (rules: LogicRule[]) => void;
   projectNotifications?: NotificationConfig[];
   onUpdateProjectNotifications?: (notifs: NotificationConfig[]) => void;
+  onSwitchToNotifications?: () => void;
 }
 
 const frequencyOptions = [
@@ -71,7 +74,7 @@ const frequencyOptions = [
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
-  projectNotifications = [], onUpdateProjectNotifications,
+  projectNotifications = [], onUpdateProjectNotifications, onSwitchToNotifications,
 }) => {
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
@@ -644,13 +647,16 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         </div>
       </div>
 
-      {/* Project-Level Notifications — redirect to Notifications tab in Layout */}
+      {/* Project-Level Notifications — click to switch to Notifications tab */}
       {onUpdateProjectNotifications && (
-        <div className="bg-white rounded-2xl border border-stone-100 p-4">
+        <div
+          className={`bg-white rounded-2xl border border-stone-100 p-4 ${onSwitchToNotifications ? 'cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/30 transition-all' : ''}`}
+          onClick={onSwitchToNotifications}
+        >
           <div className="flex items-center gap-1.5">
             <Bell size={13} className="text-stone-400" />
             <p className="text-[12px] text-stone-500">
-              You can configure project-level notifications (not tied to any questionnaire) in the <strong>Layout → Notifications</strong> tab.
+              Configure project-level notifications in the <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>Notifications</strong> tab.
             </p>
           </div>
         </div>
@@ -853,21 +859,16 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               </div>
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Clock size={11} /> Schedule</h5>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency</label>
-                                    <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Active Window</label>
-                                    <div className="flex items-center gap-1.5">
-                                      <input type="time" value={q.time_windows[0]?.start || '09:00'} onChange={(e) => updateQuestionnaire(q.id, { time_windows: [{ ...q.time_windows[0], start: e.target.value }] })} className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200" />
-                                      <span className="text-[11px] text-stone-400">to</span>
-                                      <input type="time" value={q.time_windows[0]?.end || '21:00'} onChange={(e) => updateQuestionnaire(q.id, { time_windows: [{ ...q.time_windows[0], end: e.target.value }] })} className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200" />
-                                    </div>
-                                  </div>
+                                <div>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency / 频率</label>
+                                  <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
                                 </div>
+                                <QuestionnaireScheduleEditor
+                                  frequency={q.frequency}
+                                  schedule={q.schedule_config || getDefaultScheduleConfig(q.frequency, (project as any)?.study_duration)}
+                                  onChange={(sc) => updateQuestionnaire(q.id, { schedule_config: sc })}
+                                  studyDuration={(project as any)?.study_duration}
+                                />
                               </div>
 
                               {/* A/B Testing, Quality Controls — moved to TYPE 3 FUTURE */}

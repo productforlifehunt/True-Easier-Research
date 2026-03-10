@@ -125,8 +125,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           {/* Longitudinal toggles */}
           {isLongitudinal && (
             <div className="divide-y divide-stone-100">
-              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Do Not Disturb" desc="Let participants set quiet hours" />
-              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Let participants choose when to begin" />
+              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Do Not Disturb" desc="Allow participants to set quiet hours" />
+              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Allow participants to choose when to begin" />
             </div>
           )}
         </div>
@@ -139,16 +139,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         </div>
       </SectionCard>
 
-      {/* Compensation */}
-      <SectionCard icon={DollarSign} iconBg="from-amber-50 to-yellow-50" iconColor="text-amber-600" title="Compensation">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Type</label>
-            <CustomDropdown options={[{value:'none',label:'None'},{value:'monetary',label:'Monetary'},{value:'gift_card',label:'Gift Card'},{value:'raffle',label:'Raffle'}]} value={project.compensation_type || 'none'} onChange={(v) => onUpdateProject({ ...project, compensation_type: v })} placeholder="Type" />
-          </div>
-          <InputField label="Amount ($)" type="number" value={project.compensation_amount || ''} onChange={(e) => onUpdateProject({ ...project, compensation_amount: parseFloat((e.target as HTMLInputElement).value) || undefined })} placeholder="0.00" disabled={project.compensation_type === 'none'} />
-        </div>
-      </SectionCard>
+      {/* Incentives — before Share Study / 激励 — 在分享研究之前 */}
+      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
 
       {/* Share Study */}
       <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5">
@@ -209,8 +201,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         )}
       </div>
 
-      {/* Incentives */}
-      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };
