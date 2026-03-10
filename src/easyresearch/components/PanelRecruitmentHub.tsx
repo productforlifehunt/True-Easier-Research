@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Users, Globe, ExternalLink, Settings, AlertCircle, CheckCircle2, Copy, Link2, Mail, Zap, DollarSign, Filter } from 'lucide-react';
+import { Users, Globe, ExternalLink, Settings, AlertCircle, CheckCircle2, Copy, Link2, Mail, Zap, DollarSign, Filter, Microscope, Factory, Briefcase, Target, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Panel Recruitment Hub – Multi-platform participant recruitment management
