@@ -500,7 +500,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                             title="Paste day schedule"
                             style={{ color: 'var(--color-green)' }}
                           >
-                            📋
+                            Paste
                           </button>
                         )}
                       </div>
