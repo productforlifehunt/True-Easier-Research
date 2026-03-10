@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, ChevronRight, Loader2, Search, Plus, FlaskConical, Users, SlidersHorizontal, Bookmark } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Loader2, Search, Plus, BarChart3, Users, SlidersHorizontal, Bookmark } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboardConfig } from '../hooks/useDashboardConfig';
