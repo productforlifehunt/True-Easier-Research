@@ -286,7 +286,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
     case 'ecogram':
       return (
         <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
-          <h4 className={`${txt} font-semibold text-violet-800`}>🔗 {el.config.title || 'Ecogram'}</h4>
+          <h4 className={`${txt} font-semibold text-violet-800`}>{el.config.title || 'Ecogram'}</h4>
           <p className={`${txtXx} text-violet-500 mt-1`}>Interactive care network diagram</p>
           {compact && (
             <div className="flex justify-center mt-3">
