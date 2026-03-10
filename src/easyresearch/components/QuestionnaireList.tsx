@@ -72,7 +72,7 @@ const frequencyOptions = [
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
-  projectNotifications = [], onUpdateProjectNotifications,
+  projectNotifications = [], onUpdateProjectNotifications, onSwitchToNotifications,
 }) => {
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
