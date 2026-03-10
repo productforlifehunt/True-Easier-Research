@@ -20,7 +20,7 @@ const DiscoverPage: React.FC = () => {
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-stone-100 p-1 w-fit">
+      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-stone-100 p-1 w-full">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
