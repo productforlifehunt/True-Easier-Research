@@ -208,7 +208,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
         </div>
 
         {schedule.templates.length === 0 && !editingTemplate && (
-          <p className="text-[10px] text-stone-400 italic">No templates yet. Create one to quickly assign times to days. / 暂无模板。创建一个以快速分配时间。</p>
+          <p className="text-[10px] text-stone-400 italic">No templates yet. Create one to quickly assign times to days.</p>
         )}
 
         {/* Existing templates / 已有模板 */}
