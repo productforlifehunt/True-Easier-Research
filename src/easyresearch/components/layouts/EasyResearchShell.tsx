@@ -76,7 +76,7 @@ const EasyResearchShellInner: React.FC = () => {
   const tabs = useMemo(
     () => [
       { id: 'research', path: '/easyresearch/dashboard', icon: FlaskConical, labelKey: 'nav.research' },
-      { id: 'discover', path: '/easyresearch/participant/join', icon: Search, labelKey: 'nav.discover' },
+      { id: 'discover', path: '/easyresearch/discover', icon: Search, labelKey: 'nav.discover' },
       { id: 'inbox', path: '/easyresearch/inbox', icon: MessageSquare, labelKey: 'nav.inbox' },
       { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, labelKey: 'nav.settings' },
     ],

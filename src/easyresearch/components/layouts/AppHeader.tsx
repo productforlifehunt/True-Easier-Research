@@ -38,7 +38,7 @@ const AppHeader: React.FC = () => {
     { path: '/easyresearch/templates', label: t('nav.templates') },
   ];
 
-  const mobileNavLinks = [
+  const mobileNavLinks = user ? [] : [
     { path: '/easyresearch/participant-library', label: t('nav.participants') },
   ];
 
