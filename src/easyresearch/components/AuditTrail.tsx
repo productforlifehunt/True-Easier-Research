@@ -3,7 +3,8 @@
  * 审计追踪与合规日志 — 所有项目更改的时间戳日志
  */
 import React, { useState, useMemo } from 'react';
-import { Shield, Clock, Filter, Download, Search, User, FileText, Settings, Eye } from 'lucide-react';
+import { Shield, Clock, Filter, Download, Search, User, FileText, Settings, Eye, FolderOpen, ClipboardList, HelpCircle, UserCheck, MessageCircle, Lock, Palette, Upload, File } from 'lucide-react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 interface AuditEntry {
   id: string;
