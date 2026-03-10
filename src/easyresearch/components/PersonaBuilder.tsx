@@ -263,9 +263,9 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
             </div>
             <p className="text-xs text-stone-600 line-clamp-2 mb-3">{p.bio || 'No bio yet / 暂无简介'}</p>
             <div className="flex gap-3 text-xs text-stone-500 mb-2">
-              <span>🎯 {p.goals.length} goals</span>
-              <span>😩 {p.pain_points.length} pains</span>
-              <span>💬 {p.quotes.length} quotes</span>
+              <span>{p.goals.length} goals</span>
+              <span>{p.pain_points.length} pains</span>
+              <span>{p.quotes.length} quotes</span>
             </div>
             <div className="flex gap-1 flex-wrap">
               {p.segment_tags.slice(0, 3).map(tag => (
