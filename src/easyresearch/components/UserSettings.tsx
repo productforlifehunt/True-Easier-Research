@@ -2,8 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { User, Bell, Lock, Mail, Phone, LogOut, LogIn, Edit2, Save } from 'lucide-react';
+import { User, Bell, Lock, Mail, Phone, LogOut, LogIn, Edit2, Save, Moon, Plus, X, Globe, Smartphone, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+interface DndPeriod {
+  id?: string;
+  channel: string;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}
 
 const UserSettings: React.FC = () => {
   const navigate = useNavigate();
@@ -12,13 +20,22 @@ const UserSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  
+  const [dndPeriods, setDndPeriods] = useState<DndPeriod[]>([]);
+  const [showLibraryDetails, setShowLibraryDetails] = useState(false);
+
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     phone: '',
-    notifications_enabled: true,
-    email_notifications: true
+    introduction: '',
+    web_notifications_enabled: true,
+    push_notifications_enabled: true,
+    email_notifications_enabled: true,
+    join_participant_library: false,
+    country: '',
+    occupation: '',
+    age: '',
+    gender: '',
   });
 
   useEffect(() => { checkAuthAndLoadData(); }, []);
@@ -33,10 +50,45 @@ const UserSettings: React.FC = () => {
 
   const loadUserData = async (user: any) => {
     if (!user) { setLoading(false); return; }
-    const m = user.user_metadata || {};
-    const p = { id: user.id, email: user.email, full_name: m.full_name || '', phone: m.phone || '', notifications_enabled: m.notifications_enabled ?? true, email_notifications: m.email_notifications ?? true };
-    setProfile(p);
-    setFormData({ full_name: p.full_name, email: p.email || '', phone: p.phone, notifications_enabled: p.notifications_enabled, email_notifications: p.email_notifications });
+
+    // Load profile from care_connector.profiles
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const p = profileRow || {};
+    setProfile({ ...p, email: user.email });
+    setFormData({
+      full_name: p.full_name || user.user_metadata?.full_name || '',
+      email: user.email || '',
+      phone: p.phone || '',
+      introduction: p.introduction || '',
+      web_notifications_enabled: p.web_notifications_enabled ?? true,
+      push_notifications_enabled: p.push_notifications_enabled ?? true,
+      email_notifications_enabled: p.email_notifications_enabled ?? true,
+      join_participant_library: p.join_participant_library ?? false,
+      country: p.country || '',
+      occupation: p.occupation || '',
+      age: p.age || '',
+      gender: p.gender || '',
+    });
+
+    // Load DND periods
+    const { data: dndRows } = await supabase
+      .from('user_dnd_period')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at');
+    setDndPeriods((dndRows || []).map((r: any) => ({
+      id: r.id,
+      channel: r.channel,
+      start_time: r.start_time,
+      end_time: r.end_time,
+      is_active: r.is_active,
+    })));
+
     setLoading(false);
   };
 
@@ -44,17 +96,67 @@ const UserSettings: React.FC = () => {
     if (!authUser) return;
     setSaving(true);
     try {
-      const { error } = await supabase.auth.updateUser({ data: { full_name: formData.full_name, phone: formData.phone, notifications_enabled: formData.notifications_enabled, email_notifications: formData.email_notifications } });
+      // Upsert profile
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authUser.id,
+          full_name: formData.full_name,
+          phone: formData.phone,
+          introduction: formData.introduction,
+          web_notifications_enabled: formData.web_notifications_enabled,
+          push_notifications_enabled: formData.push_notifications_enabled,
+          email_notifications_enabled: formData.email_notifications_enabled,
+          join_participant_library: formData.join_participant_library,
+          country: formData.country,
+          occupation: formData.occupation,
+          age: formData.age,
+          gender: formData.gender,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
       if (error) throw error;
+
+      // Sync DND periods — delete all then re-insert
+      await supabase.from('user_dnd_period').delete().eq('user_id', authUser.id);
+      if (dndPeriods.length > 0) {
+        const rows = dndPeriods.map(d => ({
+          user_id: authUser.id,
+          channel: d.channel,
+          start_time: d.start_time,
+          end_time: d.end_time,
+          is_active: d.is_active,
+        }));
+        await supabase.from('user_dnd_period').insert(rows);
+      }
+
+      // Also update auth metadata for name
+      await supabase.auth.updateUser({ data: { full_name: formData.full_name } });
+
       setEditing(false);
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await loadUserData(user);
       toast.success('Settings saved!');
-    } catch { toast.error('Failed to save settings'); }
-    finally { setSaving(false); }
+    } catch (err: any) {
+      console.error('Save error:', err);
+      toast.error('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSignOut = async () => { await logout(); navigate('/easyresearch/auth'); };
+
+  const addDndPeriod = () => {
+    setDndPeriods(prev => [...prev, { channel: 'all', start_time: '22:00', end_time: '07:00', is_active: true }]);
+  };
+
+  const removeDndPeriod = (index: number) => {
+    setDndPeriods(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateDndPeriod = (index: number, field: string, value: any) => {
+    setDndPeriods(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p));
+  };
 
   if (loading) {
     return (
@@ -90,6 +192,15 @@ const UserSettings: React.FC = () => {
     </div>
   );
 
+  const Toggle = ({ enabled, onChange, disabled }: { enabled: boolean; onChange: () => void; disabled?: boolean }) => (
+    <button onClick={() => !disabled && onChange()}
+      className={`w-10 h-5 rounded-full transition-all relative ${enabled ? 'bg-emerald-500' : 'bg-stone-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+      <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${enabled ? 'left-5' : 'left-0.5'}`} />
+    </button>
+  );
+
+  const channelLabels: Record<string, string> = { all: 'All Channels', web: 'Web/In-App', push: 'Push', email: 'Email' };
+
   return (
     <div className="pb-4 bg-stone-50/50">
       <div className="max-w-2xl mx-auto px-4 py-4">
@@ -106,6 +217,7 @@ const UserSettings: React.FC = () => {
           )}
         </div>
 
+        {/* Profile */}
         <SectionCard icon={User} title="Profile">
           <div className="space-y-3">
             <div>
@@ -126,34 +238,160 @@ const UserSettings: React.FC = () => {
                 placeholder="+1 (555) 123-4567"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all" />
             </div>
+            <div>
+              <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Introduction</label>
+              <textarea value={formData.introduction} onChange={(e) => setFormData({ ...formData, introduction: e.target.value })} disabled={!editing}
+                placeholder="Tell researchers a bit about yourself..."
+                rows={3}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all resize-none" />
+            </div>
           </div>
         </SectionCard>
 
-        <SectionCard icon={Bell} title="Notifications">
+        {/* Participant Library */}
+        <SectionCard icon={Users} title="Participant Library">
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
-              <div>
-                <p className="text-[13px] font-medium text-stone-700">All Notifications</p>
-                <p className="text-[11px] text-stone-400 font-light">Enable or disable all notifications</p>
+              <div className="flex-1 pr-3">
+                <p className="text-[13px] font-medium text-stone-700">Join Participant Library</p>
+                <p className="text-[11px] text-stone-400 font-light mt-0.5">
+                  Make your profile discoverable by researchers looking for study participants. Your demographics will be visible, but personal details stay private.
+                </p>
               </div>
-              <button onClick={() => editing && setFormData({ ...formData, notifications_enabled: !formData.notifications_enabled })}
-                className={`w-10 h-5 rounded-full transition-all relative ${formData.notifications_enabled ? 'bg-emerald-500' : 'bg-stone-200'} ${!editing ? 'opacity-50' : ''}`}>
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${formData.notifications_enabled ? 'left-5' : 'left-0.5'}`} />
-              </button>
+              <Toggle enabled={formData.join_participant_library} onChange={() => editing && setFormData({ ...formData, join_participant_library: !formData.join_participant_library })} disabled={!editing} />
             </div>
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
-              <div>
-                <p className="text-[13px] font-medium text-stone-700">Email Notifications</p>
-                <p className="text-[11px] text-stone-400 font-light">Receive updates via email</p>
+
+            {formData.join_participant_library && (
+              <div className="space-y-3 pt-1">
+                <button onClick={() => setShowLibraryDetails(!showLibraryDetails)}
+                  className="flex items-center gap-1 text-[12px] font-medium text-emerald-600 hover:text-emerald-700">
+                  {showLibraryDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  {showLibraryDetails ? 'Hide details' : 'Edit public profile details'}
+                </button>
+                {showLibraryDetails && (
+                  <div className="space-y-3 p-3.5 rounded-xl border border-stone-100 bg-white">
+                    <div>
+                      <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Country / Region</label>
+                      <input type="text" value={formData.country} onChange={(e) => setFormData({ ...formData, country: e.target.value })} disabled={!editing}
+                        placeholder="e.g. United States"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Age</label>
+                        <input type="text" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} disabled={!editing}
+                          placeholder="e.g. 25-34"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all" />
+                      </div>
+                      <div>
+                        <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Gender</label>
+                        <input type="text" value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} disabled={!editing}
+                          placeholder="e.g. Female"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Occupation</label>
+                      <input type="text" value={formData.occupation} onChange={(e) => setFormData({ ...formData, occupation: e.target.value })} disabled={!editing}
+                        placeholder="e.g. Student, Engineer"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 disabled:bg-stone-50 disabled:text-stone-500 transition-all" />
+                    </div>
+                  </div>
+                )}
               </div>
-              <button onClick={() => editing && formData.notifications_enabled && setFormData({ ...formData, email_notifications: !formData.email_notifications })}
-                className={`w-10 h-5 rounded-full transition-all relative ${formData.email_notifications && formData.notifications_enabled ? 'bg-emerald-500' : 'bg-stone-200'} ${!editing || !formData.notifications_enabled ? 'opacity-50' : ''}`}>
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${formData.email_notifications && formData.notifications_enabled ? 'left-5' : 'left-0.5'}`} />
-              </button>
+            )}
+          </div>
+        </SectionCard>
+
+        {/* Notifications */}
+        <SectionCard icon={Bell} title="Notifications">
+          <div className="space-y-3">
+            {/* Web / In-App */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
+              <div className="flex items-center gap-2.5">
+                <Globe size={14} className="text-stone-400" />
+                <div>
+                  <p className="text-[13px] font-medium text-stone-700">Web / In-App Notifications</p>
+                  <p className="text-[11px] text-stone-400 font-light">Browser and in-app alerts</p>
+                </div>
+              </div>
+              <Toggle enabled={formData.web_notifications_enabled} onChange={() => editing && setFormData({ ...formData, web_notifications_enabled: !formData.web_notifications_enabled })} disabled={!editing} />
+            </div>
+
+            {/* Push */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
+              <div className="flex items-center gap-2.5">
+                <Smartphone size={14} className="text-stone-400" />
+                <div>
+                  <p className="text-[13px] font-medium text-stone-700">Push Notifications</p>
+                  <p className="text-[11px] text-stone-400 font-light">Mobile push via Capacitor</p>
+                </div>
+              </div>
+              <Toggle enabled={formData.push_notifications_enabled} onChange={() => editing && setFormData({ ...formData, push_notifications_enabled: !formData.push_notifications_enabled })} disabled={!editing} />
+            </div>
+
+            {/* Email */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
+              <div className="flex items-center gap-2.5">
+                <Mail size={14} className="text-stone-400" />
+                <div>
+                  <p className="text-[13px] font-medium text-stone-700">Email Notifications</p>
+                  <p className="text-[11px] text-stone-400 font-light">Receive updates via email</p>
+                </div>
+              </div>
+              <Toggle enabled={formData.email_notifications_enabled} onChange={() => editing && setFormData({ ...formData, email_notifications_enabled: !formData.email_notifications_enabled })} disabled={!editing} />
+            </div>
+
+            {/* Do Not Disturb */}
+            <div className="mt-2 p-4 rounded-xl border border-stone-100 bg-white">
+              <div className="flex items-center gap-2 mb-3">
+                <Moon size={14} className="text-indigo-400" />
+                <p className="text-[13px] font-semibold text-stone-700">Do Not Disturb</p>
+              </div>
+              <p className="text-[11px] text-stone-400 font-light mb-3">
+                Add quiet periods when no notifications will be sent. Each period can apply to all channels or a specific one.
+              </p>
+
+              <div className="space-y-2">
+                {dndPeriods.map((period, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2.5 rounded-lg bg-stone-50">
+                    <select value={period.channel} onChange={(e) => updateDndPeriod(i, 'channel', e.target.value)}
+                      disabled={!editing}
+                      className="px-2 py-1.5 rounded-lg border border-stone-200 text-[11px] bg-white disabled:bg-stone-50 disabled:text-stone-500 min-w-[90px]">
+                      <option value="all">All</option>
+                      <option value="web">Web</option>
+                      <option value="push">Push</option>
+                      <option value="email">Email</option>
+                    </select>
+                    <input type="time" value={period.start_time} onChange={(e) => updateDndPeriod(i, 'start_time', e.target.value)}
+                      disabled={!editing}
+                      className="flex-1 px-2 py-1.5 rounded-lg border border-stone-200 text-[12px] bg-white disabled:bg-stone-50" />
+                    <span className="text-[10px] text-stone-400">to</span>
+                    <input type="time" value={period.end_time} onChange={(e) => updateDndPeriod(i, 'end_time', e.target.value)}
+                      disabled={!editing}
+                      className="flex-1 px-2 py-1.5 rounded-lg border border-stone-200 text-[12px] bg-white disabled:bg-stone-50" />
+                    {editing && (
+                      <button onClick={() => removeDndPeriod(i)} className="p-1 text-red-400 hover:bg-red-50 rounded">
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {editing && (
+                  <button onClick={addDndPeriod}
+                    className="w-full py-2 rounded-lg border border-dashed border-stone-200 text-[11px] font-medium text-emerald-500 hover:bg-emerald-50/50 flex items-center justify-center gap-1">
+                    <Plus size={12} /> Add quiet period
+                  </button>
+                )}
+                {dndPeriods.length === 0 && !editing && (
+                  <p className="text-[11px] text-stone-400 italic text-center py-2">No quiet periods set</p>
+                )}
+              </div>
             </div>
           </div>
         </SectionCard>
 
+        {/* Security */}
         <SectionCard icon={Lock} title="Security">
           <button
             onClick={async () => {

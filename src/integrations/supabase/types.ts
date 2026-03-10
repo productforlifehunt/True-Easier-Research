@@ -26270,6 +26270,10 @@ export type Database = {
           day: string
         }[]
       }
+      get_notification_preferences: {
+        Args: { p_channel: string; p_type_id: string; p_user_id: string }
+        Returns: boolean
+      }
       get_notifications: {
         Args: { p_user_id: string }
         Returns: {
