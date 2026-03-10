@@ -1027,7 +1027,7 @@ const SurveyBuilder: React.FC = () => {
                     placeholder="Untitled Project"
                     className="text-base sm:text-lg font-semibold bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-stone-800 placeholder:text-stone-300 min-w-0 w-full truncate"
                   />
-                  <Pencil size={13} className="text-stone-400 shrink-0" />
+                  
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${

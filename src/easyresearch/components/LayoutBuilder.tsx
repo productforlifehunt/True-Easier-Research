@@ -119,6 +119,7 @@ const FUNCTION_ELEMENTS = [
   { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
   { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
   { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
+  { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
 ];
 
 const LAYOUT_ELEMENTS = [
@@ -511,7 +512,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {(el.type === 'consent' || el.type === 'screening' || el.type === 'profile' || el.type === 'help' || el.type === 'custom') && (() => {
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'help' || el.type === 'custom') && (() => {
           const linkedQ = el.config.questionnaire_id ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
           return (
             <div className="space-y-2">
@@ -558,7 +559,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   <div>
                     <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
                     <input type="text" value={el.config.button_label || ''} 
-                      placeholder={el.type === 'profile' ? 'Edit Profile' : el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
+                      placeholder={el.type === 'consent' ? 'Review & Sign' : el.type === 'screening' ? 'Start Screening' : el.type === 'help' ? 'View Help' : 'Open'}
                       onChange={(e) => updateElement(el.id, { button_label: e.target.value })}
                       className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                   </div>

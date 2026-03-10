@@ -20,7 +20,7 @@ const DiscoverPage: React.FC = () => {
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-stone-100 p-1 w-fit">
+      <div className="flex items-center gap-1 mb-6 bg-white rounded-xl border border-stone-100 p-1 w-full">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -28,7 +28,7 @@ const DiscoverPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${
                 active
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
                   : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
