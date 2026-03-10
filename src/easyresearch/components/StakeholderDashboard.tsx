@@ -211,7 +211,7 @@ const StakeholderDashboard: React.FC<Props> = ({ projectId, questionnaires }) =>
             </div>
           </div>
           <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-            <div className="text-xs text-blue-700 font-medium">📊 Data Volume / 数据量</div>
+            <div className="text-xs text-blue-700 font-medium">Data Volume / 数据量</div>
             <div className="text-sm text-blue-800 mt-1">
               {metrics.totalResponses.toLocaleString()} responses across {questionnaires.length} questionnaires
             </div>
