@@ -535,6 +535,7 @@ const SurveyBuilder: React.FC = () => {
             detect_gibberish: qr.detect_gibberish ?? false,
             custom_thank_you_message: qr.custom_thank_you_message || undefined,
             redirect_url: qr.redirect_url || undefined,
+            schedule_config: qr.schedule_config || undefined,
           }));
 
           if (questionsData && mounted) {
@@ -791,6 +792,7 @@ const SurveyBuilder: React.FC = () => {
           detect_gibberish: qc.detect_gibberish ?? false,
           custom_thank_you_message: qc.custom_thank_you_message || null,
           redirect_url: qc.redirect_url || null,
+          schedule_config: qc.schedule_config || null,
         }));
         await supabase.from('questionnaire').upsert(allQPayloads, { onConflict: 'id' });
 
@@ -1150,6 +1152,7 @@ const SurveyBuilder: React.FC = () => {
             logicRules={logicRules}
             projectId={projectId}
             onUpdateLogic={setLogicRules}
+            onReorderQuestionnaires={setQuestionnaireConfigs}
           />
         )}
 

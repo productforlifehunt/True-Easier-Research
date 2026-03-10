@@ -1,9 +1,9 @@
 /**
- * Survey Flow Visualizer — Visual node-based flow diagram with inline editing
- * 调查流程可视化 — 可视化节点流程图（支持内联编辑）
+ * Survey Flow Visualizer — Visual node-based flow diagram with inline editing + reorder
+ * 调查流程可视化 — 可视化节点流程图（支持内联编辑 + 排序）
  */
 import React, { useMemo, useState } from 'react';
-import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, Layers, Plus, Trash2, Edit3 } from 'lucide-react';
+import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, ChevronUp, ChevronDown, Layers, Plus, Trash2, Edit3 } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { LogicRule } from '../utils/logicEngine';
@@ -13,6 +13,7 @@ interface SurveyFlowVisualizerProps {
   logicRules: LogicRule[];
   projectId?: string;
   onUpdateLogic?: (rules: LogicRule[]) => void;
+  onReorderQuestionnaires?: (questionnaires: QuestionnaireConfig[]) => void;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -23,8 +24,8 @@ const TYPE_COLORS: Record<string, string> = {
   matrix: '#ec4899', ranking: '#ec4899', constant_sum: '#ec4899',
   section_header: '#10b981', divider: '#d4d4d4', text_block: '#a8a29e', image_block: '#a8a29e',
   yes_no: '#8b5cf6', file_upload: '#06b6d4', signature: '#ec4899', address: '#06b6d4',
-  card_sort: '#ef4444', tree_test: '#ef4444', first_click: '#ef4444', five_second_test: '#ef4444',
-  heatmap: '#ef4444', preference_test: '#ef4444', prototype_test: '#ef4444',
+  card_sort: '#8b5cf6', tree_test: '#8b5cf6', first_click: '#8b5cf6', five_second_test: '#8b5cf6',
+  heatmap: '#8b5cf6', preference_test: '#8b5cf6', prototype_test: '#8b5cf6',
   max_diff: '#ec4899', design_survey: '#ec4899', conjoint: '#ec4899', kano: '#ec4899',
   sus: '#f59e0b', csat: '#f59e0b', ces: '#f59e0b',
   video_block: '#6366f1', audio_block: '#6366f1', embed_block: '#6366f1',
@@ -58,21 +59,21 @@ const ACTIONS = [
   { value: 'hide_questionnaire', label: 'Hide Questionnaire' },
 ];
 
-const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnaires, logicRules, projectId, onUpdateLogic }) => {
+const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnaires, logicRules, projectId, onUpdateLogic, onReorderQuestionnaires }) => {
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
-  // Build flat question list
+  // Build flat question list / 构建扁平问题列表
   const allQuestions = useMemo(() => {
     return questionnaires.flatMap(qc =>
       (qc.questions || []).map(q => ({ ...q, questionnaireName: qc.title, questionnaireId: qc.id }))
     );
   }, [questionnaires]);
 
-  // Build logic map: source question → rules
+  // Build logic map: source question → rules (show ALL rules, not just enabled)
+  // 构建逻辑映射：源问题 → 规则（显示所有规则，不仅是启用的）
   const logicBySource = useMemo(() => {
     const map = new Map<string, LogicRule[]>();
     logicRules.forEach(rule => {
-      if (!rule.enabled) return;
       const existing = map.get(rule.sourceQuestionId) || [];
       existing.push(rule);
       map.set(rule.sourceQuestionId, existing);
@@ -80,7 +81,7 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
     return map;
   }, [logicRules]);
 
-  // Group questions by questionnaire
+  // Group questions by questionnaire / 按问卷分组问题
   const groupedQuestions = useMemo(() => {
     return questionnaires.map(qc => ({
       id: qc.id,
@@ -124,6 +125,18 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
     setEditingRuleId(newRule.id);
   };
 
+  // Reorder questionnaires / 重新排序问卷
+  const moveQuestionnaire = (index: number, direction: 'up' | 'down') => {
+    if (!onReorderQuestionnaires) return;
+    const newList = [...questionnaires];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newList.length) return;
+    [newList[index], newList[targetIndex]] = [newList[targetIndex], newList[index]];
+    // Update order_index / 更新排序索引
+    const reindexed = newList.map((q, i) => ({ ...q, order_index: i }));
+    onReorderQuestionnaires(reindexed);
+  };
+
   if (questionnaires.length === 0) {
     return (
       <div className="text-center py-16 text-stone-400">
@@ -135,15 +148,12 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
 
   return (
     <div className="space-y-6">
-      {/* Legend */}
+      {/* Legend — simplified: only Text, Choice, Scale, Media */}
       <div className="flex flex-wrap gap-3 text-[10px]">
         {[
           { label: 'Text / 文本', color: '#3b82f6' },
           { label: 'Choice / 选择', color: '#8b5cf6' },
           { label: 'Scale / 量表', color: '#f59e0b' },
-          { label: 'Data / 数据', color: '#06b6d4' },
-          { label: 'Advanced / 高级', color: '#ec4899' },
-          { label: 'UX Research', color: '#ef4444' },
           { label: 'Media / 媒体', color: '#6366f1' },
         ].map(l => (
           <div key={l.label} className="flex items-center gap-1.5">
@@ -153,19 +163,40 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
         ))}
       </div>
 
-      {/* Flow diagram */}
+      {/* Flow diagram / 流程图 */}
       <div className="relative">
         {groupedQuestions.map((group, gi) => (
           <div key={group.id} className="mb-8">
-            {/* Questionnaire header */}
+            {/* Questionnaire header with reorder buttons / 问卷标题带排序按钮 */}
             <div className="flex items-center gap-2 mb-3">
               <Layers size={14} className="text-emerald-500" />
               <span className="text-xs font-semibold text-stone-700">{group.title}</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-400">{group.type}</span>
               <span className="text-[10px] text-stone-300">{group.questions.length} questions</span>
+              {/* Reorder buttons / 排序按钮 */}
+              {onReorderQuestionnaires && questionnaires.length > 1 && (
+                <div className="flex items-center gap-0.5 ml-auto">
+                  <button
+                    onClick={() => moveQuestionnaire(gi, 'up')}
+                    disabled={gi === 0}
+                    className="p-1 rounded hover:bg-stone-100 disabled:opacity-20 transition-colors"
+                    title="Move up / 上移"
+                  >
+                    <ChevronUp size={12} className="text-stone-500" />
+                  </button>
+                  <button
+                    onClick={() => moveQuestionnaire(gi, 'down')}
+                    disabled={gi === groupedQuestions.length - 1}
+                    className="p-1 rounded hover:bg-stone-100 disabled:opacity-20 transition-colors"
+                    title="Move down / 下移"
+                  >
+                    <ChevronDown size={12} className="text-stone-500" />
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Questions flow */}
+            {/* Questions flow / 问题流 */}
             <div className="ml-4 border-l-2 border-stone-200 pl-6 space-y-1">
               {group.questions.map((q, qi) => {
                 const rules = logicBySource.get(q.id) || [];
@@ -194,7 +225,6 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
                               <GitBranch size={8} /> {rules.length} rule{rules.length > 1 ? 's' : ''}
                             </span>
                           )}
-                          {/* Add rule button — visible on hover */}
                           {onUpdateLogic && (
                             <button
                               onClick={() => addRuleForQuestion(q.id, group.id)}
@@ -207,18 +237,20 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
                       </div>
                     </div>
 
-                    {/* Logic rule branches with inline edit */}
+                    {/* Logic rule branches with inline edit / 逻辑规则分支（内联编辑） */}
                     {rules.map(rule => {
                       const actionInfo = ACTION_ICONS[rule.action] || ACTION_ICONS.skip;
                       const ActionIcon = actionInfo.icon;
                       const isEditing = editingRuleId === rule.id;
+                      const isDisabled = !rule.enabled;
 
                       return (
-                        <div key={rule.id} className="ml-9">
+                        <div key={rule.id} className={`ml-9 ${isDisabled ? 'opacity-40' : ''}`}>
                           <div className="flex items-center gap-2 py-1 text-[10px] group/rule">
                             <div className="w-8 border-t border-dashed" style={{ borderColor: actionInfo.color }} />
                             <ActionIcon size={10} style={{ color: actionInfo.color }} />
                             <span style={{ color: actionInfo.color }} className="font-medium">{actionInfo.label}</span>
+                            {isDisabled && <span className="text-stone-300 italic">(disabled)</span>}
                             <span className="text-stone-400">
                               if {rule.condition} "{String(rule.value).substring(0, 20)}"
                             </span>
@@ -230,7 +262,6 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
                                 </span>
                               </>
                             )}
-                            {/* Edit / Delete buttons */}
                             {onUpdateLogic && (
                               <div className="opacity-0 group-hover/rule:opacity-100 transition-opacity flex items-center gap-0.5 ml-auto">
                                 <button onClick={() => setEditingRuleId(isEditing ? null : rule.id)} className="p-0.5 rounded hover:bg-stone-100">
@@ -243,7 +274,7 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
                             )}
                           </div>
 
-                          {/* Inline editor */}
+                          {/* Inline editor / 内联编辑器 */}
                           {isEditing && onUpdateLogic && (
                             <div className="ml-10 mt-1 mb-2 p-2.5 bg-stone-50 rounded-lg border border-stone-200 grid grid-cols-4 gap-2">
                               <div>
@@ -287,7 +318,7 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({ questionnai
           </div>
         ))}
 
-        {/* End node */}
+        {/* End node / 结束节点 */}
         <div className="flex items-center gap-2 ml-4">
           <div className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center">
             <Shield size={14} className="text-white" />

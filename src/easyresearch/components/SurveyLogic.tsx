@@ -57,17 +57,22 @@ interface SurveyLogicProps {
 }
 
 const SurveyLogic: React.FC<SurveyLogicProps> = ({ questionnaires, projectId, logicRules, onUpdateLogic }) => {
-  const [selectedQId, setSelectedQId] = useState<string>(questionnaires[0]?.id || '');
-  const selectedQ = questionnaires.find(q => q.id === selectedQId);
-  const questions = selectedQ?.questions || [];
-  const qRules = logicRules.filter(r => r.questionnaireId === selectedQId);
+  const [selectedQId, setSelectedQId] = useState<string>('__all__');
+  const selectedQ = selectedQId === '__all__' ? null : questionnaires.find(q => q.id === selectedQId);
+  const questions = selectedQId === '__all__'
+    ? questionnaires.flatMap(q => q.questions || [])
+    : (selectedQ?.questions || []);
+  const qRules = selectedQId === '__all__'
+    ? logicRules
+    : logicRules.filter(r => r.questionnaireId === selectedQId);
 
   const addRule = () => {
-    if (!selectedQId || !projectId) return;
+    const effectiveQId = selectedQId === '__all__' ? (questionnaires[0]?.id || '') : selectedQId;
+    if (!effectiveQId || !projectId) return;
     const newRule: LogicRule = {
       id: crypto.randomUUID(),
       projectId: projectId,
-      questionnaireId: selectedQId,
+      questionnaireId: effectiveQId,
       sourceQuestionId: questions[0]?.id || '',
       condition: 'equals',
       value: '',
@@ -126,19 +131,18 @@ const SurveyLogic: React.FC<SurveyLogicProps> = ({ questionnaires, projectId, lo
         </button>
       </div>
 
-      {/* Questionnaire selector */}
-      {questionnaires.length > 1 && (
-        <div className="flex items-center gap-2">
-          <label className="text-[12px] font-medium text-stone-400">Questionnaire:</label>
-          <select value={selectedQId} onChange={(e) => setSelectedQId(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-            {questionnaires.map(q => (
-              <option key={q.id} value={q.id}>{q.title || q.questionnaire_type}</option>
-            ))}
-          </select>
-          <span className="text-[11px] text-stone-300">{qRules.length} rule{qRules.length !== 1 ? 's' : ''}</span>
-        </div>
-      )}
+      {/* Questionnaire selector / 问卷选择器 */}
+      <div className="flex items-center gap-2">
+        <label className="text-[12px] font-medium text-stone-400">Questionnaire:</label>
+        <select value={selectedQId} onChange={(e) => setSelectedQId(e.target.value)}
+          className="px-3 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+          <option value="__all__">All Questionnaires / 全部问卷</option>
+          {questionnaires.map(q => (
+            <option key={q.id} value={q.id}>{q.title || q.questionnaire_type}</option>
+          ))}
+        </select>
+        <span className="text-[11px] text-stone-300">{qRules.length} rule{qRules.length !== 1 ? 's' : ''}</span>
+      </div>
 
       {qRules.length === 0 ? (
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-16 text-center">

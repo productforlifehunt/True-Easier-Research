@@ -1,0 +1,1 @@
+ALTER TABLE care_connector.questionnaire ADD COLUMN IF NOT EXISTS schedule_config JSONB DEFAULT NULL;
