@@ -568,7 +568,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <div className="space-y-3">
           <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtSm} text-indigo-700`}>
-            🧮 Task {currentTask + 1} of {numTasks} — Choose your preferred option
+            Task {currentTask + 1} of {numTasks} — Choose your preferred option
           </div>
           <div className={`grid gap-2 ${profilesPerTask <= 3 ? `grid-cols-${profilesPerTask}` : 'grid-cols-2'}`}>
             {profiles.map((profile, pi) => (
