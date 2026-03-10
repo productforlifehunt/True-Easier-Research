@@ -57,7 +57,7 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
           {(['setup', 'present', 'results'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-fuchsia-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'setup' ? '⚙️ Setup' : v === 'present' ? '🎤 Present' : '📊 Results'}
+              {v === 'setup' ? 'Setup' : v === 'present' ? 'Present' : 'Results'}
             </button>
           ))}
         </div>
