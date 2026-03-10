@@ -3,7 +3,7 @@
  * 情感分析仪表板 — 开放文本响应的实时情感追踪
  */
 import React, { useState, useMemo } from 'react';
-import { Brain, TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare, Filter, Download } from 'lucide-react';
+import { BarChart2, TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare, Filter, Download } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 
 interface Props {
