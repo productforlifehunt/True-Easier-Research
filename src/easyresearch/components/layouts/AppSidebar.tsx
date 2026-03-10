@@ -22,10 +22,10 @@ const AppSidebar: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/easyresearch/dashboard', label: t('nav.research'), icon: FlaskConical },
-    { path: '/easyresearch/discover', label: t('nav.discover'), icon: Search },
-    { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare },
-    { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings },
+    { path: '/easyresearch/dashboard', label: t('nav.research'), icon: null, isLogo: true },
+    { path: '/easyresearch/discover', label: t('nav.discover'), icon: Search, isLogo: false },
+    { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare, isLogo: false },
+    { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings, isLogo: false },
   ];
 
   const isActive = (path: string) => {

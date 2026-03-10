@@ -160,14 +160,20 @@ const EasyResearchShellInner: React.FC = () => {
                   className="flex flex-col items-center justify-center flex-1 gap-0.5 active:scale-95"
                   style={{ transition: 'transform 100ms ease' }}
                 >
-                  <Icon
-                    size={20}
-                    strokeWidth={active ? 2.2 : 1.5}
-                    style={{
-                      color: active ? '#10b981' : '#a8a29e',
-                      transition: 'color 120ms ease',
-                    }}
-                  />
+                  {tab.isLogo ? (
+                    <div style={{ opacity: active ? 1 : 0.45, transition: 'opacity 120ms ease' }}>
+                      <EasierLogo size={20} />
+                    </div>
+                  ) : Icon ? (
+                    <Icon
+                      size={20}
+                      strokeWidth={active ? 2.2 : 1.5}
+                      style={{
+                        color: active ? '#10b981' : '#a8a29e',
+                        transition: 'color 120ms ease',
+                      }}
+                    />
+                  ) : null}
                   <span
                     className="text-[10px] font-semibold"
                     style={{
