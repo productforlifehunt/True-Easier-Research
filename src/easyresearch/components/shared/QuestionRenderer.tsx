@@ -336,7 +336,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const task = question.question_config?.task_description || '';
       return (
         <div className="space-y-2">
-          {task && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>🖱️ {task}</div>}
+          {task && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>{task}</div>}
           {imgUrl ? (
             <div className="relative cursor-crosshair" onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
