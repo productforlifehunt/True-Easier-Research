@@ -375,7 +375,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                 <span className="text-[12px] font-medium text-stone-700">
                   {schedule.dateMode === 'fixed_dates'
                     ? new Date(selectedDayKey + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-                    : `Day ${selectedDayKey.split('-')[1]} / 第${selectedDayKey.split('-')[1]}天`}
+                    : `Day ${selectedDayKey.split('-')[1]}`}
                 </span>
                 <button
                   onClick={() => setDaySchedule(selectedDayKey, { dayKey: selectedDayKey, times: [] })}
