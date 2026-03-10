@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { UserCheck, FlaskConical, ChevronRight, ArrowLeft } from 'lucide-react';
+import { UserCheck, BarChart3, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const EasyResearchAuth: React.FC = () => {
   const navigate = useNavigate();
