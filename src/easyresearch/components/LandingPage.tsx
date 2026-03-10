@@ -29,7 +29,7 @@ const LandingPage: React.FC = () => {
     { icon: Palette, nameKey: 'useCase.uxResearch', descKey: 'useCase.uxResearch.desc' },
     { icon: ShoppingBag, nameKey: 'useCase.marketResearch', descKey: 'useCase.marketResearch.desc' },
     { icon: Building2, nameKey: 'useCase.hr', descKey: 'useCase.hr.desc' },
-    { icon: Brain, nameKey: 'useCase.psychology', descKey: 'useCase.psychology.desc' },
+    { icon: Lightbulb, nameKey: 'useCase.psychology', descKey: 'useCase.psychology.desc' },
   ];
 
   const steps = [
