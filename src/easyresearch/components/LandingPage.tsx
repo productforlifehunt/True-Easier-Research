@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
           <div className="rounded-2xl border border-stone-100 bg-stone-50/50 backdrop-blur-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Sparkles size={12} className="text-white" />
+                <Brain size={12} className="text-white" />
               </div>
               <span className="text-[13px] font-semibold text-emerald-600 tracking-tight">{t('landing.ai.title')}</span>
             </div>
