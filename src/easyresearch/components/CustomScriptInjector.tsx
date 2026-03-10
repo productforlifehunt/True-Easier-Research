@@ -26,7 +26,7 @@ const CustomScriptInjector: React.FC<Props> = ({ projectId }) => {
     try {
       setTestOutput('Script parsed successfully. No syntax errors detected.\n\nNote: Runtime execution is sandboxed in preview mode.\n注意：运行时执行在预览模式下是沙箱化的。');
     } catch (e: any) {
-      setTestOutput(`❌ Error: ${e.message}`);
+      setTestOutput(`Error: ${e.message}`);
     }
   };
 
