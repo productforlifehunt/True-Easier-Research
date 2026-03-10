@@ -1110,6 +1110,7 @@ const SurveyBuilder: React.FC = () => {
               onUpdateLogic={setLogicRules}
               projectNotifications={projectNotifications}
               onUpdateProjectNotifications={setProjectNotifications}
+              onSwitchToNotifications={() => setActiveTab('notifications')}
             />
           </>
         )}
