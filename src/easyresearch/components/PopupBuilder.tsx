@@ -353,15 +353,12 @@ const PopupBuilder: React.FC<PopupBuilderProps> = ({ projectId, questionnaires }
                     {popup.rules.map((rule, ri) => (
                       <div key={rule.id} className="flex items-start gap-2 p-3 rounded-lg bg-stone-50 border border-stone-100">
                         <div className="flex-1 space-y-2">
-                          <select
+                          <CustomDropdown
+                            options={TRIGGER_TYPES.map(tt => ({ value: tt.value, label: tt.label }))}
                             value={rule.trigger_type}
-                            onChange={(e) => updateRule(popup.id, rule.id, { trigger_type: e.target.value as any })}
-                            className="w-full px-2 py-1.5 text-xs border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                          >
-                            {TRIGGER_TYPES.map(tt => (
-                              <option key={tt.value} value={tt.value}>{tt.label}</option>
-                            ))}
-                          </select>
+                            onChange={(v) => updateRule(popup.id, rule.id, { trigger_type: v as any })}
+                            placeholder="Select trigger"
+                          />
 
                           {rule.trigger_type === 'timed' && (
                             <div className="flex items-center gap-2">
