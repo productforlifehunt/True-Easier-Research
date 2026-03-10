@@ -175,7 +175,7 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
                 {editing.goals.map((g, i) => (
                   <div key={g.id} className="flex items-center gap-1 mb-1">
                     <select value={g.priority} onChange={e => setEditing({ ...editing, goals: editing.goals.map(gg => gg.id === g.id ? { ...gg, priority: e.target.value as any } : gg) })} className="px-1 py-1 border rounded text-[10px] w-14">
-                      <option value="high">🔴</option><option value="medium">🟡</option><option value="low">🟢</option>
+                      <option value="high">High</option><option value="medium">Med</option><option value="low">Low</option>
                     </select>
                     <input value={g.text} onChange={e => setEditing({ ...editing, goals: editing.goals.map(gg => gg.id === g.id ? { ...gg, text: e.target.value } : gg) })} placeholder="Goal..." className="flex-1 px-2 py-1 border rounded text-xs" />
                     <button onClick={() => setEditing({ ...editing, goals: editing.goals.filter(gg => gg.id !== g.id) })} className="text-stone-300 hover:text-red-400"><Trash2 size={12} /></button>
