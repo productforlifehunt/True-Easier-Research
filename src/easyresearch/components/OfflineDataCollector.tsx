@@ -79,11 +79,11 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">How It Works / 工作原理</h3>
             <div className="space-y-3">
               {[
-                { step: '1', title: 'Cache / 缓存', desc: 'Survey questions cached in IndexedDB / 调查问题缓存在IndexedDB中', icon: '💾' },
-                { step: '2', title: 'Collect / 收集', desc: 'Responses queued locally when offline / 离线时响应本地排队', icon: '📝' },
-                { step: '3', title: 'Detect / 检测', desc: 'Auto-detect connectivity changes / 自动检测网络变化', icon: '📡' },
-                { step: '4', title: 'Sync / 同步', desc: 'Queue-based sync with retry logic / 基于队列的同步与重试逻辑', icon: '🔄' },
-                { step: '5', title: 'Verify / 验证', desc: 'Server confirms receipt, removes from queue / 服务器确认接收后从队列移除', icon: '✅' },
+                { step: '1', title: 'Cache / 缓存', desc: 'Survey questions cached in IndexedDB / 调查问题缓存在IndexedDB中', icon: '1' },
+                { step: '2', title: 'Collect / 收集', desc: 'Responses queued locally when offline / 离线时响应本地排队', icon: '2' },
+                { step: '3', title: 'Detect / 检测', desc: 'Auto-detect connectivity changes / 自动检测网络变化', icon: '3' },
+                { step: '4', title: 'Sync / 同步', desc: 'Queue-based sync with retry logic / 基于队列的同步与重试逻辑', icon: '4' },
+                { step: '5', title: 'Verify / 验证', desc: 'Server confirms receipt, removes from queue / 服务器确认接收后从队列移除', icon: '5' },
               ].map(s => (
                 <div key={s.step} className="flex items-start gap-3 p-3 bg-stone-50 rounded-xl">
                   <span className="text-xl">{s.icon}</span>
