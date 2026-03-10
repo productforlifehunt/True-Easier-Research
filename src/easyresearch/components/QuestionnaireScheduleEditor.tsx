@@ -264,7 +264,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                 }}
                 className="text-[10px] text-emerald-500 hover:text-emerald-600 font-medium"
               >
-                + Add Time / 添加时间
+                + Add Time
               </button>
             </div>
             <div className="flex items-center gap-2">
