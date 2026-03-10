@@ -645,13 +645,16 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
         </div>
       </div>
 
-      {/* Project-Level Notifications — redirect to Notifications tab in Layout */}
+      {/* Project-Level Notifications — click to switch to Notifications tab */}
       {onUpdateProjectNotifications && (
-        <div className="bg-white rounded-2xl border border-stone-100 p-4">
+        <div
+          className={`bg-white rounded-2xl border border-stone-100 p-4 ${onSwitchToNotifications ? 'cursor-pointer hover:border-emerald-200 hover:bg-emerald-50/30 transition-all' : ''}`}
+          onClick={onSwitchToNotifications}
+        >
           <div className="flex items-center gap-1.5">
             <Bell size={13} className="text-stone-400" />
             <p className="text-[12px] text-stone-500">
-              You can configure project-level notifications (not tied to any questionnaire) in the <strong>Layout → Notifications</strong> tab.
+              Configure project-level notifications in the <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>Notifications</strong> tab.
             </p>
           </div>
         </div>
