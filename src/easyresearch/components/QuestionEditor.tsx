@@ -398,9 +398,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               { value: 'text_block', label: 'Text Block' },
               { value: 'divider', label: 'Divider Line' },
               { value: 'image_block', label: 'Image' },
-              { value: 'video_block', label: '📐 Video' },
-              { value: 'audio_block', label: '📐 Audio' },
-              { value: 'embed_block', label: '📐 Embed / Webpage' },
+              { value: 'video_block', label: 'Video' },
+              { value: 'audio_block', label: 'Audio' },
+              { value: 'embed_block', label: 'Embed / Webpage' },
               // Text
               { value: 'text_short', label: 'Short Text' },
               { value: 'text_long', label: 'Long Text' },
