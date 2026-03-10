@@ -123,11 +123,11 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-5 gap-4">
             {[
-              { label: 'Requested', value: mockRecruitment.requested, icon: '🎯' },
-              { label: 'Recruited', value: mockRecruitment.recruited, icon: '👥' },
-              { label: 'Completed', value: mockRecruitment.completed, icon: '✅' },
-              { label: 'Rejected', value: mockRecruitment.rejected, icon: '❌' },
-              { label: 'Cost So Far', value: `$${mockRecruitment.costSoFar}`, icon: '💵' },
+              { label: 'Requested', value: mockRecruitment.requested, icon: 'Req' },
+              { label: 'Recruited', value: mockRecruitment.recruited, icon: 'Rec' },
+              { label: 'Completed', value: mockRecruitment.completed, icon: 'Done' },
+              { label: 'Rejected', value: mockRecruitment.rejected, icon: 'Rej' },
+              { label: 'Cost So Far', value: `$${mockRecruitment.costSoFar}`, icon: '$' },
             ].map((s, i) => (
               <div key={i} className="p-3 bg-white rounded-xl border border-stone-200 text-center">
                 <div className="text-xl mb-1">{s.icon}</div>

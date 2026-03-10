@@ -167,11 +167,11 @@ const CollectionMonitor: React.FC<Props> = ({ projectId }) => {
       {/* Live Stats Cards / 实时统计卡片 */}
       <div className="grid grid-cols-5 gap-4">
         {[
-          { label: 'Total / 总计', value: stats.totalResponses, icon: '📊', highlight: false },
-          { label: 'Today / 今日', value: stats.todayResponses, icon: '📅', highlight: stats.todayResponses > 0 },
-          { label: 'Active Now / 当前活跃', value: stats.activeNow, icon: '🟢', highlight: stats.activeNow > 0 },
-          { label: 'Completion / 完成率', value: `${stats.completionRate}%`, icon: '✅', highlight: false },
-          { label: 'Last Response / 最后响应', value: stats.lastResponseAt ? timeAgo(stats.lastResponseAt) : 'None', icon: '⏰', highlight: false },
+          { label: 'Total / 总计', value: stats.totalResponses, icon: 'T', highlight: false },
+          { label: 'Today / 今日', value: stats.todayResponses, icon: 'D', highlight: stats.todayResponses > 0 },
+          { label: 'Active Now / 当前活跃', value: stats.activeNow, icon: 'A', highlight: stats.activeNow > 0 },
+          { label: 'Completion / 完成率', value: `${stats.completionRate}%`, icon: '%', highlight: false },
+          { label: 'Last Response / 最后响应', value: stats.lastResponseAt ? timeAgo(stats.lastResponseAt) : 'None', icon: 'L', highlight: false },
         ].map((stat, i) => (
           <div key={i} className={`border rounded-lg p-4 transition-colors ${stat.highlight ? 'border-emerald-300 bg-emerald-50/50' : 'border-border'}`}>
             <div className="flex items-center justify-between">
