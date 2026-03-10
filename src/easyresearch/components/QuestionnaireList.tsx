@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList, Layers } from 'lucide-react';
+import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList, Layers, Sparkles, Mic, MessageCircle, Eye } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
 import { QUESTION_TYPE_DEFINITIONS } from '../constants/questionTypes';
