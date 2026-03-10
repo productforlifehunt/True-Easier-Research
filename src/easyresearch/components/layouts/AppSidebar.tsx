@@ -64,11 +64,17 @@ const AppSidebar: React.FC = () => {
                     : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
                 }`}
               >
-                <Icon
-                  size={18}
-                  strokeWidth={active ? 2 : 1.5}
-                  className={active ? 'text-emerald-600' : ''}
-                />
+                {item.isLogo ? (
+                  <div style={{ opacity: active ? 1 : 0.5 }}>
+                    <EasierLogo size={18} />
+                  </div>
+                ) : item.icon ? (
+                  <item.icon
+                    size={18}
+                    strokeWidth={active ? 2 : 1.5}
+                    className={active ? 'text-emerald-600' : ''}
+                  />
+                ) : null}
                 <span>{item.label}</span>
               </Link>
             );
