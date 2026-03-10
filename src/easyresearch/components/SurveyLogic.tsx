@@ -67,11 +67,12 @@ const SurveyLogic: React.FC<SurveyLogicProps> = ({ questionnaires, projectId, lo
     : logicRules.filter(r => r.questionnaireId === selectedQId);
 
   const addRule = () => {
-    if (!selectedQId || !projectId) return;
+    const effectiveQId = selectedQId === '__all__' ? (questionnaires[0]?.id || '') : selectedQId;
+    if (!effectiveQId || !projectId) return;
     const newRule: LogicRule = {
       id: crypto.randomUUID(),
       projectId: projectId,
-      questionnaireId: selectedQId,
+      questionnaireId: effectiveQId,
       sourceQuestionId: questions[0]?.id || '',
       condition: 'equals',
       value: '',
