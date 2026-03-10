@@ -157,7 +157,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             onChange={(e) => update({ sendTime: e.target.value, mode: 'once' })}
             className="px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
           />
-          <span className="text-[11px] text-stone-400">One-time questionnaire — single send time / 一次性问卷 — 单次发送时间</span>
+          <span className="text-[11px] text-stone-400">One-time questionnaire — single send time</span>
         </div>
       </div>
     );
