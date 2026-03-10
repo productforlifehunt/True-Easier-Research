@@ -251,6 +251,11 @@ const translations: TranslationDict = {
   'incentive.perResponseSuffix': { en: 'per completed questionnaire', zh: '每完成一份问卷', es: 'por cuestionario completado', fr: 'par questionnaire complété', de: 'pro ausgefülltem Fragebogen', ja: '完了したアンケートごと', ko: '완료된 설문지당', pt: 'por questionário concluído', ar: 'لكل استبيان مكتمل', hi: 'प्रत्येक प्रश्नावली पूर्ण करने पर', ru: 'за каждую заполненную анкету', it: 'per questionario completato' },
   'incentive.lotteryPrefix': { en: 'Chance to win', zh: '有机会赢取', es: 'Oportunidad de ganar', fr: 'Chance de gagner', de: 'Chance auf', ja: '当選のチャンス', ko: '당첨 기회', pt: 'Chance de ganhar', ar: 'فرصة للفوز بـ', hi: 'जीतने का मौका', ru: 'Шанс выиграть', it: 'Possibilità di vincere' },
   'incentive.paidVia': { en: 'Paid via', zh: '通过以下方式支付', es: 'Pagado vía', fr: 'Payé via', de: 'Bezahlt über', ja: '支払い方法', ko: '지급 방법', pt: 'Pago via', ar: 'الدفع عبر', hi: 'इसके माध्यम से भुगतान', ru: 'Оплата через', it: 'Pagato tramite' },
+
+  // Layout sub-tabs
+  'layout.researchDesign': { en: 'Research Design', zh: '研究设计', es: 'Diseño de Investigación', fr: 'Conception de Recherche', de: 'Forschungsdesign', ja: '研究デザイン', ko: '연구 디자인', pt: 'Design de Pesquisa', ar: 'تصميم البحث', hi: 'अनुसंधान डिज़ाइन', ru: 'Дизайн исследования', it: 'Progettazione della Ricerca' },
+  'layout.popups': { en: 'Popups', zh: '弹出窗口', es: 'Ventanas emergentes', fr: 'Pop-ups', de: 'Popups', ja: 'ポップアップ', ko: '팝업', pt: 'Pop-ups', ar: 'النوافذ المنبثقة', hi: 'पॉपअप', ru: 'Всплывающие окна', it: 'Popup' },
+  'layout.publicPages': { en: 'Public Pages', zh: '公开页面', es: 'Páginas Públicas', fr: 'Pages Publiques', de: 'Öffentliche Seiten', ja: '公開ページ', ko: '공개 페이지', pt: 'Páginas Públicas', ar: 'الصفحات العامة', hi: 'सार्वजनिक पृष्ठ', ru: 'Публичные страницы', it: 'Pagine Pubbliche' },
 };
 
 interface I18nContextType {
