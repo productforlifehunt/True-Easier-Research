@@ -269,7 +269,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
           <div className="bg-white rounded-xl border border-stone-100 p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[13px] font-semibold text-stone-800 flex items-center gap-2">
-                <Beaker size={14} className="text-violet-500" />
+                <FlaskRound size={14} className="text-violet-500" />
                 {activeExperiment.name}
               </h3>
               <div className="flex items-center gap-2">
