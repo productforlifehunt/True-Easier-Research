@@ -68,7 +68,7 @@ Behavior Rules:
         'X-Title': 'Care Connector How-to Assistant'
       },
       body: JSON.stringify({
-        model: 'google/gemma-3-12b-it',
+        model: 'openai/gpt-oss-120b',
         messages: messages,
         temperature: 0.7,
         max_tokens: 800
