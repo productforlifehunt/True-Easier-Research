@@ -125,7 +125,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
           {/* Longitudinal toggles */}
           {isLongitudinal && (
             <div className="divide-y divide-stone-100">
-              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Do Not Disturb" desc="Allow participants to set quiet hours" />
+              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Allow Do Not Disturb" desc="Allow participants to set quiet hours to pause notifications" />
               <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Allow participants to choose when to begin" />
             </div>
           )}

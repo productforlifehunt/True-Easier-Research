@@ -127,6 +127,7 @@ const LAYOUT_ELEMENTS = [
   { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
   { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
   { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
+  { type: 'back_button', label: 'Back Button', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
 ];
 
 const WIDTH_PRESETS = [
