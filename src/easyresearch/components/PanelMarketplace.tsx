@@ -36,7 +36,7 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
           {(['marketplace', 'recruitment', 'monitor'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-cyan-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'marketplace' ? '🏪 Panels' : v === 'recruitment' ? '🎯 Recruit' : '📡 Monitor'}
+              {v === 'marketplace' ? 'Panels' : v === 'recruitment' ? 'Recruit' : 'Monitor'}
             </button>
           ))}
         </div>
