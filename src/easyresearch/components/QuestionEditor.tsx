@@ -1310,7 +1310,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Kano Model Configuration */}
         {localQuestion.question_type === 'kano' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">📈 Kano Paired Questions</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Kano Paired Questions</p>
             <div>
               <label className="block text-[11px] text-stone-400 mb-1">Functional question</label>
               <input type="text" value={localQuestion.question_config?.kano_functional || ''}
