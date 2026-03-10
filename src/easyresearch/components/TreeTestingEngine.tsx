@@ -66,7 +66,7 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
       {nodes.map(node => (
         <div key={node.id} className="my-1">
           <div className="flex items-center gap-2 group p-2 rounded-lg hover:bg-stone-50">
-            <span className="text-xs text-stone-400">{node.children.length > 0 ? '📁' : '📄'}</span>
+            <span className="text-xs text-stone-400">{node.children.length > 0 ? '>' : '-'}</span>
             <span className="text-sm font-medium text-stone-800 flex-1">{node.label}</span>
             <button className="opacity-0 group-hover:opacity-100 text-xs text-indigo-600 hover:text-indigo-800">+ Child</button>
             <button className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><Trash2 className="w-3 h-3" /></button>
