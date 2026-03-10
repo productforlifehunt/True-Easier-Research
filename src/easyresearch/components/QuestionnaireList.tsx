@@ -858,7 +858,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
-                              <div className="bg-white rounded-xl border border-stone-200 p-3">
+                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
+                                <div>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency / 频率</label>
+                                  <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
+                                </div>
                                 <QuestionnaireScheduleEditor
                                   frequency={q.frequency}
                                   schedule={q.schedule_config || getDefaultScheduleConfig(q.frequency, (project as any)?.study_duration)}
