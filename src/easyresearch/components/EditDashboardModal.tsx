@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, GripVertical, RotateCcw, Eye, EyeOff, FlaskConical, Users, Plus } from 'lucide-react';
+import { X, GripVertical, RotateCcw, Eye, EyeOff, BarChart3, Users, Plus } from 'lucide-react';
 import IOSToggle from '../../components/ui/IOSToggle';
 import type { DashboardConfig, DashboardTab, UserRoles } from '../hooks/useDashboardConfig';
 
