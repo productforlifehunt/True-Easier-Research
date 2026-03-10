@@ -6,7 +6,7 @@
  * 功能：变体创建、随机分配、对比分析、显著性检验
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import { Beaker, Plus, Trash2, BarChart3, Users, Percent, ArrowRight, CheckCircle, TrendingUp, Shuffle } from 'lucide-react';
+import { FlaskConical, Plus, Trash2, BarChart3, Users, Percent, ArrowRight, CheckCircle, TrendingUp, Shuffle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
