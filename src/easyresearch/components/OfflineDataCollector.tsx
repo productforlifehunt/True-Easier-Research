@@ -36,7 +36,7 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setIsOnline(!isOnline)} className={`px-3 py-1.5 text-xs font-medium rounded-lg ${isOnline ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-            {isOnline ? '🟢 Online' : '🔴 Simulate Offline'}
+            {isOnline ? 'Online' : 'Simulate Offline'}
           </button>
           {(['config', 'queue', 'status'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
