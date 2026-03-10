@@ -1304,7 +1304,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         return (
           <div className="space-y-3">
             <div className="border-2 border-dashed rounded-xl p-8 text-center" style={{ borderColor: 'var(--border-light)' }}>
-              <p className="text-stone-400 text-[13px] mb-2">📎 Click or drag to upload</p>
+              <p className="text-stone-400 text-[13px] mb-2">Click or drag to upload</p>
               <p className="text-stone-300 text-[11px]">Max {(question as any).question_config?.max_size_mb || 10}MB • {(question as any).question_config?.accepted_types || 'All files'}</p>
               <input
                 type="file"

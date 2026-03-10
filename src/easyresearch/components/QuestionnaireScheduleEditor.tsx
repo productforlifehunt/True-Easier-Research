@@ -197,7 +197,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
       <div className="bg-stone-50 rounded-xl border border-stone-200 p-3 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
-            ⏰ Time Templates
+            Time Templates
           </span>
           <button
             onClick={() => setEditingTemplate({ id: crypto.randomUUID(), name: '', times: [] })}

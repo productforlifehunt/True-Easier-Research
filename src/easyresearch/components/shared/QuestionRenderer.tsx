@@ -265,7 +265,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       }
       return videoUrl ? (
         <video src={videoUrl} controls autoPlay={question.question_config?.autoplay} loop={question.question_config?.loop} muted={question.question_config?.muted} poster={question.question_config?.poster_url} className="w-full rounded-xl" />
-      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🎬 No video configured</div>;
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>No video configured</div>;
     }
     case 'audio_block': {
       const audioUrl = question.question_config?.audio_url || '';

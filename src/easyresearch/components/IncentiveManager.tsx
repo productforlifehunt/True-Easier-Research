@@ -112,9 +112,9 @@ const IncentiveManager: React.FC<Props> = ({ projectId, incentives: initialIncen
       <div className="flex gap-1 bg-muted p-1 rounded-lg w-fit">
         {(['overview', 'incentives', 'disbursements'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
-            {t === 'overview' && '📊 Overview / 概览'}
-            {t === 'incentives' && `🎁 Programs (${incentives.length})`}
-            {t === 'disbursements' && `💳 Disbursements (${disbursements.length})`}
+            {t === 'overview' && 'Overview / 概览'}
+            {t === 'incentives' && `Programs (${incentives.length})`}
+            {t === 'disbursements' && `Disbursements (${disbursements.length})`}
           </button>
         ))}
       </div>
