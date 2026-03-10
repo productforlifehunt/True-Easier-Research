@@ -186,7 +186,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
             </button>
           </div>
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <h4 className="text-sm font-semibold text-amber-800 mb-1">⚠️ Important Notes / 重要说明</h4>
+            <h4 className="text-sm font-semibold text-amber-800 mb-1">Important Notes / 重要说明</h4>
             <ul className="text-xs text-amber-700 space-y-1">
               <li>• Place the script in {'<head>'} for exit intent detection / 放在head中以检测退出意图</li>
               <li>• The widget loads asynchronously (no performance impact) / 小部件异步加载（无性能影响）</li>
