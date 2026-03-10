@@ -148,7 +148,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
     return (
       <div className="space-y-2">
         <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Clock size={11} /> Send Time / 发送时间
+          <Clock size={11} /> Send Time
         </h5>
         <div className="flex items-center gap-2">
           <input
