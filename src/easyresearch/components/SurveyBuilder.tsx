@@ -351,7 +351,7 @@ const SurveyBuilder: React.FC = () => {
   const updatePublishStatus = async (nextStatus: 'draft' | 'published') => {
     if (!projectId) return;
     if (nextStatus === 'published') {
-      if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => q.questions.length === 0)) {
+      if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => (q.questions?.length || 0) === 0)) {
         toast.error('Cannot publish: Please add at least one question first.');
         return;
       }
