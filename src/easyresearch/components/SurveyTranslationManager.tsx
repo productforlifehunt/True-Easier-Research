@@ -19,23 +19,23 @@ interface Translation {
 }
 
 const SUPPORTED_LOCALES = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷' },
-  { code: 'pt', name: 'Português', flag: '🇧🇷' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
+  { code: 'en', name: 'English', flag: 'EN' },
+  { code: 'zh', name: '中文', flag: 'ZH' },
+  { code: 'es', name: 'Español', flag: 'ES' },
+  { code: 'fr', name: 'Français', flag: 'FR' },
+  { code: 'de', name: 'Deutsch', flag: 'DE' },
+  { code: 'ja', name: '日本語', flag: 'JA' },
+  { code: 'ko', name: '한국어', flag: 'KO' },
+  { code: 'pt', name: 'Português', flag: 'PT' },
+  { code: 'ar', name: 'العربية', flag: 'AR' },
+  { code: 'hi', name: 'हिन्दी', flag: 'HI' },
+  { code: 'ru', name: 'Русский', flag: 'RU' },
+  { code: 'th', name: 'ไทย', flag: 'TH' },
+  { code: 'vi', name: 'Tiếng Việt', flag: 'VI' },
+  { code: 'ms', name: 'Bahasa Melayu', flag: 'MS' },
 ];
 
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = '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';
 
 const SurveyTranslationManager: React.FC<Props> = ({ projectId, questions, onQuestionsUpdate }) => {
   const [activeLocales, setActiveLocales] = useState<string[]>(['en']);

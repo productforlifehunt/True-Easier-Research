@@ -509,7 +509,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const clicks = hmVal.clicks || [];
       return (
         <div className="space-y-2">
-          {hmTask && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>🔥 {hmTask}</div>}
+          {hmTask && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>{hmTask}</div>}
           <p className={`${txtXs} text-stone-400`}>{clicks.length}/{hmMax} clicks</p>
           {hmImgUrl ? (
             <div className="relative cursor-crosshair" onClick={(e) => {

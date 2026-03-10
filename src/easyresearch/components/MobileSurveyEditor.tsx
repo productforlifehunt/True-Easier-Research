@@ -526,7 +526,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'library' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    📚 Library
+                    Library
                   </button>
                   <button
                     onClick={() => setQuestionnaireTab('schedule')}
@@ -536,7 +536,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'schedule' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    📅 Schedule
+                    Schedule
                   </button>
                 </div>
 

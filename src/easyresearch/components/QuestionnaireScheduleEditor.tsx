@@ -181,7 +181,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             schedule.dateMode === 'fixed_dates' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
           }`}
         >
-          📅 Fixed Dates
+          Fixed Dates
         </button>
         <button
           onClick={() => update({ dateMode: 'relative_days' })}
