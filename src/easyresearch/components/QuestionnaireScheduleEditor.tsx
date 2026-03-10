@@ -354,7 +354,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                       'hover:bg-stone-50 text-stone-600'
                     }`}
                   >
-                    <span className="font-medium">Day {dayNum} / 第{dayNum}天</span>
+                    <span className="font-medium">Day {dayNum}</span>
                     {hasSchedule && (
                       <span className={`text-[9px] ${isSelected ? 'text-white/80' : 'text-emerald-500'}`}>
                         {ds.times.length} time{ds.times.length > 1 ? 's' : ''}
