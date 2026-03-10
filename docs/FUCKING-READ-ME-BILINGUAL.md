@@ -835,3 +835,95 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 **三类未来功能——暂不向用户展示：** 50多个构建器标签和9个响应子视图已在代码中完整实现，但在UI中隐藏。
 
 ---
+
+## 14. AI FEATURES / AI 功能
+
+<!-- CRC STARTS -->
+<!-- CRC ENDS -->
+
+AI features operate at **3 levels**: Project, Questionnaire, and Question. Each level can configure AI behavior independently with inheritance from parent levels.
+
+AI 功能在 **3 个层级** 运作：项目、问卷和问题。每个层级都可以独立配置 AI 行为，并从父层级继承设置。
+
+### 14.1 AI Feature Types / AI 功能类型
+
+Two categories of AI features:
+
+两类 AI 功能：
+
+1. **Voice Input** — Browser-based speech recognition (Web Speech API). No cost. Participants speak answers instead of typing.
+
+   **语音输入** — 基于浏览器的语音识别（Web Speech API）。无需费用。参与者可以语音回答而不是打字。
+
+2. **AI Chat Assistant** — Conversational AI chatbot that helps participants understand questions, provides answer suggestions, can fill answers on the frontend (not database), and supports bulk-fill for lazy participants.
+
+   **AI 对话助手** — 对话式 AI 聊天机器人，帮助参与者理解问题、提供答案建议、可以在前端填写答案（不直接写入数据库）、支持批量填写。
+
+### 14.2 Level 1: Project-Level AI / 项目级 AI
+
+- Configured in Questionnaire tab > Project AI section, or via Layout Builder "AI Assistant" function element
+- 在问卷标签页 > 项目 AI 部分配置，或通过布局构建器"AI 助手"功能元素
+- Appears as floating chatbot in participant app (configurable name)
+- 在参与者应用中显示为浮动聊天机器人（可配置名称）
+- Default behavior: "Welcome to [project name]. How can I help you?" — can fill any visible form on the page
+- 默认行为："欢迎来到[项目名称]。我能帮你什么？" — 可以填写页面上任何可见的表单
+- Researcher can set AI Guidance (system prompt) to customize behavior
+- 研究者可以设置 AI 指导（系统提示词）来自定义行为
+
+### 14.3 Level 2: Questionnaire-Level AI / 问卷级 AI
+
+Configured in each questionnaire's settings panel under "AI Support":
+
+在每个问卷的设置面板中的"AI Support"下配置：
+
+- **Toggle 1:** AI Voice Assistant — enable browser speech recognition for this questionnaire
+- **开关 1：** AI 语音助手 — 为此问卷启用浏览器语音识别
+- **Toggle 2:** AI Chat Assistant — enable conversational chatbot for this questionnaire
+- **开关 2：** AI 对话助手 — 为此问卷启用对话聊天机器人
+- **Toggle 3:** Enable voice input for all questions — batch-apply voice to every question
+- **开关 3：** 为所有问题启用语音输入 — 批量为每个问题启用语音
+- **Toggle 4:** Enable AI assist for all questions — batch-apply AI assist to every question
+- **开关 4：** 为所有问题启用 AI 辅助 — 批量为每个问题启用 AI 辅助
+- **AI Guidance:** Researcher-editable text that shapes AI behavior for this questionnaire
+- **AI 指导：** 研究者可编辑的文本，塑造此问卷的 AI 行为
+
+### 14.4 Level 3: Question-Level AI / 问题级 AI
+
+Each question inherits AI settings from its parent questionnaire but can override:
+
+每个问题从其父问卷继承 AI 设置，但可以覆盖：
+
+- **Voice Input** toggle (on/off per question)
+- **语音输入** 开关（每个问题可开/关）
+- **AI Assist** toggle (help & enhance)
+- **AI 辅助** 开关（帮助和增强）
+- **AI Auto-answer** toggle (predictive fill)
+- **AI 自动回答** 开关（预测性填写）
+- **AI Guidance** per question (overrides questionnaire-level guidance for this question)
+- 每个问题的 **AI 指导**（覆盖此问题的问卷级指导）
+
+### 14.5 AI Behavior Rules / AI 行为规则
+
+- AI fills answers on **frontend only** — never writes directly to database
+- AI 仅在 **前端** 填写答案 — 永远不直接写入数据库
+- User sees filled answers visually and can modify before submitting
+- 用户可以看到已填写的答案，并在提交前修改
+- AI can bulk-fill all questions when participant requests it
+- 当参与者请求时，AI 可以批量填写所有问题
+- Voice input uses Web Speech API (free, no API cost)
+- 语音输入使用 Web Speech API（免费，无 API 费用）
+- AI chat uses OpenRouter API: model `openai/gpt-oss-120b`
+- AI 聊天使用 OpenRouter API：模型 `openai/gpt-oss-120b`
+
+### 14.6 AI UI Integration / AI 界面集成
+
+- Questionnaire-level chatbot: dropdown panel integrated into questionnaire card (not a separate floating button)
+- 问卷级聊天机器人：集成到问卷卡片中的下拉面板（不是独立的浮动按钮）
+- Project-level chatbot: floating element added via Layout Builder "AI Assistant" function element
+- 项目级聊天机器人：通过布局构建器"AI 助手"功能元素添加的浮动元素
+- All AI icons use Lucide components (Sparkles, Mic, MessageCircle) — no emojis
+- 所有 AI 图标使用 Lucide 组件（Sparkles、Mic、MessageCircle）— 不使用表情符号
+- AI settings preview: save and use Preview tab to test AI behavior
+- AI 设置预览：保存后使用预览标签页测试 AI 行为
+
+---
