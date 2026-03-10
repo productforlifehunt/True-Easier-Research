@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
-import easierLogo from '../../../assets/easier-logo-v3.png';
+import easierLogo from '../../../assets/easier-logo-v4.png';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
 import { useI18n } from '../../hooks/useI18n';
