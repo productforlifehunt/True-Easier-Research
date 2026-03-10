@@ -526,7 +526,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'library' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    📚 Library
+                    Library
                   </button>
                   <button
                     onClick={() => setQuestionnaireTab('schedule')}
