@@ -967,18 +967,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                         <option value="sms">SMS</option>
                                         <option value="push_email">Push+Email</option>
                                       </select>
-                                      <select value={notif.frequency} onChange={(e) => {
-                                        const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
-                                        updateQuestionnaire(q.id, { notifications: updated });
-                                      }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                                        <option value="once">Once</option>
-                                        <option value="hourly">Hourly</option>
-                                        <option value="2hours">Every 2h</option>
-                                        <option value="4hours">Every 4h</option>
-                                        <option value="daily">Daily</option>
-                                        <option value="twice_daily">Twice daily</option>
-                                        <option value="weekly">Weekly</option>
-                                      </select>
+                                      <span className="text-[10px] text-stone-400">Synced with questionnaire schedule</span>
                                       <div className="flex items-center gap-1">
                                         <label className="text-[10px] text-stone-400">Before:</label>
                                         <input type="number" value={notif.minutes_before} onChange={(e) => {
