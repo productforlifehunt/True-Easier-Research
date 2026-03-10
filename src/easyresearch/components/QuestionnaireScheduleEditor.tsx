@@ -388,7 +388,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
               {/* Apply template / 应用模板 */}
               {schedule.templates.length > 0 && (
                 <div>
-                  <span className="text-[10px] text-stone-400 block mb-1">Apply Template / 应用模板:</span>
+                  <span className="text-[10px] text-stone-400 block mb-1">Apply Template:</span>
                   <div className="flex flex-wrap gap-1">
                     {schedule.templates.map(t => (
                       <button
