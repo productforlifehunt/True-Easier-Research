@@ -161,7 +161,7 @@ const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
                   selectedPlatform === p.id ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200 hover:border-stone-300'
                 }`}
               >
-                <div className="text-lg mb-1">{p.icon}</div>
+                <div className="text-lg mb-1 text-stone-600">{PLATFORM_ICONS[p.icon] || <Link2 size={20} />}</div>
                 <div className="text-sm font-medium text-stone-800">{p.name}</div>
                 <div className="text-[10px] text-stone-500 mt-0.5">{p.description}</div>
               </button>
