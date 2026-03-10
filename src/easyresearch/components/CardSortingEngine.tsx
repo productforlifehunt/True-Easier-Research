@@ -162,7 +162,7 @@ const CardSortingEngine: React.FC<Props> = ({ projectId }) => {
             </h3>
             {sortType === 'open' ? (
               <div className="p-6 bg-stone-50 rounded-xl text-center">
-                <div className="text-3xl mb-2">🗂️</div>
+                <div className="text-sm font-semibold text-stone-400 mb-2">Open Sort</div>
                 <p className="text-sm text-stone-600">In open sort, participants create their own categories.</p>
                 <p className="text-xs text-stone-400 mt-1">No predefined categories needed / 无需预定义类别</p>
               </div>
