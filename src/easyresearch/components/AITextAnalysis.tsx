@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Brain, MessageSquare, Tag, TrendingUp, Loader2, Sparkles, BarChart3 } from 'lucide-react';
+import { Sparkles, MessageSquare, Tag, TrendingUp, Loader2, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // AI-Powered Text & Sentiment Analysis for open-ended responses
