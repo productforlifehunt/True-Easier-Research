@@ -241,7 +241,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.image_url ? (
               <img src={localQuestion.question_config.image_url} alt={localQuestion.question_config?.alt_text || ''} className="max-h-24 mx-auto rounded-lg border border-stone-200" style={{ maxWidth: localQuestion.question_config?.max_width || '100%' }} />
             ) : (
-              <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">🖼 Image placeholder</div>
+              <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">Image placeholder</div>
             )}
             {localQuestion.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{localQuestion.question_config.caption}</p>}
           </div>
