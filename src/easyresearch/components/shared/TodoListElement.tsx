@@ -50,7 +50,7 @@ const TodoListElement: React.FC<TodoListElementProps> = ({
   if (cards.length === 0) {
     return (
       <div className="space-y-2">
-        <h4 className={`${txt} font-semibold text-stone-800`}>✅ {el.config.title || 'To-Do'}</h4>
+        <h4 className={`${txt} font-semibold text-stone-800`}>{el.config.title || 'To-Do'}</h4>
         <p className={`${txtSm} text-stone-400 italic`}>No tasks{compact ? ' configured' : ''}</p>
       </div>
     );
@@ -58,7 +58,7 @@ const TodoListElement: React.FC<TodoListElementProps> = ({
 
   return (
     <div className="space-y-2">
-      <h4 className={`${txt} font-semibold text-stone-800`}>✅ {el.config.title || 'To-Do'}</h4>
+      <h4 className={`${txt} font-semibold text-stone-800`}>{el.config.title || 'To-Do'}</h4>
       <div
         ref={scrollRef}
         className={isVertical ? 'flex flex-col gap-2' : 'flex gap-2 overflow-x-auto pb-2'}

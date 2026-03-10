@@ -12,12 +12,12 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
   const [targetDemographics, setTargetDemographics] = useState({ ageRange: '18-65', gender: 'all', country: 'US' });
 
   const providers: PanelProvider[] = [
-    { id: 'prolific', name: 'Prolific', logo: '🔬', avgCostPerResponse: 8, avgResponseTime: '< 1 hour', totalPanelists: '200K+', qualityScore: 95, regions: ['Global'], features: ['Pre-screening', 'Longitudinal', 'Naivety checks'], connected: true },
-    { id: 'cint', name: 'Cint / Lucid', logo: '🌐', avgCostPerResponse: 5, avgResponseTime: '2-4 hours', totalPanelists: '300M+', regions: ['Global'], qualityScore: 88, features: ['Massive scale', 'B2B panels', 'Multi-market'], connected: false },
-    { id: 'mturk', name: 'Amazon MTurk', logo: '📦', avgCostPerResponse: 2, avgResponseTime: '< 30 min', totalPanelists: '500K+', regions: ['US-heavy'], qualityScore: 75, features: ['Cheapest', 'Fastest', 'Custom quals'], connected: false },
-    { id: 'respondent', name: 'Respondent.io', logo: '🎯', avgCostPerResponse: 15, avgResponseTime: '1-3 days', totalPanelists: '3M+', regions: ['US, UK, EU'], qualityScore: 92, features: ['B2B professionals', 'Interview recruits', 'High quality'], connected: false },
-    { id: 'userinterviews', name: 'User Interviews', logo: '🗣️', avgCostPerResponse: 12, avgResponseTime: '1-2 days', totalPanelists: '2M+', regions: ['US, UK, CA'], qualityScore: 90, features: ['UX research focus', 'Scheduling', 'Screener integration'], connected: false },
-    { id: 'positionly', name: 'Positly', logo: '📊', avgCostPerResponse: 3, avgResponseTime: '< 1 hour', totalPanelists: '100K+', regions: ['US'], qualityScore: 82, features: ['Academic focused', 'CloudResearch integration', 'Attention checks'], connected: false },
+    { id: 'prolific', name: 'Prolific', logo: 'P', avgCostPerResponse: 8, avgResponseTime: '< 1 hour', totalPanelists: '200K+', qualityScore: 95, regions: ['Global'], features: ['Pre-screening', 'Longitudinal', 'Naivety checks'], connected: true },
+    { id: 'cint', name: 'Cint / Lucid', logo: 'C', avgCostPerResponse: 5, avgResponseTime: '2-4 hours', totalPanelists: '300M+', regions: ['Global'], qualityScore: 88, features: ['Massive scale', 'B2B panels', 'Multi-market'], connected: false },
+    { id: 'mturk', name: 'Amazon MTurk', logo: 'M', avgCostPerResponse: 2, avgResponseTime: '< 30 min', totalPanelists: '500K+', regions: ['US-heavy'], qualityScore: 75, features: ['Cheapest', 'Fastest', 'Custom quals'], connected: false },
+    { id: 'respondent', name: 'Respondent.io', logo: 'R', avgCostPerResponse: 15, avgResponseTime: '1-3 days', totalPanelists: '3M+', regions: ['US, UK, EU'], qualityScore: 92, features: ['B2B professionals', 'Interview recruits', 'High quality'], connected: false },
+    { id: 'userinterviews', name: 'User Interviews', logo: 'U', avgCostPerResponse: 12, avgResponseTime: '1-2 days', totalPanelists: '2M+', regions: ['US, UK, CA'], qualityScore: 90, features: ['UX research focus', 'Scheduling', 'Screener integration'], connected: false },
+    { id: 'positionly', name: 'Positly', logo: 'P', avgCostPerResponse: 3, avgResponseTime: '< 1 hour', totalPanelists: '100K+', regions: ['US'], qualityScore: 82, features: ['Academic focused', 'CloudResearch integration', 'Attention checks'], connected: false },
   ];
 
   const mockRecruitment = { requested: targetN, recruited: Math.floor(targetN * 0.72), completed: Math.floor(targetN * 0.58), rejected: Math.floor(targetN * 0.08), avgTime: '4m 23s', costSoFar: Math.floor(targetN * 0.58 * (providers.find(p => p.id === (selectedProvider || 'prolific'))?.avgCostPerResponse || 8)) };
@@ -36,7 +36,7 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
           {(['marketplace', 'recruitment', 'monitor'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-cyan-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'marketplace' ? '🏪 Panels' : v === 'recruitment' ? '🎯 Recruit' : '📡 Monitor'}
+              {v === 'marketplace' ? 'Panels' : v === 'recruitment' ? 'Recruit' : 'Monitor'}
             </button>
           ))}
         </div>
@@ -97,7 +97,7 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
                 </select></div>
             </div>
             <div className="p-4 bg-cyan-50 rounded-xl border border-cyan-200">
-              <h4 className="text-sm font-bold text-cyan-800 mb-2">💰 Cost Estimate / 费用估算</h4>
+              <h4 className="text-sm font-bold text-cyan-800 mb-2">Cost Estimate / 费用估算</h4>
               <div className="text-2xl font-bold text-cyan-900">${targetN * (providers.find(p => p.id === selectedProvider)?.avgCostPerResponse || 8)}</div>
               <div className="text-xs text-cyan-600">{targetN} × ${providers.find(p => p.id === selectedProvider)?.avgCostPerResponse || 8}/response</div>
             </div>
@@ -123,11 +123,11 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-5 gap-4">
             {[
-              { label: 'Requested', value: mockRecruitment.requested, icon: '🎯' },
-              { label: 'Recruited', value: mockRecruitment.recruited, icon: '👥' },
-              { label: 'Completed', value: mockRecruitment.completed, icon: '✅' },
-              { label: 'Rejected', value: mockRecruitment.rejected, icon: '❌' },
-              { label: 'Cost So Far', value: `$${mockRecruitment.costSoFar}`, icon: '💵' },
+              { label: 'Requested', value: mockRecruitment.requested, icon: 'Req' },
+              { label: 'Recruited', value: mockRecruitment.recruited, icon: 'Rec' },
+              { label: 'Completed', value: mockRecruitment.completed, icon: 'Done' },
+              { label: 'Rejected', value: mockRecruitment.rejected, icon: 'Rej' },
+              { label: 'Cost So Far', value: `$${mockRecruitment.costSoFar}`, icon: '$' },
             ].map((s, i) => (
               <div key={i} className="p-3 bg-white rounded-xl border border-stone-200 text-center">
                 <div className="text-xl mb-1">{s.icon}</div>

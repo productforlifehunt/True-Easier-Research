@@ -35,7 +35,7 @@ const SUPPORTED_LOCALES = [
   { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
 ];
 
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = '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';
 
 const SurveyTranslationManager: React.FC<Props> = ({ projectId, questions, onQuestionsUpdate }) => {
   const [activeLocales, setActiveLocales] = useState<string[]>(['en']);

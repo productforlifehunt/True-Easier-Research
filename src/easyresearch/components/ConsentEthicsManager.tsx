@@ -116,9 +116,9 @@ const ConsentEthicsManager: React.FC<Props> = ({ projectId, consentForms = [], c
               tab === t ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t === 'forms' && `📋 Forms (${forms.length})`}
-            {t === 'records' && `✅ Consents (${activeConsents.length})`}
-            {t === 'withdrawals' && `⚠️ Withdrawals (${withdrawals.length})`}
+            {t === 'forms' && `Forms (${forms.length})`}
+            {t === 'records' && `Consents (${activeConsents.length})`}
+            {t === 'withdrawals' && `Withdrawals (${withdrawals.length})`}
           </button>
         ))}
       </div>

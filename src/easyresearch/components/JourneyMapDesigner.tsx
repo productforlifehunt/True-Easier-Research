@@ -266,9 +266,9 @@ const JourneyMapDesigner: React.FC<Props> = ({ projectId }) => {
                         {EMOTION_ICONS[tp.emotion]}
                         <span className="text-xs font-medium text-stone-700">{tp.action}</span>
                       </div>
-                      {tp.channel && <p className="text-[10px] text-stone-400">📱 {tp.channel}</p>}
-                      {tp.pain_point && <p className="text-[10px] text-red-500">😩 {tp.pain_point}</p>}
-                      {tp.opportunity && <p className="text-[10px] text-emerald-600">💡 {tp.opportunity}</p>}
+                      {tp.channel && <p className="text-[10px] text-stone-400">{tp.channel}</p>}
+                      {tp.pain_point && <p className="text-[10px] text-red-500">{tp.pain_point}</p>}
+                      {tp.opportunity && <p className="text-[10px] text-emerald-600">{tp.opportunity}</p>}
                     </div>
                   ))}
                 </div>

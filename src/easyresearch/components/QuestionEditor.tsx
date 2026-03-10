@@ -241,7 +241,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.image_url ? (
               <img src={localQuestion.question_config.image_url} alt={localQuestion.question_config?.alt_text || ''} className="max-h-24 mx-auto rounded-lg border border-stone-200" style={{ maxWidth: localQuestion.question_config?.max_width || '100%' }} />
             ) : (
-              <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">🖼 Image placeholder</div>
+              <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">Image placeholder</div>
             )}
             {localQuestion.question_config?.caption && <p className="text-[10px] text-stone-400 mt-1">{localQuestion.question_config.caption}</p>}
           </div>
@@ -262,11 +262,11 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'tree_test':
-        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🌳 Tree navigation test</div>;
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">Tree navigation test</div>;
       case 'first_click':
-        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🖱️ First click test</div>;
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">First click test</div>;
       case 'five_second_test':
-        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">⏱️ {localQuestion.question_config?.test_duration ?? 5}s exposure test</div>;
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">{localQuestion.question_config?.test_duration ?? 5}s exposure test</div>;
       case 'preference_test':
         return (
           <div className="grid grid-cols-2 gap-1">
@@ -275,7 +275,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'prototype_test':
-        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
+        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
       case 'max_diff':
         return (
           <div className="space-y-1">
@@ -301,7 +301,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'heatmap':
         return (
           <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">
-            🔥 Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
+            Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
           </div>
         );
       default: return null;
@@ -394,54 +394,54 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <CustomDropdown
             options={[
               // Layout & Media
-              { value: 'section_header', label: '📐 Section / Tab' },
-              { value: 'text_block', label: '📐 Text Block' },
-              { value: 'divider', label: '📐 Divider Line' },
-              { value: 'image_block', label: '📐 Image' },
+              { value: 'section_header', label: 'Section / Tab' },
+              { value: 'text_block', label: 'Text Block' },
+              { value: 'divider', label: 'Divider Line' },
+              { value: 'image_block', label: 'Image' },
               { value: 'video_block', label: '📐 Video' },
               { value: 'audio_block', label: '📐 Audio' },
               { value: 'embed_block', label: '📐 Embed / Webpage' },
               // Text
-              { value: 'text_short', label: '✏️ Short Text' },
-              { value: 'text_long', label: '✏️ Long Text' },
+              { value: 'text_short', label: 'Short Text' },
+              { value: 'text_long', label: 'Long Text' },
               // Choice
-              { value: 'single_choice', label: '🔘 Single Choice' },
-              { value: 'multiple_choice', label: '☑️ Multiple Choice' },
-              { value: 'checkbox_group', label: '☑️ Checkbox Group' },
-              { value: 'dropdown', label: '📋 Dropdown' },
-              { value: 'yes_no', label: '👍 Yes / No' },
-              { value: 'image_choice', label: '🖼️ Image Choice' },
-              { value: 'matrix', label: '📊 Matrix / Grid' },
-              { value: 'ranking', label: '🏅 Ranking' },
+              { value: 'single_choice', label: 'Single Choice' },
+              { value: 'multiple_choice', label: 'Multiple Choice' },
+              { value: 'checkbox_group', label: 'Checkbox Group' },
+              { value: 'dropdown', label: 'Dropdown' },
+              { value: 'yes_no', label: 'Yes / No' },
+              { value: 'image_choice', label: 'Image Choice' },
+              { value: 'matrix', label: 'Matrix / Grid' },
+              { value: 'ranking', label: 'Ranking' },
               // Scale
-              { value: 'slider', label: '🎚️ Slider' },
-              { value: 'bipolar_scale', label: '↔️ Bipolar Scale (-/+)' },
-              { value: 'rating', label: '⭐ Rating' },
-              { value: 'likert_scale', label: '📏 Likert Scale' },
-              { value: 'nps', label: '📊 NPS (0-10)' },
+              { value: 'slider', label: 'Slider' },
+              { value: 'bipolar_scale', label: 'Bipolar Scale (-/+)' },
+              { value: 'rating', label: 'Rating' },
+              { value: 'likert_scale', label: 'Likert Scale' },
+              { value: 'nps', label: 'NPS (0-10)' },
               // Data
-              { value: 'number', label: '🔢 Number' },
-              { value: 'date', label: '📅 Date' },
-              { value: 'time', label: '🕐 Time' },
-              { value: 'email', label: '📧 Email' },
-              { value: 'phone', label: '📞 Phone Number' },
-              { value: 'file_upload', label: '📁 File Upload' },
+              { value: 'number', label: 'Number' },
+              { value: 'date', label: 'Date' },
+              { value: 'time', label: 'Time' },
+              { value: 'email', label: 'Email' },
+              { value: 'phone', label: 'Phone Number' },
+              { value: 'file_upload', label: 'File Upload' },
               // UX Research
-              { value: 'card_sort', label: '🃏 Card Sort' },
-              { value: 'tree_test', label: '🌳 Tree Test' },
-              { value: 'first_click', label: '👆 First Click Test' },
-              { value: 'five_second_test', label: '⏱️ 5-Second Test' },
-              { value: 'preference_test', label: '🔀 Preference Test (A/B)' },
-              { value: 'prototype_test', label: '🖥️ Prototype Test' },
-              { value: 'max_diff', label: '📊 MaxDiff (Best-Worst)' },
-              { value: 'design_survey', label: '🎨 Design Survey (Multi-Variant)' },
-              { value: 'heatmap', label: '🔥 Heatmap (Multi-Click)' },
-              { value: 'conjoint', label: '🧮 Conjoint Analysis' },
-              { value: 'kano', label: '📐 Kano Model' },
+              { value: 'card_sort', label: 'Card Sort' },
+              { value: 'tree_test', label: 'Tree Test' },
+              { value: 'first_click', label: 'First Click Test' },
+              { value: 'five_second_test', label: '5-Second Test' },
+              { value: 'preference_test', label: 'Preference Test (A/B)' },
+              { value: 'prototype_test', label: 'Prototype Test' },
+              { value: 'max_diff', label: 'MaxDiff (Best-Worst)' },
+              { value: 'design_survey', label: 'Design Survey (Multi-Variant)' },
+              { value: 'heatmap', label: 'Heatmap (Multi-Click)' },
+              { value: 'conjoint', label: 'Conjoint Analysis' },
+              { value: 'kano', label: 'Kano Model' },
               // Standardized Metrics
-              { value: 'sus', label: '📐 SUS (System Usability Scale)' },
-              { value: 'csat', label: '😊 CSAT (Customer Satisfaction)' },
-              { value: 'ces', label: '💪 CES (Customer Effort Score)' },
+              { value: 'sus', label: 'SUS (System Usability Scale)' },
+              { value: 'csat', label: 'CSAT (Customer Satisfaction)' },
+              { value: 'ces', label: 'CES (Customer Effort Score)' },
             ]}
             value={localQuestion.question_type}
             onChange={(newType) => {

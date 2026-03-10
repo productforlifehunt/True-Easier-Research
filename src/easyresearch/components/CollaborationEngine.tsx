@@ -164,9 +164,9 @@ const CollaborationEngine: React.FC<Props> = ({
               tab === t ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t === 'comments' && `💬 Comments (${comments.length})`}
-            {t === 'team' && `👥 Team (${teamMembers.length})`}
-            {t === 'activity' && '📊 Activity / 活动'}
+            {t === 'comments' && `Comments (${comments.length})`}
+            {t === 'team' && `Team (${teamMembers.length})`}
+            {t === 'activity' && 'Activity / 活动'}
           </button>
         ))}
       </div>

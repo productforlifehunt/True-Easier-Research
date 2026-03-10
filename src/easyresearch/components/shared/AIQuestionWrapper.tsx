@@ -229,7 +229,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
         <div className="p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-[12px] text-blue-700">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="font-medium mb-0.5">💡 AI Help</p>
+              <p className="font-medium mb-0.5">AI Help</p>
               <p className="text-blue-600">{aiHelpText}</p>
             </div>
             <button onClick={() => setAiHelpText(null)} className="text-blue-400 hover:text-blue-600 shrink-0"><X size={12} /></button>

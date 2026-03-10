@@ -203,7 +203,7 @@ const StakeholderDashboard: React.FC<Props> = ({ projectId, questionnaires }) =>
         <h3 className="text-sm font-semibold text-stone-700 mb-3">Quick Insights / 快速洞察</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-100">
-            <div className="text-xs text-emerald-700 font-medium">✅ Collection Status / 收集状态</div>
+            <div className="text-xs text-emerald-700 font-medium">Collection Status / 收集状态</div>
             <div className="text-sm text-emerald-800 mt-1">
               {metrics.totalParticipants > 0
                 ? `${metrics.avgCompletion}% average completion rate across ${metrics.totalParticipants} participants`
@@ -211,13 +211,13 @@ const StakeholderDashboard: React.FC<Props> = ({ projectId, questionnaires }) =>
             </div>
           </div>
           <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-            <div className="text-xs text-blue-700 font-medium">📊 Data Volume / 数据量</div>
+            <div className="text-xs text-blue-700 font-medium">Data Volume / 数据量</div>
             <div className="text-sm text-blue-800 mt-1">
               {metrics.totalResponses.toLocaleString()} responses across {questionnaires.length} questionnaires
             </div>
           </div>
           <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-            <div className="text-xs text-purple-700 font-medium">📈 Trend / 趋势</div>
+            <div className="text-xs text-purple-700 font-medium">Trend / 趋势</div>
             <div className="text-sm text-purple-800 mt-1">
               {metrics.timeline.length > 1
                 ? `${(metrics.timeline[metrics.timeline.length - 1][1] as number)} responses on latest day`

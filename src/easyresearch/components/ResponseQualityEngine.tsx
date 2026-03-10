@@ -305,7 +305,7 @@ const ResponseQualityEngine: React.FC<Props> = ({ projectId, questions }) => {
             </div>
           ))}
           {Object.keys(stats.byType).length === 0 && (
-            <p className="text-[11px] text-stone-400 col-span-3 text-center py-4">No issues detected / 未检测到问题 ✅</p>
+            <p className="text-[11px] text-stone-400 col-span-3 text-center py-4">No issues detected / 未检测到问题</p>
           )}
         </div>
       </div>

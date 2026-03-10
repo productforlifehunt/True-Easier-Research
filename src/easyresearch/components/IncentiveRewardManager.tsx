@@ -37,7 +37,7 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
           {(['config', 'participants', 'analytics'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'participants' ? '👥 Distribute' : '📊 Analytics'}
+              {v === 'config' ? 'Config' : v === 'participants' ? 'Distribute' : 'Analytics'}
             </button>
           ))}
         </div>
@@ -49,10 +49,10 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">Reward Type / 奖励类型</h3>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { type: 'gift_card' as const, icon: '🎁', label: 'Gift Card / 礼品卡' },
-                { type: 'cash' as const, icon: '💵', label: 'Cash / 现金' },
-                { type: 'lottery' as const, icon: '🎰', label: 'Lottery / 抽奖' },
-                { type: 'points' as const, icon: '⭐', label: 'Points / 积分' },
+                { type: 'gift_card' as const, icon: 'GC', label: 'Gift Card / 礼品卡' },
+                { type: 'cash' as const, icon: '$', label: 'Cash / 现金' },
+                { type: 'lottery' as const, icon: 'LT', label: 'Lottery / 抽奖' },
+                { type: 'points' as const, icon: 'PT', label: 'Points / 积分' },
               ]).map(r => (
                 <button key={r.type} onClick={() => setConfig(prev => ({ ...prev, type: r.type }))}
                   className={`p-3 rounded-xl border-2 text-left ${config.type === r.type ? 'border-amber-500 bg-amber-50' : 'border-stone-200'}`}>
@@ -121,7 +121,7 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
             </div>
 
             <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-              <h4 className="text-sm font-bold text-amber-800 mb-2">💰 Budget Summary / 预算摘要</h4>
+              <h4 className="text-sm font-bold text-amber-800 mb-2">Budget Summary / 预算摘要</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between"><span className="text-stone-600">Eligible participants:</span><span className="font-bold">{completed}</span></div>
                 <div className="flex justify-between"><span className="text-stone-600">{config.type === 'lottery' ? 'Total prize pool:' : 'Per participant:'}</span><span className="font-bold">{config.currency} {config.type === 'lottery' ? (config.lotteryWinners || 0) * (config.lotteryPrize || 0) : config.amount}</span></div>

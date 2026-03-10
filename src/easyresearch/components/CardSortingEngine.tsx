@@ -87,7 +87,7 @@ const CardSortingEngine: React.FC<Props> = ({ projectId }) => {
           {(['setup', 'preview', 'results'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-indigo-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'setup' ? '⚙️ Setup' : v === 'preview' ? '👁️ Preview' : '📊 Results'}
+              {v === 'setup' ? 'Setup' : v === 'preview' ? 'Preview' : 'Results'}
             </button>
           ))}
         </div>
@@ -249,10 +249,10 @@ const CardSortingEngine: React.FC<Props> = ({ projectId }) => {
           {/* Summary Stats / 汇总统计 */}
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Participants', value: mockResults.length, icon: '👥' },
-              { label: 'Avg Duration', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: '⏱️' },
-              { label: 'Categories Created', value: sortType === 'open' ? '12 unique' : predefinedCategories.length, icon: '🗂️' },
-              { label: 'Agreement Score', value: '72%', icon: '🎯' },
+              { label: 'Participants', value: mockResults.length, icon: '#' },
+              { label: 'Avg Duration', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: 'T' },
+              { label: 'Categories Created', value: sortType === 'open' ? '12 unique' : predefinedCategories.length, icon: 'C' },
+              { label: 'Agreement Score', value: '72%', icon: '%' },
             ].map((stat, i) => (
               <div key={i} className="p-4 bg-white rounded-xl border border-stone-200">
                 <div className="text-2xl mb-1">{stat.icon}</div>

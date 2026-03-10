@@ -57,7 +57,7 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
           {(['setup', 'present', 'results'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-fuchsia-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'setup' ? '⚙️ Setup' : v === 'present' ? '🎤 Present' : '📊 Results'}
+              {v === 'setup' ? 'Setup' : v === 'present' ? 'Present' : 'Results'}
             </button>
           ))}
         </div>
@@ -174,10 +174,10 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Total Responses', value: liveCount || 47, icon: '📊' },
-              { label: 'Avg Response Time', value: '8s', icon: '⏱️' },
-              { label: 'Completion Rate', value: '94%', icon: '✅' },
-              { label: 'Sessions', value: '3', icon: '🎤' },
+              { label: 'Total Responses', value: liveCount || 47, icon: '#' },
+              { label: 'Avg Response Time', value: '8s', icon: 'T' },
+              { label: 'Completion Rate', value: '94%', icon: '%' },
+              { label: 'Sessions', value: '3', icon: 'S' },
             ].map((s, i) => (
               <div key={i} className="p-4 bg-white rounded-xl border border-stone-200">
                 <div className="text-2xl mb-1">{s.icon}</div>

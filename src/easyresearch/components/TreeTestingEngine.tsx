@@ -66,7 +66,7 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
       {nodes.map(node => (
         <div key={node.id} className="my-1">
           <div className="flex items-center gap-2 group p-2 rounded-lg hover:bg-stone-50">
-            <span className="text-xs text-stone-400">{node.children.length > 0 ? '📁' : '📄'}</span>
+            <span className="text-xs text-stone-400">{node.children.length > 0 ? '>' : '-'}</span>
             <span className="text-sm font-medium text-stone-800 flex-1">{node.label}</span>
             <button className="opacity-0 group-hover:opacity-100 text-xs text-indigo-600 hover:text-indigo-800">+ Child</button>
             <button className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600"><Trash2 className="w-3 h-3" /></button>
@@ -109,7 +109,7 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
           {(['setup', 'preview', 'results'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'setup' ? '⚙️ Setup' : v === 'preview' ? '👁️ Preview' : '📊 Results'}
+              {v === 'setup' ? 'Setup' : v === 'preview' ? 'Preview' : 'Results'}
             </button>
           ))}
         </div>
@@ -192,10 +192,10 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-6">
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Overall Success', value: `${Math.round(mockResults.filter(r => r.success).length / mockResults.length * 100)}%`, icon: '🎯' },
-              { label: 'Direct Success', value: `${Math.round(mockResults.filter(r => r.direct && r.success).length / mockResults.filter(r => r.success).length * 100)}%`, icon: '↗️' },
-              { label: 'Avg Time/Task', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: '⏱️' },
-              { label: 'Participants', value: '20', icon: '👥' },
+              { label: 'Overall Success', value: `${Math.round(mockResults.filter(r => r.success).length / mockResults.length * 100)}%`, icon: '%' },
+              { label: 'Direct Success', value: `${Math.round(mockResults.filter(r => r.direct && r.success).length / mockResults.filter(r => r.success).length * 100)}%`, icon: 'D' },
+              { label: 'Avg Time/Task', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: 'T' },
+              { label: 'Participants', value: '20', icon: '#' },
             ].map((s, i) => (
               <div key={i} className="p-4 bg-white rounded-xl border border-stone-200">
                 <div className="text-2xl mb-1">{s.icon}</div>

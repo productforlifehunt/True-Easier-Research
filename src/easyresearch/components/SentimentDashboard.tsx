@@ -168,10 +168,10 @@ const SentimentDashboard: React.FC<Props> = ({ projectId, responses, questions }
       <div className="flex gap-1 bg-muted p-1 rounded-lg w-fit">
         {(['overview', 'timeline', 'phrases', 'individual'] as const).map(v => (
           <button key={v} onClick={() => setView(v)} className={`px-4 py-2 text-sm rounded-md transition-colors ${view === v ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
-            {v === 'overview' && '📊 Overview / 概览'}
-            {v === 'timeline' && '📈 Timeline / 趋势'}
-            {v === 'phrases' && '🔤 Key Phrases / 关键短语'}
-            {v === 'individual' && '💬 Individual / 逐条'}
+            {v === 'overview' && 'Overview / 概览'}
+            {v === 'timeline' && 'Timeline / 趋势'}
+            {v === 'phrases' && 'Key Phrases / 关键短语'}
+            {v === 'individual' && 'Individual / 逐条'}
           </button>
         ))}
       </div>

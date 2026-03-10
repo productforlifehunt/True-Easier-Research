@@ -74,11 +74,11 @@ const IncentiveManager: React.FC<Props> = ({ projectId, incentives: initialIncen
 
   const typeLabel = (type: string) => {
     switch (type) {
-      case 'fixed': return '💰 Fixed / 固定';
-      case 'per_response': return '📝 Per Response / 每次响应';
-      case 'lottery': return '🎲 Lottery / 抽奖';
-      case 'gift_card': return '🎁 Gift Card / 礼品卡';
-      case 'points': return '⭐ Points / 积分';
+      case 'fixed': return 'Fixed / 固定';
+      case 'per_response': return 'Per Response / 每次响应';
+      case 'lottery': return 'Lottery / 抽奖';
+      case 'gift_card': return 'Gift Card / 礼品卡';
+      case 'points': return 'Points / 积分';
       default: return type;
     }
   };

@@ -205,9 +205,9 @@ const CohortComparisonEngine: React.FC<Props> = ({ projectId, responses, questio
           <div className="flex gap-1 bg-muted p-1 rounded-lg w-fit">
             {(['chart', 'table', 'significance'] as const).map(v => (
               <button key={v} onClick={() => setView(v)} className={`px-4 py-2 text-sm rounded-md transition-colors ${view === v ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
-                {v === 'chart' && '📊 Chart / 图表'}
-                {v === 'table' && '📋 Table / 表格'}
-                {v === 'significance' && '🔬 Significance / 显著性'}
+                {v === 'chart' && 'Chart / 图表'}
+                {v === 'table' && 'Table / 表格'}
+                {v === 'significance' && 'Significance / 显著性'}
               </button>
             ))}
           </div>
@@ -268,7 +268,7 @@ const CohortComparisonEngine: React.FC<Props> = ({ projectId, responses, questio
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${chiSquareResult.significant ? 'bg-emerald-100' : 'bg-amber-100'}`}>
-                      <span className="text-lg">{chiSquareResult.significant ? '✅' : '⚠️'}</span>
+                      <span className="text-lg font-bold">{chiSquareResult.significant ? '✓' : '!'}</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">

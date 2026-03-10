@@ -31,17 +31,17 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-stone-900">Offline Data Collection / 离线数据收集</h2>
-            <p className="text-sm text-stone-500">{isOnline ? '🟢 Online' : '🔴 Offline'} · {pendingCount} pending · {totalSize} KB queued</p>
+            <p className="text-sm text-stone-500">{isOnline ? 'Online' : 'Offline'} · {pendingCount} pending · {totalSize} KB queued</p>
           </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setIsOnline(!isOnline)} className={`px-3 py-1.5 text-xs font-medium rounded-lg ${isOnline ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-            {isOnline ? '🟢 Online' : '🔴 Simulate Offline'}
+            {isOnline ? 'Online' : 'Simulate Offline'}
           </button>
           {(['config', 'queue', 'status'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-slate-700 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'queue' ? '📦 Queue' : '📡 Status'}
+              {v === 'config' ? 'Config' : v === 'queue' ? 'Queue' : 'Status'}
             </button>
           ))}
         </div>
@@ -79,11 +79,11 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">How It Works / 工作原理</h3>
             <div className="space-y-3">
               {[
-                { step: '1', title: 'Cache / 缓存', desc: 'Survey questions cached in IndexedDB / 调查问题缓存在IndexedDB中', icon: '💾' },
-                { step: '2', title: 'Collect / 收集', desc: 'Responses queued locally when offline / 离线时响应本地排队', icon: '📝' },
-                { step: '3', title: 'Detect / 检测', desc: 'Auto-detect connectivity changes / 自动检测网络变化', icon: '📡' },
-                { step: '4', title: 'Sync / 同步', desc: 'Queue-based sync with retry logic / 基于队列的同步与重试逻辑', icon: '🔄' },
-                { step: '5', title: 'Verify / 验证', desc: 'Server confirms receipt, removes from queue / 服务器确认接收后从队列移除', icon: '✅' },
+                { step: '1', title: 'Cache / 缓存', desc: 'Survey questions cached in IndexedDB / 调查问题缓存在IndexedDB中', icon: '1' },
+                { step: '2', title: 'Collect / 收集', desc: 'Responses queued locally when offline / 离线时响应本地排队', icon: '2' },
+                { step: '3', title: 'Detect / 检测', desc: 'Auto-detect connectivity changes / 自动检测网络变化', icon: '3' },
+                { step: '4', title: 'Sync / 同步', desc: 'Queue-based sync with retry logic / 基于队列的同步与重试逻辑', icon: '4' },
+                { step: '5', title: 'Verify / 验证', desc: 'Server confirms receipt, removes from queue / 服务器确认接收后从队列移除', icon: '5' },
               ].map(s => (
                 <div key={s.step} className="flex items-start gap-3 p-3 bg-stone-50 rounded-xl">
                   <span className="text-xl">{s.icon}</span>
@@ -107,9 +107,9 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex gap-3 text-xs">
-              <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full">⏳ Pending: {pendingCount}</span>
-              <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">✅ Synced: {syncedCount}</span>
-              <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full">❌ Failed: {failedCount}</span>
+              <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full">Pending: {pendingCount}</span>
+              <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">Synced: {syncedCount}</span>
+              <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full">Failed: {failedCount}</span>
             </div>
             <div className="flex gap-2">
               <button className="text-xs px-3 py-1.5 bg-slate-600 text-white rounded-lg flex items-center gap-1"><RefreshCw className="w-3 h-3" /> Sync Now</button>
@@ -137,10 +137,10 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cache Status', value: 'Active', icon: '💾', color: 'emerald' },
-                { label: 'Storage Used', value: `${totalSize} KB`, icon: '📊', color: 'blue' },
-                { label: 'Queue Capacity', value: `${queue.length}/${config.maxQueueSize}`, icon: '📦', color: 'amber' },
-                { label: 'Last Sync', value: '2 min ago', icon: '🔄', color: 'stone' },
+                { label: 'Cache Status', value: 'Active', icon: 'C', color: 'emerald' },
+                { label: 'Storage Used', value: `${totalSize} KB`, icon: 'S', color: 'blue' },
+                { label: 'Queue Capacity', value: `${queue.length}/${config.maxQueueSize}`, icon: 'Q', color: 'amber' },
+                { label: 'Last Sync', value: '2 min ago', icon: 'L', color: 'stone' },
               ].map((s, i) => (
                 <div key={i} className="p-3 bg-white rounded-xl border border-stone-200">
                   <div className="text-xl mb-1">{s.icon}</div>

@@ -1366,7 +1366,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         const contentType = (question as any).question_config?.content_type || 'text';
         const bgColors: Record<string, string> = { text: '#f9fafb', info: '#eff6ff', warning: '#fffbeb', tip: '#f0fdf4' };
         const borderColors: Record<string, string> = { text: '#e5e7eb', info: '#bfdbfe', warning: '#fcd34d', tip: '#86efac' };
-        const icons: Record<string, string> = { text: '📋', info: 'ℹ️', warning: '⚠️', tip: '💡' };
+        const icons: Record<string, string> = { text: '', info: 'i', warning: '!', tip: '*' };
         return (
           <div className="rounded-xl p-4 border" style={{ backgroundColor: bgColors[contentType], borderColor: borderColors[contentType] }}>
             <div className="flex items-start gap-2">

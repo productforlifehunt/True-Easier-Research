@@ -317,7 +317,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div key={node.label} style={{ paddingLeft: depth * 16 }}>
           <button onClick={() => onResponse(question.id, { path: node.label, timestamp: Date.now() })}
             className={`w-full text-left px-3 py-2 rounded-lg ${txt} hover:bg-emerald-50 transition-colors ${value?.path === node.label ? 'bg-emerald-100 text-emerald-700 font-medium' : 'text-stone-700'}`}>
-            {node.children?.length > 0 ? '📁 ' : '📄 '}{node.label}
+            {node.children?.length > 0 ? '> ' : '- '}{node.label}
           </button>
           {node.children?.map((child: any) => renderNode(child, depth + 1))}
         </div>
@@ -666,7 +666,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <div className="space-y-3">
           <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtXs} text-indigo-700`}>
-            📐 SUS — Rate each statement (1 = Strongly Disagree, 5 = Strongly Agree). {answered}/10 answered.
+            SUS — Rate each statement (1 = Strongly Disagree, 5 = Strongly Agree). {answered}/10 answered.
           </div>
           {SUS_ITEMS.map((item, idx) => (
             <div key={idx} className={`${pad} rounded-xl border ${susVal[`q${idx}`] ? 'border-indigo-200 bg-indigo-50/30' : 'border-stone-100'}`}>
