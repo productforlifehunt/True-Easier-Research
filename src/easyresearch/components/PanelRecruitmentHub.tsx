@@ -212,7 +212,7 @@ const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
             <div key={panel.id} className="bg-white rounded-xl border border-stone-200 p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{platform?.icon || '🔗'}</span>
+                  <span className="text-stone-600">{platform ? (PLATFORM_ICONS[platform.icon] || <Link2 size={20} />) : <Link2 size={20} />}</span>
                   <div>
                     <div className="text-sm font-semibold text-stone-800">{panel.name}</div>
                     <div className="flex items-center gap-2 mt-0.5">
