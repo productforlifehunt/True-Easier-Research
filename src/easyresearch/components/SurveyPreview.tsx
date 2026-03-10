@@ -6,6 +6,7 @@ import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
+import BrandIcon from './BrandIcon';
 
 interface SurveyPreviewProps {
   questions: any[];
