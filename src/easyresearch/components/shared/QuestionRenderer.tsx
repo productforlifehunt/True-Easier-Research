@@ -484,7 +484,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               return (
                 <div key={vId} onClick={() => onResponse(question.id, { ...dsVal, choice: vId })}
                   className={`cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${dsVal.choice === vId ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-stone-200 hover:border-stone-300'}`}>
-                  {vUrl ? <img src={vUrl} alt={vText} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400"><Image size={24} /></div>}
+                  {vUrl ? <img src={vUrl} alt={vText} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400"><ImageIcon size={24} /></div>}
                   {showLabels && <p className={`text-center py-2 ${txtSm} font-medium ${dsVal.choice === vId ? 'text-emerald-600' : 'text-stone-600'}`}>{vText}</p>}
                 </div>
               );
