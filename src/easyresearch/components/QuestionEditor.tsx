@@ -275,7 +275,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'prototype_test':
-        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">📱 Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
+        return <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">Prototype ({localQuestion.question_config?.prototype_platform || 'figma'})</div>;
       case 'max_diff':
         return (
           <div className="space-y-1">
