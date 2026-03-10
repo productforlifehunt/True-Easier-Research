@@ -520,7 +520,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Icon (emoji)</label>
               <input type="text" value={localQuestion.question_config?.section_icon || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_icon: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-                placeholder="e.g., 📋 🏥 👥" maxLength={4} />
+                placeholder="e.g., Tab icon" maxLength={4} />
             </div>
             <p className="text-[11px] text-stone-400">All questions after this section header (until the next one) will be grouped into this tab.</p>
           </div>
