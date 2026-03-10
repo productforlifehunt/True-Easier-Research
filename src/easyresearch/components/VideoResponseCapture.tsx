@@ -107,7 +107,7 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
               {['all', 'positive', 'neutral', 'negative'].map(s => (
                 <button key={s} onClick={() => setFilterSentiment(s)}
                   className={`px-3 py-1 text-xs rounded-full ${filterSentiment === s ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600'}`}>
-                  {s === 'all' ? `All (${recordings.length})` : `${s === 'positive' ? '😊' : s === 'neutral' ? '😐' : '😟'} ${s}`}
+                  {s === 'all' ? `All (${recordings.length})` : s}
                 </button>
               ))}
             </div>
