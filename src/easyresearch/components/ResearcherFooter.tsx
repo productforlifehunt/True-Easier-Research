@@ -1,6 +1,6 @@
 import React from 'react';
 import { useI18n } from '../hooks/useI18n';
-import easierLogo from '../../assets/easier-logo-v5.png';
+import EasierLogo from './EasierLogo';
 
 const ResearcherFooter: React.FC = () => {
   const { t } = useI18n();
