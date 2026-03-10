@@ -109,7 +109,7 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
           {(['setup', 'preview', 'results'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'setup' ? '⚙️ Setup' : v === 'preview' ? '👁️ Preview' : '📊 Results'}
+              {v === 'setup' ? 'Setup' : v === 'preview' ? 'Preview' : 'Results'}
             </button>
           ))}
         </div>

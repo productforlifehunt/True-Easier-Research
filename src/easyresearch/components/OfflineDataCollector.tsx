@@ -137,10 +137,10 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cache Status', value: 'Active', icon: '💾', color: 'emerald' },
-                { label: 'Storage Used', value: `${totalSize} KB`, icon: '📊', color: 'blue' },
-                { label: 'Queue Capacity', value: `${queue.length}/${config.maxQueueSize}`, icon: '📦', color: 'amber' },
-                { label: 'Last Sync', value: '2 min ago', icon: '🔄', color: 'stone' },
+                { label: 'Cache Status', value: 'Active', icon: 'C', color: 'emerald' },
+                { label: 'Storage Used', value: `${totalSize} KB`, icon: 'S', color: 'blue' },
+                { label: 'Queue Capacity', value: `${queue.length}/${config.maxQueueSize}`, icon: 'Q', color: 'amber' },
+                { label: 'Last Sync', value: '2 min ago', icon: 'L', color: 'stone' },
               ].map((s, i) => (
                 <div key={i} className="p-3 bg-white rounded-xl border border-stone-200">
                   <div className="text-xl mb-1">{s.icon}</div>

@@ -121,7 +121,7 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
             </div>
 
             <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-              <h4 className="text-sm font-bold text-amber-800 mb-2">💰 Budget Summary / 预算摘要</h4>
+              <h4 className="text-sm font-bold text-amber-800 mb-2">Budget Summary / 预算摘要</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between"><span className="text-stone-600">Eligible participants:</span><span className="font-bold">{completed}</span></div>
                 <div className="flex justify-between"><span className="text-stone-600">{config.type === 'lottery' ? 'Total prize pool:' : 'Per participant:'}</span><span className="font-bold">{config.currency} {config.type === 'lottery' ? (config.lotteryWinners || 0) * (config.lotteryPrize || 0) : config.amount}</span></div>

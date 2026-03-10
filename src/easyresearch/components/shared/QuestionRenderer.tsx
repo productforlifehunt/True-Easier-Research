@@ -666,7 +666,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <div className="space-y-3">
           <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtXs} text-indigo-700`}>
-            📐 SUS — Rate each statement (1 = Strongly Disagree, 5 = Strongly Agree). {answered}/10 answered.
+            SUS — Rate each statement (1 = Strongly Disagree, 5 = Strongly Agree). {answered}/10 answered.
           </div>
           {SUS_ITEMS.map((item, idx) => (
             <div key={idx} className={`${pad} rounded-xl border ${susVal[`q${idx}`] ? 'border-indigo-200 bg-indigo-50/30' : 'border-stone-100'}`}>

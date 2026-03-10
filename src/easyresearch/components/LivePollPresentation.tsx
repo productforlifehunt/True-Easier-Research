@@ -174,10 +174,10 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Total Responses', value: liveCount || 47, icon: '📊' },
-              { label: 'Avg Response Time', value: '8s', icon: '⏱️' },
-              { label: 'Completion Rate', value: '94%', icon: '✅' },
-              { label: 'Sessions', value: '3', icon: '🎤' },
+              { label: 'Total Responses', value: liveCount || 47, icon: '#' },
+              { label: 'Avg Response Time', value: '8s', icon: 'T' },
+              { label: 'Completion Rate', value: '94%', icon: '%' },
+              { label: 'Sessions', value: '3', icon: 'S' },
             ].map((s, i) => (
               <div key={i} className="p-4 bg-white rounded-xl border border-stone-200">
                 <div className="text-2xl mb-1">{s.icon}</div>
