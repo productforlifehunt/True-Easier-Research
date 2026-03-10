@@ -366,7 +366,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm space-y-3">
-          <h4 className={`${txt} font-semibold text-stone-800`}>📅 {el.config.title || 'Study Timeline'}</h4>
+          <h4 className={`${txt} font-semibold text-stone-800`}>{el.config.title || 'Study Timeline'}</h4>
           {effectiveQs.length === 0 && (
             <p className={`${txtSm} text-stone-400 italic`}>No questionnaire linked. Configure in Layout settings.</p>
           )}
