@@ -38,6 +38,15 @@ const PLATFORMS = [
   { id: 'custom', name: 'Custom Source', icon: 'link', color: 'bg-teal-50 border-teal-200 text-teal-700', description: 'Any custom recruitment source / 任何自定义招募来源' },
 ];
 
+const PLATFORM_ICONS: Record<string, React.ReactNode> = {
+  microscope: <Microscope size={20} />,
+  factory: <Factory size={20} />,
+  briefcase: <Briefcase size={20} />,
+  target: <Target size={20} />,
+  building: <Building size={20} />,
+  link: <Link2 size={20} />,
+};
+
 const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
   const [panels, setPanels] = useState<PanelConfig[]>([]);
   const [showCreate, setShowCreate] = useState(false);
