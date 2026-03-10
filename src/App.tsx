@@ -50,6 +50,7 @@ const lazyImports = {
   ConversationView: () => import('./easyresearch/components/ConversationView'),
   FeaturesPage: () => import('./easyresearch/components/FeaturesPage'),
   PublicPageRenderer: () => import('./easyresearch/components/PublicPageRenderer'),
+  DiscoverPage: () => import('./easyresearch/components/DiscoverPage'),
 };
 
 const LandingPage = React.lazy(lazyImports.LandingPage);
@@ -74,6 +75,7 @@ const InboxPage = React.lazy(lazyImports.InboxPage);
 const ConversationView = React.lazy(lazyImports.ConversationView);
 const FeaturesPage = React.lazy(lazyImports.FeaturesPage);
 const PublicPageRenderer = React.lazy(lazyImports.PublicPageRenderer);
+const DiscoverPage = React.lazy(lazyImports.DiscoverPage);
 
 // Preload all EasyResearch chunks after initial paint
 if (typeof window !== 'undefined') {
@@ -273,6 +275,7 @@ function App() {
                     
                     {/* Participant routes */}
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
+                    <Route path="/easyresearch/discover" element={<DiscoverPage />} />
                     <Route path="/easyresearch/participant/join" element={<ParticipantJoin />} />
                     <Route path="/easyresearch/participant/home" element={<Navigate to="/easyresearch/dashboard" replace />} />
                     <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
-import easierLogo from '../../../assets/easier-logo-v4.png';
+import easierLogo from '../../../assets/easier-logo-v5.png';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
 import { useI18n } from '../../hooks/useI18n';
@@ -30,14 +30,15 @@ const AppHeader: React.FC = () => {
     navigate('/easyresearch');
   };
 
-  const desktopNavLinks = [
+  // Only show public nav links when user is NOT logged in
+  const desktopNavLinks = user ? [] : [
     { path: '/easyresearch/participant/join', label: t('nav.joinStudies') },
     { path: '/easyresearch/participant-library', label: t('nav.participants') },
     { path: '/easyresearch/features', label: t('nav.features') },
     { path: '/easyresearch/templates', label: t('nav.templates') },
   ];
 
-  const mobileNavLinks = [
+  const mobileNavLinks = user ? [] : [
     { path: '/easyresearch/participant-library', label: t('nav.participants') },
   ];
 

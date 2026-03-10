@@ -22,7 +22,7 @@ const AppSidebar: React.FC = () => {
 
   const navItems = [
     { path: '/easyresearch/dashboard', label: t('nav.research'), icon: FlaskConical },
-    { path: '/easyresearch/participant/join', label: t('nav.discover'), icon: Search },
+    { path: '/easyresearch/discover', label: t('nav.discover'), icon: Search },
     { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare },
     { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings },
   ];
