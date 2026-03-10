@@ -858,22 +858,13 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 </div>
                               </div>
 
-                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Clock size={11} /> Schedule</h5>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency</label>
-                                    <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[11px] font-medium text-stone-400 mb-1">Active Window</label>
-                                    <div className="flex items-center gap-1.5">
-                                      <input type="time" value={q.time_windows[0]?.start || '09:00'} onChange={(e) => updateQuestionnaire(q.id, { time_windows: [{ ...q.time_windows[0], start: e.target.value }] })} className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200" />
-                                      <span className="text-[11px] text-stone-400">to</span>
-                                      <input type="time" value={q.time_windows[0]?.end || '21:00'} onChange={(e) => updateQuestionnaire(q.id, { time_windows: [{ ...q.time_windows[0], end: e.target.value }] })} className="flex-1 px-2 py-1.5 rounded-lg text-[12px] border border-stone-200" />
-                                    </div>
-                                  </div>
-                                </div>
+                              <div className="bg-white rounded-xl border border-stone-200 p-3">
+                                <QuestionnaireScheduleEditor
+                                  frequency={q.frequency}
+                                  schedule={q.schedule_config || getDefaultScheduleConfig(q.frequency, (project as any)?.study_duration)}
+                                  onChange={(sc) => updateQuestionnaire(q.id, { schedule_config: sc })}
+                                  studyDuration={(project as any)?.study_duration}
+                                />
                               </div>
 
                               {/* A/B Testing, Quality Controls — moved to TYPE 3 FUTURE */}
