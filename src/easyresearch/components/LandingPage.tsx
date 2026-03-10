@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, ChevronRight, BarChart3,
-  Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download, Sparkles,
+  Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
   GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
   Bot, Wand2, MessageSquare, Mic
 } from 'lucide-react';
@@ -20,7 +20,7 @@ const LandingPage: React.FC = () => {
     { icon: Lock, titleKey: 'feature.secure', descKey: 'feature.secure.desc' },
     { icon: PieChart, titleKey: 'feature.analytics', descKey: 'feature.analytics.desc' },
     { icon: Download, titleKey: 'feature.export', descKey: 'feature.export.desc' },
-    { icon: Sparkles, titleKey: 'feature.templates', descKey: 'feature.templates.desc' },
+    { icon: Layers, titleKey: 'feature.templates', descKey: 'feature.templates.desc' },
   ];
 
   const useCases = [
@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
           <div className="rounded-2xl border border-stone-100 bg-stone-50/50 backdrop-blur-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Sparkles size={12} className="text-white" />
+                <Brain size={12} className="text-white" />
               </div>
               <span className="text-[13px] font-semibold text-emerald-600 tracking-tight">{t('landing.ai.title')}</span>
             </div>

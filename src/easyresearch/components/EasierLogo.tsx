@@ -3,7 +3,8 @@ import React from 'react';
 /**
  * Easier Research Logo — crisp SVG vector
  * L-shaped chart axis frame (emerald) + 2 ascending bars + final bar as letter "E"
- * Emerald-to-teal gradient with subtle white sheen for premium modern feel
+ * E horizontals are half the bar width (4.5px) for a refined, proportional look
+ * E extends wider to match natural letter "E" proportions
  */
 const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28, className = '' }) => {
   const uid = 'el';
@@ -25,7 +26,7 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
           <stop offset="100%" stopColor="#059669" />
         </linearGradient>
 
-        {/* Axis frame gradient — emerald tones (lighter to darker) */}
+        {/* Axis frame gradient — emerald tones */}
         <linearGradient id={`${uid}-axis`} x1="8" y1="6" x2="58" y2="54" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#6ee7b7" />
           <stop offset="50%" stopColor="#10b981" />
@@ -57,17 +58,20 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
       <rect x="29" y="24" width="9" height="26" rx="2" fill={`url(#${uid}-bar)`} />
       <rect x="29" y="24" width="9" height="13" rx="2" fill={`url(#${uid}-sheen)`} />
 
-      {/* Bar 3 / Letter "E" — same 9px width as other bars */}
-      {/* Full vertical bar (same as bars 1 & 2) */}
+      {/* Bar 3 / Letter "E" — vertical stroke same 9px as other bars */}
       <rect x="42" y="12" width="9" height="38" rx="2" fill={`url(#${uid}-bar)`} />
       <rect x="42" y="12" width="9" height="19" rx="2" fill={`url(#${uid}-sheen)`} />
 
-      {/* E horizontals — full 9px height matching bar width, seamless with vertical */}
-      <rect x="49" y="12" width="9" height="9" rx="2" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="12" width="9" height="4.5" rx="2" fill={`url(#${uid}-sheen)`} />
-      <rect x="49" y="27.5" width="7" height="9" rx="2" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="41" width="9" height="9" rx="2" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="41" width="9" height="4.5" rx="2" fill={`url(#${uid}-sheen)`} />
+      {/* E horizontals — 4.5px thick (half of bar width), wider reach for natural E shape */}
+      {/* Top bar */}
+      <rect x="49" y="12" width="11" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="12" width="11" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
+      {/* Middle bar */}
+      <rect x="49" y="28.75" width="9" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="28.75" width="9" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
+      {/* Bottom bar */}
+      <rect x="49" y="45.5" width="11" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="45.5" width="11" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
     </svg>
   );
 };
