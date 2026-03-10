@@ -237,7 +237,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
               value={editingTemplate.name}
               onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
               className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              placeholder="Template name / 模板名称"
+              placeholder="Template name"
             />
             <div className="flex items-center gap-1.5 flex-wrap">
               {editingTemplate.times.map(time => (
