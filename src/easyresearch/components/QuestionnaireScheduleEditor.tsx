@@ -272,7 +272,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                 <Save size={10} /> Save
               </button>
               <button onClick={() => setEditingTemplate(null)} className="text-[10px] text-stone-400 hover:text-stone-600">
-                Cancel / 取消
+                Cancel
               </button>
             </div>
           </div>
