@@ -167,7 +167,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       return (
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">🛡️</span>
+            <span className="text-lg font-bold text-amber-600">C</span>
             <h4 className={`${txt} font-semibold text-amber-800`}>{el.config.title || 'Consent Form'}</h4>
           </div>
           {linkedQ ? (
