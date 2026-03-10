@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
-  Sparkles, Wand2, Bot, MessageSquare, Mic, Clock, Users, BarChart3,
-  Zap, Shield, Bell, FileText, Brain, Repeat
+  Wand2, Bot, MessageSquare, Mic, Clock, Users, BarChart3,
+  Shield, Bell, FileText, Repeat
 } from 'lucide-react';
 import { useI18n } from '../hooks/useI18n';
 
@@ -44,15 +44,11 @@ const FeaturesPage: React.FC = () => {
       <section className="relative pt-32 sm:pt-40 pb-20 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-radial from-emerald-50/60 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 mb-6">
-            <Zap size={13} className="text-emerald-600" />
-            <span className="text-[12px] font-semibold text-emerald-700 tracking-tight">Platform Features</span>
-          </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-[-0.035em] text-stone-800 mb-5">
-            Everything you need for
+            Everything you need to make
             <br />
             <span className="bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent">
-              serious research
+              research easier
             </span>
           </h1>
           <p className="text-lg text-stone-400 max-w-lg mx-auto leading-relaxed font-light">
@@ -67,7 +63,7 @@ const FeaturesPage: React.FC = () => {
           <div className="mb-14">
             <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">Research Tools</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800">
-              Built for rigorous research
+              Core research features
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -88,14 +84,9 @@ const FeaturesPage: React.FC = () => {
       <section className="py-20 lg:py-28 bg-stone-50/60">
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-14 text-center">
-            <div className="inline-flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Sparkles size={12} className="text-white" />
-              </div>
-              <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase">AI-Powered</p>
-            </div>
+            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-3">AI-Powered</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800 mb-3">
-              Research meets artificial intelligence
+              AI makes research easier
             </h2>
             <p className="text-[15px] text-stone-400 max-w-md mx-auto font-light">
               AI assists both researchers and participants — from survey creation to response collection.
@@ -121,7 +112,7 @@ const FeaturesPage: React.FC = () => {
           <div className="mb-14">
             <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">Platform</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800">
-              Reliable infrastructure
+              Everything else you need
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

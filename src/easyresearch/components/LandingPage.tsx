@@ -20,7 +20,7 @@ const LandingPage: React.FC = () => {
     { icon: Lock, titleKey: 'feature.secure', descKey: 'feature.secure.desc' },
     { icon: PieChart, titleKey: 'feature.analytics', descKey: 'feature.analytics.desc' },
     { icon: Download, titleKey: 'feature.export', descKey: 'feature.export.desc' },
-    { icon: Sparkles, titleKey: 'feature.templates', descKey: 'feature.templates.desc' },
+    { icon: Layers, titleKey: 'feature.templates', descKey: 'feature.templates.desc' },
   ];
 
   const useCases = [
