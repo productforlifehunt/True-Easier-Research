@@ -248,7 +248,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
         )}
       </div>
 
-      {/* Input */}
+      {/* Input with voice */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-t border-stone-100 bg-stone-50/50">
         <input
           ref={inputRef}
@@ -259,6 +259,8 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
           placeholder="Chat about the survey..."
           className="flex-1 text-[12px] px-3 py-2 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
         />
+        {/* Voice input button — browser speech recognition */}
+        <VoiceInputButton onTranscript={(text) => setInput(prev => prev ? prev + ' ' + text : text)} primaryColor={primaryColor} />
         <button
           onClick={handleSend}
           disabled={loading || !input.trim()}
