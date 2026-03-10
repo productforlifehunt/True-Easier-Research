@@ -268,7 +268,7 @@ const CohortComparisonEngine: React.FC<Props> = ({ projectId, responses, questio
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${chiSquareResult.significant ? 'bg-emerald-100' : 'bg-amber-100'}`}>
-                      <span className="text-lg">{chiSquareResult.significant ? '✅' : '⚠️'}</span>
+                      <span className="text-lg font-bold">{chiSquareResult.significant ? '✓' : '!'}</span>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">

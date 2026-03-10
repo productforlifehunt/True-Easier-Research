@@ -165,7 +165,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
         }
       }
 
-      toast.success('🎉 Project created successfully!');
+      toast.success('Project created successfully!');
       onProjectCreated(project.id);
       onClose();
     } catch (err: any) {

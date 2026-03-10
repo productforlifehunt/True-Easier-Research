@@ -49,10 +49,10 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">Reward Type / 奖励类型</h3>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { type: 'gift_card' as const, icon: '🎁', label: 'Gift Card / 礼品卡' },
-                { type: 'cash' as const, icon: '💵', label: 'Cash / 现金' },
-                { type: 'lottery' as const, icon: '🎰', label: 'Lottery / 抽奖' },
-                { type: 'points' as const, icon: '⭐', label: 'Points / 积分' },
+                { type: 'gift_card' as const, icon: 'GC', label: 'Gift Card / 礼品卡' },
+                { type: 'cash' as const, icon: '$', label: 'Cash / 现金' },
+                { type: 'lottery' as const, icon: 'LT', label: 'Lottery / 抽奖' },
+                { type: 'points' as const, icon: 'PT', label: 'Points / 积分' },
               ]).map(r => (
                 <button key={r.type} onClick={() => setConfig(prev => ({ ...prev, type: r.type }))}
                   className={`p-3 rounded-xl border-2 text-left ${config.type === r.type ? 'border-amber-500 bg-amber-50' : 'border-stone-200'}`}>

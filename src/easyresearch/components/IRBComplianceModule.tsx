@@ -39,7 +39,7 @@ const IRBComplianceModule: React.FC<Props> = ({ projectId }) => {
           {(['consent', 'irb', 'retention', 'audit'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'consent' ? '📝 Consent' : v === 'irb' ? '🏛️ IRB' : v === 'retention' ? '🗄️ Retention' : '📋 Audit'}
+              {v === 'consent' ? 'Consent' : v === 'irb' ? 'IRB' : v === 'retention' ? 'Retention' : 'Audit'}
             </button>
           ))}
         </div>
