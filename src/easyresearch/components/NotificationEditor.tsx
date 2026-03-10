@@ -12,10 +12,10 @@ interface NotificationEditorProps {
 }
 
 const NOTIFICATION_TYPES = [
-  { value: 'push', label: '📱 Push' },
-  { value: 'email', label: '📧 Email' },
-  { value: 'sms', label: '💬 SMS' },
-  { value: 'push_email', label: '📱📧 Push + Email' },
+  { value: 'push', label: 'Push' },
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'SMS' },
+  { value: 'push_email', label: 'Push + Email' },
 ];
 
 const FREQUENCY_OPTIONS = [
