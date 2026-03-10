@@ -75,6 +75,7 @@ const InboxPage = React.lazy(lazyImports.InboxPage);
 const ConversationView = React.lazy(lazyImports.ConversationView);
 const FeaturesPage = React.lazy(lazyImports.FeaturesPage);
 const PublicPageRenderer = React.lazy(lazyImports.PublicPageRenderer);
+const DiscoverPage = React.lazy(lazyImports.DiscoverPage);
 
 // Preload all EasyResearch chunks after initial paint
 if (typeof window !== 'undefined') {
