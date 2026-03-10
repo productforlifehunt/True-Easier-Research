@@ -99,8 +99,8 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Methodology</label>
             <CustomDropdown
               options={[
-                { value: 'one_time', label: 'One Time' },
-                { value: 'multi_time', label: 'Longitudinal' },
+                { value: 'one_time', label: 'One-time' },
+                { value: 'multi_time', label: 'Multiple time' },
               ]}
               value={project.methodology_type || 'one_time'}
               onChange={(v) => onUpdateProject({ ...project, methodology_type: v })}
