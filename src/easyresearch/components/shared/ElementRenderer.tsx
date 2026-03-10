@@ -167,7 +167,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       return (
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">🛡️</span>
+            <span className="text-lg font-bold text-amber-600">C</span>
             <h4 className={`${txt} font-semibold text-amber-800`}>{el.config.title || 'Consent Form'}</h4>
           </div>
           {linkedQ ? (
@@ -286,7 +286,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
     case 'ecogram':
       return (
         <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
-          <h4 className={`${txt} font-semibold text-violet-800`}>🔗 {el.config.title || 'Ecogram'}</h4>
+          <h4 className={`${txt} font-semibold text-violet-800`}>{el.config.title || 'Ecogram'}</h4>
           <p className={`${txtXx} text-violet-500 mt-1`}>Interactive care network diagram</p>
           {compact && (
             <div className="flex justify-center mt-3">
@@ -451,7 +451,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       }
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
-          <h4 className={`${txt} font-semibold text-stone-800`}>❓ {el.config.title || 'Help & FAQ'}</h4>
+          <h4 className={`${txt} font-semibold text-stone-800`}>{el.config.title || 'Help & FAQ'}</h4>
           {linkedQ ? (
             <>
               {cardOpts.showQuestionCount && <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>}
@@ -555,7 +555,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
         <img src={el.config.image_url} alt="" className="w-full rounded-xl" />
       ) : compact ? (
         <div className="rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center h-24">
-          <span className="text-[11px] text-stone-400">🖼️ No image set</span>
+          <span className="text-[11px] text-stone-400">No image set</span>
         </div>
       ) : null;
 

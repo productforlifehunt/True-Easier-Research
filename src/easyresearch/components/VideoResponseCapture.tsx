@@ -37,7 +37,7 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
           {(['config', 'recordings', 'preview'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'recordings' ? '🎬 Recordings' : '👁️ Preview'}
+              {v === 'config' ? 'Config' : v === 'recordings' ? 'Recordings' : 'Preview'}
             </button>
           ))}
         </div>
@@ -107,7 +107,7 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
               {['all', 'positive', 'neutral', 'negative'].map(s => (
                 <button key={s} onClick={() => setFilterSentiment(s)}
                   className={`px-3 py-1 text-xs rounded-full ${filterSentiment === s ? 'bg-rose-600 text-white' : 'bg-stone-100 text-stone-600'}`}>
-                  {s === 'all' ? `All (${recordings.length})` : `${s === 'positive' ? '😊' : s === 'neutral' ? '😐' : '😟'} ${s}`}
+                  {s === 'all' ? `All (${recordings.length})` : s}
                 </button>
               ))}
             </div>
@@ -125,8 +125,8 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
                       <div className="text-xs text-stone-500">{new Date(rec.timestamp).toLocaleDateString()}</div>
                     </div>
                   </div>
-                  <span className={`text-lg ${rec.sentiment === 'positive' ? '' : rec.sentiment === 'neutral' ? '' : ''}`}>
-                    {rec.sentiment === 'positive' ? '😊' : rec.sentiment === 'neutral' ? '😐' : '😟'}
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${rec.sentiment === 'positive' ? 'bg-emerald-100 text-emerald-700' : rec.sentiment === 'neutral' ? 'bg-stone-100 text-stone-600' : 'bg-red-100 text-red-700'}`}>
+                    {rec.sentiment}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-stone-500 mb-2">

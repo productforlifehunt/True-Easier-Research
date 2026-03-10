@@ -68,7 +68,7 @@ const AdvancedQuestionAnalytics: React.FC<AdvancedQuestionAnalyticsProps> = ({
   const csatData = useMemo(() => {
     if (questionType !== 'csat') return null;
     const values = responses.map(r => parseFloat(r.response_value ?? r.response_text)).filter(v => !isNaN(v));
-    const emojis = ['😡', '😞', '😐', '😊', '😍'];
+    const emojis = ['1', '2', '3', '4', '5'];
     const dist = Array.from({ length: 5 }, (_, i) => ({
       label: emojis[i], value: i + 1,
       count: values.filter(v => v === i + 1).length

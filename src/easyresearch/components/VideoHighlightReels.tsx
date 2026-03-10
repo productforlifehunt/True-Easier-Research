@@ -41,7 +41,7 @@ const VideoHighlightReels: React.FC<Props> = ({ projectId }) => {
           {(['clips', 'reels', 'editor'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-purple-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'clips' ? '✂️ Clips' : v === 'reels' ? '🎬 Reels' : '🎞️ Editor'}
+              {v === 'clips' ? 'Clips' : v === 'reels' ? 'Reels' : 'Editor'}
             </button>
           ))}
         </div>
@@ -84,7 +84,7 @@ const VideoHighlightReels: React.FC<Props> = ({ projectId }) => {
                     <span key={tag} className={`text-[10px] px-2 py-0.5 rounded-full ${tag === 'pain-point' || tag === 'confusion' || tag === 'bug' ? 'bg-red-50 text-red-600' : tag === 'positive' || tag === 'aha-moment' ? 'bg-emerald-50 text-emerald-600' : 'bg-purple-50 text-purple-600'}`}>{tag}</span>
                   ))}
                 </div>
-                {clip.note && <div className="mt-2 text-xs text-purple-600 bg-purple-50 p-1.5 rounded-lg">📌 {clip.note}</div>}
+                {clip.note && <div className="mt-2 text-xs text-purple-600 bg-purple-50 p-1.5 rounded-lg">{clip.note}</div>}
               </div>
             ))}
           </div>

@@ -44,7 +44,7 @@ interface Persona {
   created_at: string;
 }
 
-const AVATAR_EMOJIS = ['👩‍💼', '👨‍💻', '👩‍🔬', '👨‍🏫', '👩‍⚕️', '👨‍🎨', '👩‍🍳', '👨‍🔧', '🧑‍💼', '👵', '👴', '🧑‍🎓', '👩‍🌾', '👨‍✈️', '🧑‍🚀', '👷'];
+const AVATAR_EMOJIS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
 const PERSONA_COLORS = ['#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6366f1', '#14b8a6'];
 
 const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
@@ -175,7 +175,7 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
                 {editing.goals.map((g, i) => (
                   <div key={g.id} className="flex items-center gap-1 mb-1">
                     <select value={g.priority} onChange={e => setEditing({ ...editing, goals: editing.goals.map(gg => gg.id === g.id ? { ...gg, priority: e.target.value as any } : gg) })} className="px-1 py-1 border rounded text-[10px] w-14">
-                      <option value="high">🔴</option><option value="medium">🟡</option><option value="low">🟢</option>
+                      <option value="high">High</option><option value="medium">Med</option><option value="low">Low</option>
                     </select>
                     <input value={g.text} onChange={e => setEditing({ ...editing, goals: editing.goals.map(gg => gg.id === g.id ? { ...gg, text: e.target.value } : gg) })} placeholder="Goal..." className="flex-1 px-2 py-1 border rounded text-xs" />
                     <button onClick={() => setEditing({ ...editing, goals: editing.goals.filter(gg => gg.id !== g.id) })} className="text-stone-300 hover:text-red-400"><Trash2 size={12} /></button>
@@ -263,9 +263,9 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
             </div>
             <p className="text-xs text-stone-600 line-clamp-2 mb-3">{p.bio || 'No bio yet / 暂无简介'}</p>
             <div className="flex gap-3 text-xs text-stone-500 mb-2">
-              <span>🎯 {p.goals.length} goals</span>
-              <span>😩 {p.pain_points.length} pains</span>
-              <span>💬 {p.quotes.length} quotes</span>
+              <span>{p.goals.length} goals</span>
+              <span>{p.pain_points.length} pains</span>
+              <span>{p.quotes.length} quotes</span>
             </div>
             <div className="flex gap-1 flex-wrap">
               {p.segment_tags.slice(0, 3).map(tag => (
@@ -303,7 +303,7 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
               <h4 className="text-xs font-semibold text-stone-600 mb-2 flex items-center gap-1"><Target size={12} /> Goals / 目标</h4>
               {detail.goals.map(g => (
                 <div key={g.id} className="flex items-center gap-2 mb-1">
-                  <span className="text-xs">{g.priority === 'high' ? '🔴' : g.priority === 'medium' ? '🟡' : '🟢'}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${g.priority === 'high' ? 'bg-red-100 text-red-700' : g.priority === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{g.priority}</span>
                   <span className="text-sm text-stone-700">{g.text}</span>
                 </div>
               ))}

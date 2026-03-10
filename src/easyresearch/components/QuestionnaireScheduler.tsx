@@ -500,7 +500,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                             title="Paste day schedule"
                             style={{ color: 'var(--color-green)' }}
                           >
-                            📋
+                            Paste
                           </button>
                         )}
                       </div>
@@ -579,7 +579,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                 />
               </div>
               <div className="text-sm mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-                💡 After creating, you'll be able to add questions to this questionnaire using the full question editor.
+                After creating, you'll be able to add questions to this questionnaire using the full question editor.
               </div>
               <div className="flex gap-3">
                 <button
@@ -627,7 +627,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
 
             <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#fef3c7', border: '1px solid #fbbf24' }}>
               <p className="text-sm font-medium" style={{ color: '#92400e' }}>
-                ⚠️ To add questions to this questionnaire:
+                To add questions to this questionnaire:
               </p>
               <ol className="text-sm mt-2 ml-4 list-decimal" style={{ color: '#92400e' }}>
                 <li>Go to the main project editor (Questions tab)</li>
@@ -636,7 +636,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                 <li>Return here to schedule this questionnaire on specific days</li>
               </ol>
               <p className="text-sm mt-3 font-medium" style={{ color: '#92400e' }}>
-                💡 For longitudinal studies: Each questionnaire can be scheduled independently on different days/times
+                For longitudinal studies: Each questionnaire can be scheduled independently on different days/times
               </p>
             </div>
 

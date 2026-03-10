@@ -884,7 +884,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               {/* Completion Actions */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">✅ Completion</h5>
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">Completion</h5>
                                 <div>
                                   <label className="block text-[11px] text-stone-500 mb-1">Thank-you message</label>
                                   <textarea value={(q as any).custom_thank_you_message || ''} rows={2}
@@ -992,7 +992,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
                                   <div>
-                                    <span className="text-[12px] text-stone-600 flex items-center gap-1.5">🤖 AI Survey Chatbot</span>
+                                    <span className="text-[12px] text-stone-600 flex items-center gap-1.5">AI Survey Chatbot</span>
                                     <p className="text-[10px] text-stone-400 mt-0.5">Floating AI assistant that helps participants complete the survey conversationally</p>
                                   </div>
                                   <button onClick={() => updateQuestionnaire(q.id, { ai_chatbot_enabled: !q.ai_chatbot_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_chatbot_enabled ? 'bg-violet-500' : 'bg-stone-200'}`}>

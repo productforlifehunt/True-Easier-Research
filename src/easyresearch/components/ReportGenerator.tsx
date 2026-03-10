@@ -107,7 +107,7 @@ const ReportGenerator: React.FC<Props> = ({ projectId, projectTitle, responses, 
   </style>
 </head>
 <body>
-  <h1>📊 Research Report / 研究报告</h1>
+  <h1>Research Report / 研究报告</h1>
   <p><strong>${projectTitle || 'Untitled Project'}</strong></p>
   <p style="color: #6b7280; font-size: 14px;">Generated: ${reportDate} | Project ID: ${projectId}</p>
 

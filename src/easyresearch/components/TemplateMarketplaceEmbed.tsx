@@ -136,7 +136,7 @@ const TemplateMarketplaceEmbed: React.FC<Props> = ({ mode, projectId, onAddTempl
           toast.success(`Added "${template.name}" template`);
         }
       } else {
-        toast('Project templates must be used from the Templates page', { icon: 'ℹ️' });
+        toast('Project templates must be used from the Templates page', { icon: 'i' });
       }
     } catch (err) {
       toast.error('Failed to add template');

@@ -209,7 +209,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'file_upload':
-        return <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">📎 Drop file here</div>;
+        return <div className="h-16 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-[11px] text-stone-400">Drop file here</div>;
       case 'image_choice':
         return (
           <div className="flex gap-1">
@@ -219,7 +219,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'instruction':
-        return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">ℹ Instruction block</div>;
+        return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">Instruction block</div>;
       case 'text_block':
         return (
           <div className="p-2 rounded-lg bg-stone-50 border border-stone-200">
@@ -247,7 +247,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'video_block':
-        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🎬 {localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">{localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
       case 'audio_block':
         return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🔊 {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
       case 'embed_block':
@@ -398,9 +398,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               { value: 'text_block', label: 'Text Block' },
               { value: 'divider', label: 'Divider Line' },
               { value: 'image_block', label: 'Image' },
-              { value: 'video_block', label: '📐 Video' },
-              { value: 'audio_block', label: '📐 Audio' },
-              { value: 'embed_block', label: '📐 Embed / Webpage' },
+              { value: 'video_block', label: 'Video' },
+              { value: 'audio_block', label: 'Audio' },
+              { value: 'embed_block', label: 'Embed / Webpage' },
               // Text
               { value: 'text_short', label: 'Short Text' },
               { value: 'text_long', label: 'Long Text' },
@@ -520,7 +520,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Icon (emoji)</label>
               <input type="text" value={localQuestion.question_config?.section_icon || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_icon: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-                placeholder="e.g., 📋 🏥 👥" maxLength={4} />
+                placeholder="e.g., Tab icon" maxLength={4} />
             </div>
             <p className="text-[11px] text-stone-400">All questions after this section header (until the next one) will be grouped into this tab.</p>
           </div>
@@ -1241,7 +1241,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Conjoint Analysis Configuration */}
         {localQuestion.question_type === 'conjoint' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">🧮 Conjoint Attributes</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Conjoint Attributes</p>
             {(localQuestion.question_config?.conjoint_attributes || []).map((attr: any, ai: number) => (
               <div key={ai} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex gap-2">
@@ -1310,7 +1310,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Kano Model Configuration */}
         {localQuestion.question_type === 'kano' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">📈 Kano Paired Questions</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Kano Paired Questions</p>
             <div>
               <label className="block text-[11px] text-stone-400 mb-1">Functional question</label>
               <input type="text" value={localQuestion.question_config?.kano_functional || ''}
@@ -1431,7 +1431,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.disqualify_value && (
               <div className="p-2 rounded-lg bg-red-50 border border-red-200">
                 <p className="text-[11px] text-red-600">
-                  ⚠️ Participants answering "<strong>{localQuestion.question_config.disqualify_value}</strong>" will be disqualified from the study.
+                  Participants answering "<strong>{localQuestion.question_config.disqualify_value}</strong>" will be disqualified from the study.
                 </p>
               </div>
             )}
@@ -1457,7 +1457,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           {/* AI Features Configuration */}
           {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
             <div className="space-y-2 pt-2 border-t border-stone-100">
-              <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">🤖 AI Features</p>
+              <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">AI Features</p>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
                 <input type="checkbox" checked={localQuestion.question_config?.allow_ai_assist ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_ai_assist: e.target.checked }, allow_ai_assist: e.target.checked })}

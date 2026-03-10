@@ -60,7 +60,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
           {(['config', 'triggers', 'embed', 'preview'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-violet-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'triggers' ? '⚡ Triggers' : v === 'embed' ? '< /> Embed' : '👁️ Preview'}
+              {v === 'config' ? 'Config' : v === 'triggers' ? 'Triggers' : v === 'embed' ? 'Embed' : 'Preview'}
             </button>
           ))}
         </div>
@@ -72,10 +72,10 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">Widget Type / 小部件类型</h3>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { type: 'popup' as const, label: 'Modal Popup', icon: '🪟', desc: 'Center overlay / 居中弹窗' },
-                { type: 'slide_in' as const, label: 'Slide-in', icon: '➡️', desc: 'Corner panel / 角落面板' },
-                { type: 'bottom_bar' as const, label: 'Bottom Bar', icon: '📏', desc: 'Fixed bottom strip / 固定底部条' },
-                { type: 'embedded' as const, label: 'Embedded', icon: '📎', desc: 'Inline in page / 页面内嵌' },
+                { type: 'popup' as const, label: 'Modal Popup', icon: 'P', desc: 'Center overlay / 居中弹窗' },
+                { type: 'slide_in' as const, label: 'Slide-in', icon: 'S', desc: 'Corner panel / 角落面板' },
+                { type: 'bottom_bar' as const, label: 'Bottom Bar', icon: 'B', desc: 'Fixed bottom strip / 固定底部条' },
+                { type: 'embedded' as const, label: 'Embedded', icon: 'E', desc: 'Inline in page / 页面内嵌' },
               ]).map(w => (
                 <button key={w.type} onClick={() => setWidgetType(w.type)}
                   className={`p-3 rounded-xl border-2 text-left ${widgetType === w.type ? 'border-violet-500 bg-violet-50' : 'border-stone-200 hover:border-stone-300'}`}>
@@ -186,7 +186,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
             </button>
           </div>
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-            <h4 className="text-sm font-semibold text-amber-800 mb-1">⚠️ Important Notes / 重要说明</h4>
+            <h4 className="text-sm font-semibold text-amber-800 mb-1">Important Notes / 重要说明</h4>
             <ul className="text-xs text-amber-700 space-y-1">
               <li>• Place the script in {'<head>'} for exit intent detection / 放在head中以检测退出意图</li>
               <li>• The widget loads asynchronously (no performance impact) / 小部件异步加载（无性能影响）</li>
@@ -220,7 +220,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
                 <button onClick={() => setShowPreviewWidget(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-600"><X className="w-4 h-4" /></button>
                 <h3 className="font-bold text-stone-900 text-sm mb-1">Quick Feedback / 快速反馈</h3>
                 <p className="text-xs text-stone-500 mb-3">How would you rate your experience? / 您如何评价您的体验？</p>
-                <div className="flex gap-2 mb-3">{['😡', '😕', '😐', '🙂', '😍'].map((e, i) => <button key={i} className="text-2xl hover:scale-125 transition-transform">{e}</button>)}</div>
+                <div className="flex gap-2 mb-3">{[1, 2, 3, 4, 5].map((n) => <button key={n} className="w-10 h-10 rounded-full border-2 border-stone-200 hover:border-stone-400 hover:scale-110 transition-all text-sm font-medium text-stone-600">{n}</button>)}</div>
                 <textarea placeholder="Any additional feedback? / 任何其他反馈？" rows={2} className="w-full text-xs border border-stone-200 rounded-lg p-2 mb-2" />
                 <button className="w-full py-2 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: primaryColor }}>Submit / 提交</button>
               </div>
@@ -228,7 +228,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
           )}
           {showPreviewWidget && widgetType === 'bottom_bar' && (
             <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-lg p-3 flex items-center justify-between animate-in slide-in-from-bottom-5">
-              <p className="text-sm font-medium text-stone-800">📋 Got 30 seconds? Help us improve! / 有30秒吗？帮我们改进！</p>
+              <p className="text-sm font-medium text-stone-800">Got 30 seconds? Help us improve! / 有30秒吗？帮我们改进！</p>
               <div className="flex gap-2">
                 <button className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: primaryColor }}>Take Survey</button>
                 <button onClick={() => setShowPreviewWidget(false)} className="px-3 py-1.5 text-xs text-stone-500 hover:text-stone-700">Dismiss</button>

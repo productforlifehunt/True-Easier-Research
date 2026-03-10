@@ -265,7 +265,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       }
       return videoUrl ? (
         <video src={videoUrl} controls autoPlay={question.question_config?.autoplay} loop={question.question_config?.loop} muted={question.question_config?.muted} poster={question.question_config?.poster_url} className="w-full rounded-xl" />
-      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🎬 No video configured</div>;
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>No video configured</div>;
     }
     case 'audio_block': {
       const audioUrl = question.question_config?.audio_url || '';
@@ -336,7 +336,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const task = question.question_config?.task_description || '';
       return (
         <div className="space-y-2">
-          {task && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>🖱️ {task}</div>}
+          {task && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>{task}</div>}
           {imgUrl ? (
             <div className="relative cursor-crosshair" onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -568,7 +568,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return (
         <div className="space-y-3">
           <div className={`${pad} rounded-xl bg-indigo-50 border border-indigo-200 ${txtSm} text-indigo-700`}>
-            🧮 Task {currentTask + 1} of {numTasks} — Choose your preferred option
+            Task {currentTask + 1} of {numTasks} — Choose your preferred option
           </div>
           <div className={`grid gap-2 ${profilesPerTask <= 3 ? `grid-cols-${profilesPerTask}` : 'grid-cols-2'}`}>
             {profiles.map((profile, pi) => (
@@ -706,7 +706,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     }
     case 'csat': {
       const csatLabels = ['Very Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Very Satisfied'];
-      const csatEmojis = ['😠', '😟', '😐', '😊', '🤩'];
+      const csatEmojis = ['1', '2', '3', '4', '5'];
       return (
         <div className="space-y-2">
           <div className="flex justify-center gap-2">

@@ -50,7 +50,7 @@ const LivePollPresentation: React.FC<Props> = ({ projectId }) => {
           <div className="w-10 h-10 rounded-xl bg-fuchsia-100 flex items-center justify-center"><Presentation className="w-5 h-5 text-fuchsia-600" /></div>
           <div>
             <h2 className="text-lg font-bold text-stone-900">Live Poll & Presentation / 实时投票与演示</h2>
-            <p className="text-sm text-stone-500">{questions.length} questions · {isLive ? `🔴 LIVE · ${liveCount} connected` : 'Not active'}</p>
+            <p className="text-sm text-stone-500">{questions.length} questions · {isLive ? `LIVE · ${liveCount} connected` : 'Not active'}</p>
           </div>
         </div>
         <div className="flex gap-2">

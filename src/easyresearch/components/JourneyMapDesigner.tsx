@@ -176,7 +176,7 @@ const JourneyMapDesigner: React.FC<Props> = ({ projectId }) => {
                     <div key={tp.id} className="bg-white rounded-lg border border-stone-200 p-2 space-y-1.5">
                       <div className="flex items-center gap-1">
                         <select value={tp.emotion} onChange={e => updateTouchpoint(stage.id, tp.id, { emotion: e.target.value as any })} className="text-xs border rounded px-1 py-0.5">
-                          <option value="positive">😊</option><option value="neutral">😐</option><option value="negative">😞</option>
+                          <option value="positive">Positive</option><option value="neutral">Neutral</option><option value="negative">Negative</option>
                         </select>
                         <input value={tp.action} onChange={e => updateTouchpoint(stage.id, tp.id, { action: e.target.value })} placeholder="Action / 行为" className="flex-1 px-1.5 py-0.5 border rounded text-[11px]" />
                         <button onClick={() => removeTouchpoint(stage.id, tp.id)} className="text-stone-300 hover:text-red-400"><X size={12} /></button>
@@ -259,7 +259,7 @@ const JourneyMapDesigner: React.FC<Props> = ({ projectId }) => {
               <div key={stage.id} className="w-56 shrink-0">
                 <div className="bg-stone-50 rounded-lg p-3 border border-stone-200">
                   <h5 className="font-medium text-xs text-stone-800 mb-1">{stage.name}</h5>
-                  {stage.duration && <p className="text-[10px] text-stone-400 mb-2">⏱ {stage.duration}</p>}
+                  {stage.duration && <p className="text-[10px] text-stone-400 mb-2">{stage.duration}</p>}
                   {stage.touchpoints.map(tp => (
                     <div key={tp.id} className="bg-white rounded p-2 border border-stone-100 mb-1.5">
                       <div className="flex items-center gap-1 mb-0.5">

@@ -632,7 +632,7 @@ const MobileSurveyEditor: React.FC = () => {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   title="Duplicate"
                 >
-                  📋
+                  Copy
                 </button>
                 <button
                   onClick={() => deleteQuestion(question.id)}
@@ -973,7 +973,7 @@ const MobileSurveyEditor: React.FC = () => {
                     onChange={(e) => updateQuestion(question.id, { allow_voice: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>🎤 Allow Voice Input</span>
+                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow Voice Input</span>
                 </label>
               )}
               
