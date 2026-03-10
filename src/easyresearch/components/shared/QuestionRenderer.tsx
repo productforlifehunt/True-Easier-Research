@@ -625,7 +625,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
           {/* Dysfunctional question */}
           <div className={`${pad} rounded-xl bg-red-50 border border-red-200`}>
-            <p className={`${txtSm} font-medium text-red-700 mb-2`}>❌ {dysfuncQ}</p>
+            <p className={`${txtSm} font-medium text-red-700 mb-2`}>{dysfuncQ}</p>
             <div className="space-y-1.5">
               {kanoCats.map((cat: string, ci: number) => (
                 <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.dysfunctional === cat ? 'border-red-400 bg-red-100' : 'border-stone-100 hover:border-red-200'}`}>
