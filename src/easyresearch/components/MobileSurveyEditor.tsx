@@ -632,7 +632,7 @@ const MobileSurveyEditor: React.FC = () => {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   title="Duplicate"
                 >
-                  📋
+                  Copy
                 </button>
                 <button
                   onClick={() => deleteQuestion(question.id)}
