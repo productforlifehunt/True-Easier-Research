@@ -157,8 +157,8 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
                     {mockResults.length > 0 && (
                       <div className="flex gap-4 text-xs">
                         <span className="text-emerald-600">✓ {stats.successRate}% success</span>
-                        <span className="text-blue-600">↗ {stats.directnessRate}% direct</span>
-                        <span className="text-stone-500">⏱ {stats.avgTime}s avg</span>
+                        <span className="text-blue-600">{stats.directnessRate}% direct</span>
+                        <span className="text-stone-500">{stats.avgTime}s avg</span>
                       </div>
                     )}
                   </div>

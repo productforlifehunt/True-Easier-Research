@@ -45,7 +45,7 @@ const OPERATORS: { value: Operator; label: string }[] = [
   { value: 'in', label: '∈ in list / 在列表中' },
   { value: 'is_empty', label: '∅ is empty / 为空' },
   { value: 'is_not_empty', label: '≠∅ is not empty / 不为空' },
-  { value: 'between', label: '↔ between / 介于' },
+  { value: 'between', label: 'between / 介于' },
 ];
 
 const SEGMENT_COLORS = ['#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6366f1', '#14b8a6'];

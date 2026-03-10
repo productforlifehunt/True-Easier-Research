@@ -555,7 +555,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
         <img src={el.config.image_url} alt="" className="w-full rounded-xl" />
       ) : compact ? (
         <div className="rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center h-24">
-          <span className="text-[11px] text-stone-400">🖼️ No image set</span>
+          <span className="text-[11px] text-stone-400">No image set</span>
         </div>
       ) : null;
 

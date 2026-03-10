@@ -1457,7 +1457,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           {/* AI Features Configuration */}
           {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
             <div className="space-y-2 pt-2 border-t border-stone-100">
-              <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">🤖 AI Features</p>
+              <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">AI Features</p>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
                 <input type="checkbox" checked={localQuestion.question_config?.allow_ai_assist ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_ai_assist: e.target.checked }, allow_ai_assist: e.target.checked })}
