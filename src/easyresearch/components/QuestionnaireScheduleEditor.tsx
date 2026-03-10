@@ -170,7 +170,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
   return (
     <div className="space-y-4">
       <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">
-        <Calendar size={11} /> Advanced Schedule / 高级调度
+        <Calendar size={11} /> Advanced Schedule
       </h5>
 
       {/* Date mode toggle / 日期模式切换 */}
