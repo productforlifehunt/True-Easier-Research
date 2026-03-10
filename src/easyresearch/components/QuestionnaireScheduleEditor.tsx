@@ -381,7 +381,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                   onClick={() => setDaySchedule(selectedDayKey, { dayKey: selectedDayKey, times: [] })}
                   className="text-[10px] text-red-400 hover:text-red-500"
                 >
-                  Clear All / 清除全部
+                  Clear All
                 </button>
               </div>
 
