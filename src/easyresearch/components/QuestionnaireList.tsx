@@ -7,6 +7,7 @@ import QuestionEditor from './QuestionEditor';
 import TemplateMarketplaceEmbed from './TemplateMarketplaceEmbed';
 import { type LogicRule } from '../utils/logicEngine';
 import { type NotificationConfig } from '../utils/notificationConfigSync';
+import QuestionnaireScheduleEditor, { type ScheduleConfig, getDefaultScheduleConfig } from './QuestionnaireScheduleEditor';
 
 export interface QuestionnaireConfig {
   id: string;
