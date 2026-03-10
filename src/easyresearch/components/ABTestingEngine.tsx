@@ -232,7 +232,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
                 activeExperiment?.id === exp.id ? 'bg-white text-stone-800 shadow-sm font-medium' : 'text-stone-500 hover:text-stone-700'
               }`}
             >
-              <Beaker size={11} className="inline mr-1" />
+              <FlaskConical size={11} className="inline mr-1" />
               {exp.name}
             </button>
           ))}
