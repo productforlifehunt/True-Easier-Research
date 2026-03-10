@@ -228,7 +228,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
           )}
           {showPreviewWidget && widgetType === 'bottom_bar' && (
             <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-lg p-3 flex items-center justify-between animate-in slide-in-from-bottom-5">
-              <p className="text-sm font-medium text-stone-800">📋 Got 30 seconds? Help us improve! / 有30秒吗？帮我们改进！</p>
+              <p className="text-sm font-medium text-stone-800">Got 30 seconds? Help us improve! / 有30秒吗？帮我们改进！</p>
               <div className="flex gap-2">
                 <button className="px-4 py-1.5 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: primaryColor }}>Take Survey</button>
                 <button onClick={() => setShowPreviewWidget(false)} className="px-3 py-1.5 text-xs text-stone-500 hover:text-stone-700">Dismiss</button>

@@ -636,7 +636,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                 <li>Return here to schedule this questionnaire on specific days</li>
               </ol>
               <p className="text-sm mt-3 font-medium" style={{ color: '#92400e' }}>
-                💡 For longitudinal studies: Each questionnaire can be scheduled independently on different days/times
+                For longitudinal studies: Each questionnaire can be scheduled independently on different days/times
               </p>
             </div>
 

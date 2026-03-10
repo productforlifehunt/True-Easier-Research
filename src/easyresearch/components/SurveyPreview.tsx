@@ -98,7 +98,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             {question.question_config?.image_url ? (
               <img src={question.question_config.image_url} alt={question.question_config?.alt_text || ''} className="mx-auto rounded-lg" style={{ maxWidth: question.question_config?.max_width || '100%' }} />
             ) : (
-              <div className="h-20 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-stone-400">🖼 Image</div>
+              <div className="h-20 rounded-lg border-2 border-dashed border-stone-200 bg-stone-50 flex items-center justify-center text-stone-400">Image</div>
             )}
             {question.question_config?.caption && <p className="text-[11px] text-stone-400 mt-1">{question.question_config.caption}</p>}
           </div>

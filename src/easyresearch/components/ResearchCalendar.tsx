@@ -21,14 +21,14 @@ interface CalendarEvent {
 }
 
 const EVENT_TYPES = [
-  { value: 'milestone', label: '🏁 Milestone / 里程碑', color: '#10b981' },
-  { value: 'deadline', label: '⏰ Deadline / 截止日期', color: '#ef4444' },
-  { value: 'meeting', label: '👥 Meeting / 会议', color: '#6366f1' },
-  { value: 'data_collection', label: '📊 Data Collection / 数据收集', color: '#06b6d4' },
-  { value: 'analysis', label: '🔬 Analysis / 分析', color: '#8b5cf6' },
-  { value: 'report', label: '📄 Report / 报告', color: '#f59e0b' },
-  { value: 'irb', label: '🏛️ IRB Review / IRB审查', color: '#ec4899' },
-  { value: 'custom', label: '📌 Custom / 自定义', color: '#64748b' },
+  { value: 'milestone', label: 'Milestone / 里程碑', color: '#10b981' },
+  { value: 'deadline', label: 'Deadline / 截止日期', color: '#ef4444' },
+  { value: 'meeting', label: 'Meeting / 会议', color: '#6366f1' },
+  { value: 'data_collection', label: 'Data Collection / 数据收集', color: '#06b6d4' },
+  { value: 'analysis', label: 'Analysis / 分析', color: '#8b5cf6' },
+  { value: 'report', label: 'Report / 报告', color: '#f59e0b' },
+  { value: 'irb', label: 'IRB Review / IRB审查', color: '#ec4899' },
+  { value: 'custom', label: 'Custom / 自定义', color: '#64748b' },
 ];
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
