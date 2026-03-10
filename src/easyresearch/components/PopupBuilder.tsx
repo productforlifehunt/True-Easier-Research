@@ -297,26 +297,24 @@ const PopupBuilder: React.FC<PopupBuilderProps> = ({ projectId, questionnaires }
                 {/* Content source / 内容来源 */}
                 <div>
                   <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Content Source / 内容来源</label>
-                  <select
+                  <CustomDropdown
+                    options={[
+                      { value: '_text', label: 'Custom Text / 自定义文本' },
+                      ...linkableComponents.map(q => ({
+                        value: q.id,
+                        label: q.title,
+                      })),
+                    ]}
                     value={popup.questionnaire_id || '_text'}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '_text') {
+                    onChange={(v) => {
+                      if (v === '_text') {
                         updatePopup(popup.id, { questionnaire_id: null, content: popup.content || 'Enter popup content here...' });
                       } else {
-                        updatePopup(popup.id, { questionnaire_id: val, content: null });
+                        updatePopup(popup.id, { questionnaire_id: v, content: null });
                       }
                     }}
-                    className="mt-1 w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                  >
-                    <option value="_text">📝 Custom Text / 自定义文本</option>
-                    {linkableComponents.map(q => (
-                      <option key={q.id} value={q.id}>
-                        {q.questionnaire_type === 'survey' ? '📋' : q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'onboarding' ? '🎯' : '🧩'}{' '}
-                        {q.title}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select content source"
+                  />
                 </div>
 
                 {/* Text content editor / 文本内容编辑器 */}
