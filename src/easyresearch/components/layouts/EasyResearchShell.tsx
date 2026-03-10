@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FlaskConical, Search, MessageSquare, Settings } from 'lucide-react';
+import { Search, MessageSquare, Settings } from 'lucide-react';
+import EasierLogo from '../EasierLogo';
 import AppHeader from './AppHeader';
 import AppSidebar from './AppSidebar';
 import ResearcherFooter from '../ResearcherFooter';

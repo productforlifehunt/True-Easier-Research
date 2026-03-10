@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
-import { FlaskConical, Search, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Search, MessageSquare, Settings, LogOut } from 'lucide-react';
+import EasierLogo from '../EasierLogo';
 import { useI18n } from '../../hooks/useI18n';
 
 /**
