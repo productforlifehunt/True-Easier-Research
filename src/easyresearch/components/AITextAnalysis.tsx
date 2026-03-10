@@ -165,7 +165,7 @@ Respond with ONLY valid JSON, no markdown.`;
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Brain className="w-5 h-5" />
+          <Sparkles className="w-5 h-5" />
           AI Text Analysis / AI 文本分析
         </h3>
       </div>

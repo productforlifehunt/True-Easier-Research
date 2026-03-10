@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, Plus, Lock, Globe, Clock, FileText, Package, Layers, Filter, Loader2, Trash2,
-  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain, Heart, Briefcase, Target, MessageSquare, ThumbsUp, Smile
+  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Lightbulb, Heart, Briefcase, Target, MessageSquare, ThumbsUp, Smile
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
