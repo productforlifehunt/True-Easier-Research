@@ -312,7 +312,7 @@ const AccessibilityChecker: React.FC<Props> = ({ questions, theme }) => {
                         <span className="text-[9px] text-stone-400">Q: {issue.questionText}</span>
                       )}
                     </div>
-                    <p className="text-[10px] text-emerald-700 mt-1.5">💡 {issue.suggestion}</p>
+                    <p className="text-[10px] text-emerald-700 mt-1.5">{issue.suggestion}</p>
                     <p className="text-[10px] text-emerald-600">{issue.suggestionZh}</p>
                   </div>
                 </div>

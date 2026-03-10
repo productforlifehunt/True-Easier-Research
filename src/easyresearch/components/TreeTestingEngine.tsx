@@ -192,10 +192,10 @@ const TreeTestingEngine: React.FC<Props> = ({ projectId }) => {
         <div className="space-y-6">
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Overall Success', value: `${Math.round(mockResults.filter(r => r.success).length / mockResults.length * 100)}%`, icon: '🎯' },
-              { label: 'Direct Success', value: `${Math.round(mockResults.filter(r => r.direct && r.success).length / mockResults.filter(r => r.success).length * 100)}%`, icon: '↗️' },
-              { label: 'Avg Time/Task', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: '⏱️' },
-              { label: 'Participants', value: '20', icon: '👥' },
+              { label: 'Overall Success', value: `${Math.round(mockResults.filter(r => r.success).length / mockResults.length * 100)}%`, icon: '%' },
+              { label: 'Direct Success', value: `${Math.round(mockResults.filter(r => r.direct && r.success).length / mockResults.filter(r => r.success).length * 100)}%`, icon: 'D' },
+              { label: 'Avg Time/Task', value: `${Math.round(mockResults.reduce((s, r) => s + r.duration, 0) / mockResults.length)}s`, icon: 'T' },
+              { label: 'Participants', value: '20', icon: '#' },
             ].map((s, i) => (
               <div key={i} className="p-4 bg-white rounded-xl border border-stone-200">
                 <div className="text-2xl mb-1">{s.icon}</div>

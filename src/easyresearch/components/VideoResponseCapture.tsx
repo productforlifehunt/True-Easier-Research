@@ -161,9 +161,9 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
           </div>
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-2 text-xs text-stone-500">
-              {config.webcam && <span className="px-2 py-1 bg-stone-100 rounded">📷 Camera</span>}
-              {config.screen && <span className="px-2 py-1 bg-stone-100 rounded">🖥️ Screen</span>}
-              {config.audio && <span className="px-2 py-1 bg-stone-100 rounded">🎤 Audio</span>}
+              {config.webcam && <span className="px-2 py-1 bg-stone-100 rounded">Camera</span>}
+              {config.screen && <span className="px-2 py-1 bg-stone-100 rounded">Screen</span>}
+              {config.audio && <span className="px-2 py-1 bg-stone-100 rounded">Audio</span>}
             </div>
           </div>
           <div className="flex justify-center mt-4">

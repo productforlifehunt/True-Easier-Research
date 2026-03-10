@@ -191,7 +191,7 @@ const DistributionManager: React.FC<Props> = ({ projectId, surveyCode, surveyTit
             </button>
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-xs text-amber-700">⚠️ Email sending requires SMTP configuration. Configure in project settings.</p>
+            <p className="text-xs text-amber-700">Email sending requires SMTP configuration. Configure in project settings.</p>
             <p className="text-[10px] text-amber-600 mt-0.5">邮件发送需要配置SMTP。请在项目设置中配置。</p>
           </div>
         </div>

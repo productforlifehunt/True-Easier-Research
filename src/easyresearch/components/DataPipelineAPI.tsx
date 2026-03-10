@@ -248,7 +248,7 @@ const DataPipelineAPI: React.FC<Props> = ({ projectId }) => {
             </div>
             {showNewKey && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                <p className="text-xs text-emerald-700 font-medium mb-1">⚠️ Copy this key now — it won't be shown again / 立即复制此密钥，它不会再次显示</p>
+                <p className="text-xs text-emerald-700 font-medium mb-1">Copy this key now — it won't be shown again / 立即复制此密钥，它不会再次显示</p>
                 <div className="flex items-center gap-2">
                   <code className="text-sm font-mono text-emerald-800 break-all">{showNewKey}</code>
                   <button onClick={() => { copyToClipboard(showNewKey, 'new'); }} className="shrink-0">

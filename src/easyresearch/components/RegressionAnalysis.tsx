@@ -65,7 +65,7 @@ const RegressionAnalysis: React.FC<Props> = ({ projectId }) => {
           {(['regression', 'correlation', 'anova'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-teal-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'regression' ? '📈 Regression' : v === 'correlation' ? '🔗 Correlation' : '📊 ANOVA'}
+              {v === 'regression' ? 'Regression' : v === 'correlation' ? 'Correlation' : 'ANOVA'}
             </button>
           ))}
         </div>
