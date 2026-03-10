@@ -414,7 +414,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
 
       {experiments.length === 0 && !showCreate && (
         <div className="bg-white rounded-xl border border-stone-100 p-8 text-center">
-          <Beaker size={32} className="mx-auto mb-3 text-stone-300" />
+          <FlaskRound size={32} className="mx-auto mb-3 text-stone-300" />
           <p className="text-[13px] text-stone-500">No experiments yet / 尚无实验</p>
           <p className="text-[11px] text-stone-400 mt-1">Create A/B tests to compare survey variants / 创建A/B测试以比较调查变体</p>
           <button
