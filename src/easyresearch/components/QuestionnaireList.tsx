@@ -46,6 +46,7 @@ export interface QuestionnaireConfig {
   detect_gibberish?: boolean;
   custom_thank_you_message?: string;
   redirect_url?: string;
+  schedule_config?: ScheduleConfig;
 }
 
 interface QuestionnaireListProps {
