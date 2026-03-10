@@ -77,10 +77,10 @@ const EasyResearchShellInner: React.FC = () => {
   // Bottom nav tabs — same 4 as sidebar
   const tabs = useMemo(
     () => [
-      { id: 'research', path: '/easyresearch/dashboard', icon: FlaskConical, labelKey: 'nav.research' },
-      { id: 'discover', path: '/easyresearch/discover', icon: Search, labelKey: 'nav.discover' },
-      { id: 'inbox', path: '/easyresearch/inbox', icon: MessageSquare, labelKey: 'nav.inbox' },
-      { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, labelKey: 'nav.settings' },
+      { id: 'research', path: '/easyresearch/dashboard', icon: null, isLogo: true, labelKey: 'nav.research' },
+      { id: 'discover', path: '/easyresearch/discover', icon: Search, isLogo: false, labelKey: 'nav.discover' },
+      { id: 'inbox', path: '/easyresearch/inbox', icon: MessageSquare, isLogo: false, labelKey: 'nav.inbox' },
+      { id: 'settings', path: '/easyresearch/user/settings', icon: Settings, isLogo: false, labelKey: 'nav.settings' },
     ],
     []
   );
