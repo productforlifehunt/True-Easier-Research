@@ -5,7 +5,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
-import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, GripVertical, Layers, Plus, Trash2, Edit3, Bell, MessageSquare, Clock } from 'lucide-react';
+import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, GripVertical, Layers, Plus, Trash2, Edit3, Bell, MessageSquare, Clock, Sparkles } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { LogicRule } from '../utils/logicEngine';
