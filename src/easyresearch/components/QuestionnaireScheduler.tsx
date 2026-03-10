@@ -579,7 +579,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
                 />
               </div>
               <div className="text-sm mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-                💡 After creating, you'll be able to add questions to this questionnaire using the full question editor.
+                After creating, you'll be able to add questions to this questionnaire using the full question editor.
               </div>
               <div className="flex gap-3">
                 <button
