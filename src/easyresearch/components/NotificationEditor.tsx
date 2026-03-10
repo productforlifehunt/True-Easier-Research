@@ -387,8 +387,8 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                   />
                    <span className="text-xs text-stone-600">
                     {nc.dnd_allowed ? <BellOff size={11} className="inline mr-1" /> : <Bell size={11} className="inline mr-1" />}
-                    Allow DND
-                  </span>
+                    Allow Do Not Disturb
+                   </span>
                 </label>
               </div>
             </div>
