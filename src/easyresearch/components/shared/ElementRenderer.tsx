@@ -212,7 +212,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       }
       return (
         <div className="p-4 rounded-xl bg-orange-50 border border-orange-200">
-          <h4 className={`${txt} font-semibold text-orange-800`}>📝 {el.config.title || 'Screening'}</h4>
+          <h4 className={`${txt} font-semibold text-orange-800`}>{el.config.title || 'Screening'}</h4>
           {linkedQ ? (
             <>
               {cardOpts.showQuestionCount && <p className={`${txtSm} text-orange-600 mt-1`}>{linkedQ.questions?.length || 0} screening questions</p>}

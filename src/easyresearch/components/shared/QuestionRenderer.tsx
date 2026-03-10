@@ -638,7 +638,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
           {kanoVal.functional && kanoVal.dysfunctional && (
             <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtXs} text-blue-600`}>
-              📈 Classification will be calculated after submission
+              Classification will be calculated after submission
             </div>
           )}
         </div>

@@ -30,12 +30,12 @@ interface PanelConfig {
 }
 
 const PLATFORMS = [
-  { id: 'prolific', name: 'Prolific', icon: '🔬', color: 'bg-purple-50 border-purple-200 text-purple-700', description: 'Academic research panel with quality participants / 拥有高质量参与者的学术研究面板' },
-  { id: 'mturk', name: 'Amazon MTurk', icon: '🏭', color: 'bg-amber-50 border-amber-200 text-amber-700', description: 'Large-scale crowdsourcing marketplace / 大规模众包市场' },
-  { id: 'respondent', name: 'Respondent.io', icon: '💼', color: 'bg-blue-50 border-blue-200 text-blue-700', description: 'B2B & professional participant recruitment / B2B与专业参与者招募' },
-  { id: 'userinterviews', name: 'User Interviews', icon: '🎯', color: 'bg-emerald-50 border-emerald-200 text-emerald-700', description: 'UX research participant recruitment / UX研究参与者招募' },
-  { id: 'internal', name: 'Internal Panel', icon: '🏢', color: 'bg-stone-50 border-stone-200 text-stone-700', description: 'Your own participant database / 您自己的参与者数据库' },
-  { id: 'custom', name: 'Custom Source', icon: '🔗', color: 'bg-teal-50 border-teal-200 text-teal-700', description: 'Any custom recruitment source / 任何自定义招募来源' },
+  { id: 'prolific', name: 'Prolific', icon: 'microscope', color: 'bg-purple-50 border-purple-200 text-purple-700', description: 'Academic research panel with quality participants / 拥有高质量参与者的学术研究面板' },
+  { id: 'mturk', name: 'Amazon MTurk', icon: 'factory', color: 'bg-amber-50 border-amber-200 text-amber-700', description: 'Large-scale crowdsourcing marketplace / 大规模众包市场' },
+  { id: 'respondent', name: 'Respondent.io', icon: 'briefcase', color: 'bg-blue-50 border-blue-200 text-blue-700', description: 'B2B & professional participant recruitment / B2B与专业参与者招募' },
+  { id: 'userinterviews', name: 'User Interviews', icon: 'target', color: 'bg-emerald-50 border-emerald-200 text-emerald-700', description: 'UX research participant recruitment / UX研究参与者招募' },
+  { id: 'internal', name: 'Internal Panel', icon: 'building', color: 'bg-stone-50 border-stone-200 text-stone-700', description: 'Your own participant database / 您自己的参与者数据库' },
+  { id: 'custom', name: 'Custom Source', icon: 'link', color: 'bg-teal-50 border-teal-200 text-teal-700', description: 'Any custom recruitment source / 任何自定义招募来源' },
 ];
 
 const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
