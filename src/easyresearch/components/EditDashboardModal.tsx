@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, GripVertical, RotateCcw, Eye, EyeOff, FlaskConical, Users, Plus } from 'lucide-react';
+import { X, GripVertical, RotateCcw, Eye, EyeOff, BarChart3, Users, Plus } from 'lucide-react';
 import IOSToggle from '../../components/ui/IOSToggle';
 import type { DashboardConfig, DashboardTab, UserRoles } from '../hooks/useDashboardConfig';
 
@@ -72,7 +72,7 @@ const EditDashboardModal: React.FC<Props> = ({
             <div className="flex items-center justify-between bg-stone-50 rounded-xl px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
-                  <FlaskConical size={12} className="text-blue-500" />
+                  <BarChart3 size={12} className="text-blue-500" />
                 </div>
                 <div>
                   <p className="text-[12px] font-semibold text-stone-700">Researcher</p>

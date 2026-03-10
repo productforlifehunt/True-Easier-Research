@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { UserCheck, FlaskConical, ChevronRight, ArrowLeft } from 'lucide-react';
+import { UserCheck, BarChart3, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const EasyResearchAuth: React.FC = () => {
   const navigate = useNavigate();
@@ -134,7 +134,7 @@ const EasyResearchAuth: React.FC = () => {
               <div className="grid grid-cols-2 gap-2.5">
                 {[
                   { key: 'participant' as const, icon: UserCheck, label: 'Participate', desc: 'Take surveys' },
-                  { key: 'researcher' as const, icon: FlaskConical, label: 'Research', desc: 'Create surveys' }
+                  { key: 'researcher' as const, icon: BarChart3, label: 'Research', desc: 'Create surveys' }
                 ].map(r => (
                   <button
                     key={r.key}

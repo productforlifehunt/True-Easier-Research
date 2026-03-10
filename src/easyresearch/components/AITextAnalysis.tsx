@@ -32,7 +32,7 @@ interface AIAnalysisResult {
   summary: string;
 }
 
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = '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';
 
 const AITextAnalysis: React.FC<Props> = ({ projectId, responses, questions }) => {
   const [analyzing, setAnalyzing] = useState(false);

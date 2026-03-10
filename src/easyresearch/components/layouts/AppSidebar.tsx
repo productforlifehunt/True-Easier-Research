@@ -2,7 +2,8 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { authClient } from '../../../lib/supabase';
-import { FlaskConical, Search, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Search, MessageSquare, Settings, LogOut } from 'lucide-react';
+import EasierLogo from '../EasierLogo';
 import { useI18n } from '../../hooks/useI18n';
 
 /**
@@ -21,10 +22,10 @@ const AppSidebar: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/easyresearch/dashboard', label: t('nav.research'), icon: FlaskConical },
-    { path: '/easyresearch/discover', label: t('nav.discover'), icon: Search },
-    { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare },
-    { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings },
+    { path: '/easyresearch/dashboard', label: t('nav.research'), icon: null, isLogo: true },
+    { path: '/easyresearch/discover', label: t('nav.discover'), icon: Search, isLogo: false },
+    { path: '/easyresearch/inbox', label: t('nav.inbox'), icon: MessageSquare, isLogo: false },
+    { path: '/easyresearch/user/settings', label: t('nav.settings'), icon: Settings, isLogo: false },
   ];
 
   const isActive = (path: string) => {
@@ -63,11 +64,17 @@ const AppSidebar: React.FC = () => {
                     : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'
                 }`}
               >
-                <Icon
-                  size={18}
-                  strokeWidth={active ? 2 : 1.5}
-                  className={active ? 'text-emerald-600' : ''}
-                />
+                {item.isLogo ? (
+                  <div style={{ opacity: active ? 1 : 0.5 }}>
+                    <EasierLogo size={18} />
+                  </div>
+                ) : item.icon ? (
+                  <item.icon
+                    size={18}
+                    strokeWidth={active ? 2 : 1.5}
+                    className={active ? 'text-emerald-600' : ''}
+                  />
+                ) : null}
                 <span>{item.label}</span>
               </Link>
             );

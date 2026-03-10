@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FlaskConical, TrendingUp, TrendingDown, Minus, Trophy, BarChart3, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Beaker as TestIcon, TrendingUp, TrendingDown, Minus, Trophy, BarChart3, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface Variant {
   id: string;
@@ -68,7 +68,7 @@ const ABTestResults: React.FC<Props> = ({ projectId }) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <FlaskConical size={22} className="text-emerald-600" />
+          <TestIcon size={22} className="text-emerald-600" />
           <div>
             <h2 className="text-lg font-bold text-stone-800">A/B Test Results / A/B测试结果</h2>
             <p className="text-xs text-stone-500">Statistical comparison of test variants / 测试变体的统计比较</p>
