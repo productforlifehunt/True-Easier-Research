@@ -249,9 +249,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'video_block':
         return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">{localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
       case 'audio_block':
-        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🔊 {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
+        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400"><Volume2 size={12} className="mr-1" /> {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
       case 'embed_block':
-        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🌐 {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400"><Globe size={12} className="mr-1" /> {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
       case 'card_sort':
         return (
           <div className="flex flex-wrap gap-1">
