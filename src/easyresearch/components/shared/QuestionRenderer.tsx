@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image as ImageIcon } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 
 interface QuestionRendererProps {
@@ -323,7 +324,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       );
       return (
         <div className="space-y-2">
-          {taskDesc && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>📋 {taskDesc}</div>}
+          {taskDesc && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>{taskDesc}</div>}
           <div className="border border-stone-200 rounded-xl p-2 max-h-[300px] overflow-y-auto">
             {tree.map((node: any) => renderNode(node))}
           </div>
@@ -417,7 +418,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="space-y-2">
           {tasks.length > 0 && (
             <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200`}>
-              <p className={`${txtSm} text-blue-700 font-medium mb-1`}>📋 Tasks:</p>
+              <p className={`${txtSm} text-blue-700 font-medium mb-1`}>Tasks:</p>
               {tasks.map((t: any, i: number) => (
                 <p key={i} className={`${txtXs} text-blue-600`}>{i + 1}. {t.task}</p>
               ))}
@@ -483,7 +484,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               return (
                 <div key={vId} onClick={() => onResponse(question.id, { ...dsVal, choice: vId })}
                   className={`cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${dsVal.choice === vId ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-stone-200 hover:border-stone-300'}`}>
-                  {vUrl ? <img src={vUrl} alt={vText} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400 text-2xl">🎨</div>}
+                  {vUrl ? <img src={vUrl} alt={vText} className="w-full aspect-video object-cover" /> : <div className="w-full aspect-video bg-stone-100 flex items-center justify-center text-stone-400"><ImageIcon size={24} /></div>}
                   {showLabels && <p className={`text-center py-2 ${txtSm} font-medium ${dsVal.choice === vId ? 'text-emerald-600' : 'text-stone-600'}`}>{vText}</p>}
                 </div>
               );
@@ -612,7 +613,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="space-y-4">
           {/* Functional question */}
           <div className={`${pad} rounded-xl bg-emerald-50 border border-emerald-200`}>
-            <p className={`${txtSm} font-medium text-emerald-700 mb-2`}>✅ {funcQ}</p>
+            <p className={`${txtSm} font-medium text-emerald-700 mb-2`}>{funcQ}</p>
             <div className="space-y-1.5">
               {kanoCats.map((cat: string, ci: number) => (
                 <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.functional === cat ? 'border-emerald-400 bg-emerald-100' : 'border-stone-100 hover:border-emerald-200'}`}>
@@ -625,7 +626,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
           {/* Dysfunctional question */}
           <div className={`${pad} rounded-xl bg-red-50 border border-red-200`}>
-            <p className={`${txtSm} font-medium text-red-700 mb-2`}>❌ {dysfuncQ}</p>
+            <p className={`${txtSm} font-medium text-red-700 mb-2`}>{dysfuncQ}</p>
             <div className="space-y-1.5">
               {kanoCats.map((cat: string, ci: number) => (
                 <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.dysfunctional === cat ? 'border-red-400 bg-red-100' : 'border-stone-100 hover:border-red-200'}`}>
@@ -638,7 +639,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           </div>
           {kanoVal.functional && kanoVal.dysfunctional && (
             <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtXs} text-blue-600`}>
-              📈 Classification will be calculated after submission
+              Classification will be calculated after submission
             </div>
           )}
         </div>

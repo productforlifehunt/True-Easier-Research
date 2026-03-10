@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Users, Globe, ExternalLink, Settings, AlertCircle, CheckCircle2, Copy, Link2, Mail, Zap, DollarSign, Filter } from 'lucide-react';
+import { Users, Globe, ExternalLink, Settings, AlertCircle, CheckCircle2, Copy, Link2, Mail, Zap, DollarSign, Filter, Microscope, Factory, Briefcase, Target, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Panel Recruitment Hub – Multi-platform participant recruitment management
@@ -30,13 +30,22 @@ interface PanelConfig {
 }
 
 const PLATFORMS = [
-  { id: 'prolific', name: 'Prolific', icon: '🔬', color: 'bg-purple-50 border-purple-200 text-purple-700', description: 'Academic research panel with quality participants / 拥有高质量参与者的学术研究面板' },
-  { id: 'mturk', name: 'Amazon MTurk', icon: '🏭', color: 'bg-amber-50 border-amber-200 text-amber-700', description: 'Large-scale crowdsourcing marketplace / 大规模众包市场' },
-  { id: 'respondent', name: 'Respondent.io', icon: '💼', color: 'bg-blue-50 border-blue-200 text-blue-700', description: 'B2B & professional participant recruitment / B2B与专业参与者招募' },
-  { id: 'userinterviews', name: 'User Interviews', icon: '🎯', color: 'bg-emerald-50 border-emerald-200 text-emerald-700', description: 'UX research participant recruitment / UX研究参与者招募' },
-  { id: 'internal', name: 'Internal Panel', icon: '🏢', color: 'bg-stone-50 border-stone-200 text-stone-700', description: 'Your own participant database / 您自己的参与者数据库' },
-  { id: 'custom', name: 'Custom Source', icon: '🔗', color: 'bg-teal-50 border-teal-200 text-teal-700', description: 'Any custom recruitment source / 任何自定义招募来源' },
+  { id: 'prolific', name: 'Prolific', icon: 'microscope', color: 'bg-purple-50 border-purple-200 text-purple-700', description: 'Academic research panel with quality participants / 拥有高质量参与者的学术研究面板' },
+  { id: 'mturk', name: 'Amazon MTurk', icon: 'factory', color: 'bg-amber-50 border-amber-200 text-amber-700', description: 'Large-scale crowdsourcing marketplace / 大规模众包市场' },
+  { id: 'respondent', name: 'Respondent.io', icon: 'briefcase', color: 'bg-blue-50 border-blue-200 text-blue-700', description: 'B2B & professional participant recruitment / B2B与专业参与者招募' },
+  { id: 'userinterviews', name: 'User Interviews', icon: 'target', color: 'bg-emerald-50 border-emerald-200 text-emerald-700', description: 'UX research participant recruitment / UX研究参与者招募' },
+  { id: 'internal', name: 'Internal Panel', icon: 'building', color: 'bg-stone-50 border-stone-200 text-stone-700', description: 'Your own participant database / 您自己的参与者数据库' },
+  { id: 'custom', name: 'Custom Source', icon: 'link', color: 'bg-teal-50 border-teal-200 text-teal-700', description: 'Any custom recruitment source / 任何自定义招募来源' },
 ];
+
+const PLATFORM_ICONS: Record<string, React.ReactNode> = {
+  microscope: <Microscope size={20} />,
+  factory: <Factory size={20} />,
+  briefcase: <Briefcase size={20} />,
+  target: <Target size={20} />,
+  building: <Building size={20} />,
+  link: <Link2 size={20} />,
+};
 
 const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
   const [panels, setPanels] = useState<PanelConfig[]>([]);
@@ -161,7 +170,7 @@ const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
                   selectedPlatform === p.id ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200 hover:border-stone-300'
                 }`}
               >
-                <div className="text-lg mb-1">{p.icon}</div>
+                <div className="text-lg mb-1 text-stone-600">{PLATFORM_ICONS[p.icon] || <Link2 size={20} />}</div>
                 <div className="text-sm font-medium text-stone-800">{p.name}</div>
                 <div className="text-[10px] text-stone-500 mt-0.5">{p.description}</div>
               </button>
@@ -212,7 +221,7 @@ const PanelRecruitmentHub: React.FC<Props> = ({ projectId, surveyCode }) => {
             <div key={panel.id} className="bg-white rounded-xl border border-stone-200 p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{platform?.icon || '🔗'}</span>
+                  <span className="text-stone-600">{platform ? (PLATFORM_ICONS[platform.icon] || <Link2 size={20} />) : <Link2 size={20} />}</span>
                   <div>
                     <div className="text-sm font-semibold text-stone-800">{panel.name}</div>
                     <div className="flex items-center gap-2 mt-0.5">

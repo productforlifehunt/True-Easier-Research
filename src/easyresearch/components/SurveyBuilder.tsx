@@ -1153,6 +1153,7 @@ const SurveyBuilder: React.FC = () => {
             projectId={projectId}
             onUpdateLogic={setLogicRules}
             onReorderQuestionnaires={setQuestionnaireConfigs}
+            notifications={[...projectNotifications, ...questionnaireConfigs.flatMap(qc => qc.notifications || [])]}
           />
         )}
 
