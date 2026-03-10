@@ -1431,7 +1431,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_config?.disqualify_value && (
               <div className="p-2 rounded-lg bg-red-50 border border-red-200">
                 <p className="text-[11px] text-red-600">
-                  ⚠️ Participants answering "<strong>{localQuestion.question_config.disqualify_value}</strong>" will be disqualified from the study.
+                  Participants answering "<strong>{localQuestion.question_config.disqualify_value}</strong>" will be disqualified from the study.
                 </p>
               </div>
             )}
