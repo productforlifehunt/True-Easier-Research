@@ -351,7 +351,7 @@ const SurveyBuilder: React.FC = () => {
   const updatePublishStatus = async (nextStatus: 'draft' | 'published') => {
     if (!projectId) return;
     if (nextStatus === 'published') {
-      if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => q.questions.length === 0)) {
+      if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => (q.questions?.length || 0) === 0)) {
         toast.error('Cannot publish: Please add at least one question first.');
         return;
       }
@@ -998,7 +998,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'translations' as TabId, label: t('project.translations') },
     { id: 'layout', label: t('project.layout') },
     { id: 'preview', label: t('project.preview') },
-    ...(projectId ? [{ id: 'participants' as TabId, label: 'Participants' }] : []),
+    ...(projectId ? [{ id: 'participants' as TabId, label: t('project.participants') }] : []),
     ...(projectId ? [{ id: 'responses' as TabId, label: `${t('responses.title')} ${responseCount > 0 ? responseCount : ''}`.trim() }] : []),
   ];
 
@@ -1070,8 +1070,8 @@ const SurveyBuilder: React.FC = () => {
                 className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[12px] sm:text-[13px] font-medium hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
               >
                 <Save size={14} />
-                <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
-                <span className="sm:hidden">{saving ? '...' : 'Save'}</span>
+                <span className="hidden sm:inline">{saving ? t('common.loading') : t('common.save')}</span>
+                <span className="sm:hidden">{saving ? '...' : t('common.save')}</span>
               </button>
             </div>
           </div>

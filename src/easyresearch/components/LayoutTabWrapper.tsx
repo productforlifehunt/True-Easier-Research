@@ -6,6 +6,7 @@ import NotificationEditor from './NotificationEditor';
 import PublicPageBuilder from './PublicPageBuilder';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
+import { useI18n } from '../hooks/useI18n';
 
 type SubTab = 'layout' | 'popups' | 'notifications' | 'public_pages';
 interface LayoutTabWrapperProps {
@@ -20,13 +21,6 @@ interface LayoutTabWrapperProps {
   onUpdateQuestionnaire?: (id: string, updates: Partial<QuestionnaireConfig>) => void;
 }
 
-const SUB_TABS: { id: SubTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'layout', label: 'Layout', icon: <Layout size={14} /> },
-  { id: 'popups', label: 'Popups', icon: <Layers size={14} /> },
-  { id: 'notifications', label: 'Notifications', icon: <Bell size={14} /> },
-  { id: 'public_pages', label: 'Public Pages', icon: <Globe size={14} /> },
-];
-
 const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   projectId,
   layout,
@@ -39,6 +33,14 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   onUpdateQuestionnaire,
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('layout');
+  const { t } = useI18n();
+
+  const SUB_TABS: { id: SubTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'layout', label: t('layout.researchDesign'), icon: <Layout size={14} /> },
+    { id: 'popups', label: t('layout.popups'), icon: <Layers size={14} /> },
+    { id: 'notifications', label: t('project.notifications'), icon: <Bell size={14} /> },
+    { id: 'public_pages', label: t('layout.publicPages'), icon: <Globe size={14} /> },
+  ];
 
   return (
     <div>

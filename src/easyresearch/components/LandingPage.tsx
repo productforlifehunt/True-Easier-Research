@@ -67,13 +67,13 @@ const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
             <button
               onClick={() => navigate('/easyresearch/auth')}
-              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[15px] font-medium rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/20"
+              className="group inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[14px] font-medium rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/20"
             >
-              {t('landing.getStarted')} <ArrowRight size={16} strokeWidth={2} className="group-hover:translate-x-0.5 transition-transform" />
+              {t('landing.getStarted')} <ArrowRight size={15} strokeWidth={2} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
             <button
               onClick={() => navigate('/easyresearch/templates')}
-              className="inline-flex items-center justify-center px-7 py-3.5 text-[15px] font-medium text-stone-500 rounded-xl border border-stone-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-[14px] font-medium text-stone-500 rounded-xl border border-stone-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all"
             >
               {t('landing.browseTemplates')}
             </button>
