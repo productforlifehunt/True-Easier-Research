@@ -37,7 +37,7 @@ const IncentiveRewardManager: React.FC<Props> = ({ projectId }) => {
           {(['config', 'participants', 'analytics'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'participants' ? '👥 Distribute' : '📊 Analytics'}
+              {v === 'config' ? 'Config' : v === 'participants' ? 'Distribute' : 'Analytics'}
             </button>
           ))}
         </div>
