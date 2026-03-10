@@ -30,6 +30,10 @@ export interface QuestionnaireConfig {
     questions_per_page?: number | null;
   }>;
   ai_chatbot_enabled?: boolean;
+  ai_voice_enabled?: boolean;
+  ai_voice_all_questions?: boolean;
+  ai_assist_all_questions?: boolean;
+  ai_guidance?: string;
   notifications?: NotificationConfig[];
   // A/B Test fields
   is_ab_test?: boolean;
