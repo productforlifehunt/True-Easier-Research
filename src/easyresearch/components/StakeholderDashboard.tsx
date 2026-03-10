@@ -217,7 +217,7 @@ const StakeholderDashboard: React.FC<Props> = ({ projectId, questionnaires }) =>
             </div>
           </div>
           <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-            <div className="text-xs text-purple-700 font-medium">📈 Trend / 趋势</div>
+            <div className="text-xs text-purple-700 font-medium">Trend / 趋势</div>
             <div className="text-sm text-purple-800 mt-1">
               {metrics.timeline.length > 1
                 ? `${(metrics.timeline[metrics.timeline.length - 1][1] as number)} responses on latest day`

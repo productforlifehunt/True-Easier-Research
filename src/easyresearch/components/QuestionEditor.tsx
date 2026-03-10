@@ -301,7 +301,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'heatmap':
         return (
           <div className="h-16 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">
-            🔥 Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
+            Heatmap ({localQuestion.question_config?.max_clicks || 10} clicks)
           </div>
         );
       default: return null;

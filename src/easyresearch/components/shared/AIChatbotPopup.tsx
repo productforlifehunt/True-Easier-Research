@@ -189,7 +189,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
             </div>
             {unansweredRequired.length > 0 && (
               <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-left">
-                <p className="text-[11px] font-medium text-amber-700">⚠️ {unansweredRequired.length} required question{unansweredRequired.length > 1 ? 's' : ''} unanswered:</p>
+                <p className="text-[11px] font-medium text-amber-700">{unansweredRequired.length} required question{unansweredRequired.length > 1 ? 's' : ''} unanswered:</p>
                 <ul className="mt-1 space-y-0.5">
                   {unansweredRequired.slice(0, 5).map(q => (
                     <li key={q.id} className="text-[10px] text-amber-600 truncate">• {q.question_text}</li>

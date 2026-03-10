@@ -188,9 +188,9 @@ const CollectionMonitor: React.FC<Props> = ({ projectId }) => {
       <div className="flex gap-1 bg-muted p-1 rounded-lg w-fit">
         {(['live', 'velocity', 'activity'] as const).map(v => (
           <button key={v} onClick={() => setView(v)} className={`px-4 py-2 text-sm rounded-md transition-colors ${view === v ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'}`}>
-            {v === 'live' && '📈 Hourly / 每小时'}
-            {v === 'velocity' && '📊 Daily / 每日'}
-            {v === 'activity' && '🔔 Activity / 活动'}
+            {v === 'live' && 'Hourly / 每小时'}
+            {v === 'velocity' && 'Daily / 每日'}
+            {v === 'activity' && 'Activity / 活动'}
           </button>
         ))}
       </div>
