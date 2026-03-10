@@ -8,6 +8,8 @@ import {
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
+import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
+import BrandIcon from './BrandIcon';
 
 // ── Block types for public pages ──
 const LAYOUT_BLOCK_TYPES = [
