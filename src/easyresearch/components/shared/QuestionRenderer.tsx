@@ -323,7 +323,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       );
       return (
         <div className="space-y-2">
-          {taskDesc && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>📋 {taskDesc}</div>}
+          {taskDesc && <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200 ${txtSm} text-blue-700`}>{taskDesc}</div>}
           <div className="border border-stone-200 rounded-xl p-2 max-h-[300px] overflow-y-auto">
             {tree.map((node: any) => renderNode(node))}
           </div>
