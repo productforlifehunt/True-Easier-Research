@@ -52,7 +52,7 @@ serve(async (req) => {
             'X-Title': 'Care Connector Survey Assistant'
           },
           body: JSON.stringify({
-            model: 'google/gemma-3-4b-it',
+            model: 'openai/gpt-oss-120b',
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: text }
