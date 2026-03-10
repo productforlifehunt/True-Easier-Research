@@ -203,7 +203,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             onClick={() => setEditingTemplate({ id: crypto.randomUUID(), name: '', times: [] })}
             className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600"
           >
-            <Plus size={10} /> New Template / 新建模板
+            <Plus size={10} /> New Template
           </button>
         </div>
 
