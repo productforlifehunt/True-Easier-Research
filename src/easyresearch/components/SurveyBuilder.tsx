@@ -1152,6 +1152,7 @@ const SurveyBuilder: React.FC = () => {
             logicRules={logicRules}
             projectId={projectId}
             onUpdateLogic={setLogicRules}
+            onReorderQuestionnaires={setQuestionnaireConfigs}
           />
         )}
 
