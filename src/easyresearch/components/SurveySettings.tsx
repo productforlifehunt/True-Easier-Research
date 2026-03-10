@@ -201,8 +201,6 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         )}
       </div>
 
-      {/* Incentives */}
-      <IncentiveConfig project={project} onUpdateProject={onUpdateProject} />
     </div>
   );
 };
