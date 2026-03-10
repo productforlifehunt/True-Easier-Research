@@ -189,7 +189,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             schedule.dateMode === 'relative_days' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
           }`}
         >
-          🔄 Relative Days
+          Relative Days
         </button>
       </div>
 
