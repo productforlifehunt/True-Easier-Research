@@ -145,10 +145,10 @@ const IRBComplianceModule: React.FC<Props> = ({ projectId }) => {
           <div className="space-y-4">
             <h3 className="font-semibold text-stone-800">Compliance Standards / 合规标准</h3>
             {[
-              { name: 'GDPR', region: 'EU', status: 'compliant', icon: '🇪🇺' },
-              { name: 'HIPAA', region: 'US Healthcare', status: 'partial', icon: '🏥' },
-              { name: 'CCPA', region: 'California', status: 'compliant', icon: '🇺🇸' },
-              { name: 'PIPL', region: 'China', status: 'review', icon: '🇨🇳' },
+              { name: 'GDPR', region: 'EU', status: 'compliant', icon: 'EU' },
+              { name: 'HIPAA', region: 'US Healthcare', status: 'partial', icon: 'US-H' },
+              { name: 'CCPA', region: 'California', status: 'compliant', icon: 'US' },
+              { name: 'PIPL', region: 'China', status: 'review', icon: 'CN' },
             ].map(std => (
               <div key={std.name} className="p-3 bg-white rounded-xl border border-stone-200 flex items-center gap-3">
                 <span className="text-xl">{std.icon}</span>

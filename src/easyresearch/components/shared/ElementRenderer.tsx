@@ -491,7 +491,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       }
       return (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-          <h4 className={`${txt} font-semibold text-emerald-800`}>🧩 {el.config.title || 'Custom Component'}</h4>
+          <h4 className={`${txt} font-semibold text-emerald-800`}>{el.config.title || 'Custom Component'}</h4>
           {linkedQ ? (
             <>
               {cardOpts.showQuestionCount && <p className={`${txtSm} text-emerald-600 mt-1`}>{linkedQ.questions?.length || 0} fields</p>}

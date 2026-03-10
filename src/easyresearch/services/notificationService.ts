@@ -131,7 +131,7 @@ const generateSchedule = (config: NotificationConfig, enrollmentDate: Date): Sch
         if (scheduleTime > new Date()) {
           notifications.push({
             id: notificationId++,
-            title: `📋 ${config.projectTitle}`,
+            title: `${config.projectTitle}`,
             body: `Day ${day + 1}, ${hour}:00 — Time for your survey entry!`,
             schedule: { at: scheduleTime },
             extra: { projectId: config.projectId, day: day + 1, hour }
