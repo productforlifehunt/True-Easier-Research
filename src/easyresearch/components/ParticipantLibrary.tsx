@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Briefcase, Users, Filter, UserPlus } from 'lucide-react';
+import { Search, MapPin, Briefcase, Users, Filter, UserPlus, Mail, X, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
+import toast from 'react-hot-toast';
 
 interface ParticipantProfile {
   user_id: string;
@@ -12,6 +13,12 @@ interface ParticipantProfile {
   age: number | null;
   occupation: string | null;
   bio: string | null;
+}
+
+interface ResearchProject {
+  id: string;
+  title: string;
+  status: string;
 }
 
 const ParticipantLibrary: React.FC = () => {
@@ -29,6 +36,14 @@ const ParticipantLibrary: React.FC = () => {
   const [myProfile, setMyProfile] = useState<Partial<ParticipantProfile>>({});
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Invite modal state
+  const [inviteTarget, setInviteTarget] = useState<ParticipantProfile | null>(null);
+  const [myProjects, setMyProjects] = useState<ResearchProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviting, setInviting] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
 
   // Available filter options
   const [countries, setCountries] = useState<string[]>([]);
@@ -129,6 +144,121 @@ const ParticipantLibrary: React.FC = () => {
     setSaving(false);
     setShowProfileForm(false);
     loadParticipants();
+  };
+
+  // Open invite modal — load researcher's projects
+  const openInviteModal = async (participant: ParticipantProfile) => {
+    if (!user) {
+      toast.error('Please sign in to invite participants');
+      return;
+    }
+    setInviteTarget(participant);
+    setSelectedProjectId('');
+    setInviteMessage(`Hi ${participant.full_name || 'there'}, I'd like to invite you to participate in my research study.`);
+    setLoadingProjects(true);
+
+    // Find researcher record for current user
+    const { data: researcher } = await supabase
+      .from('researcher')
+      .select('id, organization_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (researcher) {
+      const { data: projects } = await supabase
+        .from('research_project')
+        .select('id, title, status')
+        .eq('researcher_id', researcher.id)
+        .eq('is_template', false)
+        .in('status', ['published', 'active', 'draft'])
+        .order('created_at', { ascending: false });
+      setMyProjects(projects || []);
+    } else {
+      setMyProjects([]);
+    }
+    setLoadingProjects(false);
+  };
+
+  // Send invitation — creates a conversation + first message + notification
+  const sendInvitation = async () => {
+    if (!user || !inviteTarget || !selectedProjectId) return;
+    setInviting(true);
+
+    try {
+      const selectedProject = myProjects.find(p => p.id === selectedProjectId);
+
+      // 1. Create or find existing conversation
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('project_id', selectedProjectId)
+        .eq('participant_user_id', inviteTarget.user_id)
+        .eq('researcher_user_id', user.id)
+        .maybeSingle();
+
+      let conversationId: string;
+
+      if (existingConv) {
+        conversationId = existingConv.id;
+      } else {
+        const { data: newConv, error: convErr } = await supabase
+          .from('conversations')
+          .insert({
+            project_id: selectedProjectId,
+            participant_user_id: inviteTarget.user_id,
+            researcher_user_id: user.id,
+            last_message_at: new Date().toISOString(),
+            last_message_preview: inviteMessage.slice(0, 100),
+            unread_count: 1,
+          })
+          .select('id')
+          .single();
+        if (convErr) throw convErr;
+        conversationId = newConv.id;
+      }
+
+      // 2. Send the invitation message
+      const { error: msgErr } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: inviteMessage,
+          is_read: false,
+        });
+      if (msgErr) throw msgErr;
+
+      // 3. Update conversation's last message
+      await supabase
+        .from('conversations')
+        .update({
+          last_message_at: new Date().toISOString(),
+          last_message_preview: inviteMessage.slice(0, 100),
+          unread_count: 1,
+        })
+        .eq('id', conversationId);
+
+      // 4. Create a notification for the participant
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: inviteTarget.user_id,
+          type: 'study_invitation',
+          title: `Study Invitation: ${selectedProject?.title || 'Research Study'}`,
+          body: inviteMessage.slice(0, 200),
+          is_read: false,
+          reference_id: selectedProjectId,
+          reference_type: 'research_project',
+        });
+
+      toast.success(`Invitation sent to ${inviteTarget.full_name || 'participant'}!`);
+      setInviteTarget(null);
+    } catch (err: any) {
+      console.error('Invitation error:', err);
+      toast.error(err.message || 'Failed to send invitation');
+    } finally {
+      setInviting(false);
+    }
   };
 
   return (
@@ -338,7 +468,11 @@ const ParticipantLibrary: React.FC = () => {
                   <p className="text-[12px] text-stone-400 mt-3 line-clamp-2 leading-relaxed">{p.bio}</p>
                 )}
                 <div className="mt-3 flex gap-2">
-                  <button className="flex-1 text-[12px] font-medium text-emerald-600 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors">
+                  <button
+                    onClick={() => openInviteModal(p)}
+                    className="flex-1 flex items-center justify-center gap-1.5 text-[12px] font-medium text-emerald-600 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50 transition-colors"
+                  >
+                    <Mail size={12} />
                     {t('participantLibrary.inviteToStudy')}
                   </button>
                 </div>
@@ -347,6 +481,102 @@ const ParticipantLibrary: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Invite Modal */}
+      {inviteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
+              <h3 className="text-[15px] font-semibold text-stone-800">Invite to Study</h3>
+              <button onClick={() => setInviteTarget(null)} className="p-1 rounded-lg hover:bg-stone-100 transition-colors">
+                <X size={16} className="text-stone-400" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Participant info */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                  <span className="text-[13px] font-semibold text-white">{(inviteTarget.full_name?.[0] || '?').toUpperCase()}</span>
+                </div>
+                <div>
+                  <p className="text-[14px] font-medium text-stone-800">{inviteTarget.full_name || 'Anonymous'}</p>
+                  <p className="text-[12px] text-stone-400">
+                    {[inviteTarget.occupation, inviteTarget.country].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Select study */}
+              <div>
+                <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Select a study</label>
+                {loadingProjects ? (
+                  <div className="text-[13px] text-stone-400 py-3">Loading your studies...</div>
+                ) : myProjects.length === 0 ? (
+                  <div className="text-[13px] text-stone-400 bg-stone-50 rounded-lg p-4">
+                    You don't have any research projects yet. Create a study first to invite participants.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                    {myProjects.map(proj => (
+                      <button
+                        key={proj.id}
+                        onClick={() => setSelectedProjectId(proj.id)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
+                          selectedProjectId === proj.id
+                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                            : 'bg-stone-50 border border-transparent text-stone-600 hover:border-stone-200'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium truncate">{proj.title}</p>
+                          <p className="text-[11px] text-stone-400 capitalize">{proj.status}</p>
+                        </div>
+                        {selectedProjectId === proj.id && (
+                          <ChevronRight size={14} className="text-emerald-500 flex-shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Message */}
+              {myProjects.length > 0 && (
+                <div>
+                  <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Invitation message</label>
+                  <textarea
+                    value={inviteMessage}
+                    onChange={e => setInviteMessage(e.target.value)}
+                    className="w-full px-3 py-2.5 text-[13px] border border-stone-200 rounded-lg focus:outline-none focus:border-emerald-300 resize-none"
+                    rows={3}
+                    placeholder="Write a message to the participant..."
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 py-4 border-t border-stone-100 flex justify-end gap-2">
+              <button
+                onClick={() => setInviteTarget(null)}
+                className="px-4 py-2 text-[13px] font-medium text-stone-500 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={sendInvitation}
+                disabled={!selectedProjectId || inviting || !inviteMessage.trim()}
+                className="flex items-center gap-1.5 px-5 py-2 text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Mail size={13} />
+                {inviting ? 'Sending...' : 'Send Invitation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

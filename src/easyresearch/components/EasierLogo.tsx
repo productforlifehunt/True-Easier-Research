@@ -3,8 +3,8 @@ import React from 'react';
 /**
  * Easier Research Logo — crisp SVG vector
  * L-shaped chart axis frame (emerald) + 2 ascending bars + final bar as letter "E"
- * E horizontals are half the bar width (4.5px) for a refined, proportional look
- * E extends wider to match natural letter "E" proportions
+ * E horizontal bars match the L-frame stroke thickness (3.5px)
+ * E extends wider for natural letter proportions
  */
 const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28, className = '' }) => {
   const uid = 'el';
@@ -40,7 +40,7 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
         </linearGradient>
       </defs>
 
-      {/* L-shaped axis frame — emerald gradient */}
+      {/* L-shaped axis frame — emerald gradient, 3.5px stroke */}
       <path
         d="M8 6 L8 54 L58 54"
         stroke={`url(#${uid}-axis)`}
@@ -62,16 +62,16 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
       <rect x="42" y="12" width="9" height="38" rx="2" fill={`url(#${uid}-bar)`} />
       <rect x="42" y="12" width="9" height="19" rx="2" fill={`url(#${uid}-sheen)`} />
 
-      {/* E horizontals — 4.5px thick (half of bar width), wider reach for natural E shape */}
+      {/* E horizontals — 3.5px thick (matches L-frame stroke), wider for natural E shape */}
       {/* Top bar */}
-      <rect x="49" y="12" width="11" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="12" width="11" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
-      {/* Middle bar */}
-      <rect x="49" y="28.75" width="9" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="28.75" width="9" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
+      <rect x="49" y="12" width="11" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="12" width="11" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
+      {/* Middle bar — slightly shorter */}
+      <rect x="49" y="29.25" width="9" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="29.25" width="9" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
       {/* Bottom bar */}
-      <rect x="49" y="45.5" width="11" height="4.5" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="49" y="45.5" width="11" height="2.25" rx="1.5" fill={`url(#${uid}-sheen)`} />
+      <rect x="49" y="46.5" width="11" height="3.5" rx="1.5" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="46.5" width="11" height="1.75" rx="1" fill={`url(#${uid}-sheen)`} />
     </svg>
   );
 };
