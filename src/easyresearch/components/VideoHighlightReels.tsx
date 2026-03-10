@@ -41,7 +41,7 @@ const VideoHighlightReels: React.FC<Props> = ({ projectId }) => {
           {(['clips', 'reels', 'editor'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-purple-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'clips' ? '✂️ Clips' : v === 'reels' ? '🎬 Reels' : '🎞️ Editor'}
+              {v === 'clips' ? 'Clips' : v === 'reels' ? 'Reels' : 'Editor'}
             </button>
           ))}
         </div>

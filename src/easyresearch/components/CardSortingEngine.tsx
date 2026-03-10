@@ -296,7 +296,7 @@ const CardSortingEngine: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Cluster Dendrogram / 聚类树状图</h3>
             <div className="h-48 bg-gradient-to-b from-stone-50 to-stone-100 rounded-lg flex items-center justify-center">
               <div className="text-center">
-                <div className="text-4xl mb-2">🌳</div>
+                <div className="text-sm font-semibold text-stone-400 mb-2">Dendrogram</div>
                 <p className="text-sm text-stone-500">Hierarchical clustering visualization</p>
                 <p className="text-xs text-stone-400">Based on {mockResults.length} participant sorts</p>
               </div>

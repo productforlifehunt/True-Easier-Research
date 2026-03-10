@@ -125,8 +125,8 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
                       <div className="text-xs text-stone-500">{new Date(rec.timestamp).toLocaleDateString()}</div>
                     </div>
                   </div>
-                  <span className={`text-lg ${rec.sentiment === 'positive' ? '' : rec.sentiment === 'neutral' ? '' : ''}`}>
-                    {rec.sentiment === 'positive' ? '😊' : rec.sentiment === 'neutral' ? '😐' : '😟'}
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${rec.sentiment === 'positive' ? 'bg-emerald-100 text-emerald-700' : rec.sentiment === 'neutral' ? 'bg-stone-100 text-stone-600' : 'bg-red-100 text-red-700'}`}>
+                    {rec.sentiment}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-stone-500 mb-2">

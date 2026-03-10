@@ -220,7 +220,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
                 <button onClick={() => setShowPreviewWidget(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-600"><X className="w-4 h-4" /></button>
                 <h3 className="font-bold text-stone-900 text-sm mb-1">Quick Feedback / 快速反馈</h3>
                 <p className="text-xs text-stone-500 mb-3">How would you rate your experience? / 您如何评价您的体验？</p>
-                <div className="flex gap-2 mb-3">{['😡', '😕', '😐', '🙂', '😍'].map((e, i) => <button key={i} className="text-2xl hover:scale-125 transition-transform">{e}</button>)}</div>
+                <div className="flex gap-2 mb-3">{[1, 2, 3, 4, 5].map((n) => <button key={n} className="w-10 h-10 rounded-full border-2 border-stone-200 hover:border-stone-400 hover:scale-110 transition-all text-sm font-medium text-stone-600">{n}</button>)}</div>
                 <textarea placeholder="Any additional feedback? / 任何其他反馈？" rows={2} className="w-full text-xs border border-stone-200 rounded-lg p-2 mb-2" />
                 <button className="w-full py-2 text-xs font-semibold text-white rounded-lg" style={{ backgroundColor: primaryColor }}>Submit / 提交</button>
               </div>

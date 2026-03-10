@@ -706,7 +706,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     }
     case 'csat': {
       const csatLabels = ['Very Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Very Satisfied'];
-      const csatEmojis = ['😠', '😟', '😐', '😊', '🤩'];
+      const csatEmojis = ['1', '2', '3', '4', '5'];
       return (
         <div className="space-y-2">
           <div className="flex justify-center gap-2">

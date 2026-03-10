@@ -303,7 +303,7 @@ const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
               <h4 className="text-xs font-semibold text-stone-600 mb-2 flex items-center gap-1"><Target size={12} /> Goals / 目标</h4>
               {detail.goals.map(g => (
                 <div key={g.id} className="flex items-center gap-2 mb-1">
-                  <span className="text-xs">{g.priority === 'high' ? '🔴' : g.priority === 'medium' ? '🟡' : '🟢'}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${g.priority === 'high' ? 'bg-red-100 text-red-700' : g.priority === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{g.priority}</span>
                   <span className="text-sm text-stone-700">{g.text}</span>
                 </div>
               ))}

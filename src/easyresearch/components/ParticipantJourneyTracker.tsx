@@ -248,7 +248,7 @@ const ParticipantJourneyTracker: React.FC<Props> = ({ projectId, journeys: input
                         {new Date(event.timestamp).toLocaleDateString()} {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                       {event.metadata?.time_seconds && (
-                        <p className="text-xs text-muted-foreground mt-0.5">⏱ {Math.round(event.metadata.time_seconds / 60)} min</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{Math.round(event.metadata.time_seconds / 60)} min</p>
                       )}
                     </div>
                   </div>

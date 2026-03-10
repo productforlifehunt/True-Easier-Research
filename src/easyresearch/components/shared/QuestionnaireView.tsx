@@ -400,7 +400,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
           {/* Per-question timer indicator / 每题计时指示器 */}
           {qConfig.track_time_per_question && questionTimings[q.id] != null && (
             <p className={`${s.txtXs} text-stone-300 text-right`}>
-              ⏱ {Math.round(questionTimings[q.id])}s
+              {Math.round(questionTimings[q.id])}s
             </p>
           )}
         </div>

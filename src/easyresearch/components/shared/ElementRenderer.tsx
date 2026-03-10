@@ -451,7 +451,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       }
       return (
         <div className="p-4 rounded-xl bg-white border border-stone-100 shadow-sm">
-          <h4 className={`${txt} font-semibold text-stone-800`}>❓ {el.config.title || 'Help & FAQ'}</h4>
+          <h4 className={`${txt} font-semibold text-stone-800`}>{el.config.title || 'Help & FAQ'}</h4>
           {linkedQ ? (
             <>
               {cardOpts.showQuestionCount && <p className={`${txtSm} text-stone-400 mt-1`}>{linkedQ.questions?.length || 0} help items</p>}
