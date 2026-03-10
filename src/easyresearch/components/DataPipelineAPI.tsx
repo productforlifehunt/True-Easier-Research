@@ -168,9 +168,9 @@ const DataPipelineAPI: React.FC<Props> = ({ projectId }) => {
               tab === t ? 'bg-background text-foreground shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t === 'endpoints' && '🔗 Endpoints / 端点'}
-            {t === 'keys' && `🔑 API Keys (${apiKeys.length})`}
-            {t === 'playground' && '⚡ Playground / 测试'}
+            {t === 'endpoints' && 'Endpoints / 端点'}
+            {t === 'keys' && `API Keys (${apiKeys.length})`}
+            {t === 'playground' && 'Playground / 测试'}
           </button>
         ))}
       </div>
