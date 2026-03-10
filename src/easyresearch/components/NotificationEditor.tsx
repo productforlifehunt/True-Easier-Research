@@ -332,9 +332,9 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
                         }}
                         className="rounded border-stone-300 text-sky-500 focus:ring-sky-300"
                       />
-                      <span className="text-[11px] font-medium text-sky-700">
-                        🔗 Link to Questionnaire Schedule / 关联问卷调度时间
-                      </span>
+                       <span className="text-[11px] font-medium text-sky-700">
+                        Sync with questionnaire response schedule (customize which questionnaires and times to send push notifications)
+                       </span>
                     </label>
                   </div>
                   {isLinked && (
