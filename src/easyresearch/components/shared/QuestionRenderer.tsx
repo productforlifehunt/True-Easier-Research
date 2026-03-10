@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image as ImageIcon } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 
 interface QuestionRendererProps {
