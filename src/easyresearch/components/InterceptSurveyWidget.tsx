@@ -72,10 +72,10 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
             <h3 className="font-semibold text-stone-800">Widget Type / 小部件类型</h3>
             <div className="grid grid-cols-2 gap-3">
               {([
-                { type: 'popup' as const, label: 'Modal Popup', icon: '🪟', desc: 'Center overlay / 居中弹窗' },
-                { type: 'slide_in' as const, label: 'Slide-in', icon: '➡️', desc: 'Corner panel / 角落面板' },
-                { type: 'bottom_bar' as const, label: 'Bottom Bar', icon: '📏', desc: 'Fixed bottom strip / 固定底部条' },
-                { type: 'embedded' as const, label: 'Embedded', icon: '📎', desc: 'Inline in page / 页面内嵌' },
+                { type: 'popup' as const, label: 'Modal Popup', icon: 'P', desc: 'Center overlay / 居中弹窗' },
+                { type: 'slide_in' as const, label: 'Slide-in', icon: 'S', desc: 'Corner panel / 角落面板' },
+                { type: 'bottom_bar' as const, label: 'Bottom Bar', icon: 'B', desc: 'Fixed bottom strip / 固定底部条' },
+                { type: 'embedded' as const, label: 'Embedded', icon: 'E', desc: 'Inline in page / 页面内嵌' },
               ]).map(w => (
                 <button key={w.type} onClick={() => setWidgetType(w.type)}
                   className={`p-3 rounded-xl border-2 text-left ${widgetType === w.type ? 'border-violet-500 bg-violet-50' : 'border-stone-200 hover:border-stone-300'}`}>
