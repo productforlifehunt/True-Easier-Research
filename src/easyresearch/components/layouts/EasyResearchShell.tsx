@@ -64,7 +64,8 @@ const EasyResearchShellInner: React.FC = () => {
       p === '/easyresearch/inbox' ||
       p.startsWith('/easyresearch/inbox/') ||
       p === '/easyresearch/user/settings' ||
-      p.startsWith('/easyresearch/user/')
+      p.startsWith('/easyresearch/user/') ||
+      p === '/easyresearch/discover'
     );
   }, [location.pathname]);
 
