@@ -31,7 +31,7 @@ const OfflineDataCollector: React.FC<Props> = ({ projectId }) => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-stone-900">Offline Data Collection / 离线数据收集</h2>
-            <p className="text-sm text-stone-500">{isOnline ? '🟢 Online' : '🔴 Offline'} · {pendingCount} pending · {totalSize} KB queued</p>
+            <p className="text-sm text-stone-500">{isOnline ? 'Online' : 'Offline'} · {pendingCount} pending · {totalSize} KB queued</p>
           </div>
         </div>
         <div className="flex gap-2">
