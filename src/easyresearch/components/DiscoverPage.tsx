@@ -28,7 +28,7 @@ const DiscoverPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${
                 active
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
                   : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'

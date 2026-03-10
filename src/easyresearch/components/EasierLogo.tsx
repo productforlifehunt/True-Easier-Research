@@ -62,10 +62,12 @@ const EasierLogo: React.FC<{ size?: number; className?: string }> = ({ size = 28
       <rect x="42" y="12" width="9" height="38" rx="2" fill={`url(#${uid}-bar)`} />
       <rect x="42" y="12" width="9" height="19" rx="2" fill={`url(#${uid}-sheen)`} />
 
-      {/* E horizontals — same height (4px) as bar width feel, with gradient */}
-      <rect x="51" y="12" width="5" height="4" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="51" y="29" width="4" height="4" rx="1.5" fill={`url(#${uid}-bar)`} />
-      <rect x="51" y="46" width="5" height="4" rx="1.5" fill={`url(#${uid}-bar)`} />
+      {/* E horizontals — full 9px height matching bar width, seamless with vertical */}
+      <rect x="49" y="12" width="9" height="9" rx="2" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="12" width="9" height="4.5" rx="2" fill={`url(#${uid}-sheen)`} />
+      <rect x="49" y="27.5" width="7" height="9" rx="2" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="41" width="9" height="9" rx="2" fill={`url(#${uid}-bar)`} />
+      <rect x="49" y="41" width="9" height="4.5" rx="2" fill={`url(#${uid}-sheen)`} />
     </svg>
   );
 };
