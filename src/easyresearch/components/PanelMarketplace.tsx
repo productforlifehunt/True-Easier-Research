@@ -97,7 +97,7 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
                 </select></div>
             </div>
             <div className="p-4 bg-cyan-50 rounded-xl border border-cyan-200">
-              <h4 className="text-sm font-bold text-cyan-800 mb-2">💰 Cost Estimate / 费用估算</h4>
+              <h4 className="text-sm font-bold text-cyan-800 mb-2">Cost Estimate / 费用估算</h4>
               <div className="text-2xl font-bold text-cyan-900">${targetN * (providers.find(p => p.id === selectedProvider)?.avgCostPerResponse || 8)}</div>
               <div className="text-xs text-cyan-600">{targetN} × ${providers.find(p => p.id === selectedProvider)?.avgCostPerResponse || 8}/response</div>
             </div>
