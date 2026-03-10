@@ -439,8 +439,8 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             <div className="flex items-center justify-center h-full min-h-[120px]">
               <p className="text-[11px] text-stone-400 text-center">
                 {schedule.dateMode === 'fixed_dates'
-                  ? 'Select a date from the calendar / 从日历选择一个日期'
-                  : 'Select a study day from the list / 从列表选择一个研究天数'}
+                  ? 'Select a date from the calendar'
+                  : 'Select a study day from the list'}
               </p>
             </div>
           )}
