@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, ChevronRight, BarChart3,
   Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
-  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  Bot, Wand2, MessageSquare, Mic
+  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Lightbulb,
+  Bot, Wand2, MessageSquare, Mic, Sparkles
 } from 'lucide-react';
 import { useI18n } from '../hooks/useI18n';
 
