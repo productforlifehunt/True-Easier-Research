@@ -91,7 +91,7 @@ const ResearchBriefGenerator: React.FC<Props> = ({ projectId, projectTitle }) =>
           <FileText size={22} className="text-emerald-600" />
           <div>
             <h2 className="text-lg font-bold text-stone-800">Research Brief Generator / 研究简报生成器</h2>
-            <p className="text-xs text-stone-500">AI-powered research proposal builder / AI驱动的研究提案构建器</p>
+            <p className="text-xs text-stone-500">AI-powered research proposal builder / AI辅助的研究提案构建器</p>
           </div>
         </div>
         <div className="flex gap-2">
