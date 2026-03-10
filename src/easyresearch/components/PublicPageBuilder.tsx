@@ -66,6 +66,8 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [showAddElement, setShowAddElement] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
+  const [configBlockId, setConfigBlockId] = useState<string | null>(null);
 
   const activePage = pages.find(p => p.id === activePageId);
 
