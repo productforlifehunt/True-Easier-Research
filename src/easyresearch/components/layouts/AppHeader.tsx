@@ -30,7 +30,8 @@ const AppHeader: React.FC = () => {
     navigate('/easyresearch');
   };
 
-  const desktopNavLinks = [
+  // Only show public nav links when user is NOT logged in
+  const desktopNavLinks = user ? [] : [
     { path: '/easyresearch/participant/join', label: t('nav.joinStudies') },
     { path: '/easyresearch/participant-library', label: t('nav.participants') },
     { path: '/easyresearch/features', label: t('nav.features') },
