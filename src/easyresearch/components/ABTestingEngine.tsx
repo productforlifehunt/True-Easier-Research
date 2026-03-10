@@ -6,7 +6,7 @@
  * 功能：变体创建、随机分配、对比分析、显著性检验
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import { Beaker, Plus, Trash2, BarChart3, Users, Percent, ArrowRight, CheckCircle, TrendingUp, Shuffle } from 'lucide-react';
+import { FlaskConical, Plus, Trash2, BarChart3, Users, Percent, ArrowRight, CheckCircle, TrendingUp, Shuffle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
@@ -232,7 +232,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
                 activeExperiment?.id === exp.id ? 'bg-white text-stone-800 shadow-sm font-medium' : 'text-stone-500 hover:text-stone-700'
               }`}
             >
-              <Beaker size={11} className="inline mr-1" />
+              <FlaskConical size={11} className="inline mr-1" />
               {exp.name}
             </button>
           ))}
@@ -269,7 +269,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
           <div className="bg-white rounded-xl border border-stone-100 p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[13px] font-semibold text-stone-800 flex items-center gap-2">
-                <Beaker size={14} className="text-violet-500" />
+                <FlaskConical size={14} className="text-violet-500" />
                 {activeExperiment.name}
               </h3>
               <div className="flex items-center gap-2">
@@ -414,7 +414,7 @@ const ABTestingEngine: React.FC<Props> = ({ projectId, questions }) => {
 
       {experiments.length === 0 && !showCreate && (
         <div className="bg-white rounded-xl border border-stone-100 p-8 text-center">
-          <Beaker size={32} className="mx-auto mb-3 text-stone-300" />
+          <FlaskConical size={32} className="mx-auto mb-3 text-stone-300" />
           <p className="text-[13px] text-stone-500">No experiments yet / 尚无实验</p>
           <p className="text-[11px] text-stone-400 mt-1">Create A/B tests to compare survey variants / 创建A/B测试以比较调查变体</p>
           <button
