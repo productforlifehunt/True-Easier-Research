@@ -12,12 +12,12 @@ const PanelMarketplace: React.FC<Props> = ({ projectId }) => {
   const [targetDemographics, setTargetDemographics] = useState({ ageRange: '18-65', gender: 'all', country: 'US' });
 
   const providers: PanelProvider[] = [
-    { id: 'prolific', name: 'Prolific', logo: '🔬', avgCostPerResponse: 8, avgResponseTime: '< 1 hour', totalPanelists: '200K+', qualityScore: 95, regions: ['Global'], features: ['Pre-screening', 'Longitudinal', 'Naivety checks'], connected: true },
-    { id: 'cint', name: 'Cint / Lucid', logo: '🌐', avgCostPerResponse: 5, avgResponseTime: '2-4 hours', totalPanelists: '300M+', regions: ['Global'], qualityScore: 88, features: ['Massive scale', 'B2B panels', 'Multi-market'], connected: false },
-    { id: 'mturk', name: 'Amazon MTurk', logo: '📦', avgCostPerResponse: 2, avgResponseTime: '< 30 min', totalPanelists: '500K+', regions: ['US-heavy'], qualityScore: 75, features: ['Cheapest', 'Fastest', 'Custom quals'], connected: false },
-    { id: 'respondent', name: 'Respondent.io', logo: '🎯', avgCostPerResponse: 15, avgResponseTime: '1-3 days', totalPanelists: '3M+', regions: ['US, UK, EU'], qualityScore: 92, features: ['B2B professionals', 'Interview recruits', 'High quality'], connected: false },
-    { id: 'userinterviews', name: 'User Interviews', logo: '🗣️', avgCostPerResponse: 12, avgResponseTime: '1-2 days', totalPanelists: '2M+', regions: ['US, UK, CA'], qualityScore: 90, features: ['UX research focus', 'Scheduling', 'Screener integration'], connected: false },
-    { id: 'positionly', name: 'Positly', logo: '📊', avgCostPerResponse: 3, avgResponseTime: '< 1 hour', totalPanelists: '100K+', regions: ['US'], qualityScore: 82, features: ['Academic focused', 'CloudResearch integration', 'Attention checks'], connected: false },
+    { id: 'prolific', name: 'Prolific', logo: 'P', avgCostPerResponse: 8, avgResponseTime: '< 1 hour', totalPanelists: '200K+', qualityScore: 95, regions: ['Global'], features: ['Pre-screening', 'Longitudinal', 'Naivety checks'], connected: true },
+    { id: 'cint', name: 'Cint / Lucid', logo: 'C', avgCostPerResponse: 5, avgResponseTime: '2-4 hours', totalPanelists: '300M+', regions: ['Global'], qualityScore: 88, features: ['Massive scale', 'B2B panels', 'Multi-market'], connected: false },
+    { id: 'mturk', name: 'Amazon MTurk', logo: 'M', avgCostPerResponse: 2, avgResponseTime: '< 30 min', totalPanelists: '500K+', regions: ['US-heavy'], qualityScore: 75, features: ['Cheapest', 'Fastest', 'Custom quals'], connected: false },
+    { id: 'respondent', name: 'Respondent.io', logo: 'R', avgCostPerResponse: 15, avgResponseTime: '1-3 days', totalPanelists: '3M+', regions: ['US, UK, EU'], qualityScore: 92, features: ['B2B professionals', 'Interview recruits', 'High quality'], connected: false },
+    { id: 'userinterviews', name: 'User Interviews', logo: 'U', avgCostPerResponse: 12, avgResponseTime: '1-2 days', totalPanelists: '2M+', regions: ['US, UK, CA'], qualityScore: 90, features: ['UX research focus', 'Scheduling', 'Screener integration'], connected: false },
+    { id: 'positionly', name: 'Positly', logo: 'P', avgCostPerResponse: 3, avgResponseTime: '< 1 hour', totalPanelists: '100K+', regions: ['US'], qualityScore: 82, features: ['Academic focused', 'CloudResearch integration', 'Attention checks'], connected: false },
   ];
 
   const mockRecruitment = { requested: targetN, recruited: Math.floor(targetN * 0.72), completed: Math.floor(targetN * 0.58), rejected: Math.floor(targetN * 0.08), avgTime: '4m 23s', costSoFar: Math.floor(targetN * 0.58 * (providers.find(p => p.id === (selectedProvider || 'prolific'))?.avgCostPerResponse || 8)) };
