@@ -612,7 +612,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="space-y-4">
           {/* Functional question */}
           <div className={`${pad} rounded-xl bg-emerald-50 border border-emerald-200`}>
-            <p className={`${txtSm} font-medium text-emerald-700 mb-2`}>✅ {funcQ}</p>
+            <p className={`${txtSm} font-medium text-emerald-700 mb-2`}>{funcQ}</p>
             <div className="space-y-1.5">
               {kanoCats.map((cat: string, ci: number) => (
                 <label key={ci} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${kanoVal.functional === cat ? 'border-emerald-400 bg-emerald-100' : 'border-stone-100 hover:border-emerald-200'}`}>
