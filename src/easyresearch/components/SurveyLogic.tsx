@@ -57,10 +57,14 @@ interface SurveyLogicProps {
 }
 
 const SurveyLogic: React.FC<SurveyLogicProps> = ({ questionnaires, projectId, logicRules, onUpdateLogic }) => {
-  const [selectedQId, setSelectedQId] = useState<string>(questionnaires[0]?.id || '');
-  const selectedQ = questionnaires.find(q => q.id === selectedQId);
-  const questions = selectedQ?.questions || [];
-  const qRules = logicRules.filter(r => r.questionnaireId === selectedQId);
+  const [selectedQId, setSelectedQId] = useState<string>('__all__');
+  const selectedQ = selectedQId === '__all__' ? null : questionnaires.find(q => q.id === selectedQId);
+  const questions = selectedQId === '__all__'
+    ? questionnaires.flatMap(q => q.questions || [])
+    : (selectedQ?.questions || []);
+  const qRules = selectedQId === '__all__'
+    ? logicRules
+    : logicRules.filter(r => r.questionnaireId === selectedQId);
 
   const addRule = () => {
     if (!selectedQId || !projectId) return;
