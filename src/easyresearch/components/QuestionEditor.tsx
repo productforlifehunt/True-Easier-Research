@@ -394,10 +394,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <CustomDropdown
             options={[
               // Layout & Media
-              { value: 'section_header', label: '📐 Section / Tab' },
-              { value: 'text_block', label: '📐 Text Block' },
-              { value: 'divider', label: '📐 Divider Line' },
-              { value: 'image_block', label: '📐 Image' },
+              { value: 'section_header', label: 'Section / Tab' },
+              { value: 'text_block', label: 'Text Block' },
+              { value: 'divider', label: 'Divider Line' },
+              { value: 'image_block', label: 'Image' },
               { value: 'video_block', label: '📐 Video' },
               { value: 'audio_block', label: '📐 Audio' },
               { value: 'embed_block', label: '📐 Embed / Webpage' },
