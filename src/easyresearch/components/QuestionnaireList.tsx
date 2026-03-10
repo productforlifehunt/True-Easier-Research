@@ -992,17 +992,83 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 ))}
                               </div>
 
-                              {/* AI Chatbot Toggle */}
-                              <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
+                              {/* AI Support Section */}
+                              <div className="bg-white rounded-xl border border-emerald-200 p-3 space-y-3">
+                                <h5 className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5"><Sparkles size={11} /> AI Support</h5>
+
+                                {/* Toggle 1: AI Voice Assistant */}
                                 <div className="flex items-center justify-between">
-                                  <div>
-                                    <span className="text-[12px] text-stone-600 flex items-center gap-1.5">AI Survey Chatbot</span>
-                                    <p className="text-[10px] text-stone-400 mt-0.5">Floating AI assistant that helps participants complete the survey conversationally</p>
+                                  <div className="flex items-center gap-1.5">
+                                    <Mic size={13} className="text-emerald-500" />
+                                    <div>
+                                      <span className="text-[12px] text-stone-600">AI Voice Assistant</span>
+                                      <p className="text-[10px] text-stone-400">Participants can answer by voice (browser speech recognition)</p>
+                                    </div>
                                   </div>
-                                  <button onClick={() => updateQuestionnaire(q.id, { ai_chatbot_enabled: !q.ai_chatbot_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_chatbot_enabled ? 'bg-violet-500' : 'bg-stone-200'}`}>
+                                  <button onClick={() => updateQuestionnaire(q.id, { ai_voice_enabled: !q.ai_voice_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_voice_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
+                                    <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.ai_voice_enabled ? '22px' : '2px' }} />
+                                  </button>
+                                </div>
+
+                                {/* Toggle 2: AI Chat Assistant */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1.5">
+                                    <MessageCircle size={13} className="text-emerald-500" />
+                                    <div>
+                                      <span className="text-[12px] text-stone-600">AI Chat Assistant</span>
+                                      <p className="text-[10px] text-stone-400">AI chatbot helps participants complete the survey conversationally</p>
+                                    </div>
+                                  </div>
+                                  <button onClick={() => updateQuestionnaire(q.id, { ai_chatbot_enabled: !q.ai_chatbot_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_chatbot_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
                                     <span className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: q.ai_chatbot_enabled ? '22px' : '2px' }} />
                                   </button>
                                 </div>
+
+                                {/* Toggle 3: Show voice on all questions */}
+                                <div className="flex items-center justify-between pl-4 border-l-2 border-emerald-100">
+                                  <span className="text-[11px] text-stone-500">Enable voice input for all questions</span>
+                                  <button onClick={() => {
+                                    updateQuestionnaire(q.id, { ai_voice_all_questions: !q.ai_voice_all_questions });
+                                    if (!q.ai_voice_all_questions) {
+                                      const updatedQs = q.questions.map((qn: any) => ({ ...qn, allow_voice: true, question_config: { ...qn.question_config, allow_voice: true } }));
+                                      updateQuestionnaire(q.id, { questions: updatedQs });
+                                    }
+                                  }} className={`relative w-9 h-4.5 rounded-full transition-colors shrink-0 ${q.ai_voice_all_questions ? 'bg-emerald-400' : 'bg-stone-200'}`} style={{ height: '18px', width: '36px' }}>
+                                    <span className="absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform" style={{ width: '14px', height: '14px', left: q.ai_voice_all_questions ? '19px' : '2px' }} />
+                                  </button>
+                                </div>
+
+                                {/* Toggle 4: Show AI assist on all questions */}
+                                <div className="flex items-center justify-between pl-4 border-l-2 border-emerald-100">
+                                  <span className="text-[11px] text-stone-500">Enable AI assist for all questions</span>
+                                  <button onClick={() => {
+                                    updateQuestionnaire(q.id, { ai_assist_all_questions: !q.ai_assist_all_questions });
+                                    if (!q.ai_assist_all_questions) {
+                                      const updatedQs = q.questions.map((qn: any) => ({ ...qn, allow_ai_assist: true, question_config: { ...qn.question_config, allow_ai_assist: true } }));
+                                      updateQuestionnaire(q.id, { questions: updatedQs });
+                                    }
+                                  }} className={`relative w-9 h-4.5 rounded-full transition-colors shrink-0 ${q.ai_assist_all_questions ? 'bg-emerald-400' : 'bg-stone-200'}`} style={{ height: '18px', width: '36px' }}>
+                                    <span className="absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-transform" style={{ width: '14px', height: '14px', left: q.ai_assist_all_questions ? '19px' : '2px' }} />
+                                  </button>
+                                </div>
+
+                                {/* AI Guidance / System Prompt */}
+                                <div>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">AI Guidance</label>
+                                  <textarea
+                                    value={q.ai_guidance || ''}
+                                    onChange={(e) => updateQuestionnaire(q.id, { ai_guidance: e.target.value })}
+                                    className="w-full px-3 py-2 rounded-xl text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+                                    rows={3}
+                                    placeholder="Guide AI behavior for this questionnaire (e.g., 'Be encouraging and explain medical terms in simple language')"
+                                  />
+                                  <p className="text-[10px] text-stone-400 mt-1">This guidance shapes how the AI interacts with participants during this questionnaire.</p>
+                                </div>
+
+                                {/* AI Preview hint */}
+                                <p className="text-[10px] text-stone-400 flex items-center gap-1"><Eye size={10} /> Save and use the Preview tab to test AI behavior</p>
+
+                                <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">You can also customize AI settings per question in the question editor below.</p>
                               </div>
 
                               {participantTypes.length > 0 && (
