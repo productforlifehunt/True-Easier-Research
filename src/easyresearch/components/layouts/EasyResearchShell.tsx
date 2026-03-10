@@ -129,10 +129,12 @@ const EasyResearchShellInner: React.FC = () => {
         )}
       </div>
 
-      {/* Footer — ALWAYS visible on ALL pages, ALL screen sizes (not fixed, just at bottom) */}
-      <div className={`${showSidebar ? 'lg:pl-56' : ''} ${showBottomNav ? 'mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0' : ''}`}>
-        <ResearcherFooter />
-      </div>
+      {/* Footer — only on public pages (non-dashboard routes) */}
+      {!isDashboardRoute && (
+        <div className={`${showSidebar ? 'lg:pl-56' : ''}`}>
+          <ResearcherFooter />
+        </div>
+      )}
 
       {/* Mobile bottom nav — 4 tabs, logged-in only, non-public */}
       {showBottomNav && (
