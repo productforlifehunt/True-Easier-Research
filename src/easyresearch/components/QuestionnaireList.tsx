@@ -57,6 +57,7 @@ interface QuestionnaireListProps {
   onUpdateLogic?: (rules: LogicRule[]) => void;
   projectNotifications?: NotificationConfig[];
   onUpdateProjectNotifications?: (notifs: NotificationConfig[]) => void;
+  onSwitchToNotifications?: () => void;
 }
 
 const frequencyOptions = [
