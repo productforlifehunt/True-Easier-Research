@@ -417,7 +417,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         <div className="space-y-2">
           {tasks.length > 0 && (
             <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200`}>
-              <p className={`${txtSm} text-blue-700 font-medium mb-1`}>📋 Tasks:</p>
+              <p className={`${txtSm} text-blue-700 font-medium mb-1`}>Tasks:</p>
               {tasks.map((t: any, i: number) => (
                 <p key={i} className={`${txtXs} text-blue-600`}>{i + 1}. {t.task}</p>
               ))}
