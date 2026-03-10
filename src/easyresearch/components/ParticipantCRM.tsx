@@ -250,9 +250,9 @@ const ParticipantCRM: React.FC<Props> = ({ projectId }) => {
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${engagement.color}`}>{engagement.label}</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-stone-500">
-                  <span>📊 {p.responses_count} responses</span>
-                  <span>✅ {p.completion_rate}%</span>
-                  <span>⚡ {p.engagement_score}%</span>
+                  <span>{p.responses_count} responses</span>
+                  <span>{p.completion_rate}%</span>
+                  <span>{p.engagement_score}%</span>
                 </div>
                 {p.tags.length > 0 && (
                   <div className="flex gap-1 flex-wrap mt-2">{p.tags.map(t => <span key={t} className="px-2 py-0.5 bg-stone-100 text-stone-500 rounded-full text-[10px]">{t}</span>)}</div>
