@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Clock, Eye, EyeOff, Layers } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Clock, Eye, EyeOff, Layers, FileText, Shield, Compass, Puzzle } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 import { supabase } from '../../lib/supabase';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import toast from 'react-hot-toast';
