@@ -60,7 +60,7 @@ const InterceptSurveyWidget: React.FC<Props> = ({ projectId }) => {
           {(['config', 'triggers', 'embed', 'preview'] as const).map(v => (
             <button key={v} onClick={() => setActiveView(v)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeView === v ? 'bg-violet-600 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-              {v === 'config' ? '⚙️ Config' : v === 'triggers' ? '⚡ Triggers' : v === 'embed' ? '< /> Embed' : '👁️ Preview'}
+              {v === 'config' ? 'Config' : v === 'triggers' ? 'Triggers' : v === 'embed' ? 'Embed' : 'Preview'}
             </button>
           ))}
         </div>
