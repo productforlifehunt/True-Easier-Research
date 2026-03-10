@@ -10,8 +10,8 @@ const ResearcherFooter: React.FC = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-5">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg overflow-hidden">
-              <img src={easierLogo} alt="Easier" className="w-full h-full object-cover" />
+            <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px]">
+              <EasierLogo size={28} />
             </div>
             <span className="text-[14px] font-semibold tracking-tight text-stone-800">{t('brand.name')}</span>
           </div>

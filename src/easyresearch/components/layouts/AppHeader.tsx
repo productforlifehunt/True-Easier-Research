@@ -56,8 +56,8 @@ const AppHeader: React.FC = () => {
               to={user ? '/easyresearch/dashboard' : '/easyresearch'}
               className="flex items-center gap-2 group"
             >
-              <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] rounded-lg overflow-hidden">
-                <img src={easierLogo} alt="Easier" className="w-full h-full object-cover" />
+              <div className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px]">
+                <EasierLogo size={28} />
               </div>
               <span className="text-[14px] font-semibold tracking-tight text-stone-800">
                 {t('brand.name')}
