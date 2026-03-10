@@ -3,7 +3,7 @@
  * 情感分析仪表板 — 开放文本响应的实时情感追踪
  */
 import React, { useState, useMemo } from 'react';
-import { Brain, TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare, Filter, Download } from 'lucide-react';
+import { BarChart2, TrendingUp, TrendingDown, Minus, BarChart3, MessageSquare, Filter, Download } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 
 interface Props {
@@ -146,7 +146,7 @@ const SentimentDashboard: React.FC<Props> = ({ projectId, responses, questions }
       {/* Header / 头部 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Brain className="w-6 h-6 text-violet-600" />
+          <BarChart2 className="w-6 h-6 text-violet-600" />
           <div>
             <h2 className="text-lg font-semibold text-foreground">Sentiment Analysis / 情感分析</h2>
             <p className="text-sm text-muted-foreground">{textResponses.length} text responses analyzed / 条文本已分析</p>

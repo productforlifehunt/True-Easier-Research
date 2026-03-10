@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, ChevronRight, BarChart3,
   Layers, GitBranch, Globe, Lock, Smartphone, PieChart, Download,
-  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
-  Bot, Wand2, MessageSquare, Mic
+  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Lightbulb,
+  Bot, Wand2, MessageSquare, Mic, Sparkles
 } from 'lucide-react';
 import { useI18n } from '../hooks/useI18n';
 
@@ -29,7 +29,7 @@ const LandingPage: React.FC = () => {
     { icon: Palette, nameKey: 'useCase.uxResearch', descKey: 'useCase.uxResearch.desc' },
     { icon: ShoppingBag, nameKey: 'useCase.marketResearch', descKey: 'useCase.marketResearch.desc' },
     { icon: Building2, nameKey: 'useCase.hr', descKey: 'useCase.hr.desc' },
-    { icon: Brain, nameKey: 'useCase.psychology', descKey: 'useCase.psychology.desc' },
+    { icon: Lightbulb, nameKey: 'useCase.psychology', descKey: 'useCase.psychology.desc' },
   ];
 
   const steps = [
@@ -88,7 +88,7 @@ const LandingPage: React.FC = () => {
           <div className="rounded-2xl border border-stone-100 bg-stone-50/50 backdrop-blur-sm p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Brain size={12} className="text-white" />
+                <Sparkles size={12} className="text-white" />
               </div>
               <span className="text-[13px] font-semibold text-emerald-600 tracking-tight">{t('landing.ai.title')}</span>
             </div>

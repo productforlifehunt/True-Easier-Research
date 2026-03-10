@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Clock, Copy, Eye, X, Loader2,
-  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Brain,
+  GraduationCap, Stethoscope, ShoppingBag, Palette, Building2, Lightbulb,
   Heart, Briefcase, Target, MessageSquare, ThumbsUp, Smile, Filter,
   Layers, FileText, Package, Globe, Lock
 } from 'lucide-react';
