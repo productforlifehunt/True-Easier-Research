@@ -627,7 +627,7 @@ const QuestionnaireScheduler: React.FC<QuestionnaireSchedulerProps> = ({
 
             <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#fef3c7', border: '1px solid #fbbf24' }}>
               <p className="text-sm font-medium" style={{ color: '#92400e' }}>
-                ⚠️ To add questions to this questionnaire:
+                To add questions to this questionnaire:
               </p>
               <ol className="text-sm mt-2 ml-4 list-decimal" style={{ color: '#92400e' }}>
                 <li>Go to the main project editor (Questions tab)</li>
