@@ -44,7 +44,7 @@ interface Persona {
   created_at: string;
 }
 
-const AVATAR_EMOJIS = ['👩‍💼', '👨‍💻', '👩‍🔬', '👨‍🏫', '👩‍⚕️', '👨‍🎨', '👩‍🍳', '👨‍🔧', '🧑‍💼', '👵', '👴', '🧑‍🎓', '👩‍🌾', '👨‍✈️', '🧑‍🚀', '👷'];
+const AVATAR_EMOJIS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
 const PERSONA_COLORS = ['#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6366f1', '#14b8a6'];
 
 const PersonaBuilder: React.FC<Props> = ({ projectId, questionnaires }) => {
