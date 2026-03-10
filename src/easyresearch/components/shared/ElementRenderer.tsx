@@ -559,6 +559,22 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
         </div>
       ) : null;
 
+    case 'ai_assistant':
+      return (
+        <div className={`${pad} rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <Sparkles size={compact ? 14 : 16} className="text-emerald-500" />
+            <span className={`${txtSm} font-medium text-emerald-700`}>{el.config.title || 'AI Assistant'}</span>
+          </div>
+          <div className="group relative">
+            <HelpCircle size={compact ? 12 : 14} className="text-emerald-400 cursor-help" />
+            <div className="absolute bottom-full right-0 mb-1 hidden group-hover:block w-48 p-2 rounded-lg bg-stone-800 text-white text-[10px] shadow-lg z-10">
+              Configure this AI assistant in the Questionnaire tab &gt; Project AI section.
+            </div>
+          </div>
+        </div>
+      );
+
     default:
       return (
         <div className="p-3 rounded-xl bg-stone-50 border border-stone-100">
