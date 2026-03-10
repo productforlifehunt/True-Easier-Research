@@ -5,6 +5,7 @@ import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
+import BrandIcon from './BrandIcon';
 
 export interface LayoutTab {
   id: string;
@@ -127,6 +128,7 @@ const LAYOUT_ELEMENTS = [
   { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
   { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
   { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
+  { type: 'back_button', label: 'Back Button', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
 ];
 
 const WIDTH_PRESETS = [
@@ -1322,7 +1324,8 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 {DEVICE_PRESETS.map(d => (
                   <button key={d.id} onClick={() => setSelectedDevice(d)}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
-                    {d.brand === 'apple' ? '🍎' : '🤖'} {d.label}
+                    <BrandIcon brand={d.brand} size={10} />
+                    {d.label}
                   </button>
                 ))}
               </div>

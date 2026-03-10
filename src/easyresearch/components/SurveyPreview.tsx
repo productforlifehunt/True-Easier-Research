@@ -6,6 +6,7 @@ import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
+import BrandIcon from './BrandIcon';
 
 interface SurveyPreviewProps {
   questions: any[];
@@ -131,7 +132,8 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             {DEVICE_PRESETS.map(d => (
               <button key={d.id} onClick={() => setSelectedDevice(d)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
-                {d.brand === 'apple' ? '🍎' : '🤖'} {d.label}
+                <BrandIcon brand={d.brand} size={12} />
+                {d.label}
               </button>
             ))}
           </div>

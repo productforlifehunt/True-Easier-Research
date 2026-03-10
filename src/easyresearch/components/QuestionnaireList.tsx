@@ -64,12 +64,12 @@ interface QuestionnaireListProps {
 
 const frequencyOptions = [
   { value: 'once', label: 'One-time' },
-  { value: 'hourly', label: 'Hourly' },
-  { value: '2hours', label: 'Every 2 hours' },
-  { value: '4hours', label: 'Every 4 hours' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'twice_daily', label: 'Twice daily' },
-  { value: 'weekly', label: 'Weekly' },
+  { value: 'hourly', label: 'Multiple time — Hourly' },
+  { value: '2hours', label: 'Multiple time — Every 2 hours' },
+  { value: '4hours', label: 'Multiple time — Every 4 hours' },
+  { value: 'daily', label: 'Multiple time — Daily' },
+  { value: 'twice_daily', label: 'Multiple time — Twice daily' },
+  { value: 'weekly', label: 'Multiple time — Weekly' },
 ];
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
@@ -696,26 +696,40 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">Questionnaire {idx + 1}</span>
-                                <select
+                                <CustomDropdown
+                                  options={[
+                                    { value: 'survey', label: 'Questionnaire' },
+                                    { value: '_divider', label: '── Forms & Components ──' },
+                                    { value: 'consent', label: 'Consent' },
+                                    { value: 'screening', label: 'Screening' },
+                                    { value: 'profile', label: 'Profile' },
+                                    { value: 'help', label: 'Help' },
+                                    { value: 'custom', label: 'Custom' },
+                                  ].filter(o => o.value !== '_divider')}
                                   value={q.questionnaire_type}
-                                  onChange={(e) => { e.stopPropagation(); updateQuestionnaire(q.id, { questionnaire_type: e.target.value as any }); }}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border-none outline-none cursor-pointer ${
-                                    q.questionnaire_type === 'consent' ? 'bg-emerald-50 text-emerald-600' :
-                                    q.questionnaire_type === 'screening' ? 'bg-amber-50 text-amber-600' :
-                                    q.questionnaire_type === 'profile' ? 'bg-violet-50 text-violet-600' :
-                                    q.questionnaire_type === 'help' ? 'bg-sky-50 text-sky-600' :
-                                    q.questionnaire_type === 'custom' ? 'bg-rose-50 text-rose-600' :
-                                    'bg-stone-50 text-stone-500'
-                                  }`}
-                                >
-                                  <option value="survey">Survey</option>
-                                  <option value="consent">Consent</option>
-                                  <option value="screening">Screening</option>
-                                  <option value="profile">Profile</option>
-                                  <option value="help">Help</option>
-                                  <option value="custom">Custom</option>
-                                </select>
+                                  onChange={(v) => updateQuestionnaire(q.id, { questionnaire_type: v as any })}
+                                  placeholder="Type"
+                                  className="w-auto"
+                                  buttonStyle={{
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    textTransform: 'uppercase' as const,
+                                    letterSpacing: '0.05em',
+                                    padding: '2px 8px',
+                                    borderRadius: '9999px',
+                                    border: 'none',
+                                    background: q.questionnaire_type === 'consent' ? '#ecfdf5' :
+                                      q.questionnaire_type === 'screening' ? '#fffbeb' :
+                                      q.questionnaire_type === 'profile' ? '#f5f3ff' :
+                                      q.questionnaire_type === 'help' ? '#f0f9ff' :
+                                      q.questionnaire_type === 'custom' ? '#fff1f2' : '#fafaf9',
+                                    color: q.questionnaire_type === 'consent' ? '#059669' :
+                                      q.questionnaire_type === 'screening' ? '#d97706' :
+                                      q.questionnaire_type === 'profile' ? '#7c3aed' :
+                                      q.questionnaire_type === 'help' ? '#0284c7' :
+                                      q.questionnaire_type === 'custom' ? '#e11d48' : '#78716c',
+                                  }}
+                                />
                                 <input
                                   type="text"
                                   value={q.title}

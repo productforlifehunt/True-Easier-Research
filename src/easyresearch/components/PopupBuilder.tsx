@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Clock, Eye, EyeOff, Layers } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Clock, Eye, EyeOff, Layers, FileText, Shield, Compass, Puzzle } from 'lucide-react';
+import CustomDropdown from './CustomDropdown';
 import { supabase } from '../../lib/supabase';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import toast from 'react-hot-toast';
@@ -296,26 +297,24 @@ const PopupBuilder: React.FC<PopupBuilderProps> = ({ projectId, questionnaires }
                 {/* Content source / 内容来源 */}
                 <div>
                   <label className="text-[11px] font-medium text-stone-500 uppercase tracking-wider">Content Source / 内容来源</label>
-                  <select
+                  <CustomDropdown
+                    options={[
+                      { value: '_text', label: 'Custom Text / 自定义文本' },
+                      ...linkableComponents.map(q => ({
+                        value: q.id,
+                        label: q.title,
+                      })),
+                    ]}
                     value={popup.questionnaire_id || '_text'}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '_text') {
+                    onChange={(v) => {
+                      if (v === '_text') {
                         updatePopup(popup.id, { questionnaire_id: null, content: popup.content || 'Enter popup content here...' });
                       } else {
-                        updatePopup(popup.id, { questionnaire_id: val, content: null });
+                        updatePopup(popup.id, { questionnaire_id: v, content: null });
                       }
                     }}
-                    className="mt-1 w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                  >
-                    <option value="_text">📝 Custom Text / 自定义文本</option>
-                    {linkableComponents.map(q => (
-                      <option key={q.id} value={q.id}>
-                        {q.questionnaire_type === 'survey' ? '📋' : q.questionnaire_type === 'consent' ? '🛡️' : q.questionnaire_type === 'onboarding' ? '🎯' : '🧩'}{' '}
-                        {q.title}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select content source"
+                  />
                 </div>
 
                 {/* Text content editor / 文本内容编辑器 */}
@@ -354,15 +353,12 @@ const PopupBuilder: React.FC<PopupBuilderProps> = ({ projectId, questionnaires }
                     {popup.rules.map((rule, ri) => (
                       <div key={rule.id} className="flex items-start gap-2 p-3 rounded-lg bg-stone-50 border border-stone-100">
                         <div className="flex-1 space-y-2">
-                          <select
+                          <CustomDropdown
+                            options={TRIGGER_TYPES.map(tt => ({ value: tt.value, label: tt.label }))}
                             value={rule.trigger_type}
-                            onChange={(e) => updateRule(popup.id, rule.id, { trigger_type: e.target.value as any })}
-                            className="w-full px-2 py-1.5 text-xs border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-300"
-                          >
-                            {TRIGGER_TYPES.map(tt => (
-                              <option key={tt.value} value={tt.value}>{tt.label}</option>
-                            ))}
-                          </select>
+                            onChange={(v) => updateRule(popup.id, rule.id, { trigger_type: v as any })}
+                            placeholder="Select trigger"
+                          />
 
                           {rule.trigger_type === 'timed' && (
                             <div className="flex items-center gap-2">

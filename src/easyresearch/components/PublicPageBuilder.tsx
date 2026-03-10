@@ -8,6 +8,8 @@ import {
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
+import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
+import BrandIcon from './BrandIcon';
 
 // ── Block types for public pages ──
 const LAYOUT_BLOCK_TYPES = [
@@ -64,6 +66,8 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [showAddElement, setShowAddElement] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
+  const [configBlockId, setConfigBlockId] = useState<string | null>(null);
 
   const activePage = pages.find(p => p.id === activePageId);
 
@@ -395,7 +399,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
         </div>
       ) : (
         <>
-          {/* Page tabs — mirrors Layout builder tab bar */}
+          {/* Page tabs */}
           <div className="flex items-center gap-1 bg-stone-100 rounded-xl p-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {pages.map(page => (
               <div key={page.id}
@@ -414,9 +418,9 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
           </div>
 
           {activePage && (
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Left: Page config + element list */}
-              <div className="flex-1 space-y-3">
+            <div className="flex gap-4">
+              {/* Left column: Elements list */}
+              <div className="w-[280px] shrink-0 space-y-3">
                 {/* Page settings */}
                 <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -433,7 +437,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
                     <div>
                       <label className="text-[11px] text-stone-400 mb-1 block">Title</label>
                       <input value={activePage.title} onChange={e => updatePage(activePage.id, 'title', e.target.value)}
@@ -444,16 +448,16 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                       <input value={activePage.slug} onChange={e => updatePage(activePage.id, 'slug', e.target.value.replace(/[^a-z0-9-]/g, ''))}
                         className="w-full px-2.5 py-1.5 text-[12px] border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-mono" placeholder="recruitment-page" />
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-[11px] text-stone-400 mb-1 block">Description</label>
-                    <textarea value={activePage.description || ''} onChange={e => updatePage(activePage.id, 'description', e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-[12px] border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none" rows={2} />
+                    <div>
+                      <label className="text-[11px] text-stone-400 mb-1 block">Description</label>
+                      <textarea value={activePage.description || ''} onChange={e => updatePage(activePage.id, 'description', e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-[12px] border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none" rows={2} />
+                    </div>
                   </div>
                   {activePage.slug && (
                     <div className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-stone-100">
                       <Globe size={12} className="text-stone-400 shrink-0" />
-                      <code className="text-[11px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{activePage.slug}</code>
+                      <code className="text-[10px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{activePage.slug}</code>
                       <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${activePage.slug}`); toast.success('URL copied'); }}
                         className="shrink-0"><Copy size={12} className="text-emerald-600 hover:text-emerald-700" /></button>
                     </div>
@@ -549,7 +553,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                       activePage.blocks.map((block, bIdx) => (
                         <div key={block.id} className={`rounded-xl border bg-white transition-all ${editingBlockId === block.id ? 'border-emerald-300 ring-1 ring-emerald-100' : 'border-stone-100 hover:border-stone-200'}`}>
                           <div className={`flex items-center gap-2 px-3 py-2.5 group cursor-pointer transition-colors ${editingBlockId === block.id ? 'bg-emerald-50/30' : ''}`}
-                            onClick={() => setEditingBlockId(editingBlockId === block.id ? null : block.id)}>
+                            onClick={() => { setEditingBlockId(editingBlockId === block.id ? null : block.id); setConfigBlockId(block.id); }}>
                             <GripVertical size={14} className="text-stone-300" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
@@ -565,13 +569,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                                 className="p-1 hover:bg-stone-100 rounded disabled:opacity-30"><ArrowUp size={12} /></button>
                               <button onClick={e => { e.stopPropagation(); moveBlock(activePage.id, block.id, 'down'); }} disabled={bIdx === activePage.blocks.length - 1}
                                 className="p-1 hover:bg-stone-100 rounded disabled:opacity-30"><ArrowDown size={12} /></button>
-                              <button onClick={e => { e.stopPropagation(); setEditingBlockId(block.id); }} className="p-1 hover:bg-stone-100 rounded">
-                                <Edit3 size={12} className="text-stone-400" /></button>
                               <button onClick={e => { e.stopPropagation(); deleteBlock(activePage.id, block.id); }} className="p-1 hover:bg-red-50 rounded">
                                 <Trash2 size={12} className="text-red-400" /></button>
                             </div>
                           </div>
-                          {editingBlockId === block.id && renderBlockConfig(block)}
                         </div>
                       ))
                     )}
@@ -579,10 +580,109 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                 </div>
               </div>
 
-              {/* Right: Live preview */}
-              <div className="lg:w-[430px] shrink-0">
+              {/* Center column: Phone preview */}
+              <div className="flex-1 flex justify-center">
                 <div className="sticky top-24">
-                  {renderPreview(activePage)}
+                  {/* Device selector */}
+                  <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
+                    {DEVICE_PRESETS.map(d => (
+                      <button key={d.id} onClick={() => setSelectedDevice(d)}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${selectedDevice.id === d.id ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
+                        <BrandIcon brand={d.brand} size={10} />
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Phone frame with preview */}
+                  <div className="relative mx-auto" style={{ width: selectedDevice.width * 0.85, height: selectedDevice.height * 0.85 }}>
+                    <div className="absolute inset-0 rounded-[2.5rem] border-[8px] border-stone-800 bg-white overflow-hidden shadow-xl">
+                      {/* Notch / Dynamic Island */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80px] h-[22px] bg-stone-800 rounded-b-2xl z-10" />
+                      <div className="h-full overflow-y-auto pt-8 px-4 pb-4">
+                        {activePage.title && <h1 className="text-[15px] font-bold text-stone-800 mb-1">{activePage.title}</h1>}
+                        {activePage.description && <p className="text-[11px] text-stone-500 mb-4">{activePage.description}</p>}
+                        {activePage.blocks.length === 0 && (
+                          <div className="text-center py-12 text-stone-300 text-[11px]">Add blocks to see a preview</div>
+                        )}
+                        {activePage.blocks.map(block => (
+                          <div key={block.id}
+                            onClick={() => { setEditingBlockId(block.id); setConfigBlockId(block.id); }}
+                            className={`cursor-pointer transition-all ${editingBlockId === block.id ? 'ring-2 ring-emerald-300 rounded-lg' : 'hover:ring-1 hover:ring-stone-200 rounded-lg'}`}>
+                            {block.type === 'text' && (
+                              <div style={{
+                                textAlign: (block.style_text_align || 'left') as any,
+                                fontSize: `calc(${block.style_font_size || '14px'} * 0.85)`,
+                                fontWeight: block.style_font_weight || 'normal',
+                                padding: block.style_padding || '6px 0',
+                                color: block.style_text_color || '#44403c',
+                                background: block.style_background || 'transparent',
+                                borderRadius: block.style_border_radius || '0',
+                              }}>
+                                {(block.content || '').split('\n').map((line: string, i: number) => (
+                                  <React.Fragment key={i}>{line}{i < (block.content || '').split('\n').length - 1 && <br />}</React.Fragment>
+                                ))}
+                              </div>
+                            )}
+                            {block.type === 'image' && block.image_url && (
+                              <div style={{ textAlign: (block.style_text_align || 'center') as any, padding: block.style_padding || '6px 0' }}>
+                                <img src={block.image_url} alt="" style={{ maxWidth: '100%', borderRadius: block.style_border_radius || '8px' }} className="inline-block" />
+                              </div>
+                            )}
+                            {block.type === 'image' && !block.image_url && (
+                              <div className="flex items-center justify-center h-20 bg-stone-50 border border-dashed border-stone-200 rounded-lg text-stone-300 text-[10px] my-2">
+                                <Image size={14} className="mr-1" /> No image
+                              </div>
+                            )}
+                            {block.type === 'spacer' && <div style={{ height: block.style_height || '32px' }} />}
+                            {block.type === 'divider' && <hr className="border-stone-200 my-3" />}
+                            {block.type === 'button' && (
+                              <div style={{ textAlign: (block.style_text_align || 'center') as any, padding: block.style_padding || '8px 0' }}>
+                                <button className="px-5 py-2 bg-emerald-500 text-white rounded-lg text-[12px] font-medium"
+                                  style={{ borderRadius: block.style_border_radius || '8px', background: block.style_background || undefined, color: block.style_text_color || undefined }}>
+                                  {block.content || 'Click Here'}
+                                </button>
+                              </div>
+                            )}
+                            {block.type === 'signup_form' && (
+                              <div className="my-2 p-3 border border-stone-200 rounded-xl bg-stone-50 space-y-2">
+                                <p className="text-[10px] font-semibold text-stone-600">Sign Up Form</p>
+                                <div className="space-y-1.5">
+                                  <div className="h-7 bg-white rounded-lg border border-stone-200 px-2 flex items-center text-[10px] text-stone-300">Name</div>
+                                  <div className="h-7 bg-white rounded-lg border border-stone-200 px-2 flex items-center text-[10px] text-stone-300">Email</div>
+                                  <div className="h-7 bg-emerald-500 rounded-lg flex items-center justify-center text-[10px] text-white font-medium">Register</div>
+                                </div>
+                              </div>
+                            )}
+                            {block.type === 'start_date_picker' && (
+                              <div className="my-2 p-3 border border-stone-200 rounded-xl bg-stone-50 space-y-1.5">
+                                <p className="text-[10px] font-semibold text-stone-600">Set Study Start Date</p>
+                                <div className="flex items-center gap-2">
+                                  <Calendar size={12} className="text-emerald-500" />
+                                  <div className="h-7 flex-1 bg-white rounded-lg border border-stone-200 px-2 flex items-center text-[10px] text-stone-400">Select date...</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column: Block config */}
+              <div className="w-[260px] shrink-0">
+                <div className="sticky top-24">
+                  {configBlockId && activePage.blocks.find(b => b.id === configBlockId) ? (
+                    renderBlockConfig(activePage.blocks.find(b => b.id === configBlockId)!)
+                  ) : (
+                    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 text-center">
+                      <Edit3 size={20} className="mx-auto mb-2 text-stone-300" />
+                      <p className="text-[12px] text-stone-400 font-medium">Select an element</p>
+                      <p className="text-[10px] text-stone-300 mt-1">Click an element in the list or preview to edit its properties</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
