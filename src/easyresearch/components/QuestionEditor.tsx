@@ -262,7 +262,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'tree_test':
-        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🌳 Tree navigation test</div>;
+        return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">Tree navigation test</div>;
       case 'first_click':
         return <div className="h-12 rounded-lg bg-stone-50 border border-stone-200 flex items-center justify-center text-[11px] text-stone-400">🖱️ First click test</div>;
       case 'five_second_test':
