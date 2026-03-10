@@ -535,6 +535,7 @@ const SurveyBuilder: React.FC = () => {
             detect_gibberish: qr.detect_gibberish ?? false,
             custom_thank_you_message: qr.custom_thank_you_message || undefined,
             redirect_url: qr.redirect_url || undefined,
+            schedule_config: qr.schedule_config || undefined,
           }));
 
           if (questionsData && mounted) {
