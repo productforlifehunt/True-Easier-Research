@@ -198,7 +198,8 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = ({ questionnaires, projectTi
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-white text-[13px] font-medium hover:scale-105 transition-all bg-gradient-to-r from-violet-500 to-purple-600"
+        className="fixed z-50 flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-white text-[13px] font-medium hover:scale-105 transition-all bg-gradient-to-r from-emerald-500 to-teal-500"
+        style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))', right: '1rem' }}
       >
         <Pencil size={16} />
         AI Editor

@@ -148,7 +148,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
     return (
       <div className="space-y-2">
         <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">
-          <Clock size={11} /> Send Time / 发送时间
+          <Clock size={11} /> Send Time
         </h5>
         <div className="flex items-center gap-2">
           <input
@@ -157,7 +157,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             onChange={(e) => update({ sendTime: e.target.value, mode: 'once' })}
             className="px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
           />
-          <span className="text-[11px] text-stone-400">One-time questionnaire — single send time / 一次性问卷 — 单次发送时间</span>
+          <span className="text-[11px] text-stone-400">One-time questionnaire — single send time</span>
         </div>
       </div>
     );
@@ -170,7 +170,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
   return (
     <div className="space-y-4">
       <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">
-        <Calendar size={11} /> Advanced Schedule / 高级调度
+        <Calendar size={11} /> Advanced Schedule
       </h5>
 
       {/* Date mode toggle / 日期模式切换 */}
@@ -181,7 +181,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             schedule.dateMode === 'fixed_dates' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
           }`}
         >
-          📅 Fixed Dates / 固定日期
+          📅 Fixed Dates
         </button>
         <button
           onClick={() => update({ dateMode: 'relative_days' })}
@@ -189,7 +189,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             schedule.dateMode === 'relative_days' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'
           }`}
         >
-          🔄 Relative Days / 相对天数
+          🔄 Relative Days
         </button>
       </div>
 
@@ -197,18 +197,18 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
       <div className="bg-stone-50 rounded-xl border border-stone-200 p-3 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
-            ⏰ Time Templates / 时间模板
+            ⏰ Time Templates
           </span>
           <button
             onClick={() => setEditingTemplate({ id: crypto.randomUUID(), name: '', times: [] })}
             className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600"
           >
-            <Plus size={10} /> New Template / 新建模板
+            <Plus size={10} /> New Template
           </button>
         </div>
 
         {schedule.templates.length === 0 && !editingTemplate && (
-          <p className="text-[10px] text-stone-400 italic">No templates yet. Create one to quickly assign times to days. / 暂无模板。创建一个以快速分配时间。</p>
+          <p className="text-[10px] text-stone-400 italic">No templates yet. Create one to quickly assign times to days.</p>
         )}
 
         {/* Existing templates / 已有模板 */}
@@ -237,7 +237,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
               value={editingTemplate.name}
               onChange={(e) => setEditingTemplate({ ...editingTemplate, name: e.target.value })}
               className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              placeholder="Template name / 模板名称"
+              placeholder="Template name"
             />
             <div className="flex items-center gap-1.5 flex-wrap">
               {editingTemplate.times.map(time => (
@@ -264,15 +264,15 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                 }}
                 className="text-[10px] text-emerald-500 hover:text-emerald-600 font-medium"
               >
-                + Add Time / 添加时间
+                + Add Time
               </button>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={saveTemplate} className="flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-medium text-white bg-emerald-500 hover:bg-emerald-600">
-                <Save size={10} /> Save / 保存
+                <Save size={10} /> Save
               </button>
               <button onClick={() => setEditingTemplate(null)} className="text-[10px] text-stone-400 hover:text-stone-600">
-                Cancel / 取消
+                Cancel
               </button>
             </div>
           </div>
@@ -337,7 +337,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             /* Relative days list / 相对天数列表 */
             <div className="space-y-1 max-h-64 overflow-y-auto">
               <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block mb-1.5">
-                Study Days (1–{duration}) / 研究天数
+                Study Days (1–{duration})
               </span>
               {relativeDays.map(dayKey => {
                 const dayNum = parseInt(dayKey.split('-')[1]);
@@ -354,7 +354,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                       'hover:bg-stone-50 text-stone-600'
                     }`}
                   >
-                    <span className="font-medium">Day {dayNum} / 第{dayNum}天</span>
+                    <span className="font-medium">Day {dayNum}</span>
                     {hasSchedule && (
                       <span className={`text-[9px] ${isSelected ? 'text-white/80' : 'text-emerald-500'}`}>
                         {ds.times.length} time{ds.times.length > 1 ? 's' : ''}
@@ -375,20 +375,20 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                 <span className="text-[12px] font-medium text-stone-700">
                   {schedule.dateMode === 'fixed_dates'
                     ? new Date(selectedDayKey + 'T00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-                    : `Day ${selectedDayKey.split('-')[1]} / 第${selectedDayKey.split('-')[1]}天`}
+                    : `Day ${selectedDayKey.split('-')[1]}`}
                 </span>
                 <button
                   onClick={() => setDaySchedule(selectedDayKey, { dayKey: selectedDayKey, times: [] })}
                   className="text-[10px] text-red-400 hover:text-red-500"
                 >
-                  Clear All / 清除全部
+                  Clear All
                 </button>
               </div>
 
               {/* Apply template / 应用模板 */}
               {schedule.templates.length > 0 && (
                 <div>
-                  <span className="text-[10px] text-stone-400 block mb-1">Apply Template / 应用模板:</span>
+                  <span className="text-[10px] text-stone-400 block mb-1">Apply Template:</span>
                   <div className="flex flex-wrap gap-1">
                     {schedule.templates.map(t => (
                       <button
@@ -431,7 +431,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                   onClick={() => { addTimeToDay(selectedDayKey, newTimeInput); }}
                   className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600"
                 >
-                  <Plus size={10} /> Add / 添加
+                  <Plus size={10} /> Add
                 </button>
               </div>
             </div>
@@ -439,8 +439,8 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             <div className="flex items-center justify-center h-full min-h-[120px]">
               <p className="text-[11px] text-stone-400 text-center">
                 {schedule.dateMode === 'fixed_dates'
-                  ? 'Select a date from the calendar / 从日历选择一个日期'
-                  : 'Select a study day from the list / 从列表选择一个研究天数'}
+                  ? 'Select a date from the calendar'
+                  : 'Select a study day from the list'}
               </p>
             </div>
           )}

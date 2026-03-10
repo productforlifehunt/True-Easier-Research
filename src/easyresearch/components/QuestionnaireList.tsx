@@ -64,12 +64,7 @@ interface QuestionnaireListProps {
 
 const frequencyOptions = [
   { value: 'once', label: 'One-time' },
-  { value: 'hourly', label: 'Multiple time — Hourly' },
-  { value: '2hours', label: 'Multiple time — Every 2 hours' },
-  { value: '4hours', label: 'Multiple time — Every 4 hours' },
-  { value: 'daily', label: 'Multiple time — Daily' },
-  { value: 'twice_daily', label: 'Multiple time — Twice daily' },
-  { value: 'weekly', label: 'Multiple time — Weekly' },
+  { value: 'multiple', label: 'Multiple time' },
 ];
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
@@ -874,7 +869,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency / 频率</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency</label>
                                   <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
                                 </div>
                                 <QuestionnaireScheduleEditor
@@ -938,7 +933,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {(q.notifications || []).map((notif, ni) => (
                                   <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-[11px] font-medium text-stone-600">#{ni + 1}</span>
+                                      <span className="text-[11px] font-medium text-stone-600">Notification #{ni + 1}</span>
                                       <div className="flex items-center gap-1.5">
                                         <button onClick={() => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
@@ -972,18 +967,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                         <option value="sms">SMS</option>
                                         <option value="push_email">Push+Email</option>
                                       </select>
-                                      <select value={notif.frequency} onChange={(e) => {
-                                        const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, frequency: e.target.value } : n);
-                                        updateQuestionnaire(q.id, { notifications: updated });
-                                      }} className="px-1.5 py-1 rounded-lg text-[10px] border border-stone-200 bg-white">
-                                        <option value="once">Once</option>
-                                        <option value="hourly">Hourly</option>
-                                        <option value="2hours">Every 2h</option>
-                                        <option value="4hours">Every 4h</option>
-                                        <option value="daily">Daily</option>
-                                        <option value="twice_daily">Twice daily</option>
-                                        <option value="weekly">Weekly</option>
-                                      </select>
+                                      <span className="text-[10px] text-stone-400">Synced with questionnaire schedule</span>
                                       <div className="flex items-center gap-1">
                                         <label className="text-[10px] text-stone-400">Before:</label>
                                         <input type="number" value={notif.minutes_before} onChange={(e) => {
@@ -997,7 +981,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
                                         }} className="w-3 h-3 rounded" />
-                                        DND allowed
+                                        Do Not Disturb allowed
                                       </label>
                                     </div>
                                   </div>
