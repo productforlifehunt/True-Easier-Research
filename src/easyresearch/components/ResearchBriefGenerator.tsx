@@ -15,7 +15,7 @@ interface BriefSection {
 }
 
 // AI-powered research brief/proposal generator
-// AI驱动的研究简报/提案生成器
+// AI辅助的研究简报/提案生成器
 const ResearchBriefGenerator: React.FC<Props> = ({ projectId, projectTitle }) => {
   const [objective, setObjective] = useState('');
   const [methodology, setMethodology] = useState('survey');
