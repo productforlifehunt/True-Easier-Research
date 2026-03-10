@@ -271,14 +271,14 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const audioUrl = question.question_config?.audio_url || '';
       return audioUrl ? (
         <audio src={audioUrl} controls autoPlay={question.question_config?.autoplay} loop={question.question_config?.loop} className="w-full" />
-      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🔊 No audio configured</div>;
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>No audio configured</div>;
     }
     case 'embed_block': {
       const embedUrl = question.question_config?.embed_url || '';
       const embedH = question.question_config?.embed_height || '400px';
       return embedUrl ? (
         <iframe src={embedUrl} className="w-full rounded-xl border border-stone-200" style={{ height: embedH }} allowFullScreen={question.question_config?.allow_fullscreen !== false} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" />
-      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>🌐 No embed configured</div>;
+      ) : <div className={`${pad} rounded-xl bg-stone-100 text-center ${txtSm} text-stone-400`}>No embed configured</div>;
     }
     case 'card_sort': {
       const cards = question.question_config?.cards || [];

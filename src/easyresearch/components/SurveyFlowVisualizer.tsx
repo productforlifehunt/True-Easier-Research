@@ -5,7 +5,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
-import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, GripVertical, Layers, Plus, Trash2, Edit3, Bell, MessageSquare, Clock } from 'lucide-react';
+import { ArrowDown, ArrowRight, GitBranch, Shield, XCircle, Eye, EyeOff, ChevronRight, GripVertical, Layers, Plus, Trash2, Edit3, Bell, MessageSquare, Clock, Sparkles } from 'lucide-react';
 import CustomDropdown from './CustomDropdown';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { LogicRule } from '../utils/logicEngine';
@@ -254,6 +254,19 @@ const SurveyFlowVisualizer: React.FC<SurveyFlowVisualizerProps> = ({
           <div className="flex justify-center py-2"><ArrowDown size={16} className="text-stone-300" /></div>
         </div>
       )}
+
+      {/* Project-level AI Assistant node / 项目级AI助手节点 */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Sparkles size={14} className="text-emerald-500" />
+          <span className="text-xs font-semibold text-stone-700">Project AI Assistant</span>
+        </div>
+        <div className="ml-4 py-2 px-3 rounded-lg bg-emerald-50/50 border border-emerald-100">
+          <p className="text-[11px] text-stone-600">Project-level AI chatbot available to participants across all questionnaires.</p>
+          <p className="text-[10px] text-stone-400 mt-1">Configure in questionnaire settings or add via Layout Builder &gt; Function Elements &gt; AI Assistant.</p>
+        </div>
+        <div className="flex justify-center py-2"><ArrowDown size={16} className="text-stone-300" /></div>
+      </div>
 
       {/* Flow diagram with drag-and-drop / 可拖拽流程图 */}
       <DragDropContext onDragEnd={handleDragEnd}>

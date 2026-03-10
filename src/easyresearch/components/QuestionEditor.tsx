@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Mic, GripVertical, X, Save, Check } from 'lucide-react';
+import { Settings, Mic, GripVertical, X, Save, Check, Volume2, Globe, Sparkles, Wand2 } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import CustomDropdown from './CustomDropdown';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -249,9 +249,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       case 'video_block':
         return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">{localQuestion.question_config?.video_url ? 'Video' : 'No video set'}</div>;
       case 'audio_block':
-        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🔊 {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
+        return <div className="h-8 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400"><Volume2 size={12} className="mr-1" /> {localQuestion.question_config?.audio_url ? 'Audio' : 'No audio set'}</div>;
       case 'embed_block':
-        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400">🌐 {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
+        return <div className="h-16 rounded-lg bg-stone-100 flex items-center justify-center text-[11px] text-stone-400"><Globe size={12} className="mr-1" /> {localQuestion.question_config?.embed_url ? 'Embedded content' : 'No embed set'}</div>;
       case 'card_sort':
         return (
           <div className="flex flex-wrap gap-1">
@@ -517,7 +517,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Icon (emoji)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Icon</label>
               <input type="text" value={localQuestion.question_config?.section_icon || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_icon: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                 placeholder="e.g., Tab icon" maxLength={4} />
@@ -880,7 +880,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
               Allow multiple selections
             </label>
-            <p className="text-[11px] text-stone-400">Add options above with image URLs in the option value field, or use emoji/text labels as visual options.</p>
+            <p className="text-[11px] text-stone-400">Add options above with image URLs in the option value field, or use text labels as visual options.</p>
           </div>
         )}
 
@@ -1454,31 +1454,41 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
           </div>
 
-          {/* AI Features Configuration */}
+          {/* AI Support — per-question settings (inherited from questionnaire, overridable) */}
           {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
-            <div className="space-y-2 pt-2 border-t border-stone-100">
-              <p className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">AI Features</p>
+            <div className="space-y-3 pt-2 border-t border-stone-100">
+              <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5"><Sparkles size={11} /> AI Support</p>
+              <p className="text-[10px] text-stone-400">Inherited from questionnaire settings. Override per question below.</p>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
-                <input type="checkbox" checked={localQuestion.question_config?.allow_ai_assist ?? false}
+                <input type="checkbox" checked={localQuestion.question_config?.allow_voice ?? localQuestion.allow_voice ?? false}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_voice: e.target.checked }, allow_voice: e.target.checked })}
+                  className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                <Mic size={12} className="text-emerald-500" /> Voice Input
+              </label>
+              <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
+                <input type="checkbox" checked={localQuestion.question_config?.allow_ai_assist ?? localQuestion.allow_ai_assist ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_ai_assist: e.target.checked }, allow_ai_assist: e.target.checked })}
-                  className="rounded border-stone-300 text-blue-500 focus:ring-blue-500" />
-                <span className="text-blue-500">✦</span> AI Assist (help & enhance)
+                  className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                <Sparkles size={12} className="text-emerald-500" /> AI Assist (help & enhance)
               </label>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
                 <input type="checkbox" checked={localQuestion.question_config?.allow_ai_auto_answer ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_ai_auto_answer: e.target.checked } })}
-                  className="rounded border-stone-300 text-violet-500 focus:ring-violet-500" />
-                <span className="text-violet-500">🪄</span> AI Auto-answer (predictive)
+                  className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
+                <Wand2 size={12} className="text-emerald-500" /> AI Auto-answer (predictive)
               </label>
-              {['text_short', 'text_long'].includes(localQuestion.question_type) && (
-                <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
-                  <input type="checkbox" checked={localQuestion.question_config?.allow_voice ?? localQuestion.allow_voice ?? false}
-                    onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_voice: e.target.checked }, allow_voice: e.target.checked })}
-                    className="rounded border-stone-300 text-orange-500 focus:ring-orange-500" />
-                  <Mic size={12} className="text-orange-500" /> Voice input
-                </label>
-              )}
-              <p className="text-[10px] text-stone-400">These features will appear as buttons below the question for participants.</p>
+              {/* AI Guidance for this question */}
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">AI Guidance for this question</label>
+                <textarea
+                  value={localQuestion.question_config?.ai_guidance || ''}
+                  onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, ai_guidance: e.target.value } })}
+                  className="w-full px-3 py-2 rounded-xl text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
+                  rows={2}
+                  placeholder="Guide AI behavior for this question (e.g., 'Encourage detailed responses about daily routines')"
+                />
+              </div>
+              <p className="text-[10px] text-stone-400">These features appear as interactive buttons below the question for participants.</p>
             </div>
           )}
         </div>

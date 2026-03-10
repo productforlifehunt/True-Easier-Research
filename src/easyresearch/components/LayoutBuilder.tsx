@@ -17,7 +17,7 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant';
   config: {
     questionnaire_id?: string;
     questionnaire_ids?: string[];
@@ -120,6 +120,7 @@ const FUNCTION_ELEMENTS = [
   { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
   { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
   { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
+  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'Sparkles', desc: 'Project-level AI chatbot (floating)' },
 ];
 
 const LAYOUT_ELEMENTS = [
