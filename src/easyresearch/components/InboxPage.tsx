@@ -117,7 +117,7 @@ const InboxPage: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
         <MessageSquare size={48} className="text-stone-300 mb-4" />
-        <p className="text-stone-500 text-sm">Sign in to view your inbox</p>
+        <p className="text-stone-500 text-sm">{t('inbox.signInToView')}</p>
       </div>
     );
   }
@@ -135,7 +135,7 @@ const InboxPage: React.FC = () => {
           }`}
         >
           <MessageSquare size={16} />
-          Messages
+          {t('inbox.messages')}
         </button>
         <button
           onClick={() => setTab('notifications')}
@@ -144,7 +144,7 @@ const InboxPage: React.FC = () => {
           }`}
         >
           <Bell size={16} />
-          Notifications
+          {t('inbox.notifications')}
           {unreadNotifCount > 0 && (
             <span className="bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
@@ -164,14 +164,14 @@ const InboxPage: React.FC = () => {
         conversations.length === 0 ? (
           <div className="flex flex-col items-center py-16">
             <MessageSquare size={40} className="text-stone-200 mb-3" />
-            <p className="text-stone-400 text-sm">No conversations yet</p>
-            <p className="text-stone-300 text-xs mt-1">Messages from researchers and participants will appear here</p>
+            <p className="text-stone-400 text-sm">{t('inbox.noConversations')}</p>
+            <p className="text-stone-300 text-xs mt-1">{t('inbox.noConversationsDesc')}</p>
           </div>
         ) : (
           <div className="space-y-1">
             {conversations.map(conv => {
               const isResearcher = conv.researcher_user_id === user.id;
-              const otherLabel = conv.other_user_email || (isResearcher ? 'Participant' : 'Researcher');
+              const otherLabel = conv.other_user_email || (isResearcher ? t('dashboard.participant') : t('nav.research'));
               return (
                 <button
                   key={conv.id}
@@ -187,7 +187,7 @@ const InboxPage: React.FC = () => {
                       <span className="text-[11px] text-stone-400 flex-shrink-0 ml-2">{formatTime(conv.last_message_at)}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-stone-400 truncate">{conv.last_message_preview || 'Start a conversation'}</p>
+                      <p className="text-xs text-stone-400 truncate">{conv.last_message_preview || ''}</p>
                       {conv.unread_count > 0 && (
                         <span className="bg-emerald-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 ml-2">
                           {conv.unread_count}
@@ -209,13 +209,13 @@ const InboxPage: React.FC = () => {
               onClick={markAllNotificationsRead}
               className="text-xs text-emerald-600 font-medium mb-3 hover:underline"
             >
-              Mark all as read
+              {t('inbox.markAllRead')}
             </button>
           )}
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center py-16">
               <Bell size={40} className="text-stone-200 mb-3" />
-              <p className="text-stone-400 text-sm">No notifications yet</p>
+              <p className="text-stone-400 text-sm">{t('inbox.noNotifications')}</p>
             </div>
           ) : (
             <div className="space-y-1">
