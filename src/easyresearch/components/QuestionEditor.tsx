@@ -219,7 +219,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           </div>
         );
       case 'instruction':
-        return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">ℹ Instruction block</div>;
+        return <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600">Instruction block</div>;
       case 'text_block':
         return (
           <div className="p-2 rounded-lg bg-stone-50 border border-stone-200">
