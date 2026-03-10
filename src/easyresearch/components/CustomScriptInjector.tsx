@@ -48,7 +48,7 @@ const CustomScriptInjector: React.FC<Props> = ({ projectId }) => {
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
           <div>
-            <p className="text-xs text-amber-800 font-semibold">⚠️ Advanced Feature / 高级功能</p>
+            <p className="text-xs text-amber-800 font-semibold">Advanced Feature / 高级功能</p>
             <p className="text-xs text-amber-700">Custom scripts run in participant browsers. Test thoroughly before publishing. / 自定义脚本在参与者浏览器中运行，发布前请充分测试。</p>
           </div>
         </div>

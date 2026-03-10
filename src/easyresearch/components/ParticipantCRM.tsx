@@ -332,9 +332,9 @@ const ParticipantCRM: React.FC<Props> = ({ projectId }) => {
               <div>
                 <label className="text-xs font-semibold text-stone-600 mb-1.5 block flex items-center gap-1"><Clock size={12} /> Timeline / 时间线</label>
                 <div className="space-y-1 text-xs text-stone-500">
-                  <div>📥 Enrolled: {new Date(detail.enrolled_at).toLocaleDateString()}</div>
-                  <div>🕐 Last active: {new Date(detail.last_active).toLocaleDateString()}</div>
-                  {detail.satisfaction_score && <div>⭐ Satisfaction: {detail.satisfaction_score.toFixed(1)}</div>}
+                  <div>Enrolled: {new Date(detail.enrolled_at).toLocaleDateString()}</div>
+                  <div>Last active: {new Date(detail.last_active).toLocaleDateString()}</div>
+                  {detail.satisfaction_score && <div>Satisfaction: {detail.satisfaction_score.toFixed(1)}</div>}
                 </div>
               </div>
             </div>

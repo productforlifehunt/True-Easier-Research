@@ -55,18 +55,18 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
   }, [auditLog, entityFilter, userFilter, searchTerm]);
 
   const entityIcon = (type: string) => {
-    switch (type) {
-      case 'project': return '📁';
-      case 'questionnaire': return '📋';
-      case 'question': return '❓';
-      case 'enrollment': return '👤';
-      case 'response': return '💬';
-      case 'consent': return '🛡️';
-      case 'setting': return '⚙️';
-      case 'layout': return '🎨';
-      case 'export': return '📤';
-      default: return '📄';
-    }
+    const iconMap: Record<string, React.ReactNode> = {
+      project: <FolderOpen size={12} className="text-stone-500" />,
+      questionnaire: <ClipboardList size={12} className="text-stone-500" />,
+      question: <HelpCircle size={12} className="text-stone-500" />,
+      enrollment: <UserCheck size={12} className="text-stone-500" />,
+      response: <MessageCircle size={12} className="text-stone-500" />,
+      consent: <Lock size={12} className="text-stone-500" />,
+      setting: <Settings size={12} className="text-stone-500" />,
+      layout: <Palette size={12} className="text-stone-500" />,
+      export: <Upload size={12} className="text-stone-500" />,
+    };
+    return iconMap[type] || <File size={12} className="text-stone-500" />;
   };
 
   const entityColor = (type: string) => {
