@@ -74,7 +74,7 @@ const VideoResponseCapture: React.FC<Props> = ({ projectId }) => {
             <label className="flex items-center gap-2 text-sm text-stone-700 cursor-pointer">
               <input type="checkbox" checked={config.autoTranscribe} onChange={() => setConfig(prev => ({ ...prev, autoTranscribe: !prev.autoTranscribe }))}
                 className="rounded text-rose-600" />
-              🤖 Auto-transcribe with AI / AI自动转录
+              Auto-transcribe with AI / AI自动转录
             </label>
           </div>
 
