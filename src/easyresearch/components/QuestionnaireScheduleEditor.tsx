@@ -431,7 +431,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
                   onClick={() => { addTimeToDay(selectedDayKey, newTimeInput); }}
                   className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600"
                 >
-                  <Plus size={10} /> Add / 添加
+                  <Plus size={10} /> Add
                 </button>
               </div>
             </div>
