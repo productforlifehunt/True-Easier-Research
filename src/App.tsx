@@ -275,6 +275,7 @@ function App() {
                     
                     {/* Participant routes */}
                     <Route path="/easyresearch/user/settings" element={<UserSettings />} />
+                    <Route path="/easyresearch/discover" element={<DiscoverPage />} />
                     <Route path="/easyresearch/participant/join" element={<ParticipantJoin />} />
                     <Route path="/easyresearch/participant/home" element={<Navigate to="/easyresearch/dashboard" replace />} />
                     <Route path="/easyresearch/participant/:projectId" element={<SurveyViewRouter />} />
