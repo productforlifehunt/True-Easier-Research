@@ -337,7 +337,7 @@ const QuestionnaireScheduleEditor: React.FC<Props> = ({ frequency, schedule: raw
             /* Relative days list / 相对天数列表 */
             <div className="space-y-1 max-h-64 overflow-y-auto">
               <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block mb-1.5">
-                Study Days (1–{duration}) / 研究天数
+                Study Days (1–{duration})
               </span>
               {relativeDays.map(dayKey => {
                 const dayNum = parseInt(dayKey.split('-')[1]);
