@@ -282,7 +282,7 @@ Respond with a JSON array matching the input structure with translated text/desc
                 selectedLocale === code ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground hover:bg-muted/30'
               }`}
             >
-              <span>{locale?.flag || '🌐'}</span>
+              <span>{locale?.flag || 'lang'}</span>
               <span>{locale?.name || code}</span>
               {stats && (
                 <span className={`text-xs ${stats.translated === stats.total ? 'text-green-600' : 'text-amber-600'}`}>
