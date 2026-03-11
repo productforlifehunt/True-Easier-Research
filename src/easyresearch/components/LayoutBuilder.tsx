@@ -168,22 +168,22 @@ const ICON_OPTIONS = [
 ];
 
 const FUNCTION_ELEMENTS = [
-  { type: 'ecogram', label: 'Ecogram', lucideIcon: 'Link2', desc: 'Care network diagram' },
-  { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
-  { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
-  { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
-  { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
-  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
+  { type: 'ecogram', label: 'Ecogram', label_en: 'Ecogram', label_zh: '生态图', lucideIcon: 'Link2', desc: 'Care network diagram' },
+  { type: 'progress', label: 'Progress', label_en: 'Progress', label_zh: '进度', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
+  { type: 'timeline', label: 'Timeline', label_en: 'Timeline', label_zh: '时间线', lucideIcon: 'Calendar', desc: 'Study timeline view' },
+  { type: 'start_date_picker', label: 'Set Start Date', label_en: 'Set Start Date', label_zh: '设置开始日期', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
+  { type: 'direct_message', label: 'Message Researcher', label_en: 'Message Researcher', label_zh: '联系研究者', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
+  { type: 'ai_assistant', label: 'AI Assistant', label_en: 'AI Assistant', label_zh: 'AI 助手', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
 ];
 
 const LAYOUT_ELEMENTS = [
-  { type: 'text_block', label: 'Text Block', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
-  { type: 'todo_list', label: 'To-Do List', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
-  { type: 'spacer', label: 'Spacer', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
-  { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
-  { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
-  { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
-  { type: 'back_button', label: 'Back Button', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
+  { type: 'text_block', label: 'Text Block', label_en: 'Text Block', label_zh: '文本块', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
+  { type: 'todo_list', label: 'To-Do List', label_en: 'To-Do List', label_zh: '待办列表', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
+  { type: 'spacer', label: 'Spacer', label_en: 'Spacer', label_zh: '间距', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
+  { type: 'divider', label: 'Divider', label_en: 'Divider', label_zh: '分割线', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
+  { type: 'button', label: 'Button', label_en: 'Button', label_zh: '按钮', lucideIcon: 'MousePointer', desc: 'Action button' },
+  { type: 'image', label: 'Image', label_en: 'Image', label_zh: '图片', lucideIcon: 'Image', desc: 'Image block' },
+  { type: 'back_button', label: 'Back Button', label_en: 'Back Button', label_zh: '返回按钮', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
 ];
 
 const WIDTH_PRESETS = [
@@ -1427,20 +1427,20 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                 {showAddElement && (
                   <div className="p-2 bg-stone-50 rounded-xl border border-stone-200 space-y-2 max-h-[300px] overflow-y-auto">
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '布局部件' : 'Layout Elements'}</p>
                     <div className="grid grid-cols-3 gap-1">
                       {LAYOUT_ELEMENTS.map(et => (
-                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                        <button key={et.type} onClick={() => addElement(et.type, { title: lang === 'zh' ? et.label_zh : et.label_en })}
                           className="flex flex-col items-center gap-0.5 p-1.5 rounded-lg hover:bg-white transition-colors text-[9px] border border-transparent hover:border-stone-200">
                           {getLucideIcon(et.lucideIcon, 14, 'text-stone-500')}
-                          <span className="text-stone-500 font-medium">{et.label}</span>
+                          <span className="text-stone-500 font-medium">{lang === 'zh' ? et.label_zh : et.label_en}</span>
                         </button>
                       ))}
                     </div>
 
                     {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Questionnaires</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '问卷' : 'Questionnaires'}</p>
                         <div className="space-y-0.5">
                           {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
                             <button key={q.id} onClick={() => addQuestionnaire(q)}
@@ -1455,7 +1455,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                     {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Forms & Components</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '表单与组件' : 'Forms & Components'}</p>
                         <div className="space-y-0.5">
                           {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).map(q => {
                             const TypeIcon = q.questionnaire_type === 'consent' ? Shield : q.questionnaire_type === 'screening' ? ClipboardCheck : q.questionnaire_type === 'profile' ? User : q.questionnaire_type === 'help' ? HelpCircle : q.questionnaire_type === 'onboarding' ? Layers : Plus;
@@ -1477,10 +1477,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     </p>
                     <div className="grid grid-cols-2 gap-1">
                       {FUNCTION_ELEMENTS.map(et => (
-                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                        <button key={et.type} onClick={() => addElement(et.type, { title: lang === 'zh' ? et.label_zh : et.label_en })}
                           className="flex items-center gap-1.5 p-1.5 rounded-lg text-left hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
                           {getLucideIcon(et.lucideIcon, 14, 'text-stone-500')}
-                          <span className="text-stone-600 font-medium">{et.label}</span>
+                          <span className="text-stone-600 font-medium">{lang === 'zh' ? et.label_zh : et.label_en}</span>
                         </button>
                       ))}
                     </div>
