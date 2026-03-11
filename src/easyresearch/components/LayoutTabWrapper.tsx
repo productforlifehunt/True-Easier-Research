@@ -109,7 +109,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
     });
   }, [layout, tabsWithAi, aiConfig, onUpdate, makeAiElement]);
 
-  // Update AI config at project level — sync to all ai_assistant elements
+  // Update AI config at project level — sync STRUCTURAL props (mode, position) to all ai_assistant elements
+  // Title/content/icon are per-element and edited in LayoutBuilder config panel / 标题、描述、图标在每个元素级别独立编辑
   const updateAiConfig = useCallback((updates: Partial<typeof aiConfig>) => {
     const newConfig = { ...aiConfig, ...updates };
     const updatedTabs = layout.tabs.map(tab => ({
@@ -122,9 +123,6 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
             ...e.config,
             ai_display_mode: newConfig.display_mode,
             ai_position: newConfig.position,
-            ...(updates.title !== undefined ? { title: updates.title } : {}),
-            ...(updates.description !== undefined ? { content: updates.description } : {}),
-            ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
           },
         };
       }),

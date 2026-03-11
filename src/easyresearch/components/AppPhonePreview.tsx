@@ -495,8 +495,8 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         )}
       </div>
 
-      {/* Floating AI Assistant button (popup mode) — positioned at bottom of phone */}
-      {popupAiElement && !activeQuestionnaireId && !editable && (() => {
+      {/* Floating AI Assistant button (popup mode) — shown in both editable and preview modes */}
+      {popupAiElement && !activeQuestionnaireId && (() => {
         const pos = popupAiElement.config.ai_position || 'bottom-right';
         const iconName = popupAiElement.config.icon || 'MessageCircle';
         const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
