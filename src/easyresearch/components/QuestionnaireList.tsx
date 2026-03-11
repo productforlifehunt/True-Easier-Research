@@ -76,6 +76,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
   projectNotifications = [], onUpdateProjectNotifications, onSwitchToNotifications,
 }) => {
+  const { t } = useI18n();
+}) => {
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   // Active tab filter per questionnaire: null = show all, 'general' = unassigned, sectionId = specific tab

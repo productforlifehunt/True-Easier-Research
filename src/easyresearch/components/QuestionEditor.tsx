@@ -47,6 +47,7 @@ interface QuestionEditorProps {
 }
 
 const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, questionnaireType, onUpdateQuestion }) => {
+  const { t } = useI18n();
   const [localQuestion, setLocalQuestion] = useState<Question | null>(question);
   const [hasChanges, setHasChanges] = useState(false);
 
