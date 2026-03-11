@@ -360,7 +360,11 @@ Questions link to participant types via `question_participant_type` junction tab
 
 ## 5. PARTICIPANT TYPES / 参与者类型
 
-<!-- CRC STARTS -->
+<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
+<!-- ✅ T1-5.1: Participant types CRUD in ParticipantTypeManager.tsx / 参与者类型增删改查正常 -->
+<!-- ✅ T1-5.2: 3-level filtering works: project → questionnaire → question (junction tables) / 三级过滤正常 -->
+<!-- ✅ T1-5.3: Auto-numbering generates correct prefix+number on enrollment / 自动编号生成正确 -->
+<!-- ✅ T1-5.4: `filterQuestionsByParticipantType()` and `filterQuestionnairesByParticipantType()` correctly hide/show content / 过滤函数正确隐藏/显示内容 -->
 <!-- CRC ENDS -->
 
 Each research project can define multiple participant types (e.g. "Primary Caregiver", "Family Member", "Patient"). Participant types control which questionnaires and questions each participant sees via a 3-level filtering system.
