@@ -166,11 +166,11 @@ const ResearcherDashboard: React.FC = () => {
       const { error } = await supabase.from('research_project').delete().eq('id', projectId);
       if (error) throw error;
       setShowDeleteConfirm(null);
-      toast.success('Project deleted');
+      toast.success(t('toast.projectDeleted'));
       loadDashboardData();
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
+      toast.error(t('toast.deleteFailed'));
     } finally {
       setActionLoading(false);
     }
@@ -181,7 +181,7 @@ const ResearcherDashboard: React.FC = () => {
     try {
       const { data: researcher } = await supabase
         .from('researcher').select('organization_id, id').eq('user_id', user?.id).maybeSingle();
-      if (!researcher) { toast.error('Researcher profile not found'); return; }
+      if (!researcher) { toast.error(t('toast.researcherNotFound')); return; }
 
       const { data: newProject, error } = await supabase
         .from('research_project')
@@ -230,12 +230,12 @@ const ResearcherDashboard: React.FC = () => {
           sourceLayout.bottom_nav = sourceLayout.tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id }));
           await saveLayoutToDb(newProject.id, sourceLayout);
         }
-        toast.success('Project duplicated');
+        toast.success(t('toast.duplicated'));
         loadDashboardData();
       }
     } catch (error) {
       console.error('Error duplicating project:', error);
-      toast.error('Failed to duplicate project');
+      toast.error(t('toast.duplicateFailed'));
     } finally {
       setActionLoading(false);
     }
@@ -258,7 +258,7 @@ const ResearcherDashboard: React.FC = () => {
       <div className="flex items-center justify-center py-32">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mx-auto"></div>
-          <p className="mt-3 text-[13px] text-stone-400">Loading...</p>
+          <p className="mt-3 text-[13px] text-stone-400">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -372,7 +372,7 @@ const ResearcherDashboard: React.FC = () => {
                         {project.title}
                       </h3>
                       <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium border ${getStatusColor(project.status)}`}>
-                        {project.status}
+                        {t(`status.${project.status}`) || project.status}
                       </span>
                     </div>
                     <p className="text-[13px] text-stone-400 line-clamp-1 mb-2 font-light">{project.description}</p>
@@ -391,7 +391,7 @@ const ResearcherDashboard: React.FC = () => {
                     <button
                       className="p-1.5 rounded-lg hover:bg-stone-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); handleDuplicateProject(project); }}
-                      title="Duplicate"
+                      title={t('action.duplicate')}
                       disabled={actionLoading}
                     >
                       <Copy size={14} className="text-stone-400" />
@@ -399,7 +399,7 @@ const ResearcherDashboard: React.FC = () => {
                     <button
                       className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(project.id); }}
-                      title="Delete"
+                      title={t('common.delete')}
                     >
                       <Trash2 size={14} className="text-red-400" />
                     </button>
