@@ -403,13 +403,12 @@ When a participant enrolls, the system counts existing enrollments of the same `
 
 ## 6. LOGIC / 逻辑规则
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-6.1: All logic rules stored in `research_logic` table (no JSONB, no per-question columns) / 所有逻辑规则存储在 research_logic 表 -->
-<!-- ✅ T1-6.2: `evaluateLogic()` in `logicEngine.ts` returns correct visibleQuestionIds, skipTarget, disqualified flags / 逻辑引擎返回正确结果 -->
-<!-- ✅ T1-6.3: Logic CRUD in builder UI — create, edit, delete rules per questionnaire / 构建器中逻辑规则增删改查正常 -->
-<!-- ✅ T1-6.4: Skip/show/hide actions execute correctly in participant survey view / 跳转/显示/隐藏在参与者视图中正确执行 -->
-<!-- ✅ T1-6.5: No references to old `logic_rule` table or `question.logic_rules` JSONB in code / 代码中无旧逻辑表或JSONB引用 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-6.1: All logic rules stored in `research_logic` table (no JSONB, no per-question columns) / 所有逻辑规则存储在 research_logic 表
+> - ✅ T1-6.2: `evaluateLogic()` in `logicEngine.ts` returns correct visibleQuestionIds, skipTarget, disqualified flags / 逻辑引擎返回正确结果
+> - ✅ T1-6.3: Logic CRUD in builder UI — create, edit, delete rules per questionnaire / 构建器中逻辑规则增删改查正常
+> - ✅ T1-6.4: Skip/show/hide actions execute correctly in participant survey view / 跳转/显示/隐藏在参与者视图中正确执行
+> - ✅ T1-6.5: No references to old `logic_rule` table or `question.logic_rules` JSONB in code / 代码中无旧逻辑表或JSONB引用
 
 The logic system supports **12 categories** of conditional logic, all stored in ONE flat relational table: `research_logic`. No JSONB. No per-question columns. One table rules them all.
 
