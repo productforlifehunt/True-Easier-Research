@@ -30,6 +30,8 @@ interface ElementRendererProps {
   onToggleTodo?: (cardId: string) => void;
   /** Open project-level AI Assistant dialog */
   onOpenAiAssistant?: () => void;
+  /** Open direct message with researcher / 打开与研究者的直接消息 */
+  onOpenDirectMessage?: () => void;
 }
 
 /**
