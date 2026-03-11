@@ -39,7 +39,7 @@ export interface LayoutElement {
       border_color?: string;
       shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
       text_align?: 'left' | 'center' | 'right';
-      content_align?: 'top' | 'center' | 'bottom'; // vertical alignment within fixed height
+      content_align?: 'top' | 'center' | 'bottom';
       font_size?: string;
       font_weight?: string;
       text_color?: string;
@@ -79,6 +79,9 @@ export interface LayoutElement {
       label: string;
       question_ids: string[];
     }>;
+    // AI Assistant config / AI 助手配置
+    ai_display_mode?: 'popup' | 'card'; // popup = floating button, card = inline card
+    ai_position?: 'bottom-right' | 'bottom-left' | 'center'; // position for popup mode
   };
   order_index: number;
 }
