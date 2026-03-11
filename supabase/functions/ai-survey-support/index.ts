@@ -26,9 +26,8 @@ async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   })
   if (!res.ok) {
     const errorText = await res.text()
-    console.error('OpenRouter error status:', res.status, 'headers:', JSON.stringify(Object.fromEntries(res.headers.entries())))
-    console.error('OpenRouter error body:', errorText)
-    throw new Error(`AI API failed: ${res.status} - ${errorText}`)
+    console.error('OpenRouter error:', errorText)
+    throw new Error(`AI API failed: ${res.status}`)
   }
   const data = await res.json()
   return data.choices?.[0]?.message?.content?.trim() || ''
