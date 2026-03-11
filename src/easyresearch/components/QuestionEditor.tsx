@@ -1477,7 +1477,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 <input type="checkbox" checked={localQuestion.question_config?.allow_ai_auto_answer ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_ai_auto_answer: e.target.checked } })}
                   className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                <Wand2 size={12} className="text-emerald-500" /> {t('ai.autoAnswer')}
+                <Wand2 size={12} className="text-emerald-500" /> {t('ai.autoAnswerPredictive')}
               </label>
               {/* AI Guidance for this question */}
               <div>
