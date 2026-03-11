@@ -217,7 +217,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
             className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 transition-colors text-white font-medium text-[13px] flex items-center justify-center gap-2"
           >
             <Sparkles size={16} />
-            AI Support
+            {t('builder.aiSupport')}
           </button>
 
           {showAiSupport && (
