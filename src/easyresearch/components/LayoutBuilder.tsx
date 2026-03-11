@@ -49,6 +49,7 @@ export interface LayoutElement {
     button_action?: string;
     button_label?: string;
     button_border_radius?: string;
+    icon?: string; // Custom Lucide icon name
     image_url?: string;
     show_question_count?: boolean;
     show_estimated_time?: boolean;
