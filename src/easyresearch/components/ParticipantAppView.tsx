@@ -44,6 +44,7 @@ const ParticipantAppView: React.FC = () => {
   const [submittedQuestionnaireIds, setSubmittedQuestionnaireIds] = useState<Set<string>>(new Set());
   const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
   const [showProjectAiChat, setShowProjectAiChat] = useState(false);
+  const [showDmConfirm, setShowDmConfirm] = useState(false);
 
   // Load persisted todo completions
   useEffect(() => {
