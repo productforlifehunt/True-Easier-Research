@@ -511,7 +511,26 @@ const ParticipantAppView: React.FC = () => {
         )}
       </div>
 
-      {/* Project-level AI Assistant chatbot — hide when inside a questionnaire (it has its own) */}
+      {/* Floating AI Assistant button (popup mode) — driven by ai_assistant element config */}
+      {currentTabPopupAi && !activeQuestionnaireId && !showProjectAiChat && (() => {
+        const pos = currentTabPopupAi.config.ai_position || 'bottom-right';
+        const iconName = currentTabPopupAi.config.icon || 'MessageCircle';
+        const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
+        const title = currentTabPopupAi.config.title || currentTabPopupAi.config.button_label || 'AI';
+        const posClass = pos === 'bottom-left' ? 'left-4' : pos === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4';
+        return (
+          <button
+            type="button"
+            onClick={() => setShowProjectAiChat(true)}
+            className={`fixed bottom-20 ${posClass} z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[13px] font-medium`}
+          >
+            <FloatIcon size={16} />
+            {title}
+          </button>
+        );
+      })()}
+
+      {/* Project-level AI Assistant chatbot popup — opened from floating button */}
       {showProjectAiChat && !activeQuestionnaireId && (() => {
         const allQuestions = questionnaires.flatMap(q => q.questions || []);
         const projectTitle = project?.title || 'Study';
