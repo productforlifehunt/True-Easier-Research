@@ -126,7 +126,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return translations[key]?.[lang] || translations[key]?.en || key;
   }, [lang]);
 
-  const dir = LANGUAGES.find(l => l.code === lang)?.dir || 'ltr';
+  const dir: 'ltr' | 'rtl' = LANGUAGES.find(l => l.code === lang)?.dir || 'ltr';
 
   return (
     <I18nContext.Provider value={{ lang, setLang, t, dir }}>
