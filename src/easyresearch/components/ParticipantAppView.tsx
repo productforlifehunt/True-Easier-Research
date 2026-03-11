@@ -547,6 +547,77 @@ const ParticipantAppView: React.FC = () => {
             initialOpen={true}
           />
         );
+      {/* Direct Message confirmation dialog / 直接消息确认对话框 */}
+      {showDmConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-4">
+            <h3 className="text-[15px] font-semibold text-stone-800">
+              {project?.title || 'Message Researcher'}
+            </h3>
+            <p className="text-[13px] text-stone-500">
+              Would you like to open a direct conversation with the researcher of this study?
+              <br />
+              <span className="text-stone-400">是否要与本研究的研究者直接沟通？</span>
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDmConfirm(false)}
+                className="flex-1 py-2 rounded-lg border border-stone-200 text-[13px] font-medium text-stone-500 hover:bg-stone-50"
+              >
+                Cancel / 取消
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowDmConfirm(false);
+                  if (!user || !projectId || !project?.user_id) {
+                    toast.error('Unable to start conversation');
+                    return;
+                  }
+                  try {
+                    // Check if a conversation already exists / 检查是否已有会话
+                    const { data: existing } = await supabase
+                      .from('conversations')
+                      .select('id')
+                      .eq('project_id', projectId)
+                      .eq('participant_user_id', user.id)
+                      .eq('researcher_user_id', project.user_id)
+                      .maybeSingle();
+
+                    if (existing) {
+                      navigate(`/easyresearch/inbox/${existing.id}`);
+                      return;
+                    }
+                    // Create new conversation / 创建新会话
+                    const { data: newConv, error } = await supabase
+                      .from('conversations')
+                      .insert({
+                        project_id: projectId,
+                        participant_user_id: user.id,
+                        researcher_user_id: project.user_id,
+                        last_message_at: new Date().toISOString(),
+                        last_message_preview: null,
+                        unread_count: 0,
+                      })
+                      .select('id')
+                      .single();
+
+                    if (error) throw error;
+                    navigate(`/easyresearch/inbox/${newConv.id}`);
+                  } catch (err) {
+                    console.error('Error creating conversation:', err);
+                    toast.error('Failed to open conversation');
+                  }
+                }}
+                className="flex-1 py-2 rounded-lg bg-emerald-500 text-white text-[13px] font-medium hover:bg-emerald-600"
+              >
+                Open Chat / 开始对话
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       })()}
     </div>
   );
