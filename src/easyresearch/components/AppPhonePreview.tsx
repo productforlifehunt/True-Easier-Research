@@ -502,15 +502,28 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
         const title = popupAiElement.config.title || popupAiElement.config.button_label || 'AI';
         const posClass = pos === 'bottom-left' ? 'left-4' : pos === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4';
+        const isHighlighted = highlightedElementId === popupAiElement.id;
         return (
-          <button
-            type="button"
-            onClick={() => onOpenAiAssistant?.()}
-            className={`absolute bottom-4 ${posClass} z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[11px] font-medium`}
-          >
-            <FloatIcon size={14} />
-            {title}
-          </button>
+          <div className={`absolute bottom-4 ${posClass} z-20`}>
+            {editable && (
+              <div className="absolute -top-7 left-1/2 -translate-x-1/2 flex gap-1 bg-white rounded-full shadow-md px-1.5 py-0.5">
+                <button type="button" onClick={() => onElementClick?.(popupAiElement.id)} className="p-0.5 hover:bg-stone-100 rounded">
+                  <Edit3 size={10} className="text-stone-400" />
+                </button>
+                <button type="button" onClick={() => onRemoveElement?.(popupAiElement.id)} className="p-0.5 hover:bg-red-50 rounded">
+                  <Trash2 size={10} className="text-red-400" />
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => editable ? onElementClick?.(popupAiElement.id) : onOpenAiAssistant?.()}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[11px] font-medium ${isHighlighted ? 'ring-2 ring-emerald-300 ring-offset-1' : ''}`}
+            >
+              <FloatIcon size={14} />
+              {title}
+            </button>
+          </div>
         );
       })()}
     </div>
