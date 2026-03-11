@@ -571,7 +571,7 @@ const ParticipantLibrary: React.FC = () => {
                 className="flex items-center gap-1.5 px-5 py-2 text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Mail size={13} />
-                {inviting ? 'Sending...' : 'Send Invitation'}
+                {inviting ? t('participantLibrary.sending') : t('participantLibrary.sendInvitation')}
               </button>
             </div>
           </div>
