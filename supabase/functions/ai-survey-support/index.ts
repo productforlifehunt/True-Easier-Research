@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 // Dev-stage key; move to project secret for production
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || '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'
 const AI_MODEL = 'google/gemini-3-flash-preview'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
