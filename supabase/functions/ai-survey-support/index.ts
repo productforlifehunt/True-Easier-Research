@@ -15,10 +15,8 @@ async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${AI_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://easierresearch.app',
-      'X-Title': 'Easier Research AI'
     },
     body: JSON.stringify({ model: AI_MODEL, messages, temperature, max_tokens: maxTokens })
   })
