@@ -352,11 +352,11 @@ const SurveyBuilder: React.FC = () => {
     if (!projectId) return;
     if (nextStatus === 'published') {
       if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => (q.questions?.length || 0) === 0)) {
-        toast.error('Cannot publish: Please add at least one question first.');
+        toast.error(t('toast.cannotPublishNoQuestions'));
         return;
       }
       if (!project.title || project.title.trim() === '' || project.title === 'Untitled Project') {
-        toast.error('Cannot publish: Please add a project title first.');
+        toast.error(t('toast.cannotPublishNoTitle'));
         return;
       }
     }
@@ -378,13 +378,13 @@ const SurveyBuilder: React.FC = () => {
       if (error) throw error;
       setProject(prev => ({ ...(prev as any), ...updates }));
       if (nextStatus === 'published') {
-        toast.success('Project published! Share the survey code with participants.');
+        toast.success(t('toast.projectPublished'));
       } else {
-        toast.success('Project unpublished.');
+        toast.success(t('toast.projectUnpublished'));
       }
     } catch (error) {
       console.error('Error updating publish status:', error);
-      toast.error('Failed to update publish status. Please try again.');
+      toast.error(t('toast.publishFailed'));
     } finally {
       setSaving(false);
     }
@@ -971,14 +971,14 @@ const SurveyBuilder: React.FC = () => {
           await Promise.all([syncQuestions(newProject.id), syncLogicRules(newProject.id)]);
           const allNotifs = [...projectNotifications, ...questionnaireConfigs.flatMap(qc => qc.notifications || [])];
           await saveNotificationConfigs(newProject.id, allNotifs);
-          toast.success('Project created successfully!');
+          toast.success(t('toast.projectCreated'));
           navigate(`/easyresearch/project/${newProject.id}`);
         }
       }
-      if (projectId) toast.success('Project saved successfully!');
+      if (projectId) toast.success(t('toast.projectSaved'));
     } catch (error) {
       console.error('Error saving project:', error);
-      toast.error('Failed to save project. Please try again.');
+      toast.error(t('toast.projectSaveFailed'));
     } finally {
       setSaving(false);
     }
