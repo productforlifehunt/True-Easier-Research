@@ -352,7 +352,7 @@ const SurveyBuilder: React.FC = () => {
     if (!projectId) return;
     if (nextStatus === 'published') {
       if (questionnaireConfigs.length === 0 || questionnaireConfigs.every(q => (q.questions?.length || 0) === 0)) {
-        toast.error('Cannot publish: Please add at least one question first.');
+        toast.error(t('toast.cannotPublishNoQuestions'));
         return;
       }
       if (!project.title || project.title.trim() === '' || project.title === 'Untitled Project') {
