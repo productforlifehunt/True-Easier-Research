@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Sparkles, HelpCircle, MessageCircle } from 'lucide-react';
+import { ChevronRight, HelpCircle, MessageCircle, icons as allIcons } from 'lucide-react';
 import type { LayoutElement } from '../LayoutBuilder';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
 import TodoListElement from './TodoListElement';
