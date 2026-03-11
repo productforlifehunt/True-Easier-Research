@@ -978,7 +978,7 @@ const SurveyBuilder: React.FC = () => {
       if (projectId) toast.success(t('toast.projectSaved'));
     } catch (error) {
       console.error('Error saving project:', error);
-      toast.error('Failed to save project. Please try again.');
+      toast.error(t('toast.projectSaveFailed'));
     } finally {
       setSaving(false);
     }
