@@ -258,7 +258,7 @@ const ResearcherDashboard: React.FC = () => {
       <div className="flex items-center justify-center py-32">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent mx-auto"></div>
-          <p className="mt-3 text-[13px] text-stone-400">Loading...</p>
+          <p className="mt-3 text-[13px] text-stone-400">{t('common.loading')}</p>
         </div>
       </div>
     );
