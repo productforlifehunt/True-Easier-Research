@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
 import { Bell, Moon, User, LogOut, LogIn, FileText, Network } from 'lucide-react';
+import { useI18n } from '../hooks/useI18n';
 import toast from 'react-hot-toast';
 import EcogramBuilder, { EcogramMember } from './EcogramBuilder';
 import { scheduleStudyNotifications, requestNotificationPermission } from '../services/notificationService';
@@ -13,6 +14,7 @@ interface EnrollmentQuestion { id: string; project_id: string; question_text: st
 const ParticipantSettings: React.FC = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [project, setProject] = useState<any>(null);
   const [enrollment, setEnrollment] = useState<any>(null);
   const [profileData, setProfileData] = useState<any>({});
@@ -41,7 +43,6 @@ const ParticipantSettings: React.FC = () => {
           study_duration: projectData.study_duration,
           survey_frequency: projectData.survey_frequency,
         });
-        // Load profile questions from profile_question table
         const { data: profileRows } = await supabase
           .from('profile_question')
           .select('*')
@@ -56,14 +57,12 @@ const ParticipantSettings: React.FC = () => {
         const { data: enrollmentData } = await supabase.from('enrollment').select('*').eq('id', enrollmentId).maybeSingle();
         if (enrollmentData) { 
           setEnrollment(enrollmentData); 
-          // Load from flat tables instead of JSONB
           const [flatProfile, flatDnd, flatEcogram] = await Promise.all([
             loadProfileData(enrollmentId),
             loadDndSetting(enrollmentId),
             loadEcogramData({ enrollmentId }),
           ]);
           setProfileData(flatProfile);
-          // Load enrollment responses from flat table instead of JSONB
           const flatEnrollment = await loadProfileData(enrollmentId, 'enrollment');
           setEnrollmentResponses(flatEnrollment);
           setDndSettings(flatDnd);
@@ -78,16 +77,13 @@ const ParticipantSettings: React.FC = () => {
     if (!enrollment) return;
     setSaving(true);
     try {
-      // Save to flat tables instead of JSONB
       await Promise.all([
         saveProfileData(enrollment.id, profileData),
         saveDndSetting(enrollment.id, dndSettings),
         saveEcogramData({ enrollmentId: enrollment.id }, ecogramData),
       ]);
-      // Save enrollment responses to flat table instead of JSONB
       await saveProfileData(enrollment.id, enrollmentResponses, 'enrollment');
 
-      // Re-schedule notifications with updated DND if project has notifications enabled
       if (notificationEnabled && project?.notification_enabled && project?.methodology_type === 'multi_time') {
         const dndPeriods = (dndSettings.periods || []).map((p: any) => ({
           start_time: p.start_time,
@@ -103,7 +99,7 @@ const ParticipantSettings: React.FC = () => {
         }, new Date(enrollment.study_start_date || enrollment.created_at));
       }
 
-      toast.success('Settings saved!');
+      toast.success(t('resSettings.saved'));
     } catch (error) { console.error('Error saving settings:', error); toast.error('Failed to save'); }
     finally { setSaving(false); }
   };
@@ -136,35 +132,35 @@ const ParticipantSettings: React.FC = () => {
     <div className="pb-4 bg-stone-50/50">
       <div className="max-w-2xl mx-auto px-4 py-4">
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-stone-800 tracking-tight">Settings</h1>
-          <p className="text-[13px] text-stone-400 font-light mt-0.5">Manage your profile and preferences</p>
+          <h1 className="text-xl font-bold text-stone-800 tracking-tight">{t('partSettings.title')}</h1>
+          <p className="text-[13px] text-stone-400 font-light mt-0.5">{t('partSettings.subtitle')}</p>
         </div>
 
-        <SectionCard icon={User} title="Account">
+        <SectionCard icon={User} title={t('partSettings.account')}>
           {currentUser ? (
             <div className="space-y-3">
               <div className="p-3.5 rounded-xl bg-stone-50">
-                <p className="text-[11px] font-medium text-stone-400 mb-0.5">Email</p>
+                <p className="text-[11px] font-medium text-stone-400 mb-0.5">{t('partSettings.email')}</p>
                 <p className="text-[13px] font-medium text-stone-700">{currentUser.email}</p>
               </div>
               <button onClick={handleLogout}
                 className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium flex items-center justify-center gap-2 border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
-                <LogOut size={14} /> Sign Out
+                <LogOut size={14} /> {t('partSettings.signOut')}
               </button>
             </div>
           ) : (
             <div className="text-center py-4">
-              <p className="text-[13px] text-stone-400 font-light mb-3">Sign in to access your researches</p>
+              <p className="text-[13px] text-stone-400 font-light mb-3">{t('partSettings.signInAccess')}</p>
               <button onClick={handleLogin}
                 className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                <LogIn size={14} /> Sign In
+                <LogIn size={14} /> {t('common.signIn')}
               </button>
             </div>
           )}
         </SectionCard>
 
         {enrollmentQuestions.length > 0 && (
-          <SectionCard icon={FileText} title="Enrollment Information">
+          <SectionCard icon={FileText} title={t('partSettings.enrollmentInfo')}>
             <div className="space-y-4">
               {enrollmentQuestions.map((question) => (
                 <div key={question.id}>
@@ -183,9 +179,9 @@ const ParticipantSettings: React.FC = () => {
                   {(question.question_type === 'single_choice' || question.question_type === 'yes_no') && (
                     <select value={enrollmentResponses[question.id] || ''} onChange={(e) => setEnrollmentResponses({ ...enrollmentResponses, [question.id]: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
-                      <option value="">Select an option</option>
+                      <option value="">{t('partSettings.selectOption')}</option>
                       {question.question_type === 'yes_no' ? (
-                        <><option value="yes">Yes</option><option value="no">No</option></>
+                        <><option value="yes">{t('partSettings.yes')}</option><option value="no">{t('partSettings.no')}</option></>
                       ) : (
                         (question.options || []).map((option: string, idx: number) => (
                           <option key={idx} value={option}>{option}</option>
@@ -200,7 +196,7 @@ const ParticipantSettings: React.FC = () => {
         )}
 
         {profileQuestions.length > 0 && (
-          <SectionCard icon={User} title="Profile Information">
+          <SectionCard icon={User} title={t('partSettings.profileInfo')}>
             <div className="space-y-4">
               {profileQuestions.map((question) => (
                 <div key={question.id}>
@@ -218,7 +214,7 @@ const ParticipantSettings: React.FC = () => {
                   {question.question_type === 'single_choice' && (
                     <select value={profileData[question.id] || ''} onChange={(e) => setProfileData({ ...profileData, [question.id]: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
-                      <option value="">Select an option</option>
+                      <option value="">{t('partSettings.selectOption')}</option>
                       {(question.options || []).map((option: any) => (
                         <option key={option.id} value={option.id}>{option.text || option.option_text}</option>
                       ))}
@@ -230,11 +226,11 @@ const ParticipantSettings: React.FC = () => {
           </SectionCard>
         )}
 
-        <SectionCard icon={Bell} title="Notifications">
+        <SectionCard icon={Bell} title={t('resSettings.notifications')}>
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-stone-50">
             <div>
-              <p className="text-[13px] font-medium text-stone-700">Enable Notifications</p>
-              <p className="text-[11px] text-stone-400 font-light">Receive reminders for surveys</p>
+              <p className="text-[13px] font-medium text-stone-700">{t('partSettings.enableNotif')}</p>
+              <p className="text-[11px] text-stone-400 font-light">{t('partSettings.receiveReminders')}</p>
             </div>
             <button onClick={() => setNotificationEnabled(!notificationEnabled)}
               className={`w-10 h-5 rounded-full transition-all relative ${notificationEnabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
@@ -243,13 +239,13 @@ const ParticipantSettings: React.FC = () => {
           </div>
         </SectionCard>
 
-        <SectionCard icon={Moon} title="Do Not Disturb">
+        <SectionCard icon={Moon} title={t('partSettings.dnd')}>
           <div className="space-y-3">
             {(dndSettings.periods || []).map((period: any, index: number) => (
               <div key={index} className="flex items-center gap-2 p-3 rounded-xl border border-stone-100">
                 <input type="time" value={period.start_time || ''} onChange={(e) => updateDndPeriod(index, 'start_time', e.target.value)}
                   className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
-                <span className="text-[11px] text-stone-400">to</span>
+                <span className="text-[11px] text-stone-400">{t('partSettings.to')}</span>
                 <input type="time" value={period.end_time || ''} onChange={(e) => updateDndPeriod(index, 'end_time', e.target.value)}
                   className="flex-1 px-3 py-2 rounded-lg border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200" />
                 <button onClick={() => removeDndPeriod(index)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition-colors text-[12px]">✕</button>
@@ -257,18 +253,18 @@ const ParticipantSettings: React.FC = () => {
             ))}
             <button onClick={addDndPeriod}
               className="w-full py-2.5 rounded-xl border border-dashed border-stone-200 text-[12px] font-medium text-emerald-500 hover:bg-emerald-50/50 transition-colors">
-              + Add DND Period
+              {t('partSettings.addDnd')}
             </button>
           </div>
         </SectionCard>
 
         {project?.ecogram_enabled && (
-          <SectionCard icon={Network} title="Care Network (Ecogram)">
+          <SectionCard icon={Network} title={t('partSettings.careNetwork')}>
             <EcogramBuilder
               initialData={ecogramData}
               onSave={(data) => {
                 setEcogramData(data);
-                toast.success('Ecogram updated — press Save Settings to persist');
+                toast.success(t('resSettings.saved'));
               }}
               centerLabel={project?.ecogram_config?.center_label || 'You'}
               relationshipOptions={project?.ecogram_config?.relationship_options}
@@ -280,7 +276,7 @@ const ParticipantSettings: React.FC = () => {
         {enrollment && (
           <button onClick={saveSettings} disabled={saving}
             className="w-full py-3 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all disabled:opacity-50">
-            {saving ? 'Saving...' : 'Save Settings'}
+            {saving ? t('partSettings.saving') : t('partSettings.saveSettings')}
           </button>
         )}
       </div>
