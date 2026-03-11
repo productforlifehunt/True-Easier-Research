@@ -8,7 +8,7 @@ import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 import BrandIcon from './BrandIcon';
 import { useI18n } from '../hooks/useI18n';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../lib/supabase';
 
 // Private custom element from DB / 数据库中的定制功能部件
 interface CustomFunctionElement {
