@@ -719,7 +719,7 @@ Per-questionnaire per-enrollment. Stored in `enrollment_dnd_period` table (enrol
 ## 11. SURVEY BUILDER / 调查构建器
 
 > **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
-> - ✅ T1-11.1: SurveyBuilder.tsx loads at `/easyresearch/project/:id` with all 9 tabs visible / 构建器在正确路由加载，9个标签可见
+> - ✅ T1-11.1: SurveyBuilder.tsx loads at `/easyresearch/project/:id` with all 12 tabs visible / 构建器在正确路由加载，12个标签可见
 > - ✅ T1-11.2: `syncQuestions()` upserts questions + options + config to DB correctly / 问题同步正常
 > - ✅ T1-11.3: Responses tab only shows after project save, displays live response count / 响应标签在保存后显示，含实时计数
 > - ✅ T1-11.4: Layout auto-saves with 1.5s debounce via `saveLayoutToDb()` / 布局1.5秒防抖自动保存
