@@ -440,7 +440,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       {layout.show_header && (
         <div className="flex-shrink-0 px-5 py-2.5" style={{ backgroundColor: primaryColor }}>
           <h1 className="text-[15px] font-bold text-white">
-            {layout.header_title || activeTab?.label || 'Home'}
+            {layout.header_title || projectTitle || activeTab?.label || 'Home'}
           </h1>
           {layout.header_description && (
             <p className="text-[11px] text-white/70 mt-0.5 line-clamp-1">{layout.header_description}</p>
