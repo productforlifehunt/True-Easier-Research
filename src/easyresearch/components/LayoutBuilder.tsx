@@ -1485,6 +1485,24 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       ))}
                     </div>
 
+                    {/* User-customized Function Elements / 自定义功能部件 */}
+                    {userFuncElements.length > 0 && (
+                      <div className="border-t border-stone-200 pt-2 mt-1">
+                        <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                          {lang === 'zh' ? '自定义功能部件' : 'Your Custom Elements'}
+                        </p>
+                        <div className="space-y-0.5">
+                          {userFuncElements.map(ue => (
+                            <button key={ue.id} onClick={() => addElement(ue.base_type, { title: lang === 'zh' ? ue.name_zh : ue.name_en })}
+                              className="w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-colors text-[10px] border border-transparent hover:bg-blue-50 hover:border-blue-200">
+                              {getLucideIcon(ue.icon || 'Sparkles', 14, 'text-blue-500')}
+                              <span className="text-stone-700 font-medium truncate">{lang === 'zh' ? ue.name_zh : ue.name_en}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Private / Custom Elements — 定制部件 */}
                     <div className="border-t border-stone-200 pt-2 mt-1">
                       <div className="flex items-center gap-1.5 mb-1">
