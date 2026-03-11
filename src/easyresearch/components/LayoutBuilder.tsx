@@ -244,11 +244,26 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
 };
 
 const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, projectTitle, projectDescription, onUpdate, onUpdateQuestionnaire }) => {
+  const { t, lang } = useI18n();
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
+  const [customElements, setCustomElements] = useState<CustomFunctionElement[]>([]);
+
+  // Fetch private/custom elements from DB / 从数据库获取定制功能部件
+  useEffect(() => {
+    const fetchCustomElements = async () => {
+      try {
+        const { data, error } = await (supabase as any).from('custom_function_element').select('*');
+        if (!error && data) setCustomElements(data);
+      } catch (e) {
+        // Silent fail — table may not exist yet / 静默失败
+      }
+    };
+    fetchCustomElements();
+  }, []);
 
   const activeTab = layout.tabs.find(t => t.id === activeTabId);
 
