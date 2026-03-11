@@ -378,9 +378,9 @@ const SurveyBuilder: React.FC = () => {
       if (error) throw error;
       setProject(prev => ({ ...(prev as any), ...updates }));
       if (nextStatus === 'published') {
-        toast.success('Project published! Share the survey code with participants.');
+        toast.success(t('toast.projectPublished'));
       } else {
-        toast.success('Project unpublished.');
+        toast.success(t('toast.projectUnpublished'));
       }
     } catch (error) {
       console.error('Error updating publish status:', error);
