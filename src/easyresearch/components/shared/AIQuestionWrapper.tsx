@@ -268,7 +268,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
                 {chatLoading && (
                   <div className="flex items-center gap-1 text-stone-400 text-[11px]">
                     <Loader2 size={12} className="animate-spin" />
-                    AI is thinking...
+                    {t('ai.thinking')}
                   </div>
                 )}
               </div>
