@@ -25,7 +25,7 @@ const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-survey-su
 const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
   question, value, onResponse, children, aiConfig, compact = false,
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const MODE_LABELS: { key: AiMode; label: string }[] = [
     { key: 'all', label: t('ai.mode.all') },
