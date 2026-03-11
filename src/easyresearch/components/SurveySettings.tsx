@@ -66,7 +66,7 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
   );
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-3xl space-y-4">
       {/* Title & Description — no section header needed */}
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 space-y-3">
         <InputField label={t('project.title')} type="text" value={project.title} onChange={(e) => onUpdateProject({ ...project, title: (e.target as HTMLInputElement).value })} placeholder={t('project.title')} />

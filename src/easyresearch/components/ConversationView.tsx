@@ -160,7 +160,7 @@ const ConversationView: React.FC = () => {
   });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px-56px)] lg:h-[calc(100vh-56px)] max-w-2xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-56px-56px)] lg:h-[calc(100vh-56px)] max-w-2xl">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <button onClick={() => navigate('/easyresearch/inbox')} className="p-1 rounded-lg hover:bg-stone-100 transition-colors">

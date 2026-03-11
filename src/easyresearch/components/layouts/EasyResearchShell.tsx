@@ -123,7 +123,7 @@ const EasyResearchShellInner: React.FC = () => {
         style={{ willChange: 'opacity' }}
       >
         {showSidebar ? (
-          <div className="p-4 sm:p-6 lg:p-8">
+          <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-6">
             <Outlet />
           </div>
         ) : (

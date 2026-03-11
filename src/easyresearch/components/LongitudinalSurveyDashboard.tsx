@@ -119,7 +119,7 @@ const LongitudinalSurveyDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-stone-50/50 py-6 pb-24">
-      <div className="max-w-3xl mx-auto px-4">
+      <div className="max-w-3xl px-0">
         {/* Header Card */}
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-4">
           <div className="flex justify-between items-start">

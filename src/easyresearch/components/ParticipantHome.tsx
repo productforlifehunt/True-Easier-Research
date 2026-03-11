@@ -186,7 +186,7 @@ const ParticipantHome: React.FC = () => {
 
   return (
     <div className="bg-stone-50/50">
-      <div className="max-w-lg mx-auto px-4 py-4">
+      <div className="max-w-3xl px-0 py-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>

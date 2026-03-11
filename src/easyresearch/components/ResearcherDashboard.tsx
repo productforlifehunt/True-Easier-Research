@@ -266,7 +266,7 @@ const ResearcherDashboard: React.FC = () => {
 
   return (
     <div>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

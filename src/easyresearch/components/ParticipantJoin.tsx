@@ -151,7 +151,7 @@ const ParticipantJoin: React.FC = () => {
   // Main join/discover page
   return (
     <div className="bg-stone-50/50">
-      <div className="max-w-lg mx-auto px-4 py-4">
+      <div className="max-w-2xl px-0 py-4">
         {/* Join by Code */}
         <div className="mb-5">
           <h1 className="text-xl font-bold text-stone-800 tracking-tight">Join a Study</h1>

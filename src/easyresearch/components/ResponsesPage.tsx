@@ -81,7 +81,7 @@ const ResponsesPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Responses</h1>
         <p className="text-[13px] text-stone-400 mt-1 font-light">Overview of all responses across your projects</p>
