@@ -635,11 +635,10 @@ The following are implemented in code but hidden from UI: Funnel (`FunnelAnalysi
 
 ## 9. USER PROFILE / 用户资料
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-9.1: `is_researcher` and `is_participant` booleans on profiles table save and load correctly / 角色布尔值保存加载正常 -->
-<!-- ✅ T1-9.2: User can be both researcher AND participant simultaneously / 用户可同时拥有两种角色 -->
-<!-- ✅ T1-9.3: `push_notifications_enabled` master kill switch works / 推送通知主开关有效 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-9.1: `is_researcher` and `is_participant` booleans on profiles table save and load correctly / 角色布尔值保存加载正常
+> - ✅ T1-9.2: User can be both researcher AND participant simultaneously / 用户可同时拥有两种角色
+> - ✅ T1-9.3: `push_notifications_enabled` master kill switch works / 推送通知主开关有效
 
 User role is defined in the `profiles` table. A user can be both researcher and participant simultaneously.
 
