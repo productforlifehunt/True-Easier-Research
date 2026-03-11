@@ -263,7 +263,7 @@ const ParticipantLibrary: React.FC = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f9faf8' }}>
-      <div className="max-w-5xl py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -345,7 +345,7 @@ const ParticipantLibrary: React.FC = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="text-[12px] font-medium text-stone-500 mb-1 block">Bio</label>
+                <label className="text-[12px] font-medium text-stone-500 mb-1 block">{t('participantLibrary.bio')}</label>
                 <textarea
                   value={myProfile.bio || ''}
                   onChange={e => setMyProfile(p => ({ ...p, bio: e.target.value }))}
@@ -413,14 +413,14 @@ const ParticipantLibrary: React.FC = () => {
                 type="number"
                 value={ageMin}
                 onChange={e => setAgeMin(e.target.value)}
-                placeholder="Age ≥"
+                placeholder={t('participantLibrary.ageMin')}
                 className="w-1/2 px-3 py-2 text-[13px] border border-stone-200 rounded-lg focus:outline-none focus:border-emerald-300"
               />
               <input
                 type="number"
                 value={ageMax}
                 onChange={e => setAgeMax(e.target.value)}
-                placeholder="Age ≤"
+                placeholder={t('participantLibrary.ageMax')}
                 className="w-1/2 px-3 py-2 text-[13px] border border-stone-200 rounded-lg focus:outline-none focus:border-emerald-300"
               />
             </div>
@@ -444,7 +444,7 @@ const ParticipantLibrary: React.FC = () => {
                     <span className="text-[13px] font-semibold text-white">{(p.full_name?.[0] || '?').toUpperCase()}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">{p.full_name || 'Anonymous'}</h3>
+                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">{p.full_name || t('participantLibrary.anonymous')}</h3>
                     {p.occupation && (
                       <div className="flex items-center gap-1 mt-0.5">
                         <Briefcase size={11} className="text-stone-300" />
@@ -488,7 +488,7 @@ const ParticipantLibrary: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-              <h3 className="text-[15px] font-semibold text-stone-800">Invite to Study</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800">{t('participantLibrary.inviteTitle')}</h3>
               <button onClick={() => setInviteTarget(null)} className="p-1 rounded-lg hover:bg-stone-100 transition-colors">
                 <X size={16} className="text-stone-400" />
               </button>
@@ -501,7 +501,7 @@ const ParticipantLibrary: React.FC = () => {
                   <span className="text-[13px] font-semibold text-white">{(inviteTarget.full_name?.[0] || '?').toUpperCase()}</span>
                 </div>
                 <div>
-                  <p className="text-[14px] font-medium text-stone-800">{inviteTarget.full_name || 'Anonymous'}</p>
+                  <p className="text-[14px] font-medium text-stone-800">{inviteTarget.full_name || t('participantLibrary.anonymous')}</p>
                   <p className="text-[12px] text-stone-400">
                     {[inviteTarget.occupation, inviteTarget.country].filter(Boolean).join(' · ')}
                   </p>
@@ -510,12 +510,12 @@ const ParticipantLibrary: React.FC = () => {
 
               {/* Select study */}
               <div>
-                <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Select a study</label>
+                <label className="text-[12px] font-semibold text-stone-600 mb-2 block">{t('participantLibrary.selectStudy')}</label>
                 {loadingProjects ? (
-                  <div className="text-[13px] text-stone-400 py-3">Loading your studies...</div>
+                  <div className="text-[13px] text-stone-400 py-3">{t('participantLibrary.loadingStudies')}</div>
                 ) : myProjects.length === 0 ? (
                   <div className="text-[13px] text-stone-400 bg-stone-50 rounded-lg p-4">
-                    You don't have any research projects yet. Create a study first to invite participants.
+                    {t('participantLibrary.noStudies')}
                   </div>
                 ) : (
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
@@ -545,7 +545,7 @@ const ParticipantLibrary: React.FC = () => {
               {/* Message */}
               {myProjects.length > 0 && (
                 <div>
-                  <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Invitation message</label>
+                  <label className="text-[12px] font-semibold text-stone-600 mb-2 block">{t('participantLibrary.invitationMessage')}</label>
                   <textarea
                     value={inviteMessage}
                     onChange={e => setInviteMessage(e.target.value)}
@@ -563,7 +563,7 @@ const ParticipantLibrary: React.FC = () => {
                 onClick={() => setInviteTarget(null)}
                 className="px-4 py-2 text-[13px] font-medium text-stone-500 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={sendInvitation}
@@ -571,7 +571,7 @@ const ParticipantLibrary: React.FC = () => {
                 className="flex items-center gap-1.5 px-5 py-2 text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Mail size={13} />
-                {inviting ? 'Sending...' : 'Send Invitation'}
+                {inviting ? t('participantLibrary.sending') : t('participantLibrary.sendInvitation')}
               </button>
             </div>
           </div>
