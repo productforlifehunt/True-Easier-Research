@@ -3,6 +3,7 @@ import { Sparkles, Send, Loader2, Check, RotateCcw, Mic } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../hooks/useI18n';
 
 type AiMode = 'all' | 'explain' | 'improve' | 'chat' | 'fill';
 
