@@ -3,11 +3,13 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { UserCheck, BarChart3, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useI18n } from '../hooks/useI18n';
 
 const EasyResearchAuth: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user: currentUser, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -23,14 +25,9 @@ const EasyResearchAuth: React.FC = () => {
     if (redirectTo && redirectTo.startsWith('/easyresearch')) {
       navigate(redirectTo, { replace: true });
     } else {
-      // Check if researcher
       supabase.from('researcher').select('id').eq('user_id', currentUser.id).maybeSingle()
         .then(({ data }) => {
-          if (data || currentUser.user_metadata?.role === 'researcher') {
-            navigate('/easyresearch/dashboard', { replace: true });
-          } else {
-            navigate('/easyresearch/dashboard', { replace: true });
-          }
+          navigate('/easyresearch/dashboard', { replace: true });
         });
     }
   }, [currentUser, authLoading, location.search, navigate]);
@@ -51,16 +48,15 @@ const EasyResearchAuth: React.FC = () => {
 
   const handleAuth = async () => {
     setError('');
-    if (!email.trim()) { setError('Please enter your email'); return; }
-    if (!password) { setError('Please enter a password'); return; }
-    if (isSignUp && password.length < 6) { setError('Password must be at least 6 characters'); return; }
+    if (!email.trim()) { setError(t('auth.enterEmail')); return; }
+    if (!password) { setError(t('auth.enterPassword')); return; }
+    if (isSignUp && password.length < 6) { setError(t('auth.passwordTooShort')); return; }
 
     setLoading(true);
     try {
       if (isSignUp) {
         const { data: authData, error: signUpError } = await authClient.auth.signUp({ email, password, options: { data: { role } } });
         let userId = authData?.user?.id;
-        // If user already exists, fall back to sign in (user can have multiple roles)
         if (signUpError) {
           const isAlreadyRegistered = signUpError.message?.toLowerCase().includes('already registered') || signUpError.message?.toLowerCase().includes('already been registered');
           if (!isAlreadyRegistered) throw signUpError;
@@ -70,7 +66,6 @@ const EasyResearchAuth: React.FC = () => {
         }
         if (userId && role === 'researcher') {
           try {
-            // Ensure profile exists (researcher.user_id FK -> profile.id)
             const { data: existingProfile } = await supabase.from('profile').select('id').eq('id', userId).maybeSingle();
             if (!existingProfile) {
               await supabase.from('profile').insert({ id: userId, user_id: userId, email, user_type: 'researcher' });
@@ -88,12 +83,7 @@ const EasyResearchAuth: React.FC = () => {
       const { data: { user } } = await authClient.auth.getUser();
       if (user) {
         const redirectTarget = getRedirectTarget();
-        const { data: researcher } = await supabase.from('researcher').select('id').eq('user_id', user.id).maybeSingle();
-        if (researcher || user.user_metadata?.role === 'researcher') {
-          navigate(redirectTarget ?? '/easyresearch/dashboard', { replace: true });
-        } else {
-          navigate(redirectTarget ?? '/easyresearch/dashboard', { replace: true });
-        }
+        navigate(redirectTarget ?? '/easyresearch/dashboard', { replace: true });
       }
     } catch (err: any) { setError(err.message); }
     finally { setLoading(false); }
@@ -102,7 +92,7 @@ const EasyResearchAuth: React.FC = () => {
   if (authLoading || currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f9faf8' }}>
-        <div className="text-stone-400 text-sm">Loading...</div>
+        <div className="text-stone-400 text-sm">{t('common.loading')}</div>
       </div>
     );
   }
@@ -113,7 +103,7 @@ const EasyResearchAuth: React.FC = () => {
       <div className="px-5 py-4">
         <Link to="/easyresearch" className="inline-flex items-center gap-1.5 text-stone-400 hover:text-stone-600 transition-colors text-[13px] font-medium">
           <ArrowLeft size={16} />
-          <span>Back</span>
+          <span>{t('common.back')}</span>
         </Link>
       </div>
 
@@ -121,20 +111,20 @@ const EasyResearchAuth: React.FC = () => {
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold tracking-tight text-stone-800 mb-1.5">
-              {isSignUp ? 'Create your account' : 'Welcome back'}
+              {isSignUp ? t('auth.createAccount') : t('auth.welcomeBack')}
             </h1>
             <p className="text-[14px] text-stone-400 font-light">
-              {isSignUp ? 'Start creating surveys' : 'Sign in to continue'}
+              {isSignUp ? t('auth.startCreating') : t('auth.signInToContinue')}
             </p>
           </div>
 
           {isSignUp && (
             <div className="mb-6">
-              <p className="text-[12px] font-medium text-stone-500 mb-2.5">I want to:</p>
+              <p className="text-[12px] font-medium text-stone-500 mb-2.5">{t('auth.iWantTo')}</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { key: 'participant' as const, icon: UserCheck, label: 'Participate', desc: 'Take surveys' },
-                  { key: 'researcher' as const, icon: BarChart3, label: 'Research', desc: 'Create surveys' }
+                  { key: 'participant' as const, icon: UserCheck, label: t('auth.participate'), desc: t('auth.takeSurveys') },
+                  { key: 'researcher' as const, icon: BarChart3, label: t('auth.research'), desc: t('auth.createSurveys') }
                 ].map(r => (
                   <button
                     key={r.key}
@@ -155,7 +145,7 @@ const EasyResearchAuth: React.FC = () => {
           <div className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm shadow-stone-100">
             <div className="space-y-3.5">
               <div>
-                <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Email</label>
+                <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('auth.email')}</label>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
@@ -163,7 +153,7 @@ const EasyResearchAuth: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Password</label>
+                <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('auth.password')}</label>
                 <input
                   type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
@@ -180,7 +170,7 @@ const EasyResearchAuth: React.FC = () => {
                 disabled={loading || !email || !password}
                 className="w-full py-2.5 rounded-xl text-[14px] font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 transition-all shadow-sm shadow-emerald-200 flex items-center justify-center gap-1.5"
               >
-                {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                {loading ? t('common.loading') : (isSignUp ? t('auth.createAccountBtn') : t('common.signIn'))}
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -188,7 +178,7 @@ const EasyResearchAuth: React.FC = () => {
 
           <p className="text-center mt-5">
             <button onClick={() => setIsSignUp(!isSignUp)} className="text-[13px] text-emerald-600 hover:text-emerald-700 font-medium">
-              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+              {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}
             </button>
           </p>
         </div>
