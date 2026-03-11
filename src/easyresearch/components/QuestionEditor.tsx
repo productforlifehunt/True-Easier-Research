@@ -4,6 +4,7 @@ import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import CustomDropdown from './CustomDropdown';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import toast from 'react-hot-toast';
+import { useI18n } from '../hooks/useI18n';
 
 interface Question {
   id: string;

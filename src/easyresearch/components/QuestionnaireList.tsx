@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useI18n } from '../hooks/useI18n';
 import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList, Layers, Sparkles, Mic, MessageCircle, Eye } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
