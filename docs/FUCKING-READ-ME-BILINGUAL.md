@@ -771,7 +771,7 @@ The participant-facing mobile app layout is stored in flat relational tables. Ma
 - `id` (uuid PK)
 - `tab_id` (uuid FK → app_tab)
 - `project_id` (uuid FK)
-- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`
+- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`, `'ai_assistant'`
 - `order_index` (int)
 - `questionnaire_id` (uuid FK, nullable) — single questionnaire link / 单问卷链接
 - `questionnaire_ids` (text[], nullable) — multiple questionnaires (for timeline) / 多问卷（时间线用）
