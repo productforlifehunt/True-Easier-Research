@@ -547,6 +547,8 @@ const ParticipantAppView: React.FC = () => {
             initialOpen={true}
           />
         );
+      })()}
+
       {/* Direct Message confirmation dialog / 直接消息确认对话框 */}
       {showDmConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -576,7 +578,7 @@ const ParticipantAppView: React.FC = () => {
                     return;
                   }
                   try {
-                    // Check if a conversation already exists / 检查是否已有会话
+                    // Check if conversation exists / 检查是否已有会话
                     const { data: existing } = await supabase
                       .from('conversations')
                       .select('id')
@@ -618,7 +620,6 @@ const ParticipantAppView: React.FC = () => {
           </div>
         </div>
       )}
-      })()}
     </div>
   );
 };
