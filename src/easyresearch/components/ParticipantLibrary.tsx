@@ -444,7 +444,7 @@ const ParticipantLibrary: React.FC = () => {
                     <span className="text-[13px] font-semibold text-white">{(p.full_name?.[0] || '?').toUpperCase()}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">{p.full_name || 'Anonymous'}</h3>
+                    <h3 className="text-[14px] font-semibold text-stone-800 truncate">{p.full_name || t('participantLibrary.anonymous')}</h3>
                     {p.occupation && (
                       <div className="flex items-center gap-1 mt-0.5">
                         <Briefcase size={11} className="text-stone-300" />
