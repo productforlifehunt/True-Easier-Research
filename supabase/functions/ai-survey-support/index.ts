@@ -13,6 +13,7 @@ const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
+  console.log('Using API key starting with:', OPENROUTER_API_KEY.substring(0, 15), '... length:', OPENROUTER_API_KEY.length)
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
