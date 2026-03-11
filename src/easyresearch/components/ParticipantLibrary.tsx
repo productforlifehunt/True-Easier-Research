@@ -345,7 +345,7 @@ const ParticipantLibrary: React.FC = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="text-[12px] font-medium text-stone-500 mb-1 block">Bio</label>
+                <label className="text-[12px] font-medium text-stone-500 mb-1 block">{t('participantLibrary.bio')}</label>
                 <textarea
                   value={myProfile.bio || ''}
                   onChange={e => setMyProfile(p => ({ ...p, bio: e.target.value }))}
