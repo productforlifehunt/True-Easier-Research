@@ -47,14 +47,13 @@ All data lives in flat relational tables. No JSONB config blobs. No separate tem
 
 ## 2. RESEARCH PROJECT / 研究项目
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-2.1: Project CRUD works — create, read, update, delete from `research_project` / 项目增删改查正常 -->
-<!-- ✅ T1-2.2: `methodology_type` toggle between 'one_time' and 'multi_time' saves and loads correctly / 研究方法类型切换保存加载正常 -->
-<!-- ✅ T1-2.3: `status` transitions 'draft' ↔ 'published' work, `published_at` set on publish / 状态转换和发布时间正常 -->
-<!-- ✅ T1-2.4: `survey_code` generates and displays for participant joining / 研究码生成和显示正常 -->
-<!-- ✅ T1-2.5: Feature toggles (ai_enabled, voice_enabled, notification_enabled) save/load / 功能开关保存加载正常 -->
-<!-- ✅ T1-2.6: Layout theme columns (layout_theme_primary_color, etc.) persist and apply in participant view / 布局主题列持久化并在参与者视图中应用 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-2.1: Project CRUD works — create, read, update, delete from `research_project` / 项目增删改查正常
+> - ✅ T1-2.2: `methodology_type` toggle between 'one_time' and 'multi_time' saves and loads correctly / 研究方法类型切换保存加载正常
+> - ✅ T1-2.3: `status` transitions 'draft' ↔ 'published' work, `published_at` set on publish / 状态转换和发布时间正常
+> - ✅ T1-2.4: `survey_code` generates and displays for participant joining / 研究码生成和显示正常
+> - ✅ T1-2.5: Feature toggles (ai_enabled, voice_enabled, notification_enabled) save/load / 功能开关保存加载正常
+> - ✅ T1-2.6: Layout theme columns (layout_theme_primary_color, etc.) persist and apply in participant view / 布局主题列持久化并在参与者视图中应用
 
 Every study lives in the `research_project` table (tier 1). A project can have multiple questionnaires (e.g. hourly, daily), and components (consent, screening, profile, help, custom) which are also questionnaires under the hood.
 
