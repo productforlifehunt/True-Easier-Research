@@ -384,7 +384,7 @@ const SurveyBuilder: React.FC = () => {
       }
     } catch (error) {
       console.error('Error updating publish status:', error);
-      toast.error('Failed to update publish status. Please try again.');
+      toast.error(t('toast.publishFailed'));
     } finally {
       setSaving(false);
     }
