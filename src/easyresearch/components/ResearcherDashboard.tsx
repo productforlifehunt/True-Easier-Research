@@ -391,7 +391,7 @@ const ResearcherDashboard: React.FC = () => {
                     <button
                       className="p-1.5 rounded-lg hover:bg-stone-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); handleDuplicateProject(project); }}
-                      title="Duplicate"
+                      title={t('action.duplicate')}
                       disabled={actionLoading}
                     >
                       <Copy size={14} className="text-stone-400" />
