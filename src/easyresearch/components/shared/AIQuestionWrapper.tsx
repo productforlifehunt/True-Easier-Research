@@ -145,7 +145,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
           ? `${cleanText}\n\n✅ Filled: ${typeof parsedValue === 'object' ? JSON.stringify(parsedValue) : String(parsedValue)}`
           : `✅ Filled: ${typeof parsedValue === 'object' ? JSON.stringify(parsedValue) : String(parsedValue)}`;
         setChatMessages(prev => [...prev, { role: 'assistant', content: displayMsg }]);
-        toast.success('AI filled the answer — review and correct if needed');
+        toast.success(lang === 'zh' ? 'AI 已填写答案 — 请检查并修改' : 'AI filled the answer — review and correct if needed');
       } else {
         setChatMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
       }
