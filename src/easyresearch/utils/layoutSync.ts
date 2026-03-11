@@ -315,6 +315,9 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
 
   for (const tab of layout.tabs) {
     for (const el of tab.elements) {
+      // For ai_assistant elements, map config fields to repurposed DB columns:
+      // ai_display_mode → card_display_style, ai_position → button_action, icon → screening_criteria
+      const isAi = el.type === 'ai_assistant';
       allElements.push({
         id: el.id,
         tab_id: tab.id,
@@ -343,15 +346,15 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
         style_text_color: el.config.style?.text_color || null,
         style_bg_color: el.config.style?.bg_color || null,
         style_overflow: el.config.style?.overflow || null,
-        button_action: el.config.button_action || null,
+        button_action: isAi ? (el.config.ai_position || 'bottom-right') : (el.config.button_action || null),
         button_label: el.config.button_label || null,
         button_border_radius: el.config.button_border_radius || null,
-        card_display_style: el.config.card_display_style || null,
+        card_display_style: isAi ? (el.config.ai_display_mode || 'popup') : (el.config.card_display_style || null),
         show_frequency: el.config.show_frequency ?? null,
         image_url: el.config.image_url || null,
         show_question_count: el.config.show_question_count ?? null,
         show_estimated_time: el.config.show_estimated_time ?? null,
-        screening_criteria: el.config.screening_criteria || null,
+        screening_criteria: isAi ? (el.config.icon || 'MessageCircle') : (el.config.screening_criteria || null),
         progress_style: el.config.progress_style || null,
         timeline_start_hour: el.config.timeline_start_hour ?? null,
         timeline_end_hour: el.config.timeline_end_hour ?? null,
