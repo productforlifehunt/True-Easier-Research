@@ -12,9 +12,9 @@ const DiscoverPage: React.FC = () => {
   const { t } = useI18n();
 
   const tabs: { id: DiscoverTab; label: string; icon: React.ElementType }[] = [
-    { id: 'studies', label: 'Studies', icon: Search },
-    { id: 'participants', label: 'Participants', icon: Users },
-    { id: 'templates', label: 'Templates', icon: BookTemplate },
+    { id: 'studies', label: t('discover.studies'), icon: Search },
+    { id: 'participants', label: t('discover.participants'), icon: Users },
+    { id: 'templates', label: t('discover.templates'), icon: BookTemplate },
   ];
 
   return (
