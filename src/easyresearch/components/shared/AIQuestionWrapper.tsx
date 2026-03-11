@@ -71,6 +71,8 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
     }
   }, []);
 
+  const { lang } = useI18n();
+
   const callAI = useCallback(async (action: string, extra: any = {}) => {
     const { data: { session } } = await supabase.auth.getSession();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -87,12 +89,13 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
         options: question.options,
         currentAnswer: value,
         questionConfig: question.question_config,
+        language: lang,
         ...extra,
       }),
     });
     if (!res.ok) throw new Error(`AI request failed: ${res.status}`);
     return await res.json();
-  }, [question, value, normalizedType]);
+  }, [question, value, normalizedType, lang]);
 
   // Parse AI response and fill the form field
   const parseAndFill = useCallback((aiAnswer: string) => {
