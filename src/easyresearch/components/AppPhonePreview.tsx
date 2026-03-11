@@ -44,7 +44,7 @@ const ICON_MAP: Record<string, React.FC<any>> = {
 const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   layout, questionnaires, participantTypes, studyDuration = 7,
   activeTabId: controlledTabId, onActiveTabChange,
-  highlightedElementId, onElementClick,
+  highlightedElementId, onElementClick, projectTitle,
   editable = false, onRemoveElement, onUpdateElement,
   scale = 1, frameWidth = 375, frameHeight = 680,
   filterParticipantTypeId,
