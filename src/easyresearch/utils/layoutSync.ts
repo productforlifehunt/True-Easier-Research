@@ -101,7 +101,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
   // Load project-level layout settings
   const { data: proj } = await supabase
     .from('research_project')
-    .select('layout_show_header, layout_header_title, layout_theme_primary_color, layout_theme_background_color, layout_theme_card_style')
+    .select('layout_show_header, layout_header_title, layout_header_description, layout_theme_primary_color, layout_theme_background_color, layout_theme_card_style')
     .eq('id', projectId)
     .maybeSingle();
 
@@ -245,6 +245,7 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
     bottom_nav: tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id })),
     show_header: proj?.layout_show_header ?? true,
     header_title: proj?.layout_header_title || '',
+    header_description: proj?.layout_header_description || undefined,
     theme: {
       primary_color: proj?.layout_theme_primary_color || '#10b981',
       background_color: proj?.layout_theme_background_color || '#f5f5f4',
@@ -263,8 +264,12 @@ const CORE_ELEMENT_KEYS = [
   'id', 'tab_id', 'project_id', 'type', 'order_index',
   'questionnaire_id', 'title', 'content', 'visible', 'participant_types', 'width',
   'style_padding', 'style_background', 'style_border_radius', 'style_height',
-  'button_action', 'button_label', 'image_url',
-  'show_question_count', 'show_estimated_time', 'screening_criteria',
+  'style_margin', 'style_opacity', 'style_border', 'style_border_color',
+  'style_shadow', 'style_text_align', 'style_content_align',
+  'style_font_size', 'style_font_weight', 'style_text_color', 'style_bg_color', 'style_overflow',
+  'button_action', 'button_label', 'button_border_radius',
+  'card_display_style', 'show_frequency', 'image_url',
+  'show_question_count', 'show_estimated_time', 'consent_text', 'screening_criteria',
   'progress_style', 'timeline_start_hour', 'timeline_end_hour', 'timeline_days',
   'todo_layout', 'todo_auto_scroll', 'questionnaire_ids',
 ];
@@ -391,6 +396,7 @@ export async function saveLayoutToDb(projectId: string, layout: AppLayout): Prom
     supabase.from('research_project').update({
       layout_show_header: layout.show_header,
       layout_header_title: layout.header_title,
+      layout_header_description: layout.header_description || null,
       layout_theme_primary_color: layout.theme.primary_color,
       layout_theme_background_color: layout.theme.background_color,
       layout_theme_card_style: layout.theme.card_style,

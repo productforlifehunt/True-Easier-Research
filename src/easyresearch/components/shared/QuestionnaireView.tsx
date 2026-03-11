@@ -395,6 +395,7 @@ const QuestionnaireView: React.FC<QuestionnaireViewProps> = ({
               onResponse={handleResponse}
               primaryColor={primaryColor}
               compact={compact}
+              allowVoice={q.question_config?.allow_voice || q.allow_voice}
             />
           </AIQuestionWrapper>
           {/* Per-question timer indicator / 每题计时指示器 */}

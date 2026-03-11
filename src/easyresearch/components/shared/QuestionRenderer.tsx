@@ -1,6 +1,7 @@
-import React from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Image as ImageIcon, Mic, MicOff } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
+import toast from 'react-hot-toast';
 
 interface QuestionRendererProps {
   question: any;
@@ -9,6 +10,8 @@ interface QuestionRendererProps {
   primaryColor?: string;
   /** When true, uses smaller font sizes for phone mockup preview */
   compact?: boolean;
+  /** Enable voice input for text fields */
+  allowVoice?: boolean;
 }
 
 /**
@@ -16,9 +19,37 @@ interface QuestionRendererProps {
  * to guarantee 100% visual parity.
  */
 const QuestionRenderer: React.FC<QuestionRendererProps> = ({
-  question, value, onResponse, primaryColor = '#10b981', compact = false,
+  question, value, onResponse, primaryColor = '#10b981', compact = false, allowVoice = false,
 }) => {
   const normalizedType = normalizeLegacyQuestionType(question.question_type);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const toggleVoice = useCallback(() => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { toast.error('Speech recognition not supported'); return; }
+    const recognition = new SpeechRecognition();
+    recognition.lang = navigator.language || 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      const currentVal = value || '';
+      onResponse(question.id, currentVal ? `${currentVal} ${transcript}` : transcript);
+      toast.success('Voice input captured');
+    };
+    recognition.onerror = () => { toast.error('Voice input failed'); setIsRecording(false); };
+    recognition.onend = () => setIsRecording(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  }, [isRecording, value, question.id, onResponse]);
+
   // Font sizes: compact (phone preview) vs full (participant view)
   const txt = compact ? 'text-[13px]' : 'text-[14px]';
   const txtSm = compact ? 'text-[11px]' : 'text-[12px]';
@@ -28,6 +59,22 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   const btnH = compact ? 'w-10 h-10' : 'w-11 h-11';
   const starSize = compact ? 'text-2xl' : 'text-3xl';
   const npsBtn = compact ? 'w-9 h-9' : 'w-10 h-10';
+  const isTextInput = ['text_short', 'text_long'].includes(normalizedType);
+
+  const voiceBtn = allowVoice && isTextInput ? (
+    <button
+      type="button"
+      onClick={toggleVoice}
+      className={`absolute top-2 right-2 p-1.5 rounded-lg transition-all z-10 ${
+        isRecording
+          ? 'bg-red-100 text-red-500 animate-pulse'
+          : 'bg-stone-100 text-stone-400 hover:text-stone-600 hover:bg-stone-200'
+      }`}
+      title={isRecording ? 'Stop recording' : 'Voice input'}
+    >
+      {isRecording ? <MicOff size={compact ? 12 : 14} /> : <Mic size={compact ? 12 : 14} />}
+    </button>
+  ) : null;
 
   switch (normalizedType) {
     case 'single_choice':
@@ -66,9 +113,19 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         </div>
       );
     case 'text_short':
-      return <input type="text" value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} placeholder="Your answer..." />;
+      return (
+        <div className="relative">
+          <input type="text" value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 ${voiceBtn ? 'pr-10' : ''} rounded-xl border border-stone-200 ${txt} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} placeholder="Your answer..." />
+          {voiceBtn}
+        </div>
+      );
     case 'text_long':
-      return <textarea value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} rows={4} placeholder="Your answer..." />;
+      return (
+        <div className="relative">
+          <textarea value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 ${voiceBtn ? 'pr-10' : ''} rounded-xl border border-stone-200 ${txt} resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} rows={4} placeholder="Your answer..." />
+          {voiceBtn}
+        </div>
+      );
     case 'number':
       return <input type="number" value={value || ''} onChange={(e) => onResponse(question.id, e.target.value)} className={`w-full px-4 py-3 rounded-xl border border-stone-200 ${txt} focus:outline-none focus:ring-2 focus:ring-emerald-500/20`} placeholder="Enter number..." />;
     case 'likert_scale': {

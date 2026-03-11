@@ -5,6 +5,7 @@ import QuestionnaireScheduler from './QuestionnaireScheduler';
 import ParticipantTypeManager, { type ParticipantType } from './ParticipantTypeManager';
 import IncentiveConfig from './IncentiveConfig';
 import { type SurveyProject } from './SurveyBuilder';
+import { useI18n } from '../hooks/useI18n';
 
 interface QuestionnaireRef {
   id: string;
@@ -22,6 +23,7 @@ interface SurveySettingsProps {
 }
 
 const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProject, participantTypes, onUpdateParticipantTypes, questionnaires }) => {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [questionnaireTab, setQuestionnaireTab] = useState<'library' | 'schedule'>('library');
   const canShare = Boolean(project.id);
@@ -67,10 +69,10 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
     <div className="max-w-3xl mx-auto space-y-4">
       {/* Title & Description — no section header needed */}
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 space-y-3">
-        <InputField label="Title" type="text" value={project.title} onChange={(e) => onUpdateProject({ ...project, title: (e.target as HTMLInputElement).value })} placeholder="Project title" />
+        <InputField label={t('project.title')} type="text" value={project.title} onChange={(e) => onUpdateProject({ ...project, title: (e.target as HTMLInputElement).value })} placeholder={t('project.title')} />
         <div>
-          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Description</label>
-          <textarea value={project.description} onChange={(e) => onUpdateProject({ ...project, description: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder="Project purpose and goals" />
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('project.description')}</label>
+          <textarea value={project.description} onChange={(e) => onUpdateProject({ ...project, description: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={3} placeholder={t('project.description')} />
         </div>
       </div>
 
@@ -84,19 +86,19 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
       </div>
 
       {/* Features */}
-      <SectionCard icon={Settings} iconBg="from-sky-50 to-blue-50" iconColor="text-sky-600" title="Features">
+      <SectionCard icon={Settings} iconBg="from-sky-50 to-blue-50" iconColor="text-sky-600" title={t('project.features')}>
         <div className="divide-y divide-stone-100">
-          <Toggle enabled={project.voice_enabled} onChange={(v) => onUpdateProject({ ...project, voice_enabled: v })} label="Voice Input" desc="Allow participants to respond via voice" />
-          <Toggle enabled={project.notification_enabled} onChange={(v) => onUpdateProject({ ...project, notification_enabled: v })} label="Notifications" desc="Send reminders to participants" />
-          <Toggle enabled={(project as any).messaging_enabled || false} onChange={(v) => onUpdateProject({ ...project, messaging_enabled: v } as any)} label="Messaging" desc="Enable direct messaging between researcher and participants" />
+          <Toggle enabled={project.voice_enabled} onChange={(v) => onUpdateProject({ ...project, voice_enabled: v })} label={t('project.voiceInput')} desc={t('project.voiceInputDesc')} />
+          <Toggle enabled={project.notification_enabled} onChange={(v) => onUpdateProject({ ...project, notification_enabled: v })} label={t('project.notificationsLabel')} desc={t('project.notificationsDesc')} />
+          <Toggle enabled={(project as any).messaging_enabled || false} onChange={(v) => onUpdateProject({ ...project, messaging_enabled: v } as any)} label={t('project.messaging')} desc={t('project.messagingDesc')} />
         </div>
       </SectionCard>
 
       {/* Study Type — One Time vs Longitudinal */}
-      <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title="Study Type">
+      <SectionCard icon={Calendar} iconBg="from-rose-50 to-pink-50" iconColor="text-rose-600" title={t('project.studyType')}>
         <div className="space-y-4">
           <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Methodology</label>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('project.methodology')}</label>
             <CustomDropdown
               options={[
                 { value: 'one_time', label: 'One-time' },

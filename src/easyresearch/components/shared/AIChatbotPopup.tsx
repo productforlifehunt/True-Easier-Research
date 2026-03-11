@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Loader2, Bot, Minimize2, CheckCircle2, Mic, Mic
 import { supabase } from '../../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../hooks/useI18n';
 
 interface AIChatbotPopupProps {
   questionnaireTitle: string;
@@ -11,6 +12,8 @@ interface AIChatbotPopupProps {
   onResponse: (questionId: string, value: any) => void;
   primaryColor?: string;
   compact?: boolean;
+  /** If true, chatbot opens immediately when rendered */
+  initialOpen?: boolean;
 }
 
 const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-survey-support`;
@@ -55,9 +58,10 @@ const VoiceInputButton: React.FC<{ onTranscript: (text: string) => void; primary
 };
 
 const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
-  questionnaireTitle, questions, responses, onResponse, primaryColor = '#10b981', compact = false,
+  questionnaireTitle, questions, responses, onResponse, primaryColor = '#10b981', compact = false, initialOpen = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { t } = useI18n();
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [messages, setMessages] = useState<Array<{ role: string; content: string; fills?: any[] }>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -157,17 +161,17 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
             }
           }
         });
-        toast.success(`AI filled ${fills.length} answer${fills.length > 1 ? 's' : ''} — review and correct if needed`);
+        toast.success(t('ai.filledAnswers').replace('{n}', String(fills.length)));
       }
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: result.response || 'I couldn\'t process that. Could you rephrase?',
+        content: result.response || t('ai.couldntProcess'),
         fills: fills.length > 0 ? fills : undefined,
       }]);
     } catch (err: any) {
-      toast.error(err.message || 'AI request failed');
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
+      toast.error(err.message || t('ai.requestFailed'));
+      setMessages(prev => [...prev, { role: 'assistant', content: t('ai.errorTryAgain') }]);
     } finally {
       setLoading(false);
     }
@@ -186,7 +190,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
         style={{ backgroundColor: primaryColor }}
       >
         <Bot size={18} />
-        <span className={compact ? 'sr-only' : ''}>AI Assistant</span>
+        <span className={compact ? 'sr-only' : ''}>{t('ai.assistant')}</span>
         {unansweredRequired.length > 0 && (
           <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
             {unansweredRequired.length}
@@ -197,15 +201,15 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden"
-      style={{ maxHeight: compact ? '60vh' : '70vh' }}>
+    <div className="fixed bottom-20 right-4 z-50 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-stone-200 flex flex-col overflow-hidden"
+      style={{ maxHeight: compact ? '50vh' : '60vh' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100" style={{ backgroundColor: primaryColor }}>
         <div className="flex items-center gap-2 text-white">
           <Bot size={18} />
           <div>
-            <p className="text-[13px] font-semibold">AI Assistant</p>
-            <p className="text-[10px] opacity-80">{answeredCount}/{responseQuestions.length} answered</p>
+            <p className="text-[13px] font-semibold">{t('ai.assistant')}</p>
+            <p className="text-[10px] opacity-80">{answeredCount}/{responseQuestions.length} {t('ai.answered')}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -223,24 +227,24 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
               <Bot size={24} style={{ color: primaryColor }} />
             </div>
             <div>
-              <p className="text-[13px] font-medium text-stone-700">Hi! I'm your survey assistant.</p>
-              <p className="text-[11px] text-stone-400 mt-1">I can help you complete "{questionnaireTitle}". Just chat with me naturally and I'll fill in the answers for you!</p>
+              <p className="text-[13px] font-medium text-stone-700">{t('ai.greeting')}</p>
+              <p className="text-[11px] text-stone-400 mt-1">{t('ai.helpComplete').replace('{title}', questionnaireTitle)}</p>
             </div>
             {unansweredRequired.length > 0 && (
               <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-left">
-                <p className="text-[11px] font-medium text-amber-700">{unansweredRequired.length} required question{unansweredRequired.length > 1 ? 's' : ''} unanswered:</p>
+                <p className="text-[11px] font-medium text-amber-700">{t('ai.requiredUnanswered').replace('{n}', String(unansweredRequired.length))}</p>
                 <ul className="mt-1 space-y-0.5">
                   {unansweredRequired.slice(0, 5).map(q => (
                     <li key={q.id} className="text-[10px] text-amber-600 truncate">• {q.question_text}</li>
                   ))}
                   {unansweredRequired.length > 5 && (
-                    <li className="text-[10px] text-amber-500">...and {unansweredRequired.length - 5} more</li>
+                    <li className="text-[10px] text-amber-500">...{t('ai.andMore').replace('{n}', String(unansweredRequired.length - 5))}</li>
                   )}
                 </ul>
               </div>
             )}
             <div className="flex flex-wrap gap-1.5 justify-center">
-              {['Help me answer all questions', 'What questions are left?', 'Tell me about this survey'].map(suggestion => (
+              {[t('ai.suggestAnswerAll'), t('ai.suggestWhatsLeft'), t('ai.suggestTellMe')].map(suggestion => (
                 <button key={suggestion} onClick={() => { setInput(suggestion); }}
                   className="px-2.5 py-1 rounded-full text-[10px] font-medium border border-stone-200 text-stone-500 hover:bg-stone-50 transition-colors">
                   {suggestion}
@@ -266,7 +270,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
                       <div key={fi} className="flex items-start gap-1.5 text-[10px]">
                         <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" />
                         <span className="text-emerald-700">
-                          Filled: <strong>{q.question_text?.substring(0, 40)}{q.question_text?.length > 40 ? '...' : ''}</strong>
+                          {t('ai.filled')}: <strong>{q.question_text?.substring(0, 40)}{q.question_text?.length > 40 ? '...' : ''}</strong>
                           {' → '}{typeof fill.value === 'object' ? JSON.stringify(fill.value) : String(fill.value).substring(0, 30)}
                         </span>
                       </div>
@@ -281,7 +285,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
         {loading && (
           <div className="flex justify-start">
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-stone-200 text-stone-400 text-[12px]">
-              <Loader2 size={14} className="animate-spin" /> Thinking...
+              <Loader2 size={14} className="animate-spin" /> {t('ai.thinking')}
             </div>
           </div>
         )}
@@ -295,7 +299,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          placeholder="Chat about the survey..."
+          placeholder={t('ai.chatPlaceholder')}
           className="flex-1 text-[12px] px-3 py-2 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
         />
         {/* Voice input button — browser speech recognition */}

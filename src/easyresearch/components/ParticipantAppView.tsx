@@ -10,6 +10,7 @@ import QuestionRenderer from './shared/QuestionRenderer';
 import AIQuestionWrapper from './shared/AIQuestionWrapper';
 import QuestionnaireView from './shared/QuestionnaireView';
 import ElementRenderer from './shared/ElementRenderer';
+import AIChatbotPopup from './shared/AIChatbotPopup';
 import type { AppLayout, LayoutElement } from './LayoutBuilder';
 import { loadLayoutFromDb } from '../utils/layoutSync';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
@@ -42,6 +43,7 @@ const ParticipantAppView: React.FC = () => {
   const [completedTodoIds, setCompletedTodoIds] = useState<Set<string>>(new Set());
   const [submittedQuestionnaireIds, setSubmittedQuestionnaireIds] = useState<Set<string>>(new Set());
   const [logicRules, setLogicRules] = useState<LogicRule[]>([]);
+  const [showProjectAiChat, setShowProjectAiChat] = useState(false);
 
   // Load persisted todo completions
   useEffect(() => {
@@ -278,6 +280,7 @@ const ParticipantAppView: React.FC = () => {
         onResponse={handleResponse}
         primaryColor={layout?.theme?.primary_color || '#10b981'}
         compact={false}
+        allowVoice={question.question_config?.allow_voice || question.allow_voice}
       />
     </AIQuestionWrapper>
   );
@@ -373,6 +376,7 @@ const ParticipantAppView: React.FC = () => {
         }}
         completedTodoIds={completedTodoIds}
         onToggleTodo={handleToggleTodo}
+        onOpenAiAssistant={() => setShowProjectAiChat(true)}
       />
     );
   };
@@ -490,6 +494,23 @@ const ParticipantAppView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Project-level AI Assistant chatbot — hide when inside a questionnaire (it has its own) */}
+      {showProjectAiChat && !activeQuestionnaireId && (() => {
+        const allQuestions = questionnaires.flatMap(q => q.questions || []);
+        const projectTitle = project?.title || 'Study';
+        return (
+          <AIChatbotPopup
+            questionnaireTitle={projectTitle}
+            questions={allQuestions}
+            responses={responses}
+            onResponse={handleResponse}
+            primaryColor={primaryColor}
+            compact={false}
+            initialOpen={true}
+          />
+        );
+      })()}
     </div>
   );
 };

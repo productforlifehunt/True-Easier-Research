@@ -10,6 +10,7 @@ import {
 import CreateProjectDialog from './CreateProjectDialog';
 import AIProjectBuilder from './AIProjectBuilder';
 import { loadLayoutFromDb, saveLayoutToDb } from '../utils/layoutSync';
+import { useI18n } from '../hooks/useI18n';
 
 // Define interfaces
 interface Organization {
@@ -48,6 +49,7 @@ interface DashboardStats {
 const ResearcherDashboard: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [projects, setProjects] = useState<ResearchProject[]>([]);
@@ -269,7 +271,7 @@ const ResearcherDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Projects</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-stone-800">{t('nav.research')}</h1>
               <p className="text-[13px] text-stone-400 mt-1">
                 {organization?.name}
               </p>
@@ -279,13 +281,13 @@ const ResearcherDashboard: React.FC = () => {
                 onClick={() => setShowAIBuilder(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm shadow-violet-200 flex items-center gap-1.5"
               >
-                <Sparkles size={14} /> AI Create
+                <Sparkles size={14} /> {t('project.aiEditor')}
               </button>
               <button
                 onClick={() => setShowCreateDialog(true)}
                 className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5"
               >
-                <Plus size={16} /> New Project
+                <Plus size={16} /> {t('dashboard.newStudy')}
               </button>
             </div>
           </div>
@@ -294,10 +296,10 @@ const ResearcherDashboard: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {[
-            { label: 'Projects', value: stats.totalProjects, sub: `${stats.activeProjects} active`, icon: FileText, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
-            { label: 'Participants', value: stats.totalParticipants, sub: 'enrolled', icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
-            { label: 'Responses', value: stats.totalResponses, sub: 'collected', icon: BarChart3, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
-            { label: 'Completion', value: `${stats.avgCompletionRate}%`, sub: 'avg rate', icon: CheckCircle, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
+            { label: t('nav.research'), value: stats.totalProjects, sub: `${stats.activeProjects} ${t('project.active').toLowerCase()}`, icon: FileText, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
+            { label: t('project.participants'), value: stats.totalParticipants, sub: t('project.enrolled').toLowerCase(), icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
+            { label: t('responses.title'), value: stats.totalResponses, sub: '', icon: BarChart3, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
+            { label: t('builder.completion'), value: `${stats.avgCompletionRate}%`, sub: '', icon: CheckCircle, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
           ].map((stat) => (
             <div key={stat.label} className={`bg-gradient-to-br ${stat.gradient} rounded-2xl p-5 border border-white/60`}>
               <div className="flex items-center justify-between mb-3">
@@ -322,7 +324,7 @@ const ResearcherDashboard: React.FC = () => {
                     : 'text-stone-400 hover:text-stone-600'
                 }`}
               >
-                {tab === 'all' ? 'All' : tab}
+                {tab === 'all' ? t('settings.all') : tab === 'active' ? t('project.active') : tab === 'draft' ? t('common.draft') : tab === 'completed' ? t('common.completed') : tab}
               </button>
             ))}
           </div>
@@ -330,7 +332,7 @@ const ResearcherDashboard: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
             <input
               type="text"
-              placeholder="Search projects..."
+              placeholder={t('common.search') + '...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-4 py-1.5 rounded-full w-full sm:w-56 text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
@@ -345,15 +347,15 @@ const ResearcherDashboard: React.FC = () => {
               <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
                 <FileText className="text-emerald-500" size={24} />
               </div>
-              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">No projects yet</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">{t('builder.noQuestionnaires')}</h3>
               <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">
-                Create your first research project to start collecting insights.
+                {t('project.noParticipantsDesc')}
               </p>
               <button
                 onClick={() => setShowCreateDialog(true)}
                 className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200"
               >
-                <Plus size={16} /> Create Project
+                <Plus size={16} /> {t('dashboard.newStudy')}
               </button>
             </div>
           ) : (
@@ -428,24 +430,24 @@ const ResearcherDashboard: React.FC = () => {
               <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
                 <Trash2 className="text-red-500" size={16} />
               </div>
-              <h3 className="text-[15px] font-semibold text-stone-800">Delete Project?</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800">{t('common.delete')} ?</h3>
             </div>
             <p className="text-[13px] text-stone-400 mb-5 font-light">
-              This cannot be undone. All questions, responses, and data will be permanently deleted.
+              {t('common.deleteConfirmMsg')}
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
                 className="px-4 py-1.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() => handleDeleteProject(showDeleteConfirm)}
                 disabled={actionLoading}
                 className="px-4 py-1.5 rounded-full text-[13px] font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50"
               >
-                {actionLoading ? 'Deleting...' : 'Delete'}
+                {actionLoading ? t('common.loading') : t('common.delete')}
               </button>
             </div>
           </div>

@@ -77,7 +77,7 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
         </div>
         <button
           onClick={addType}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-violet-500 to-purple-500 hover:shadow-lg hover:shadow-violet-200/50 transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
         >
           <Plus size={14} /> Add Type
         </button>
@@ -229,7 +229,7 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                       ))}
                       <button
                         onClick={() => updateType(pt.id, { relations: [...pt.relations, ''] })}
-                        className="text-[11px] text-violet-500 hover:text-violet-600 font-medium"
+                        className="text-[11px] text-emerald-500 hover:text-emerald-600 font-medium"
                       >
                         + Add Relation
                       </button>

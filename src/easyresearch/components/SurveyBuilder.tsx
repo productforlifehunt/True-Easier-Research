@@ -780,6 +780,10 @@ const SurveyBuilder: React.FC = () => {
           display_mode: qc.display_mode || 'one_per_page',
           questions_per_page: qc.questions_per_page ?? null,
           ai_chatbot_enabled: qc.ai_chatbot_enabled ?? false,
+          ai_voice_enabled: qc.ai_voice_enabled ?? false,
+          ai_voice_all_questions: qc.ai_voice_all_questions ?? false,
+          ai_assist_all_questions: qc.ai_assist_all_questions ?? false,
+          ai_guidance: qc.ai_guidance || null,
           is_ab_test: qc.is_ab_test ?? false,
           ab_variant_name: qc.ab_variant_name || null,
           ab_group_id: qc.ab_group_id || null,
@@ -1005,6 +1009,18 @@ const SurveyBuilder: React.FC = () => {
   // Notifications tab is handled inside LayoutTabWrapper
 
 
+  // Show loading spinner until real data is loaded — prevents flash of empty defaults
+  if (loading && projectId) {
+    return (
+      <div className="min-h-screen bg-stone-50/50 flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-[13px] text-stone-400 font-light">{t('common.loading')}...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-stone-50/50">
       {/* Header */}
@@ -1024,7 +1040,7 @@ const SurveyBuilder: React.FC = () => {
                     type="text"
                     value={project.title || ''}
                     onChange={(e) => setProject({ ...project, title: e.target.value })}
-                    placeholder="Untitled Project"
+                    placeholder={t('dashboard.noProjects')}
                     className="text-base sm:text-lg font-semibold bg-transparent border-none focus:outline-none focus:ring-0 p-0 text-stone-800 placeholder:text-stone-300 min-w-0 w-full truncate"
                   />
                   
@@ -1035,7 +1051,7 @@ const SurveyBuilder: React.FC = () => {
                       ? 'bg-emerald-50 text-emerald-600' 
                       : 'bg-stone-100 text-stone-500'
                   }`}>
-                    {projectStatus}
+                    {t(`status.${projectStatus}`)}
                   </span>
                 </div>
               </div>
@@ -1476,12 +1492,17 @@ const SurveyBuilder: React.FC = () => {
         )}
       </div>
 
-      {/* AI Edit Chatbot */}
+      {/* AI Edit Chatbot — context-aware, frontend-only form filler */}
       <AIEditChatbot
-        questionnaires={questionnaireConfigs}
+        activeTab={activeTab}
         projectTitle={project.title || 'Untitled'}
         projectId={projectId}
-        onUpdate={setQuestionnaireConfigs}
+        project={project}
+        onUpdateProject={(updates) => setProject(updates)}
+        questionnaires={questionnaireConfigs}
+        onUpdateQuestionnaires={setQuestionnaireConfigs}
+        logicRules={logicRules}
+        onUpdateLogic={setLogicRules}
       />
 
       {/* Save as Template Modal */}

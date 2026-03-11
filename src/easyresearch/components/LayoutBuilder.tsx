@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3, Link2, Calendar, CheckSquare, Maximize2, Minus, MousePointer, Image, Shield, ClipboardCheck, User, Layers, icons } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';
@@ -17,7 +18,7 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant' | 'direct_message' | 'start_date_picker' | 'back_button' | 'onboarding';
   config: {
     questionnaire_id?: string;
     questionnaire_ids?: string[];
@@ -106,12 +107,36 @@ interface LayoutBuilderProps {
 }
 
 const ICON_OPTIONS = [
+  { value: '', label: 'None', icon: '' },
   { value: 'Home', label: 'Home', icon: 'Home' },
   { value: 'FileText', label: 'Survey', icon: 'FileText' },
   { value: 'BarChart3', label: 'Progress', icon: 'BarChart3' },
   { value: 'HelpCircle', label: 'Help', icon: 'HelpCircle' },
   { value: 'Settings', label: 'Settings', icon: 'Settings' },
   { value: 'Layout', label: 'Layout', icon: 'Layout' },
+  { value: 'Calendar', label: 'Calendar', icon: 'Calendar' },
+  { value: 'User', label: 'User', icon: 'User' },
+  { value: 'Users', label: 'Users', icon: 'Users' },
+  { value: 'MessageCircle', label: 'Message', icon: 'MessageCircle' },
+  { value: 'Bell', label: 'Bell', icon: 'Bell' },
+  { value: 'Heart', label: 'Heart', icon: 'Heart' },
+  { value: 'Star', label: 'Star', icon: 'Star' },
+  { value: 'Shield', label: 'Shield', icon: 'Shield' },
+  { value: 'ClipboardCheck', label: 'Clipboard', icon: 'ClipboardCheck' },
+  { value: 'Sparkles', label: 'AI/Sparkles', icon: 'Sparkles' },
+  { value: 'BookOpen', label: 'Book', icon: 'BookOpen' },
+  { value: 'Globe', label: 'Globe', icon: 'Globe' },
+  { value: 'Camera', label: 'Camera', icon: 'Camera' },
+  { value: 'Mic', label: 'Mic', icon: 'Mic' },
+  { value: 'Phone', label: 'Phone', icon: 'Phone' },
+  { value: 'Mail', label: 'Mail', icon: 'Mail' },
+  { value: 'Map', label: 'Map', icon: 'Map' },
+  { value: 'Clock', label: 'Clock', icon: 'Clock' },
+  { value: 'CheckSquare', label: 'Tasks', icon: 'CheckSquare' },
+  { value: 'ListChecks', label: 'Checklist', icon: 'ListChecks' },
+  { value: 'Activity', label: 'Activity', icon: 'Activity' },
+  { value: 'Award', label: 'Award', icon: 'Award' },
+  { value: 'Briefcase', label: 'Briefcase', icon: 'Briefcase' },
 ];
 
 const FUNCTION_ELEMENTS = [
@@ -313,6 +338,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const editingElement = activeTab?.elements.find(e => e.id === editingElementId);
 
   const getLucideIcon = (iconName: string, size = 14, className = 'text-stone-500') => {
+    if (!iconName) return null;
     const Icon = icons[iconName as keyof typeof icons];
     return Icon ? <Icon size={size} className={className} /> : <FileText size={size} className={className} />;
   };
@@ -513,7 +539,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           </>
         )}
 
-        {(el.type === 'consent' || el.type === 'screening' || el.type === 'help' || el.type === 'custom') && (() => {
+        {(el.type === 'consent' || el.type === 'screening' || el.type === 'help' || el.type === 'custom' || el.type === 'profile' || el.type === 'onboarding') && (() => {
           const linkedQ = el.config.questionnaire_id ? questionnaires.find(qc => qc.id === el.config.questionnaire_id) : null;
           return (
             <div className="space-y-2">
@@ -524,7 +550,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                   updateElement(el.id, { questionnaire_id: e.target.value, title: selected?.title || el.config.title });
                 }} className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                   <option value="">— Select {el.type} component —</option>
-                  {questionnaires.filter(q => q.questionnaire_type === el.type || (el.type === 'custom' && q.questionnaire_type === 'custom')).map(q => (
+                  {questionnaires.filter(q => q.questionnaire_type === el.type || (el.type === 'custom' && q.questionnaire_type === 'custom') || (el.type === 'onboarding' && q.questionnaire_type === 'onboarding') || (el.type === 'profile' && q.questionnaire_type === 'profile')).map(q => (
                     <option key={q.id} value={q.id}>{q.title} ({q.questions?.length || 0} fields)</option>
                   ))}
                 </select>
@@ -776,6 +802,48 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             <input type="text" value={el.config.image_url || ''} onChange={(e) => updateElement(el.id, { image_url: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://..." />
             <p className="text-[9px] text-stone-400">Paste an external URL or upload an image to your project's storage.</p>
+          </div>
+        )}
+
+        {el.type === 'direct_message' && (
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input type="text" value={el.config.button_label || ''} placeholder="Message Researcher"
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value, title: e.target.value || 'Message Researcher' })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <p className="text-[10px] text-stone-400">Opens a direct messaging panel with the research team.</p>
+          </div>
+        )}
+
+        {el.type === 'ai_assistant' && (
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input type="text" value={el.config.button_label || ''} placeholder="AI Assistant"
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value, title: e.target.value || 'AI Assistant' })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <p className="text-[10px] text-stone-400">Opens the project-level AI chatbot assistant for participants.</p>
+          </div>
+        )}
+
+        {el.type === 'start_date_picker' && (
+          <div className="space-y-2">
+            <p className="text-[10px] text-stone-400">Allows participants to choose their own study start date. The date picker will be shown as an interactive calendar.</p>
+          </div>
+        )}
+
+        {el.type === 'back_button' && (
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
+              <input type="text" value={el.config.button_label || ''} placeholder="Back"
+                onChange={(e) => updateElement(el.id, { button_label: e.target.value, title: e.target.value || 'Back' })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <p className="text-[10px] text-stone-400">Navigates back to the previous screen.</p>
           </div>
         )}
 
@@ -1361,6 +1429,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 frameWidth={selectedDevice.width}
                 frameHeight={selectedDevice.height}
                 filterParticipantTypeId={filterParticipantTypeId}
+                onOpenAiAssistant={() => toast('AI Assistant will open here for participants', { icon: '🤖', duration: 4000 })}
               />
               <p className="text-[11px] text-stone-400 text-center mt-2 font-light">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
             </div>
@@ -1369,7 +1438,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           {/* Right: Element Config Panel — shows when an element is selected */}
           <div className="hidden xl:block xl:w-[320px] shrink-0">
             {editingElement ? (
-              <div className="sticky top-24">
+              <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-xl scrollbar-thin">
                 {renderElementConfig(editingElement)}
               </div>
             ) : (

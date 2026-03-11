@@ -7,8 +7,8 @@ const corsHeaders = {
 }
 
 // Dev-stage key; move to project secret for production
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
-const AI_MODEL = 'openai/gpt-oss-120b'
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
+const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
@@ -68,7 +68,14 @@ serve(async (req) => {
 
       case 'chat': {
         if (!messages || !Array.isArray(messages)) throw new Error('Missing messages for chat action')
-        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\nCurrent question: "${question || 'N/A'}"\nCurrent answer: "${currentAnswer || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}`
+        const { modeInstruction } = body
+        const optionsStr = options?.length
+          ? `\nAvailable options:\n${options.map((o: any, i: number) => `${i + 1}. ${typeof o === 'string' ? o : o.option_text || o.text}`).join('\n')}`
+          : ''
+        const configStr = questionConfig ? `\nQuestion config: ${JSON.stringify(questionConfig)}` : ''
+        
+        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\nCurrent question: "${question || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}\nCurrent answer: "${currentAnswer || 'N/A'}"${optionsStr}${configStr}\n\n${modeInstruction || 'Help the user with this question. Be flexible and understand their intent.'}`
+        
         const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages]
         const aiMessage = await callAI(fullMessages, 0.7, 1000)
         return new Response(JSON.stringify({ response: aiMessage }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -148,6 +155,85 @@ serve(async (req) => {
         }
         const cleanResponse = am.replace(/<<<EDIT_COMMANDS>>>[\s\S]*?<<<END_EDIT>>>/g,'').replace(/```(?:json)?\s*\[[\s\S]*?\]\s*```/g,'').trim()
         return new Response(JSON.stringify({ response: cleanResponse, editCommands }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      case 'ai_editor_form_fill': {
+        if (!messages || !Array.isArray(messages)) throw new Error('Missing messages')
+        const { activeTab, pageContext, projectTitle: pt } = body
+        const tabDesc = activeTab || 'unknown'
+
+        // Build system prompt based on active tab — AI fills frontend forms, never touches DB
+        const formFillInstructions = `You are an AI Editor assistant for the research project "${pt || 'Untitled'}".
+You are currently on the "${tabDesc}" tab.
+
+CURRENT PAGE STATE:
+${pageContext || '(no context provided)'}
+
+YOUR ROLE: Help the researcher fill out forms on the current page. You update React frontend form state ONLY — you never write to the database directly. The user will click "Save" when they're satisfied.
+
+To fill/update form fields, include a JSON block:
+<<<FORM_FILLS>>>
+[
+  // For Settings tab (target: "project"):
+  {"target": "project", "action": "update_project", "data": {"field_name": "value", ...}},
+
+  // For Questionnaires/Components tab:
+  {"target": "questionnaire", "action": "add_questionnaire", "data": {"title": "...", "description": "...", "type": "survey", "questions": [{"question_text": "...", "question_type": "text_short", "required": true, "options": ["opt1"], "question_config": {}}]}},
+  {"target": "questionnaire", "action": "edit_questionnaire", "questionnaire_id": "uuid", "data": {"title": "new title"}},
+  {"target": "question", "action": "add_question", "questionnaire_id": "uuid", "data": {"question_text": "...", "question_type": "TYPE", "required": true, "options": ["opt1"], "question_config": {}}},
+  {"target": "question", "action": "edit_question", "question_id": "uuid", "data": {"question_text": "new text"}},
+  {"target": "question", "action": "delete_question", "question_id": "uuid"},
+
+  // For Logic tab:
+  {"target": "logic", "action": "add_rule", "data": {"questionnaire_id": "uuid", "source_question_id": "uuid", "condition": "equals", "value": "yes", "action": "skip", "target_question_id": "uuid", "description": "..."}},
+  {"target": "logic", "action": "edit_rule", "rule_id": "uuid", "data": {"condition": "not_equals", "value": "no"}},
+  {"target": "logic", "action": "delete_rule", "rule_id": "uuid"}
+]
+<<<END_FORM_FILLS>>>
+
+Settings project fields: title, description, project_type (survey/esm/ema/daily_diary/longitudinal), methodology_type (single_time/multi_time), study_duration (number), survey_frequency (once/daily/weekly/hourly/custom), max_participant (number), ai_enabled (bool), voice_enabled (bool), notification_enabled (bool), compensation_type (string), compensation_amount (number), onboarding_required (bool), incentive_enabled (bool), incentive_type (fixed/variable/lottery), incentive_amount (number), incentive_currency (USD/CNY/EUR...).
+
+Supported question_type values:
+text_short, text_long, single_choice, multiple_choice, dropdown, checkbox_group, yes_no, image_choice,
+slider, bipolar_scale, rating, likert_scale, nps, number, date, time, email, phone,
+matrix, ranking, file_upload, instruction, section_header, text_block, divider, image_block,
+constant_sum, signature, address, slider_range
+
+question_config keys by type:
+- likert_scale: {"scale_type":"1-5" or "1-7", "min_label":"...", "max_label":"..."}
+- slider: {"min_value":0, "max_value":100, "step":1, "min_label":"...", "max_label":"..."}
+- bipolar_scale: {"min_value":-3, "max_value":3, "min_label":"...", "max_label":"..."}
+- rating: {"max_value":5}
+- yes_no: {"yes_label":"Yes", "no_label":"No"}
+- matrix: {"columns":["col1","col2"]} with options as row labels
+
+Logic conditions: equals, not_equals, contains, greater_than, less_than, is_empty, is_not_empty, any_selected, none_selected
+Logic actions: skip, show, hide, disqualify, end_survey, show_questionnaire, hide_questionnaire, calculate, pipe_answer
+
+Rules:
+- Always explain what you're about to fill BEFORE the <<<FORM_FILLS>>> block.
+- Use real IDs from the page context when editing/deleting existing items.
+- For choice questions, ALWAYS include options array.
+- If no form changes are needed (just answering a question), omit the FORM_FILLS block entirely.
+- Keep explanations concise (2-4 sentences).`
+
+        const fm3 = [{ role: 'system', content: formFillInstructions }, ...messages]
+        const am3 = await callAI(fm3, 0.7, 8000)
+        let formFills: any[] = []
+        const ffm = am3.match(/<<<FORM_FILLS>>>([\s\S]*?)<<<END_FORM_FILLS>>>/)
+        if (ffm) { try { formFills = JSON.parse(ffm[1].trim()) } catch(e) { console.error('Parse form fill error:', e) } }
+        // Fallback: try code fences
+        if (formFills.length === 0) {
+          const cbm = am3.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/)
+          if (cbm) { try { formFills = JSON.parse(cbm[1].trim()) } catch(e) { console.error('Parse code block form fill error:', e) } }
+        }
+        // Fallback 2: raw JSON array with target/action fields
+        if (formFills.length === 0) {
+          const ram = am3.match(/(\[\s*\{[\s\S]*?"target"\s*:[\s\S]*?\}\s*\])/)
+          if (ram) { try { formFills = JSON.parse(ram[1].trim()) } catch(e) { console.error('Parse raw form fill error:', e) } }
+        }
+        const cleanResp = am3.replace(/<<<FORM_FILLS>>>[\s\S]*?<<<END_FORM_FILLS>>>/g,'').replace(/```(?:json)?\s*\[[\s\S]*?\]\s*```/g,'').trim()
+        return new Response(JSON.stringify({ response: cleanResp, formFills }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
       default:

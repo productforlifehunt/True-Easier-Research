@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, GripVertical, Trash2, Edit3, Move } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, GripVertical, Trash2, Edit3, Move, Calendar, User, Users, MessageCircle, Bell, Heart, Star, Shield, ClipboardCheck, Sparkles, BookOpen, Globe, Camera, Mic, Phone, Mail, Map, Clock, CheckSquare, ListChecks, Activity, Award, Briefcase, icons as allIcons } from 'lucide-react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionRenderer from './shared/QuestionRenderer';
@@ -27,10 +27,16 @@ interface AppPhonePreviewProps {
   frameHeight?: number;
   /** Filter elements by participant type ID */
   filterParticipantTypeId?: string | null;
+  /** Open project-level AI Assistant dialog */
+  onOpenAiAssistant?: () => void;
 }
 
 const ICON_MAP: Record<string, React.FC<any>> = {
   Home, FileText, BarChart3, HelpCircle, Settings, Layout,
+  Calendar, User, Users, MessageCircle, Bell, Heart, Star,
+  Shield, ClipboardCheck, Sparkles, BookOpen, Globe, Camera,
+  Mic, Phone, Mail, Map, Clock, CheckSquare, ListChecks,
+  Activity, Award, Briefcase,
 };
 
 const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
@@ -40,6 +46,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   editable = false, onRemoveElement, onUpdateElement,
   scale = 1, frameWidth = 375, frameHeight = 680,
   filterParticipantTypeId,
+  onOpenAiAssistant,
 }) => {
   const [internalTabId, setInternalTabId] = useState(layout.tabs[0]?.id || '');
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string | null>(null);
@@ -131,6 +138,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         onOpenQuestionnaire={(id) => { setActiveQuestionnaireId(id); setCurrentQuestionIndex(0); }}
         onSelectTimelineDay={setSelectedTimelineDay}
         renderQuestionnaireCard={renderQuestionnaireCard}
+        onOpenAiAssistant={onOpenAiAssistant}
       />
     );
   };
@@ -428,10 +436,13 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       </div>
       {/* Header */}
       {layout.show_header && (
-        <div className="flex-shrink-0 px-5 py-3 bg-white/80 backdrop-blur-sm border-b border-stone-100">
-          <h1 className="text-[15px] font-bold text-stone-800">
+        <div className="flex-shrink-0 px-5 py-2.5" style={{ backgroundColor: primaryColor }}>
+          <h1 className="text-[15px] font-bold text-white">
             {layout.header_title || activeTab?.label || 'Home'}
           </h1>
+          {layout.header_description && (
+            <p className="text-[11px] text-white/70 mt-0.5 line-clamp-1">{layout.header_description}</p>
+          )}
         </div>
       )}
       {/* Top horizontal tab bar — matches ParticipantAppView */}
@@ -439,7 +450,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
         <div className="flex-shrink-0 bg-white/95 backdrop-blur-sm border-b border-stone-100">
           <div className="flex gap-0.5 px-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {layout.bottom_nav.map(nav => {
-              const IconComp = ICON_MAP[nav.icon] || Home;
+              const IconComp = nav.icon ? (ICON_MAP[nav.icon] || (allIcons as any)[nav.icon] || Home) : null;
               const isActive = currentTabId === nav.tab_id;
               return (
                 <button key={nav.tab_id} type="button"
@@ -449,7 +460,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
                     borderColor: isActive ? primaryColor : 'transparent',
                     color: isActive ? primaryColor : '#a8a29e',
                   }}>
-                  <IconComp size={13} />
+                  {IconComp && <IconComp size={13} />}
                   {nav.label}
                 </button>
               );
@@ -489,4 +500,4 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   );
 };
 
-export default AppPhonePreview;
+export default React.memo(AppPhonePreview);

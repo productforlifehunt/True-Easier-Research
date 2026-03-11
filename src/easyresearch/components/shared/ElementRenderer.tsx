@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Sparkles, HelpCircle } from 'lucide-react';
+import { ChevronRight, Sparkles, HelpCircle, MessageCircle } from 'lucide-react';
 import type { LayoutElement } from '../LayoutBuilder';
 import type { QuestionnaireConfig } from '../QuestionnaireList';
 import TodoListElement from './TodoListElement';
@@ -28,6 +28,8 @@ interface ElementRendererProps {
   completedTodoIds?: Set<string>;
   /** Toggle a todo card's completion */
   onToggleTodo?: (cardId: string) => void;
+  /** Open project-level AI Assistant dialog */
+  onOpenAiAssistant?: () => void;
 }
 
 /**
@@ -39,7 +41,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
   activeQuestionnaireId, compact = false,
   onOpenQuestionnaire, onSelectTimelineDay, renderQuestionnaireCard,
   stopPropagation = false,
-  completedTodoIds = new Set(), onToggleTodo,
+  completedTodoIds = new Set(), onToggleTodo, onOpenAiAssistant,
 }) => {
   if (el.config.visible === false) return null;
 
@@ -561,19 +563,77 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     case 'ai_assistant':
       return (
-        <div className={`${pad} rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between`}>
+        <button
+          type="button"
+          onClick={wrap(() => onOpenAiAssistant?.())}
+          className={`w-full ${pad} rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between cursor-pointer hover:bg-emerald-100 transition-colors`}
+        >
           <div className="flex items-center gap-2">
             <Sparkles size={compact ? 14 : 16} className="text-emerald-500" />
             <span className={`${txtSm} font-medium text-emerald-700`}>{el.config.title || 'AI Assistant'}</span>
           </div>
-          <div className="group relative">
-            <HelpCircle size={compact ? 12 : 14} className="text-emerald-400 cursor-help" />
-            <div className="absolute bottom-full right-0 mb-1 hidden group-hover:block w-48 p-2 rounded-lg bg-stone-800 text-white text-[10px] shadow-lg z-10">
-              Configure this AI assistant in the Questionnaire tab &gt; Project AI section.
-            </div>
+          <ChevronRight size={compact ? 14 : 16} className="text-emerald-400" />
+        </button>
+      );
+
+    case 'direct_message':
+      return (
+        <button
+          type="button"
+          onClick={wrap(() => onOpenAiAssistant?.())}
+          className={`w-full ${pad} rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors shadow-sm`}
+        >
+          <div className="flex items-center gap-2">
+            <MessageCircle size={compact ? 14 : 16} className="text-blue-500" />
+            <span className={`${txtSm} font-medium text-blue-700`}>{el.config.title || 'Message Researcher'}</span>
+          </div>
+          <ChevronRight size={compact ? 14 : 16} className="text-blue-400" />
+        </button>
+      );
+
+    case 'start_date_picker':
+      return (
+        <div className={`${pad} rounded-xl bg-white border border-stone-200 shadow-sm`}>
+          <h4 className={`${txt} font-semibold text-stone-800 mb-2`}>{el.config.title || 'Set Start Date'}</h4>
+          <p className={`${txtXs} text-stone-400 mb-2`}>Choose when to begin your study</p>
+          <div className={`${txtSm} text-stone-600 px-3 py-2 bg-stone-50 rounded-lg border border-stone-200`}>
+            📅 Select a date...
           </div>
         </div>
       );
+
+    case 'back_button':
+      return (
+        <button
+          type="button"
+          className={`flex items-center gap-1.5 px-3 py-2 ${txtSm} font-medium text-stone-600 hover:bg-stone-100 rounded-lg transition-colors`}
+        >
+          ← {el.config.title || 'Back'}
+        </button>
+      );
+
+    case 'onboarding': {
+      const linkedQ = el.config.questionnaire_id ? questionnaires?.find(q => q.id === el.config.questionnaire_id) : null;
+      if (linkedQ && activeQuestionnaireId === linkedQ.id) {
+        return <>{renderQuestionnaireCard(linkedQ.id, linkedQ.title)}</>;
+      }
+      return (
+        <div className={`${pad} rounded-xl bg-blue-50 border border-blue-200`}>
+          <h4 className={`${txt} font-semibold text-blue-800`}>{el.config.title || 'Onboarding'}</h4>
+          {linkedQ ? (
+            <>
+              <p className={`${txtSm} text-blue-600 mt-1`}>{linkedQ.questions?.length || 0} steps</p>
+              <button onClick={wrap(() => onOpenQuestionnaire(linkedQ.id))}
+                className={`mt-2 px-3 py-1.5 bg-blue-500 text-white ${txtSm} font-medium hover:bg-blue-600 transition-colors rounded-lg`}>
+                Start Onboarding
+              </button>
+            </>
+          ) : (
+            <p className={`${txtSm} text-blue-600 mt-1 italic`}>No onboarding linked</p>
+          )}
+        </div>
+      );
+    }
 
     default:
       return (
@@ -584,4 +644,4 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
   }
 };
 
-export default ElementRenderer;
+export default React.memo(ElementRenderer);

@@ -87,7 +87,7 @@ const AppSidebar: React.FC = () => {
               <p className="text-[12px] font-medium text-stone-700 truncate">
                 {user.email}
               </p>
-              <p className="text-[11px] text-stone-400">Researcher</p>
+              <p className="text-[11px] text-stone-400">{t('role.researcher')}</p>
             </div>
           )}
           <button

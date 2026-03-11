@@ -178,6 +178,16 @@ Two questionnaires with the same `ab_group_id` form a test group. Participants a
 - `custom_thank_you_message` (text) — message after completion / 完成后消息
 - `redirect_url` (text) — redirect after completion / 完成后重定向
 
+### 3.7 AI feature columns / AI功能列
+
+- `ai_voice_enabled` (bool) — enable voice input feature for this questionnaire / 启用语音输入功能
+- `ai_chatbot_enabled` (bool) — enable AI chatbot assistant for this questionnaire / 启用AI聊天助手
+- `ai_voice_all_questions` (bool) — when true, all questions inherit voice input capability / 为所有问题启用语音输入
+- `ai_assist_all_questions` (bool) — when true, all questions get AI Support dropdown panel / 为所有问题启用AI支持面板
+- `ai_guidance` (text) — system prompt to guide AI behavior for this questionnaire / AI行为指导提示词
+
+**AI Support behavior:** When `ai_assist_all_questions` is enabled, each question in the questionnaire displays an expandable "AI Support" panel below the question. Participants can chat with AI to get help or request AI to fill answers. AI fills answers DIRECTLY in frontend form fields (not database). User reviews and submits when ready. / 当启用时，每个问题下方显示可展开的"AI支持"面板。参与者可与AI对话获取帮助或请求AI填写答案。AI直接填写前端表单字段（不写入数据库），用户审核后提交。
+
 ---
 
 ## 4. QUESTIONS / 问题

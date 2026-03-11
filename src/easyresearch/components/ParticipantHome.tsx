@@ -19,6 +19,13 @@ interface StudyItem {
   enrolled_at?: string;
 }
 
+const TAB_I18N_MAP: Record<string, string> = {
+  all: 'dashboard.allStudies',
+  drafts: 'dashboard.myDrafts',
+  published: 'dashboard.myPublished',
+  joined: 'dashboard.myJoined',
+};
+
 const ParticipantHome: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -218,7 +225,7 @@ const ParticipantHome: React.FC = () => {
                   : 'bg-white text-stone-400 hover:text-stone-600 border border-stone-100'
               }`}
             >
-              {tab.label}
+              {TAB_I18N_MAP[tab.id] ? t(TAB_I18N_MAP[tab.id]) : tab.label}
               <span className="ml-1 opacity-60">
                 {tabCounts[tab.id as keyof typeof tabCounts] ?? 0}
               </span>
@@ -275,9 +282,9 @@ const ParticipantHome: React.FC = () => {
                       ? 'bg-stone-50 text-stone-500'
                       : 'bg-stone-100 text-stone-400'
                   }`}>
-                    {study.status}
+                    {t(`status.${study.status}`)}
                   </span>
-                  <span className="text-[10px] text-stone-400">{study.project_type}</span>
+                  <span className="text-[10px] text-stone-400">{t(`projectType.${study.project_type}`)}</span>
                   {study.study_duration && (
                     <span className="text-[10px] text-stone-400 flex items-center gap-0.5">
                       <Clock size={9} /> {study.study_duration}d
@@ -293,16 +300,16 @@ const ParticipantHome: React.FC = () => {
               <Search size={22} className="text-stone-300" />
             </div>
             <h2 className="text-[14px] font-semibold text-stone-700 mb-1">
-              {activeTab === 'all' ? 'No studies yet' : `No ${visibleTabs.find(t => t.id === activeTab)?.label?.toLowerCase() || 'studies'}`}
+              {t('dashboard.noProjects')}
             </h2>
             <p className="text-[12px] text-stone-400 font-light mb-4">
-              {activeTab === 'joined' ? 'Join studies from the Discover tab' : 'Create your first research study'}
+              {activeTab === 'joined' ? t('dashboard.joinFromDiscover') : t('dashboard.createFirst')}
             </p>
             <button
               onClick={() => activeTab === 'joined' ? navigate('/easyresearch/participant/join') : navigate('/easyresearch/create-survey')}
               className="px-5 py-2 rounded-full text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500"
             >
-              {activeTab === 'joined' ? 'Find Studies' : 'Create Study'}
+              {activeTab === 'joined' ? t('dashboard.findStudies') : t('dashboard.createStudy')}
             </button>
           </div>
         )}
