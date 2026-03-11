@@ -14,7 +14,6 @@ const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
-  console.log('callAI: model=', AI_MODEL, 'key_end=', OPENROUTER_API_KEY.slice(-10))
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
