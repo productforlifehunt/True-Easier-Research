@@ -361,66 +361,66 @@ How can I help you today?`
               
               {/* Conversation Starters - Only show after intro message */}
               {index === 0 && message.role === 'assistant' && messages.length === 1 && (
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex gap-1.5 mt-3 overflow-x-auto">
                   <button
                     onClick={() => {
-                      setInput('Can you explain what this question is asking?');
+                      setInput(language === 'zh' ? '解释一下这个问题在问什么？' : 'Can you explain what this question is asking?');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    ❓ Explain Question
+                    {language === 'zh' ? '解释' : 'Explain'}
                   </button>
                   <button
                     onClick={() => {
-                      setInput('Help me improve this answer');
+                      setInput(language === 'zh' ? '帮我改进这个回答' : 'Help me improve this answer');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    ✨ Improve
+                    {language === 'zh' ? '改进' : 'Improve'}
                   </button>
                   <button
                     onClick={() => {
-                      setInput('Fix any typos or grammar mistakes');
+                      setInput(language === 'zh' ? '修正拼写和语法错误' : 'Fix any typos or grammar mistakes');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    ✓ Correct
+                    {language === 'zh' ? '纠错' : 'Correct'}
                   </button>
                   <button
                     onClick={() => {
-                      setInput('Make this more detailed and elaborate');
+                      setInput(language === 'zh' ? '让回答更详细、更深入' : 'Make this more detailed and elaborate');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    📝 Elaborate
+                    {language === 'zh' ? '扩展' : 'Elaborate'}
                   </button>
                   <button
                     onClick={() => {
-                      setInput('Make this shorter and more concise');
+                      setInput(language === 'zh' ? '让回答更简洁' : 'Make this shorter and more concise');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    ✂️ Shorten
+                    {language === 'zh' ? '精简' : 'Shorten'}
                   </button>
                   <button
                     onClick={() => {
-                      setInput('I need help with this question');
+                      setInput(language === 'zh' ? '我需要帮助' : 'I need help with this question');
                       setTimeout(() => sendMessage(), 100);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                    className="px-3 py-1 rounded-md text-xs font-medium transition-all hover:opacity-90 whitespace-nowrap shrink-0"
                     style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                   >
-                    💬 Help
+                    {language === 'zh' ? '帮助' : 'Help'}
                   </button>
                 </div>
               )}
