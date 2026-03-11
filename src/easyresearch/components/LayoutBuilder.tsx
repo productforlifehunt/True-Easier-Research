@@ -39,7 +39,7 @@ export interface LayoutElement {
       border_color?: string;
       shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
       text_align?: 'left' | 'center' | 'right';
-      content_align?: 'top' | 'center' | 'bottom'; // vertical alignment within fixed height
+      content_align?: 'top' | 'center' | 'bottom';
       font_size?: string;
       font_weight?: string;
       text_color?: string;
@@ -79,6 +79,9 @@ export interface LayoutElement {
       label: string;
       question_ids: string[];
     }>;
+    // AI Assistant config / AI 助手配置
+    ai_display_mode?: 'popup' | 'card'; // popup = floating button, card = inline card
+    ai_position?: 'bottom-right' | 'bottom-left' | 'center'; // position for popup mode
   };
   order_index: number;
 }
@@ -93,6 +96,15 @@ export interface AppLayout {
     primary_color: string;
     background_color: string;
     card_style: 'flat' | 'elevated' | 'outlined';
+  };
+  // Project-level AI Assistant / 项目级 AI 助手
+  ai_assistant_enabled?: boolean;
+  ai_assistant_config?: {
+    display_mode: 'popup' | 'card';
+    position: 'bottom-right' | 'bottom-left' | 'center';
+    icon?: string;
+    title?: string;
+    description?: string;
   };
 }
 
@@ -146,7 +158,7 @@ const FUNCTION_ELEMENTS = [
   { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
   { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
   { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
-  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'Sparkles', desc: 'Project-level AI chatbot (floating)' },
+  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
 ];
 
 const LAYOUT_ELEMENTS = [
@@ -846,14 +858,58 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         )}
 
         {el.type === 'ai_assistant' && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label</label>
-              <input type="text" value={el.config.button_label || ''} placeholder="AI Assistant"
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Mode / 显示模式</label>
+              <div className="flex gap-1.5">
+                {(['popup', 'card'] as const).map(mode => (
+                  <button key={mode} type="button"
+                    onClick={() => updateElement(el.id, { ai_display_mode: mode })}
+                    className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-colors ${
+                      (el.config.ai_display_mode || 'popup') === mode
+                        ? 'border-emerald-400 bg-emerald-50 text-emerald-600'
+                        : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                    }`}>
+                    {mode === 'popup' ? 'Floating / 浮动弹窗' : 'Card / 内嵌卡片'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {(el.config.ai_display_mode || 'popup') === 'popup' && (
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Position / 位置</label>
+                <div className="flex gap-1.5">
+                  {(['bottom-right', 'bottom-left', 'center'] as const).map(pos => (
+                    <button key={pos} type="button"
+                      onClick={() => updateElement(el.id, { ai_position: pos })}
+                      className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition-colors ${
+                        (el.config.ai_position || 'bottom-right') === pos
+                          ? 'border-emerald-400 bg-emerald-50 text-emerald-600'
+                          : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                      }`}>
+                      {pos === 'bottom-right' ? '↘ Right' : pos === 'bottom-left' ? '↙ Left' : '↓ Center'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Button Label / 按钮文字</label>
+              <input type="text" value={el.config.button_label || ''} placeholder="AI Assistant / AI 助手"
                 onChange={(e) => updateElement(el.id, { button_label: e.target.value, title: e.target.value || 'AI Assistant' })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
             </div>
-            <p className="text-[10px] text-stone-400">Opens the project-level AI chatbot assistant for participants.</p>
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Description / 描述</label>
+              <input type="text" value={el.config.content || ''} placeholder="AI can help answer questions about this study"
+                onChange={(e) => updateElement(el.id, { content: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            <p className="text-[10px] text-stone-400">
+              {(el.config.ai_display_mode || 'popup') === 'popup'
+                ? 'Displays as a floating button. Tap to open the AI chatbot.'
+                : 'Displays as an inline card in the page. Tap to expand the AI chatbot.'}
+            </p>
           </div>
         )}
 
