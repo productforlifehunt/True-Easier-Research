@@ -75,7 +75,7 @@ serve(async (req) => {
       }
 
       case 'ai_enhance': {
-        systemPrompt = `You are a writing assistant. Improve the participant's survey answer. Return ONLY the improved text, nothing else.`
+        systemPrompt = `You are a writing assistant. Improve the participant's survey answer. Return ONLY the improved text, nothing else.\n\n${langInstruction}`
         userMessage = `Question: "${question}"\nOriginal answer: "${currentAnswer}"\n\nImprove this answer:`
         break
       }
