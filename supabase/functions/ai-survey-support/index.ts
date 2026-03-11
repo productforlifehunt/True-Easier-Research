@@ -6,17 +6,20 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-// Lovable AI Gateway — standard edge function approach / 标准边缘函数方式
-const AI_API_KEY = Deno.env.get('LOVABLE_API_KEY')!
-const AI_MODEL = 'google/gemini-3-flash-preview'
-const AI_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions'
+// OpenRouter direct — no Lovable AI Gateway, no fallbacks
+// OpenRouter 直连 — 不走 Lovable AI Gateway，不走 fallback
+const OPENROUTER_API_KEY = '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'
+const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
+const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${AI_API_KEY}`,
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://careconnector.app',
+      'X-Title': 'EasyResearch AI Survey Support'
     },
     body: JSON.stringify({ model: AI_MODEL, messages, temperature, max_tokens: maxTokens })
   })
@@ -148,19 +151,16 @@ serve(async (req) => {
         const fm = [{ role: 'system', content: systemPrompt }, ...messages]
         const am = await callAI(fm, 0.7, 16000)
         let editCommands: any[] = []
-        // Try primary delimiter format
         const em = am.match(/<<<EDIT_COMMANDS>>>([\s\S]*?)<<<END_EDIT>>>/)
         if (em) {
           try { editCommands = JSON.parse(em[1].trim()) } catch(e) { console.error('Parse edit error:', e) }
         }
-        // Fallback: try to find JSON array in markdown code fences
         if (editCommands.length === 0) {
           const codeBlockMatch = am.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/)
           if (codeBlockMatch) {
             try { editCommands = JSON.parse(codeBlockMatch[1].trim()) } catch(e) { console.error('Parse code block edit error:', e) }
           }
         }
-        // Fallback 2: try to find a raw JSON array with action fields
         if (editCommands.length === 0) {
           const rawArrayMatch = am.match(/(\[\s*\{[\s\S]*?"action"\s*:[\s\S]*?\}\s*\])/)
           if (rawArrayMatch) {
@@ -176,7 +176,6 @@ serve(async (req) => {
         const { activeTab, pageContext, projectTitle: pt } = body
         const tabDesc = activeTab || 'unknown'
 
-        // Build system prompt based on active tab — AI fills frontend forms, never touches DB
         const formFillInstructions = `You are an AI Editor assistant for the research project "${pt || 'Untitled'}".
 You are currently on the "${tabDesc}" tab.
 
@@ -188,17 +187,12 @@ YOUR ROLE: Help the researcher fill out forms on the current page. You update Re
 To fill/update form fields, include a JSON block:
 <<<FORM_FILLS>>>
 [
-  // For Settings tab (target: "project"):
   {"target": "project", "action": "update_project", "data": {"field_name": "value", ...}},
-
-  // For Questionnaires/Components tab:
   {"target": "questionnaire", "action": "add_questionnaire", "data": {"title": "...", "description": "...", "type": "survey", "questions": [{"question_text": "...", "question_type": "text_short", "required": true, "options": ["opt1"], "question_config": {}}]}},
   {"target": "questionnaire", "action": "edit_questionnaire", "questionnaire_id": "uuid", "data": {"title": "new title"}},
   {"target": "question", "action": "add_question", "questionnaire_id": "uuid", "data": {"question_text": "...", "question_type": "TYPE", "required": true, "options": ["opt1"], "question_config": {}}},
   {"target": "question", "action": "edit_question", "question_id": "uuid", "data": {"question_text": "new text"}},
   {"target": "question", "action": "delete_question", "question_id": "uuid"},
-
-  // For Logic tab:
   {"target": "logic", "action": "add_rule", "data": {"questionnaire_id": "uuid", "source_question_id": "uuid", "condition": "equals", "value": "yes", "action": "skip", "target_question_id": "uuid", "description": "..."}},
   {"target": "logic", "action": "edit_rule", "rule_id": "uuid", "data": {"condition": "not_equals", "value": "no"}},
   {"target": "logic", "action": "delete_rule", "rule_id": "uuid"}
@@ -236,18 +230,32 @@ Rules:
         let formFills: any[] = []
         const ffm = am3.match(/<<<FORM_FILLS>>>([\s\S]*?)<<<END_FORM_FILLS>>>/)
         if (ffm) { try { formFills = JSON.parse(ffm[1].trim()) } catch(e) { console.error('Parse form fill error:', e) } }
-        // Fallback: try code fences
         if (formFills.length === 0) {
           const cbm = am3.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/)
           if (cbm) { try { formFills = JSON.parse(cbm[1].trim()) } catch(e) { console.error('Parse code block form fill error:', e) } }
         }
-        // Fallback 2: raw JSON array with target/action fields
         if (formFills.length === 0) {
           const ram = am3.match(/(\[\s*\{[\s\S]*?"target"\s*:[\s\S]*?\}\s*\])/)
           if (ram) { try { formFills = JSON.parse(ram[1].trim()) } catch(e) { console.error('Parse raw form fill error:', e) } }
         }
         const cleanResp = am3.replace(/<<<FORM_FILLS>>>[\s\S]*?<<<END_FORM_FILLS>>>/g,'').replace(/```(?:json)?\s*\[[\s\S]*?\]\s*```/g,'').trim()
         return new Response(JSON.stringify({ response: cleanResp, formFills }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      // --- Frontend AI proxy actions (text analysis + translation) ---
+      // These replace direct client-side OpenRouter calls
+      case 'text_analysis': {
+        const { prompt } = body
+        if (!prompt) throw new Error('Missing prompt for text_analysis')
+        const result = await callAI([{ role: 'user', content: prompt }], 0.3, 2000)
+        return new Response(JSON.stringify({ response: result }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      case 'translate': {
+        const { prompt } = body
+        if (!prompt) throw new Error('Missing prompt for translate')
+        const result = await callAI([{ role: 'user', content: prompt }], 0.2, 4000)
+        return new Response(JSON.stringify({ response: result }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
       default:
