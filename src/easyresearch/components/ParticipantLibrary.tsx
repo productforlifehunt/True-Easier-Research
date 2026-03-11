@@ -515,7 +515,7 @@ const ParticipantLibrary: React.FC = () => {
                   <div className="text-[13px] text-stone-400 py-3">{t('participantLibrary.loadingStudies')}</div>
                 ) : myProjects.length === 0 ? (
                   <div className="text-[13px] text-stone-400 bg-stone-50 rounded-lg p-4">
-                    You don't have any research projects yet. Create a study first to invite participants.
+                    {t('participantLibrary.noStudies')}
                   </div>
                 ) : (
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
