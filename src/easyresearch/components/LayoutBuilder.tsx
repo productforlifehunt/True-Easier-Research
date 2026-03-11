@@ -251,15 +251,20 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
   const [customElements, setCustomElements] = useState<CustomFunctionElement[]>([]);
+  const [userFuncElements, setUserFuncElements] = useState<any[]>([]);
 
-  // Fetch private/custom elements from DB / 从数据库获取定制功能部件
+  // Fetch private/custom elements + user-customized function elements from DB
   useEffect(() => {
     const fetchCustomElements = async () => {
       try {
-        const { data, error } = await (supabase as any).from('custom_function_element').select('*');
-        if (!error && data) setCustomElements(data);
+        const [customRes, userRes] = await Promise.all([
+          (supabase as any).from('custom_function_element').select('*'),
+          (supabase as any).from('user_function_element').select('*'),
+        ]);
+        if (!customRes.error && customRes.data) setCustomElements(customRes.data);
+        if (!userRes.error && userRes.data) setUserFuncElements(userRes.data);
       } catch (e) {
-        // Silent fail — table may not exist yet / 静默失败
+        // Silent fail — tables may not exist yet / 静默失败
       }
     };
     fetchCustomElements();
