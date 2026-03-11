@@ -20318,6 +20318,7 @@ export type Database = {
           description: string | null
           disable_backtracking: boolean | null
           id: string
+          layout_header_description: string | null
           layout_header_title: string | null
           layout_show_header: boolean | null
           layout_theme_background_color: string | null
@@ -20358,6 +20359,7 @@ export type Database = {
           description?: string | null
           disable_backtracking?: boolean | null
           id?: string
+          layout_header_description?: string | null
           layout_header_title?: string | null
           layout_show_header?: boolean | null
           layout_theme_background_color?: string | null
@@ -20398,6 +20400,7 @@ export type Database = {
           description?: string | null
           disable_backtracking?: boolean | null
           id?: string
+          layout_header_description?: string | null
           layout_header_title?: string | null
           layout_show_header?: boolean | null
           layout_theme_background_color?: string | null
