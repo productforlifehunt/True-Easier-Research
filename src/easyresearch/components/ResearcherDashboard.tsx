@@ -166,11 +166,11 @@ const ResearcherDashboard: React.FC = () => {
       const { error } = await supabase.from('research_project').delete().eq('id', projectId);
       if (error) throw error;
       setShowDeleteConfirm(null);
-      toast.success('Project deleted');
+      toast.success(t('toast.projectDeleted'));
       loadDashboardData();
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
+      toast.error(t('toast.deleteFailed'));
     } finally {
       setActionLoading(false);
     }
