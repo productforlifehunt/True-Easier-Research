@@ -368,9 +368,23 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     );
   };
 
+  // ── Separate popup-mode AI elements from normal elements ──
+  const normalElements = activeTab?.elements.filter(e => {
+    if (e.type === 'ai_assistant' && (e.config.ai_display_mode || 'popup') === 'popup') return false;
+    return true;
+  }) || [];
+
+  const popupAiElement = activeTab?.elements.find(
+    e => e.type === 'ai_assistant' && (e.config.ai_display_mode || 'popup') === 'popup' && e.config.visible !== false
+  );
+
   // ── Elements list (with or without DnD) ──
   const renderElements = () => {
-    if (!activeTab || activeTab.elements.length === 0) {
+    // For the element list, use ALL elements in editable mode (so user can see/drag the ai_assistant),
+    // but in preview mode, exclude popup-mode ai_assistant (rendered as floating)
+    const elementsToRender = editable ? (activeTab?.elements || []) : normalElements;
+
+    if (!activeTab || elementsToRender.length === 0) {
       return (
         <div className="py-16 text-center">
           <p className="text-[12px] text-stone-400">No elements on this tab</p>
@@ -379,7 +393,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       );
     }
 
-    const hasWidths = activeTab.elements.some(e => e.config.width && e.config.width !== '100%');
+    const hasWidths = elementsToRender.some(e => e.config.width && e.config.width !== '100%');
     const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
 
     if (editable) {
@@ -410,7 +424,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
     return (
       <div className={containerClass}>
-        {activeTab.elements.map((el, idx) => {
+        {elementsToRender.map((el, idx) => {
           const w = el.config.width || '100%';
           const wrapped = renderElementWrapper(el, idx);
           if (!wrapped) return null;
