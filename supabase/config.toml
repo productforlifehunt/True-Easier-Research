@@ -2,3 +2,9 @@ project_id = "yekarqanirdkdckimpna"
 
 [functions.ai-survey-support]
 verify_jwt = false
+
+[functions.how-to-chatbot]
+verify_jwt = false
+
+[functions.process-voice-survey]
+verify_jwt = false
