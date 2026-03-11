@@ -71,7 +71,6 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
     }
   }, []);
 
-  const { lang } = useI18n();
 
   const callAI = useCallback(async (action: string, extra: any = {}) => {
     const { data: { session } } = await supabase.auth.getSession();
