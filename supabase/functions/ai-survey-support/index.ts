@@ -36,7 +36,23 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { action, question, questionType, options, currentAnswer, questionConfig, messages, questionnaire } = body
+    const { action, question, questionType, options, currentAnswer, questionConfig, messages, questionnaire, language } = body
+
+    // Build language instruction based on app language setting
+    // 根据应用语言设置构建语言指令
+    const langCode = language || 'en'
+    const langInstruction = langCode === 'zh'
+      ? `LANGUAGE RULE: The user's app is set to Chinese. You MUST respond in Chinese by default. However, be smart about it:
+- If the user sends a full sentence entirely in English, they clearly prefer English for this message — respond in English.
+- If the user mixes Chinese and English (e.g. uses English abbreviations like "AI", "APP", technical terms), still respond in Chinese.
+- Short greetings like "hi", "hello" are universal — respond in Chinese since the app is set to Chinese.
+- If you're unsure whether the user is writing in English or Chinese (ambiguous words), respond in Chinese and optionally ask: "你是想用英文交流吗？"
+- NEVER mix languages in your response. Either fully Chinese or fully English.`
+      : `LANGUAGE RULE: The user's app is set to English. You MUST respond in English by default. However:
+- If the user sends a full sentence entirely in Chinese, respond in Chinese.
+- If the user mixes languages, respond in English.
+- Short greetings are universal — respond in English.
+- NEVER mix languages in your response.`
 
     let systemPrompt = ''
     let userMessage = ''
