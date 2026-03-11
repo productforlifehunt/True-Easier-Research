@@ -199,7 +199,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
         <div className="p-2.5 rounded-lg bg-violet-50 border border-violet-200 text-[12px] text-violet-700 flex items-start gap-2">
           <Check size={14} className="mt-0.5 shrink-0 text-violet-500" />
           <div className="flex-1">
-            <p className="font-medium mb-0.5">AI Suggestion Applied</p>
+            <p className="font-medium mb-0.5">{t('ai.suggestionApplied')}</p>
             <p className="text-violet-600 line-clamp-2">{aiSuggestion}</p>
           </div>
           <button onClick={() => { setAiSuggestion(null); onResponse(question.id, undefined); }} className="text-violet-400 hover:text-violet-600">
