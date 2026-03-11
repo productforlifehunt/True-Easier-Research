@@ -378,6 +378,7 @@ const ParticipantAppView: React.FC = () => {
         completedTodoIds={completedTodoIds}
         onToggleTodo={handleToggleTodo}
         onOpenAiAssistant={() => setShowProjectAiChat(true)}
+        onOpenDirectMessage={() => setShowDmConfirm(true)}
       />
     );
   };
