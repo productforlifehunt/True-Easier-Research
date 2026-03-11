@@ -719,7 +719,7 @@ Per-questionnaire per-enrollment. Stored in `enrollment_dnd_period` table (enrol
 ## 11. SURVEY BUILDER / 调查构建器
 
 > **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
-> - ✅ T1-11.1: SurveyBuilder.tsx loads at `/easyresearch/project/:id` with all 9 tabs visible / 构建器在正确路由加载，9个标签可见
+> - ✅ T1-11.1: SurveyBuilder.tsx loads at `/easyresearch/project/:id` with all 12 tabs visible / 构建器在正确路由加载，12个标签可见
 > - ✅ T1-11.2: `syncQuestions()` upserts questions + options + config to DB correctly / 问题同步正常
 > - ✅ T1-11.3: Responses tab only shows after project save, displays live response count / 响应标签在保存后显示，含实时计数
 > - ✅ T1-11.4: Layout auto-saves with 1.5s debounce via `saveLayoutToDb()` / 布局1.5秒防抖自动保存
@@ -740,12 +740,15 @@ These tabs are visible in the project editor:
 | 1 | `settings` | Settings / 设置 | `SurveySettings.tsx` | Project config: title, methodology, schedule, participant types, incentives, sharing link / 项目配置 |
 | 2 | `questionnaires` | Questionnaires / 问卷 | `QuestionnaireList.tsx` | Add/edit questionnaires and their questions, drag-drop reorder, per-question config / 问卷和问题编辑 |
 | 3 | `components` | Components / 组件 | `ComponentBuilder.tsx` | Non-survey instruments: consent, screening, profile, help, custom. Same questionnaire schema. / 非调查工具 |
-| 4 | `logic` | Logic / 逻辑 | `SurveyLogic.tsx` | Skip/show/hide rules per questionnaire. Visual rule cards. / 跳转规则 |
-| 5 | `flow` | Flow / 流程 | `SurveyFlowVisualizer.tsx` | Visual node diagram of survey structure with logic arrows / 调查流程图 |
-| 6 | `layout` | Layout / 布局 | `LayoutBuilder.tsx` (via `LayoutTabWrapper.tsx`) | Participant app UI: tabs, elements, popups, public pages / 参与者应用UI |
-| 7 | `preview` | Preview / 预览 | `SurveyPreview.tsx` | Live phone preview of participant experience / 实时预览 |
+| 4 | `func_elements` | Elements / 功能部件 | `FunctionalElementsTab.tsx` | View/customize/clone function elements (ecogram, progress, timeline, etc.), manage custom paid elements / 查看、自定义、克隆功能部件，管理定制部件 |
+| 5 | `logic` | Logic / 逻辑 | `SurveyLogic.tsx` | Skip/show/hide rules per questionnaire. Visual rule cards. / 跳转规则 |
+| 6 | `flow` | Flow / 流程 | `SurveyFlowVisualizer.tsx` | Visual node diagram of survey structure with logic arrows / 调查流程图 |
+| 7 | `notifications` | Notifications / 通知 | `NotificationEditor.tsx` | Push/email notification configuration / 通知配置 |
 | 8 | `translations` | Translation / 翻译 | `SurveyTranslationManager.tsx` | Side-by-side translation editor, AI auto-translate, 14 locales / 翻译编辑器 |
-| 9 | `responses` | Responses / 回复 | `ProjectResponsesTab.tsx` | Analysis hub with 6 sub-views (see Section 8.4) / 分析中心 |
+| 9 | `layout` | Layout / 布局 | `LayoutBuilder.tsx` (via `LayoutTabWrapper.tsx`) | Participant app UI: tabs, elements, popups, public pages / 参与者应用UI |
+| 10 | `preview` | Preview / 预览 | `SurveyPreview.tsx` | Live phone preview of participant experience / 实时预览 |
+| 11 | `participants` | Participants / 参与者 | `ProjectParticipantsTab.tsx` | Participant enrollment and management / 参与者注册管理 |
+| 12 | `responses` | Responses / 回复 | `ProjectResponsesTab.tsx` | Analysis hub with 6 sub-views (see Section 8.4) / 分析中心 |
 
 The Responses tab only shows after project save (needs `projectId`). It displays live response count in the tab label.
 
@@ -824,7 +827,7 @@ The participant-facing mobile app layout is stored in flat relational tables. Ma
 - `id` (uuid PK)
 - `tab_id` (uuid FK → app_tab)
 - `project_id` (uuid FK)
-- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`, `'ai_assistant'`
+- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`, `'ai_assistant'`, `'direct_message'`, `'start_date_picker'`, `'back_button'`, `'onboarding'`, `'custom_function'`
 - `order_index` (int)
 - `questionnaire_id` (uuid FK, nullable) — single questionnaire link / 单问卷链接
 - `questionnaire_ids` (text[], nullable) — multiple questionnaires (for timeline) / 多问卷（时间线用）
@@ -877,13 +880,59 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 
 通过 `saveLayoutToDb()` 1.5秒防抖自动保存，通过 `loadLayoutFromDb()` 加载，均在 `layoutSync.ts` 中。一切都是扁平列或关系表——无JSONB。
 
+### 12.6 Function Elements / 功能部件
+
+Function elements are interactive app components available in the Layout Builder. They are divided into three categories:
+
+功能部件是布局构建器中可用的交互式应用组件，分为三类：
+
+**Standard (Public) / 标准（公共）：** `ecogram`, `progress`, `timeline`, `start_date_picker`, `direct_message`, `ai_assistant`. Always available. Some can be customized (cloned with custom name/config), some cannot.
+
+**标准（公共）：** 生态图、进度、时间线、设置开始日期、联系研究者、AI助手。始终可用。部分可自定义（以自定义名称/配置克隆），部分不可。
+
+- Customizable: `ecogram`, `progress`, `timeline` — user can clone and rename / 可自定义的用户可以克隆并重命名
+- Not customizable: `start_date_picker`, `direct_message`, `ai_assistant` — shown grayed out / 不可自定义的显示为灰色
+
+**User-Customized / 用户自定义：** Stored in `care_connector.user_function_element`. Created when user clones a standard element with a custom name. Per-user, per-project.
+
+**用户自定义：** 存储在 `care_connector.user_function_element`。用户克隆标准部件并自定义名称时创建。按用户、按项目。
+
+- `id`, `user_id`, `project_id`, `base_type`, `name_en`, `name_zh`, `description_en`, `description_zh`, `icon`, `element_config`
+
+**Private/Custom (Paid) / 定制部件（付费）：** Stored in `care_connector.custom_function_element`. Created by admin for specific users. Bespoke elements for paid customization.
+
+**定制部件（付费）：** 存储在 `care_connector.custom_function_element`。由管理员为特定用户创建。为付费定制的专属部件。
+
+- `id`, `user_id`, `name_en`, `name_zh`, `description_en`, `description_zh`, `icon`, `element_config`, `is_public`
+- Junction table `care_connector.custom_element_user` — allows one element to be assigned to multiple users / 联接表允许一个部件分配给多个用户
+- `element_id`, `user_id`, `granted_at`
+- RLS: users see own + public elements + elements assigned via junction table / 用户可见自有、公共和通过联接表分配的部件
+
+In the Layout Builder element picker, these three sections appear in order: Standard Function Elements → User-Customized → Custom Elements (with "Contact for Custom Build" CTA).
+
+在布局构建器元素选择器中，这三个部分按序显示：标准功能部件 → 用户自定义 → 定制部件（含"联系我们定制"按钮）。
+
+### 12.7 Admin Dashboard / 管理员面板
+
+Route: `/easyresearch/admin` — only accessible to `guowei.jiang.work@gmail.com`. Protected by email check in component + RequireResearcher wrapper.
+
+路由：`/easyresearch/admin` — 仅 `guowei.jiang.work@gmail.com` 可访问。通过组件中的邮箱检查和 RequireResearcher 包装器保护。
+
+Features / 功能：
+- List all `custom_function_element` entries / 列出所有定制部件
+- Create, edit, delete custom elements / 创建、编辑、删除定制部件
+- Assign elements to users via email lookup (through `researcher` table) / 通过邮箱查找（通过 researcher 表）将部件分配给用户
+- View/remove user assignments from `custom_element_user` junction table / 查看/移除联接表中的用户分配
+
+Component: `AdminDashboard.tsx`
+
 ---
 
 ## SYSTEM INVENTORY / 系统清单
 
-**Active builder tabs: 9** — Settings, Questionnaires, Components, Logic, Flow, Layout, Preview, Translation, Responses (includes Participants sub-view)
+**Active builder tabs: 12** — Settings, Questionnaires, Components, Elements (Function Elements), Logic, Flow, Notifications, Translation, Layout, Preview, Participants, Responses
 
-**活跃标签页：9个** — 设置、问卷、组件、逻辑、流程、布局、预览、翻译、响应（含参与者子视图）
+**活跃标签页：12个** — 设置、问卷、组件、功能部件、逻辑、流程、通知、翻译、布局、预览、参与者、响应
 
 **Active response sub-views: 6** — Summary, Individual, Table, Cross-Tab, Export, Participants
 

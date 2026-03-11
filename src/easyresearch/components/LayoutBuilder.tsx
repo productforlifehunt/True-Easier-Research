@@ -251,15 +251,20 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
   const [customElements, setCustomElements] = useState<CustomFunctionElement[]>([]);
+  const [userFuncElements, setUserFuncElements] = useState<any[]>([]);
 
-  // Fetch private/custom elements from DB / 从数据库获取定制功能部件
+  // Fetch private/custom elements + user-customized function elements from DB
   useEffect(() => {
     const fetchCustomElements = async () => {
       try {
-        const { data, error } = await (supabase as any).from('custom_function_element').select('*');
-        if (!error && data) setCustomElements(data);
+        const [customRes, userRes] = await Promise.all([
+          (supabase as any).from('custom_function_element').select('*'),
+          (supabase as any).from('user_function_element').select('*'),
+        ]);
+        if (!customRes.error && customRes.data) setCustomElements(customRes.data);
+        if (!userRes.error && userRes.data) setUserFuncElements(userRes.data);
       } catch (e) {
-        // Silent fail — table may not exist yet / 静默失败
+        // Silent fail — tables may not exist yet / 静默失败
       }
     };
     fetchCustomElements();
@@ -1479,6 +1484,24 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         </button>
                       ))}
                     </div>
+
+                    {/* User-customized Function Elements / 自定义功能部件 */}
+                    {userFuncElements.length > 0 && (
+                      <div className="border-t border-stone-200 pt-2 mt-1">
+                        <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                          {lang === 'zh' ? '自定义功能部件' : 'Your Custom Elements'}
+                        </p>
+                        <div className="space-y-0.5">
+                          {userFuncElements.map(ue => (
+                            <button key={ue.id} onClick={() => addElement(ue.base_type, { title: lang === 'zh' ? ue.name_zh : ue.name_en })}
+                              className="w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-colors text-[10px] border border-transparent hover:bg-blue-50 hover:border-blue-200">
+                              {getLucideIcon(ue.icon || 'Sparkles', 14, 'text-blue-500')}
+                              <span className="text-stone-700 font-medium truncate">{lang === 'zh' ? ue.name_zh : ue.name_en}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Private / Custom Elements — 定制部件 */}
                     <div className="border-t border-stone-200 pt-2 mt-1">

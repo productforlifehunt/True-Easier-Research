@@ -18,6 +18,7 @@ import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/log
 import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
 import { loadNotificationConfigs, saveNotificationConfigs, type NotificationConfig } from '../utils/notificationConfigSync';
 import ComponentBuilder from './ComponentBuilder';
+import FunctionalElementsTab from './FunctionalElementsTab';
 import NotificationEditor from './NotificationEditor';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
@@ -151,11 +152,11 @@ export interface SurveyProject {
   layout_theme_card_style?: string;
 }
 
-type TabId = 'questionnaires' | 'components' | 'logic' | 'flow' | 'notifications' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports' | 'card_sorting' | 'tree_testing' | 'intercept' | 'video_capture' | 'reward_mgmt' | 'live_poll' | 'panel_market' | 'custom_scripts' | 'irb_compliance' | 'offline_collect' | 'video_reels' | 'regression';
+type TabId = 'questionnaires' | 'components' | 'func_elements' | 'logic' | 'flow' | 'notifications' | 'layout' | 'settings' | 'preview' | 'participants' | 'responses' | 'quotas' | 'translations' | 'panel' | 'webhooks' | 'variables' | 'versioning' | 'ab_testing' | 'scheduler' | 'theming' | 'distribute' | 'accessibility' | 'consent' | 'collaboration' | 'journeys' | 'api' | 'incentives' | 'monitor' | 'audit' | 'power_analysis' | 'repository' | 'data_cleaning' | 'sessions' | 'recruitment' | 'segmentation' | 'personas' | 'journey_maps' | 'annotations' | 'calendar' | 'stakeholder' | 'crm' | 'templates' | 'visualization' | 'screener' | 'brief' | 'lang_preview' | 'ab_results' | 'prototype_testing' | 'conversational' | 'contact_email' | 'workflows' | 'save_continue' | 'share_reports' | 'card_sorting' | 'tree_testing' | 'intercept' | 'video_capture' | 'reward_mgmt' | 'live_poll' | 'panel_market' | 'custom_scripts' | 'irb_compliance' | 'offline_collect' | 'video_reels' | 'regression';
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -996,6 +997,7 @@ const SurveyBuilder: React.FC = () => {
     { id: 'settings', label: t('project.settings') },
     { id: 'questionnaires', label: t('project.questionnaires') },
     { id: 'components', label: t('project.components') },
+    { id: 'func_elements' as TabId, label: lang === 'zh' ? '功能部件' : 'Elements' },
     { id: 'logic', label: t('project.logic') },
     { id: 'flow', label: t('project.flow') },
     { id: 'notifications', label: t('project.notifications') },
@@ -1142,6 +1144,11 @@ const SurveyBuilder: React.FC = () => {
             project={project}
             projectId={projectId}
           />
+        )}
+
+        {/* Functional Elements Tab / 功能部件标签 */}
+        {activeTab === 'func_elements' && (
+          <FunctionalElementsTab projectId={projectId} />
         )}
 
         {/* Participants Tab */}

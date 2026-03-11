@@ -51,6 +51,7 @@ const lazyImports = {
   FeaturesPage: () => import('./easyresearch/components/FeaturesPage'),
   PublicPageRenderer: () => import('./easyresearch/components/PublicPageRenderer'),
   DiscoverPage: () => import('./easyresearch/components/DiscoverPage'),
+  AdminDashboard: () => import('./easyresearch/components/AdminDashboard'),
 };
 
 const LandingPage = React.lazy(lazyImports.LandingPage);
@@ -76,6 +77,7 @@ const ConversationView = React.lazy(lazyImports.ConversationView);
 const FeaturesPage = React.lazy(lazyImports.FeaturesPage);
 const PublicPageRenderer = React.lazy(lazyImports.PublicPageRenderer);
 const DiscoverPage = React.lazy(lazyImports.DiscoverPage);
+const AdminDashboard = React.lazy(lazyImports.AdminDashboard);
 
 // Preload all EasyResearch chunks after initial paint
 if (typeof window !== 'undefined') {
@@ -265,6 +267,7 @@ function App() {
                     <Route path="/easyresearch/responses" element={<RequireResearcher><ResponsesPage /></RequireResearcher>} />
                     <Route path="/easyresearch/settings" element={<RequireResearcher><ResearcherSettings /></RequireResearcher>} />
                     <Route path="/easyresearch/participants" element={<RequireResearcher><ParticipantsPage /></RequireResearcher>} />
+                    <Route path="/easyresearch/admin" element={<RequireResearcher><AdminDashboard /></RequireResearcher>} />
                     
                     {/* Participant Library */}
                     <Route path="/easyresearch/participant-library" element={<ParticipantLibrary />} />
