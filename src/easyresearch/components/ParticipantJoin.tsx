@@ -57,7 +57,7 @@ const ParticipantJoin: React.FC = () => {
       const { data: projectData } = await supabase.from('research_project').select('id, title, description').eq('id', projectId).maybeSingle();
       if (!projectData) throw new Error('Project not found');
       setProject({ ...projectData, enrollmentId: enrollment.id });
-    } catch (err) { setError('This invitation link is invalid or has expired.'); }
+    } catch (err) { setError(t('toast.noStudyFound')); }
     finally { setLoading(false); }
   };
 
@@ -65,38 +65,38 @@ const ParticipantJoin: React.FC = () => {
     setJoining(true);
     try {
       await supabase.from('enrollment').update({ status: 'active' }).eq('id', project.enrollmentId);
-      toast.success('Successfully joined the study!');
+      toast.success(t('toast.joinedStudy'));
       navigate(`/easyresearch/participant/${project.id}`);
-    } catch (err) { toast.error('Failed to join study'); }
+    } catch (err) { toast.error(t('toast.invitationFailed')); }
     finally { setJoining(false); }
   };
 
   const handleJoinByCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!surveyCode.trim()) { toast.error('Please enter a survey code'); return; }
+    if (!surveyCode.trim()) { toast.error(t('toast.enterCode')); return; }
     setJoining(true); setError(null);
     try {
       const { data: projectData, error: projectError } = await supabase
         .from('research_project').select('*')
         .eq('survey_code', surveyCode.toUpperCase().trim())
         .in('status', ['published', 'active']).maybeSingle();
-      if (projectError || !projectData) { setError('No study found with this code.'); setJoining(false); return; }
+      if (projectError || !projectData) { setError(t('toast.noStudyFound')); setJoining(false); return; }
       if (user) {
         const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectData.id).eq('participant_id', user.id).maybeSingle();
-        if (existing) { toast.success('You are already enrolled!'); navigate(`/easyresearch/participant/${projectData.id}`); return; }
+        if (existing) { toast.success(t('toast.alreadyEnrolled')); navigate(`/easyresearch/participant/${projectData.id}`); return; }
         const { data: newEnrollment, error: enrollError } = await supabase.from('enrollment').insert({
           project_id: projectData.id, participant_id: user.id, participant_email: user.email,
           status: 'active', enrollment_token: crypto.randomUUID()
         }).select('id').single();
         if (enrollError) throw enrollError;
-        toast.success('Successfully joined the study!');
+        toast.success(t('toast.joinedStudy'));
         navigate(`/easyresearch/participant/${projectData.id}`);
       } else {
         sessionStorage.setItem('pending_survey_code', surveyCode.toUpperCase().trim());
-        toast.success('Please sign in to join');
+        toast.success(t('toast.signInToJoin'));
         navigate(`/easyresearch/auth?redirectTo=/easyresearch/participant/join&redirect=participant`);
       }
-    } catch (err: any) { console.error('Join error:', err); setError(err.message || 'Failed to join study.'); }
+    } catch (err: any) { console.error('Join error:', err); setError(err.message || t('toast.invitationFailed')); }
     finally { setJoining(false); }
   };
 
