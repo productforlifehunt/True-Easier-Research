@@ -1,12 +1,27 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3, Link2, Calendar, CheckSquare, Maximize2, Minus, MousePointer, Image, Shield, ClipboardCheck, User, Layers, icons } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3, Link2, Calendar, CheckSquare, Maximize2, Minus, MousePointer, Image, Shield, ClipboardCheck, User, Layers, icons, Lock, Mail } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 import BrandIcon from './BrandIcon';
+import { useI18n } from '../hooks/useI18n';
+import { supabase } from '../../lib/supabase';
+
+// Private custom element from DB / 数据库中的定制功能部件
+interface CustomFunctionElement {
+  id: string;
+  user_id: string;
+  name_en: string;
+  name_zh: string;
+  description_en: string | null;
+  description_zh: string | null;
+  icon: string;
+  element_config: any;
+  is_public: boolean;
+}
 
 export interface LayoutTab {
   id: string;
@@ -18,7 +33,7 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant' | 'direct_message' | 'start_date_picker' | 'back_button' | 'onboarding';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant' | 'direct_message' | 'start_date_picker' | 'back_button' | 'onboarding' | 'custom_function';
   config: {
     questionnaire_id?: string;
     questionnaire_ids?: string[];
@@ -229,11 +244,26 @@ const getDefaultLayout = (questionnaires: QuestionnaireConfig[]): AppLayout => {
 };
 
 const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, participantTypes, studyDuration = 7, projectTitle, projectDescription, onUpdate, onUpdateQuestionnaire }) => {
+  const { t, lang } = useI18n();
   const [activeTabId, setActiveTabId] = useState(layout.tabs[0]?.id || '');
   const [showAddElement, setShowAddElement] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<DevicePreset>(DEFAULT_DEVICE);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
   const [filterParticipantTypeId, setFilterParticipantTypeId] = useState<string | null>(null);
+  const [customElements, setCustomElements] = useState<CustomFunctionElement[]>([]);
+
+  // Fetch private/custom elements from DB / 从数据库获取定制功能部件
+  useEffect(() => {
+    const fetchCustomElements = async () => {
+      try {
+        const { data, error } = await (supabase as any).from('custom_function_element').select('*');
+        if (!error && data) setCustomElements(data);
+      } catch (e) {
+        // Silent fail — table may not exist yet / 静默失败
+      }
+    };
+    fetchCustomElements();
+  }, []);
 
   const activeTab = layout.tabs.find(t => t.id === activeTabId);
 
@@ -1437,7 +1467,9 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       </>
                     )}
 
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Function Elements</p>
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">
+                      {lang === 'zh' ? '功能部件' : 'Function Elements'}
+                    </p>
                     <div className="grid grid-cols-2 gap-1">
                       {FUNCTION_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
@@ -1446,6 +1478,50 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                           <span className="text-stone-600 font-medium">{et.label}</span>
                         </button>
                       ))}
+                    </div>
+
+                    {/* Private / Custom Elements — 定制部件 */}
+                    <div className="border-t border-stone-200 pt-2 mt-1">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Lock size={10} className="text-amber-500" />
+                        <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">
+                          {lang === 'zh' ? '定制部件' : 'Custom Elements'}
+                        </p>
+                      </div>
+                      {customElements.length > 0 ? (
+                        <div className="space-y-0.5">
+                          {customElements.map(ce => (
+                            <button key={ce.id} onClick={() => addElement('custom_function', {
+                              title: lang === 'zh' ? ce.name_zh : ce.name_en,
+                              content: lang === 'zh' ? (ce.description_zh || '') : (ce.description_en || ''),
+                              icon: ce.icon || 'Sparkles',
+                            })}
+                              className="w-full flex items-center gap-2 p-1.5 rounded-lg text-left transition-colors text-[10px] border border-transparent hover:bg-amber-50 hover:border-amber-200">
+                              {getLucideIcon(ce.icon || 'Sparkles', 14, 'text-amber-500')}
+                              <div className="flex-1 min-w-0">
+                                <span className="text-stone-700 font-medium block truncate">{lang === 'zh' ? ce.name_zh : ce.name_en}</span>
+                                {(lang === 'zh' ? ce.description_zh : ce.description_en) && (
+                                  <span className="text-[9px] text-stone-400 block truncate">{lang === 'zh' ? ce.description_zh : ce.description_en}</span>
+                                )}
+                              </div>
+                              {!ce.is_public && <Lock size={9} className="text-amber-400 shrink-0" />}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-amber-50/50 rounded-lg p-2.5 border border-amber-100 text-center">
+                          <p className="text-[10px] text-stone-500 mb-1.5">
+                            {lang === 'zh'
+                              ? '如果现有部件无法满足您的需求，我们可以为您的研究定制专属部件。'
+                              : 'Need something our standard elements can\'t do? We can build custom elements for your research.'}
+                          </p>
+                          <a href="mailto:guowei.jiang.work@gmail.com?subject=Custom Element Request&body=Hi, I'd like to request a custom element for my research project."
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-200 transition-colors">
+                            <Mail size={10} />
+                            {lang === 'zh' ? '联系我们定制' : 'Contact for Custom Build'}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
