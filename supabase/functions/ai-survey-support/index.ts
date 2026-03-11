@@ -6,9 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-// OpenRouter direct — development key
-// OpenRouter 直连 — 开发阶段密钥
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || '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'
+// OpenRouter direct — production key
+// OpenRouter 直连 — 生产密钥
+const OPENROUTER_API_KEY = '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'
 const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
