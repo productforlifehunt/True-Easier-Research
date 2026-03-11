@@ -30,6 +30,8 @@ interface ElementRendererProps {
   onToggleTodo?: (cardId: string) => void;
   /** Open project-level AI Assistant dialog */
   onOpenAiAssistant?: () => void;
+  /** Open direct message with researcher / 打开与研究者的直接消息 */
+  onOpenDirectMessage?: () => void;
 }
 
 /**
@@ -41,7 +43,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
   activeQuestionnaireId, compact = false,
   onOpenQuestionnaire, onSelectTimelineDay, renderQuestionnaireCard,
   stopPropagation = false,
-  completedTodoIds = new Set(), onToggleTodo, onOpenAiAssistant,
+  completedTodoIds = new Set(), onToggleTodo, onOpenAiAssistant, onOpenDirectMessage,
 }) => {
   if (el.config.visible === false) return null;
 
@@ -611,7 +613,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       return (
         <button
           type="button"
-          onClick={wrap(() => onOpenAiAssistant?.())}
+          onClick={wrap(() => onOpenDirectMessage?.())}
           className={`w-full ${pad} rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors shadow-sm`}
         >
           <div className="flex items-center gap-2">

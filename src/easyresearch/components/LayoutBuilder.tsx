@@ -294,9 +294,45 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
   const updateElement = (elementId: string, config: Partial<LayoutElement['config']>) => {
     if (!activeTab) return;
-    updateTab(activeTab.id, {
-      elements: activeTab.elements.map(e => e.id === elementId ? { ...e, config: { ...e.config, ...config } } : e),
-    });
+
+    // Check if this is an AI assistant element with structural changes that need cross-tab sync
+    // 检查是否是 AI 助手元素的结构性更改，需要跨 Tab 同步
+    const targetEl = activeTab.elements.find(e => e.id === elementId);
+    const isAiStructuralChange = targetEl?.type === 'ai_assistant' &&
+      ('ai_display_mode' in config || 'ai_position' in config);
+
+    if (isAiStructuralChange) {
+      // Sync structural props (mode, position) to ALL tabs' AI elements
+      const structuralUpdates: Partial<LayoutElement['config']> = {};
+      if ('ai_display_mode' in config) structuralUpdates.ai_display_mode = config.ai_display_mode;
+      if ('ai_position' in config) structuralUpdates.ai_position = config.ai_position;
+
+      const newTabs = layout.tabs.map(tab => ({
+        ...tab,
+        elements: tab.elements.map(e => {
+          if (e.id === elementId) {
+            // The edited element gets ALL config changes
+            return { ...e, config: { ...e.config, ...config } };
+          }
+          if (e.type === 'ai_assistant') {
+            // Other AI elements get only structural changes
+            return { ...e, config: { ...e.config, ...structuralUpdates } };
+          }
+          return e;
+        }),
+      }));
+      // Also sync to project-level ai_assistant_config
+      const newAiConfig = {
+        ...layout.ai_assistant_config,
+        display_mode: config.ai_display_mode ?? layout.ai_assistant_config?.display_mode ?? 'popup',
+        position: config.ai_position ?? layout.ai_assistant_config?.position ?? 'bottom-right',
+      };
+      onUpdate({ ...layout, tabs: newTabs, ai_assistant_config: newAiConfig });
+    } else {
+      updateTab(activeTab.id, {
+        elements: activeTab.elements.map(e => e.id === elementId ? { ...e, config: { ...e.config, ...config } } : e),
+      });
+    }
   };
 
   const resolveTabId = (droppableId: string) => {
