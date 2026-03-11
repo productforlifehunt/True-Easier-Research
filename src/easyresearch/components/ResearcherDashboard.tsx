@@ -399,7 +399,7 @@ const ResearcherDashboard: React.FC = () => {
                     <button
                       className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                       onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(project.id); }}
-                      title="Delete"
+                      title={t('common.delete')}
                     >
                       <Trash2 size={14} className="text-red-400" />
                     </button>
