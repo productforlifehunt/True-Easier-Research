@@ -158,7 +158,7 @@ const FUNCTION_ELEMENTS = [
   { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
   { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
   { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
-  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'Sparkles', desc: 'Project-level AI chatbot (floating)' },
+  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
 ];
 
 const LAYOUT_ELEMENTS = [
