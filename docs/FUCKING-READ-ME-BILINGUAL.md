@@ -769,15 +769,14 @@ Participants (standalone), Panel, Quotas, Variables, Webhooks, Versioning, A/B T
 
 ## 12. LAYOUT AND DESIGN / 布局和设计
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-12.1: Desktop layout: header + footer on all public pages, sidebar on `/dashboard` routes / 桌面布局正确 -->
-<!-- ✅ T1-12.2: Mobile layout: mobile header + mobile footer ONLY on `/dashboard` routes / 移动布局正确 -->
-<!-- ✅ T1-12.3: `app_tab` and `app_tab_element` CRUD works in LayoutBuilder / 标签和元素增删改查正常 -->
-<!-- ✅ T1-12.4: All 16 element types render: questionnaire, consent, screening, profile, ecogram, text_block, progress, timeline, help, custom, spacer, divider, image, button, todo_list, ai_assistant / 16种元素类型渲染正常 -->
-<!-- ✅ T1-12.5: `saveLayoutToDb()` and `loadLayoutFromDb()` in `layoutSync.ts` persist all flat columns / 布局持久化正常 -->
-<!-- ✅ T1-12.6: Public pages (app_public_page + app_public_page_block) build and render via PublicPageBuilder / 公开页面构建和渲染正常 -->
-<!-- ✅ T1-12.7: Popup system (app_popup + app_popup_rule) saves and triggers correctly / 弹窗系统保存和触发正常 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-12.1: Desktop layout: header + footer on all public pages, sidebar on `/dashboard` routes / 桌面布局正确
+> - ✅ T1-12.2: Mobile layout: mobile header + mobile footer ONLY on `/dashboard` routes / 移动布局正确
+> - ✅ T1-12.3: `app_tab` and `app_tab_element` CRUD works in LayoutBuilder / 标签和元素增删改查正常
+> - ✅ T1-12.4: All 16 element types render: questionnaire, consent, screening, profile, ecogram, text_block, progress, timeline, help, custom, spacer, divider, image, button, todo_list, ai_assistant / 16种元素类型渲染正常
+> - ✅ T1-12.5: `saveLayoutToDb()` and `loadLayoutFromDb()` in `layoutSync.ts` persist all flat columns / 布局持久化正常
+> - ✅ T1-12.6: Public pages (app_public_page + app_public_page_block) build and render via PublicPageBuilder / 公开页面构建和渲染正常
+> - ✅ T1-12.7: Popup system (app_popup + app_popup_rule) saves and triggers correctly / 弹窗系统保存和触发正常
 
 ### 12.1 Platform layout / 平台布局
 
