@@ -137,9 +137,9 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           <button
             type="button"
             onClick={toggleProjectAi}
-            className={`relative w-10 h-5.5 rounded-full transition-colors ${aiEnabled ? 'bg-emerald-500' : 'bg-stone-300'}`}
+            className={`relative w-10 h-6 rounded-full transition-colors ${aiEnabled ? 'bg-emerald-500' : 'bg-stone-300'}`}
           >
-            <span className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform ${aiEnabled ? 'left-5' : 'left-0.5'}`} />
+            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${aiEnabled ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </div>
 
