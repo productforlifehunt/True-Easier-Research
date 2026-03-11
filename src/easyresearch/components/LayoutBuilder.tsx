@@ -168,22 +168,22 @@ const ICON_OPTIONS = [
 ];
 
 const FUNCTION_ELEMENTS = [
-  { type: 'ecogram', label: 'Ecogram', lucideIcon: 'Link2', desc: 'Care network diagram' },
-  { type: 'progress', label: 'Progress', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
-  { type: 'timeline', label: 'Timeline', lucideIcon: 'Calendar', desc: 'Study timeline view' },
-  { type: 'start_date_picker', label: 'Set Start Date', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
-  { type: 'direct_message', label: 'Message Researcher', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
-  { type: 'ai_assistant', label: 'AI Assistant', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
+  { type: 'ecogram', label: 'Ecogram', label_en: 'Ecogram', label_zh: '生态图', lucideIcon: 'Link2', desc: 'Care network diagram' },
+  { type: 'progress', label: 'Progress', label_en: 'Progress', label_zh: '进度', lucideIcon: 'BarChart3', desc: 'Study progress overview' },
+  { type: 'timeline', label: 'Timeline', label_en: 'Timeline', label_zh: '时间线', lucideIcon: 'Calendar', desc: 'Study timeline view' },
+  { type: 'start_date_picker', label: 'Set Start Date', label_en: 'Set Start Date', label_zh: '设置开始日期', lucideIcon: 'Calendar', desc: 'Custom study start date picker' },
+  { type: 'direct_message', label: 'Message Researcher', label_en: 'Message Researcher', label_zh: '联系研究者', lucideIcon: 'MessageCircle', desc: 'Direct message with researcher' },
+  { type: 'ai_assistant', label: 'AI Assistant', label_en: 'AI Assistant', label_zh: 'AI 助手', lucideIcon: 'MessageCircle', desc: 'Project-level AI chatbot (popup or card)' },
 ];
 
 const LAYOUT_ELEMENTS = [
-  { type: 'text_block', label: 'Text Block', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
-  { type: 'todo_list', label: 'To-Do List', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
-  { type: 'spacer', label: 'Spacer', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
-  { type: 'divider', label: 'Divider', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
-  { type: 'button', label: 'Button', lucideIcon: 'MousePointer', desc: 'Action button' },
-  { type: 'image', label: 'Image', lucideIcon: 'Image', desc: 'Image block' },
-  { type: 'back_button', label: 'Back Button', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
+  { type: 'text_block', label: 'Text Block', label_en: 'Text Block', label_zh: '文本块', lucideIcon: 'FileText', desc: 'Custom text or instructions' },
+  { type: 'todo_list', label: 'To-Do List', label_en: 'To-Do List', label_zh: '待办列表', lucideIcon: 'CheckSquare', desc: 'Task cards slider' },
+  { type: 'spacer', label: 'Spacer', label_en: 'Spacer', label_zh: '间距', lucideIcon: 'Maximize2', desc: 'Add vertical space' },
+  { type: 'divider', label: 'Divider', label_en: 'Divider', label_zh: '分割线', lucideIcon: 'Minus', desc: 'Horizontal divider line' },
+  { type: 'button', label: 'Button', label_en: 'Button', label_zh: '按钮', lucideIcon: 'MousePointer', desc: 'Action button' },
+  { type: 'image', label: 'Image', label_en: 'Image', label_zh: '图片', lucideIcon: 'Image', desc: 'Image block' },
+  { type: 'back_button', label: 'Back Button', label_en: 'Back Button', label_zh: '返回按钮', lucideIcon: 'ArrowLeft', desc: 'Navigate to previous screen' },
 ];
 
 const WIDTH_PRESETS = [
