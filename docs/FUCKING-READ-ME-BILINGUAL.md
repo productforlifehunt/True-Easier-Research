@@ -503,12 +503,11 @@ Logic tab in SurveyBuilder shows rules per questionnaire. Inline `QuestionLogicE
 
 ## 7. TEMPLATES / 模板
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-7.1: Templates use `is_template = true` on same table — no separate template tables exist / 模板使用同表 is_template 标记 -->
-<!-- ✅ T1-7.2: "Use template" deep-clones project+questionnaires+questions with `is_template = false` / "使用模板"深度克隆为真实数据 -->
-<!-- ✅ T1-7.3: "Save as template" deep-clones with `is_template = true` / "保存为模板"深度克隆为模板 -->
-<!-- ✅ T1-7.4: No hardcoded templates in frontend — all from database / 前端无硬编码模板 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-7.1: Templates use `is_template = true` on same table — no separate template tables exist / 模板使用同表 is_template 标记
+> - ✅ T1-7.2: "Use template" deep-clones project+questionnaires+questions with `is_template = false` / "使用模板"深度克隆为真实数据
+> - ✅ T1-7.3: "Save as template" deep-clones with `is_template = true` / "保存为模板"深度克隆为模板
+> - ✅ T1-7.4: No hardcoded templates in frontend — all from database / 前端无硬编码模板
 
 A template is NOT a separate table or JSONB blob. A template is a row in the SAME table as real data with `is_template = true`. Never create a separate template table.
 
