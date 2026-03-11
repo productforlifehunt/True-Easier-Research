@@ -109,7 +109,7 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
       icon: editForm.icon,
       element_config: editForm.element_config,
     }).eq('id', editingId);
-    if (error) { toast.error('Failed: ' + error.message); return; }
+    if (error) { toast.error(lang === 'zh' ? '失败: ' + error.message : 'Failed: ' + error.message); return; }
     toast.success(lang === 'zh' ? '已保存' : 'Saved');
     setEditingId(null);
     setEditForm({});

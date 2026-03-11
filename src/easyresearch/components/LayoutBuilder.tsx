@@ -1477,10 +1477,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     </p>
                     <div className="grid grid-cols-2 gap-1">
                       {FUNCTION_ELEMENTS.map(et => (
-                        <button key={et.type} onClick={() => addElement(et.type, { title: et.label })}
+                        <button key={et.type} onClick={() => addElement(et.type, { title: lang === 'zh' ? et.label_zh : et.label_en })}
                           className="flex items-center gap-1.5 p-1.5 rounded-lg text-left hover:bg-white transition-colors text-[10px] border border-transparent hover:border-stone-200">
                           {getLucideIcon(et.lucideIcon, 14, 'text-stone-500')}
-                          <span className="text-stone-600 font-medium">{et.label}</span>
+                          <span className="text-stone-600 font-medium">{lang === 'zh' ? et.label_zh : et.label_en}</span>
                         </button>
                       ))}
                     </div>
