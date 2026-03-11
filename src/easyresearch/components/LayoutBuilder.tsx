@@ -430,7 +430,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     const current = effectiveTypes || participantTypes.map(p => p.id);
                     const next = visible ? current.filter(id => id !== pt.id) : [...current, pt.id];
                     updateElement(el.id, { participant_types: next });
-                  }} className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${visible ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400'}`}>
+                  }} className={`px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors ${visible ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-stone-200 text-stone-400 bg-white'}`}>
                     {pt.name}
                   </button>
                 );
