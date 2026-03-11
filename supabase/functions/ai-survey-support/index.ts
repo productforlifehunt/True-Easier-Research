@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-// Use Lovable AI Gateway (auto-provisioned key) with same model
-const OPENROUTER_API_KEY = Deno.env.get('LOVABLE_API_KEY') || Deno.env.get('OPENROUTER_API_KEY') || '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'
+// Lovable AI Gateway — standard edge function approach / 标准边缘函数方式
+const AI_API_KEY = Deno.env.get('LOVABLE_API_KEY')!
 const AI_MODEL = 'google/gemini-3-flash-preview'
 const AI_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions'
 
@@ -15,10 +15,8 @@ async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${AI_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://easierresearch.app',
-      'X-Title': 'Easier Research AI'
     },
     body: JSON.stringify({ model: AI_MODEL, messages, temperature, max_tokens: maxTokens })
   })

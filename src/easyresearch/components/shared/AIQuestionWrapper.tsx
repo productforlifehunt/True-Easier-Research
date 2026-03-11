@@ -3,6 +3,7 @@ import { Sparkles, Send, Loader2, Check, RotateCcw, Mic } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../hooks/useI18n';
 
 type AiMode = 'all' | 'explain' | 'improve' | 'chat' | 'fill';
 
@@ -21,17 +22,18 @@ interface AIQuestionWrapperProps {
 
 const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-survey-support`;
 
-const MODE_LABELS: { key: AiMode; label: string }[] = [
-  { key: 'all', label: 'All My Help' },
-  { key: 'explain', label: 'Explain' },
-  { key: 'improve', label: 'Improve' },
-  { key: 'chat', label: 'Chat' },
-  { key: 'fill', label: 'Fill' },
-];
-
 const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
   question, value, onResponse, children, aiConfig, compact = false,
 }) => {
+  const { t } = useI18n();
+
+  const MODE_LABELS: { key: AiMode; label: string }[] = [
+    { key: 'all', label: t('ai.mode.all') },
+    { key: 'explain', label: t('ai.mode.explain') },
+    { key: 'improve', label: t('ai.mode.improve') },
+    { key: 'chat', label: t('ai.mode.chat') },
+    { key: 'fill', label: t('ai.mode.fill') },
+  ];
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [showAiSupport, setShowAiSupport] = useState(false);
@@ -181,11 +183,11 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
 
   const getModePlaceholder = (mode: AiMode): string => {
     switch (mode) {
-      case 'all': return 'Hi! Pick a mode so I understand your intent faster, but every mode can do everything — explain, improve, fill, or chat. Just tell me what you need, or pick a mode and I already know what you want!';
-      case 'explain': return 'Ask me to explain this question...';
-      case 'improve': return 'Ask me to improve your answer...';
-      case 'chat': return 'Type a message...';
-      case 'fill': return 'e.g. "5", "yes", "select B"...';
+      case 'all': return t('ai.hint.all');
+      case 'explain': return t('ai.hint.explain');
+      case 'improve': return t('ai.hint.improve');
+      case 'chat': return t('ai.hint.chat');
+      case 'fill': return t('ai.hint.fill');
     }
   };
 
@@ -197,7 +199,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
         <div className="p-2.5 rounded-lg bg-violet-50 border border-violet-200 text-[12px] text-violet-700 flex items-start gap-2">
           <Check size={14} className="mt-0.5 shrink-0 text-violet-500" />
           <div className="flex-1">
-            <p className="font-medium mb-0.5">AI Suggestion Applied</p>
+            <p className="font-medium mb-0.5">{t('ai.suggestionApplied')}</p>
             <p className="text-violet-600 line-clamp-2">{aiSuggestion}</p>
           </div>
           <button onClick={() => { setAiSuggestion(null); onResponse(question.id, undefined); }} className="text-violet-400 hover:text-violet-600">
@@ -215,7 +217,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
             className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 transition-colors text-white font-medium text-[13px] flex items-center justify-center gap-2"
           >
             <Sparkles size={16} />
-            AI Support
+            {t('builder.aiSupport')}
           </button>
 
           {showAiSupport && (

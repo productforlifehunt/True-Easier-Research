@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useI18n } from '../hooks/useI18n';
 import { Plus, Trash2, Clock, Bell, BellOff, ChevronDown, ChevronRight, Copy, ArrowUpDown, FileText, Edit2, Users, Settings, X, GitBranch, FolderInput, Check, LayoutList, Layers, Sparkles, Mic, MessageCircle, Eye } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import CustomDropdown from './CustomDropdown';
@@ -75,6 +76,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
   projectNotifications = [], onUpdateProjectNotifications, onSwitchToNotifications,
 }) => {
+  const { t } = useI18n();
   const [openSections, setOpenSections] = useState<Record<string, 'settings' | 'questions' | null>>({});
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   // Active tab filter per questionnaire: null = show all, 'general' = unassigned, sectionId = specific tab
@@ -992,17 +994,17 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 ))}
                               </div>
 
-                              {/* AI Support Section */}
+                               {/* AI Support Section */}
                               <div className="bg-white rounded-xl border border-emerald-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5"><Sparkles size={11} /> AI Support</h5>
+                                <h5 className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5"><Sparkles size={11} /> {t('builder.aiSupport')}</h5>
 
                                 {/* Toggle 1: AI Voice Assistant */}
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5">
                                     <Mic size={13} className="text-emerald-500" />
                                     <div>
-                                      <span className="text-[12px] text-stone-600">AI Voice Assistant</span>
-                                      <p className="text-[10px] text-stone-400">Participants can answer by voice (browser speech recognition)</p>
+                                      <span className="text-[12px] text-stone-600">{t('ai.voiceAssistant')}</span>
+                                      <p className="text-[10px] text-stone-400">{t('ai.voiceAssistantDesc')}</p>
                                     </div>
                                   </div>
                                   <button onClick={() => updateQuestionnaire(q.id, { ai_voice_enabled: !q.ai_voice_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_voice_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
@@ -1015,8 +1017,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <div className="flex items-center gap-1.5">
                                     <MessageCircle size={13} className="text-emerald-500" />
                                     <div>
-                                      <span className="text-[12px] text-stone-600">AI Chat Assistant</span>
-                                      <p className="text-[10px] text-stone-400">AI chatbot helps participants complete the survey conversationally</p>
+                                      <span className="text-[12px] text-stone-600">{t('ai.chatAssistant')}</span>
+                                      <p className="text-[10px] text-stone-400">{t('ai.chatAssistantDesc')}</p>
                                     </div>
                                   </div>
                                   <button onClick={() => updateQuestionnaire(q.id, { ai_chatbot_enabled: !q.ai_chatbot_enabled })} className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${q.ai_chatbot_enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
@@ -1026,7 +1028,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                                 {/* Toggle 3: Show voice on all questions */}
                                 <div className="flex items-center justify-between pl-4 border-l-2 border-emerald-100">
-                                  <span className="text-[11px] text-stone-500">Enable voice input for all questions</span>
+                                  <span className="text-[11px] text-stone-500">{t('ai.voiceAllQuestions')}</span>
                                   <button onClick={() => {
                                     updateQuestionnaire(q.id, { ai_voice_all_questions: !q.ai_voice_all_questions });
                                     if (!q.ai_voice_all_questions) {
@@ -1040,7 +1042,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                                 {/* Toggle 4: Show AI assist on all questions */}
                                 <div className="flex items-center justify-between pl-4 border-l-2 border-emerald-100">
-                                  <span className="text-[11px] text-stone-500">Enable AI assist for all questions</span>
+                                  <span className="text-[11px] text-stone-500">{t('ai.assistAllQuestions')}</span>
                                   <button onClick={() => {
                                     updateQuestionnaire(q.id, { ai_assist_all_questions: !q.ai_assist_all_questions });
                                     if (!q.ai_assist_all_questions) {
@@ -1054,19 +1056,19 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                                 {/* AI Guidance / System Prompt */}
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">AI Guidance</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ai.guidance')}</label>
                                   <textarea
                                     value={q.ai_guidance || ''}
                                     onChange={(e) => updateQuestionnaire(q.id, { ai_guidance: e.target.value })}
                                     className="w-full px-3 py-2 rounded-xl text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
                                     rows={3}
-                                    placeholder="Guide AI behavior for this questionnaire (e.g., 'Be encouraging and explain medical terms in simple language')"
+                                    placeholder={t('ai.guidancePlaceholder')}
                                   />
-                                  <p className="text-[10px] text-stone-400 mt-1">This guidance shapes how the AI interacts with participants during this questionnaire.</p>
+                                  <p className="text-[10px] text-stone-400 mt-1">{t('ai.guidanceDesc')}</p>
                                 </div>
 
                                 {/* AI Preview hint */}
-                                <p className="text-[10px] text-stone-400 flex items-center gap-1"><Eye size={10} /> Save and use the Preview tab to test AI behavior</p>
+                                <p className="text-[10px] text-stone-400 flex items-center gap-1"><Eye size={10} /> {t('ai.previewHint')}</p>
 
                                 <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">You can also customize AI settings per question in the question editor below.</p>
                               </div>
