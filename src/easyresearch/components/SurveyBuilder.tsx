@@ -356,7 +356,7 @@ const SurveyBuilder: React.FC = () => {
         return;
       }
       if (!project.title || project.title.trim() === '' || project.title === 'Untitled Project') {
-        toast.error('Cannot publish: Please add a project title first.');
+        toast.error(t('toast.cannotPublishNoTitle'));
         return;
       }
     }
