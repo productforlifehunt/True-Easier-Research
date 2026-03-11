@@ -206,16 +206,15 @@ Two questionnaires with the same `ab_group_id` form a test group. Participants a
 
 ## 4. QUESTIONS / 问题
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-4.1: All 47 question types from `questionTypes.ts` render in Builder, Preview, and Participant views / 47种问题类型在构建器、预览、参与者视图中渲染 -->
-<!-- ✅ T1-4.2: `questionConfigToDbCols()` spreads config to flat `cfg_*` columns on save / 保存时配置展平到 cfg_* 列 -->
-<!-- ✅ T1-4.3: `hydrateQuestionRows()` reconstructs `question_config` from `cfg_*` columns on load / 加载时从 cfg_* 列重建配置 -->
-<!-- ✅ T1-4.4: Options stored in `question_option` table (not JSONB) — add, edit, delete, reorder / 选项存储在 question_option 表中 -->
-<!-- ✅ T1-4.5: Question drag-drop reorder updates `order_index` correctly / 问题拖拽排序更新 order_index -->
-<!-- ✅ T1-4.6: Per-question toggles (allow_voice, allow_ai_assist, allow_other, allow_none) save/load / 每题开关保存加载正常 -->
-<!-- ✅ T1-4.7: Layout types (section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block) do NOT create response rows / 布局类型不创建响应行 -->
-<!-- ✅ T1-4.8: `section_header` creates tab grouping via `groupQuestionsBySections()` / 章节标题正确分组 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-4.1: All 47 question types from `questionTypes.ts` render in Builder, Preview, and Participant views / 47种问题类型在构建器、预览、参与者视图中渲染
+> - ✅ T1-4.2: `questionConfigToDbCols()` spreads config to flat `cfg_*` columns on save / 保存时配置展平到 cfg_* 列
+> - ✅ T1-4.3: `hydrateQuestionRows()` reconstructs `question_config` from `cfg_*` columns on load / 加载时从 cfg_* 列重建配置
+> - ✅ T1-4.4: Options stored in `question_option` table (not JSONB) — add, edit, delete, reorder / 选项存储在 question_option 表中
+> - ✅ T1-4.5: Question drag-drop reorder updates `order_index` correctly / 问题拖拽排序更新 order_index
+> - ✅ T1-4.6: Per-question toggles (allow_voice, allow_ai_assist, allow_other, allow_none) save/load / 每题开关保存加载正常
+> - ✅ T1-4.7: Layout types (section_header, text_block, divider, image_block, instruction, video_block, audio_block, embed_block) do NOT create response rows / 布局类型不创建响应行
+> - ✅ T1-4.8: `section_header` creates tab grouping via `groupQuestionsBySections()` / 章节标题正确分组
 
 Each question is a row in the `question` table (tier 3, renamed from old `survey_question` — NEVER use `survey_question`). A question belongs to one project via `project_id` and one questionnaire via `questionnaire_id`. The canonical type list lives in `src/easyresearch/constants/questionTypes.ts`.
 
