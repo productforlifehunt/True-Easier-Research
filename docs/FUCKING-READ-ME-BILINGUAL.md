@@ -657,14 +657,13 @@ A user can be both (e.g. a researcher who also joins another researcher's study)
 
 ## 10. NOTIFICATION / 通知
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-10.1: Notification configs CRUD in QuestionnaireList.tsx — add/edit/delete per questionnaire / 通知配置增删改查正常 -->
-<!-- ✅ T1-10.2: `notification_config` supports both project-level (questionnaire_id=null) and questionnaire-level / 支持项目级和问卷级通知 -->
-<!-- ✅ T1-10.3: Schedule modes ('interval' vs 'specific_times') save and load correctly / 时间模式保存加载正常 -->
-<!-- ✅ T1-10.4: DND periods per-questionnaire per-enrollment stored in `enrollment_dnd_period` / 免打扰时段存储正常 -->
-<!-- ✅ T1-10.5: `notificationScheduler.ts` fires browser notifications respecting: enabled → time window → cooldown → DND / 通知调度器正确执行检查链 -->
-<!-- ✅ T1-10.6: Master kill switch `profiles.push_notifications_enabled` blocks all notifications when false / 主开关关闭时阻止所有通知 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-10.1: Notification configs CRUD in QuestionnaireList.tsx — add/edit/delete per questionnaire / 通知配置增删改查正常
+> - ✅ T1-10.2: `notification_config` supports both project-level (questionnaire_id=null) and questionnaire-level / 支持项目级和问卷级通知
+> - ✅ T1-10.3: Schedule modes ('interval' vs 'specific_times') save and load correctly / 时间模式保存加载正常
+> - ✅ T1-10.4: DND periods per-questionnaire per-enrollment stored in `enrollment_dnd_period` / 免打扰时段存储正常
+> - ✅ T1-10.5: `notificationScheduler.ts` fires browser notifications respecting: enabled → time window → cooldown → DND / 通知调度器正确执行检查链
+> - ✅ T1-10.6: Master kill switch `profiles.push_notifications_enabled` blocks all notifications when false / 主开关关闭时阻止所有通知
 
 Each research project can set up push notifications at two levels: project-level (not tied to any questionnaire) and questionnaire-level. Each questionnaire can have multiple independent notification configs, each with its own schedule, content, and DND settings.
 
