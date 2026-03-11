@@ -97,6 +97,15 @@ export interface AppLayout {
     background_color: string;
     card_style: 'flat' | 'elevated' | 'outlined';
   };
+  // Project-level AI Assistant / 项目级 AI 助手
+  ai_assistant_enabled?: boolean;
+  ai_assistant_config?: {
+    display_mode: 'popup' | 'card';
+    position: 'bottom-right' | 'bottom-left' | 'center';
+    icon?: string;
+    title?: string;
+    description?: string;
+  };
 }
 
 interface LayoutBuilderProps {
