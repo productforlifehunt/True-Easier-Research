@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { BarChart3, Users, TrendingUp, Activity } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../hooks/useI18n';
 
 const AnalyticsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const [stats, setStats] = useState({
     totalSurveys: 0, activeParticipants: 0, totalResponses: 0, completionRate: 0, recentResponses: [] as any[]
   });
@@ -63,14 +65,14 @@ const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-2xl font-semibold tracking-tight text-stone-800 mb-6">Analytics</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-stone-800 mb-6">{t('analytics.title')}</h1>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
         {[
-          { label: 'Surveys', value: stats.totalSurveys, icon: BarChart3, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
-          { label: 'Participants', value: stats.activeParticipants, icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
-          { label: 'Responses', value: stats.totalResponses, icon: TrendingUp, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
-          { label: 'Completion', value: `${stats.completionRate}%`, icon: Activity, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
+          { label: t('analytics.surveys'), value: stats.totalSurveys, icon: BarChart3, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
+          { label: t('nav.participants'), value: stats.activeParticipants, icon: Users, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
+          { label: t('responses.title'), value: stats.totalResponses, icon: TrendingUp, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' },
+          { label: t('analytics.completion'), value: `${stats.completionRate}%`, icon: Activity, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
         ].map(s => (
           <div key={s.label} className={`bg-gradient-to-br ${s.gradient} rounded-2xl p-5 border border-white/60`}>
             <s.icon size={16} className={`${s.iconColor} mb-3`} strokeWidth={1.5} />
@@ -82,7 +84,7 @@ const AnalyticsPage: React.FC = () => {
 
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm">
         <div className="px-5 py-4 border-b border-stone-100">
-          <h3 className="text-[15px] font-semibold text-stone-800">Recent Responses</h3>
+          <h3 className="text-[15px] font-semibold text-stone-800">{t('analytics.recentResponses')}</h3>
         </div>
         {loading ? (
           <div className="p-8 text-center">
@@ -94,10 +96,10 @@ const AnalyticsPage: React.FC = () => {
               <div key={response.id} className="px-5 py-3.5 hover:bg-stone-50/50 transition-colors">
                 <div className="flex justify-between items-start mb-1">
                   <p className="text-[13px] font-medium text-stone-800">
-                    {response.question?.question_text || 'Question'}
+                    {response.question?.question_text || t('analytics.question')}
                   </p>
                   <span className="shrink-0 ml-3 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-100">
-                    {response.question?.question_type || 'response'}
+                    {response.question?.question_type || t('analytics.response')}
                   </span>
                 </div>
                 <p className="text-[13px] text-stone-500 mb-1 font-light">
@@ -110,7 +112,7 @@ const AnalyticsPage: React.FC = () => {
                       : ''}
                 </p>
                 <div className="flex items-center gap-3 text-[11px] text-stone-300">
-                  <span>{response.enrollment?.participant_email || 'Anonymous'}</span>
+                  <span>{response.enrollment?.participant_email || t('analytics.anonymous')}</span>
                   <span>·</span>
                   <span>{new Date(response.created_at).toLocaleString()}</span>
                 </div>
@@ -122,7 +124,7 @@ const AnalyticsPage: React.FC = () => {
             <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
               <BarChart3 className="text-emerald-500" size={20} />
             </div>
-            <p className="text-[13px] text-stone-400 font-light">No responses yet. Share your surveys to start collecting data.</p>
+            <p className="text-[13px] text-stone-400 font-light">{t('analytics.noResponses')}</p>
           </div>
         )}
       </div>
