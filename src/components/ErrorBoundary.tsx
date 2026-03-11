@@ -71,7 +71,7 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     // In production, this would send to error monitoring service
-    if (process.env.NODE_ENV === 'production' && this.props.enableReporting !== false) {
+    if (import.meta.env.PROD && this.props.enableReporting !== false) {
       // Example: Send to error monitoring service with enhanced details
       // errorReportingService.captureException(error, {
       //   extra: { ...errorInfo, errorDetails },
