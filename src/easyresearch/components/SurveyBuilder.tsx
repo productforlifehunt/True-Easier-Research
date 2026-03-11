@@ -975,7 +975,7 @@ const SurveyBuilder: React.FC = () => {
           navigate(`/easyresearch/project/${newProject.id}`);
         }
       }
-      if (projectId) toast.success('Project saved successfully!');
+      if (projectId) toast.success(t('toast.projectSaved'));
     } catch (error) {
       console.error('Error saving project:', error);
       toast.error('Failed to save project. Please try again.');
