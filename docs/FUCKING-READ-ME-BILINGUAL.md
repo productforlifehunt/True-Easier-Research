@@ -228,7 +228,7 @@ All config is stored as flat database columns (NOT JSONB). Each question type on
 
 **Text / 文本:** `cfg_max_length`
 
-**Choice / 选择:** `cfg_allow_multiple`, `cfg_layout`, `cfg_columns_count`, `cfg_yes_label`, `cfg_no_label`, `cfg_columns`
+**Choice / 选择:** `cfg_allow_multiple`, `cfg_yes_label`, `cfg_no_label`, `cfg_columns`
 
 **File / 文件:** `cfg_max_files`, `cfg_max_size_mb`, `cfg_accepted_types`
 
@@ -771,7 +771,7 @@ The participant-facing mobile app layout is stored in flat relational tables. Ma
 - `id` (uuid PK)
 - `tab_id` (uuid FK → app_tab)
 - `project_id` (uuid FK)
-- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`
+- `type` (text) — `'questionnaire'`, `'consent'`, `'screening'`, `'profile'`, `'ecogram'`, `'text_block'`, `'progress'`, `'timeline'`, `'help'`, `'custom'`, `'spacer'`, `'divider'`, `'image'`, `'button'`, `'todo_list'`, `'ai_assistant'`
 - `order_index` (int)
 - `questionnaire_id` (uuid FK, nullable) — single questionnaire link / 单问卷链接
 - `questionnaire_ids` (text[], nullable) — multiple questionnaires (for timeline) / 多问卷（时间线用）
@@ -922,8 +922,8 @@ Each question inherits AI settings from its parent questionnaire but can overrid
 - 当参与者请求时，AI 可以批量填写所有问题
 - Voice input uses Web Speech API (free, no API cost)
 - 语音输入使用 Web Speech API（免费，无 API 费用）
-- AI chat uses OpenRouter API: model `openai/gpt-oss-120b`
-- AI 聊天使用 OpenRouter API：模型 `openai/gpt-oss-120b`
+- AI chat uses OpenRouter API: model `google/gemini-3.1-flash-lite-preview`
+- AI 聊天使用 OpenRouter API：模型 `google/gemini-3.1-flash-lite-preview`
 
 ### 14.6 AI UI Integration / AI 界面集成
 
