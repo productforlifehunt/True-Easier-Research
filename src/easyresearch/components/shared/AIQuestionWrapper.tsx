@@ -183,11 +183,11 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
 
   const getModePlaceholder = (mode: AiMode): string => {
     switch (mode) {
-      case 'all': return 'Hi! Pick a mode so I understand your intent faster, but every mode can do everything — explain, improve, fill, or chat. Just tell me what you need, or pick a mode and I already know what you want!';
-      case 'explain': return 'Ask me to explain this question...';
-      case 'improve': return 'Ask me to improve your answer...';
-      case 'chat': return 'Type a message...';
-      case 'fill': return 'e.g. "5", "yes", "select B"...';
+      case 'all': return t('ai.hint.all');
+      case 'explain': return t('ai.hint.explain');
+      case 'improve': return t('ai.hint.improve');
+      case 'chat': return t('ai.hint.chat');
+      case 'fill': return t('ai.hint.fill');
     }
   };
 
