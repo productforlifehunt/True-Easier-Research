@@ -88,7 +88,7 @@ serve(async (req) => {
           : ''
         const configStr = questionConfig ? `\nQuestion config: ${JSON.stringify(questionConfig)}` : ''
         
-        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\nCurrent question: "${question || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}\nCurrent answer: "${currentAnswer || 'N/A'}"${optionsStr}${configStr}\n\n${modeInstruction || 'Help the user with this question. Be flexible and understand their intent.'}`
+        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\n${langInstruction}\n\nCurrent question: "${question || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}\nCurrent answer: "${currentAnswer || 'N/A'}"${optionsStr}${configStr}\n\n${modeInstruction || 'Help the user with this question. Be flexible and understand their intent.'}`
         
         const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages]
         const aiMessage = await callAI(fullMessages, 0.7, 1000)
