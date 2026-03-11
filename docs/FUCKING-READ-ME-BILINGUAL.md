@@ -133,7 +133,13 @@ See Section 7 (Templates). / 见第7节（模板）。
 
 ## 3. QUESTIONNAIRE / 问卷
 
-<!-- CRC STARTS -->
+<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
+<!-- ✅ T1-3.1: All 6 questionnaire_types ('questionnaire','consent','screening','profile','help','custom') create and save correctly / 6种问卷类型创建保存正常 -->
+<!-- ✅ T1-3.2: Questionnaire CRUD within a project — add, edit, delete, reorder via drag-drop / 问卷增删改查和拖拽排序正常 -->
+<!-- ✅ T1-3.3: `display_mode` setting persists ('all_at_once', 'one_per_page', 'section_per_page') / 显示模式保存正常 -->
+<!-- ✅ T1-3.4: AI toggles (ai_voice_enabled, ai_chatbot_enabled, ai_voice_all_questions, ai_assist_all_questions) save and propagate to questions / AI 开关保存并传播到问题 -->
+<!-- ✅ T1-3.5: Participant type linking via junction table works (assign/unassign types) / 参与者类型关联正常 -->
+<!-- ✅ T1-3.6: A/B test columns (is_ab_test, ab_group_id, ab_split_percentage) save and load / A/B测试列保存加载正常 -->
 <!-- CRC ENDS -->
 
 Each questionnaire is a row in the `questionnaire` table (tier 2). It belongs to one project via `project_id`. Although some types are not "questionnaires" in the traditional sense, ALL form-based instruments use this same table.
