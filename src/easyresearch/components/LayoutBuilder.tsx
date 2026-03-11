@@ -33,7 +33,7 @@ export interface LayoutTab {
 
 export interface LayoutElement {
   id: string;
-  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant' | 'direct_message' | 'start_date_picker' | 'back_button' | 'onboarding';
+  type: 'questionnaire' | 'consent' | 'screening' | 'profile' | 'ecogram' | 'text_block' | 'progress' | 'timeline' | 'help' | 'custom' | 'spacer' | 'divider' | 'image' | 'button' | 'todo_list' | 'ai_assistant' | 'direct_message' | 'start_date_picker' | 'back_button' | 'onboarding' | 'custom_function';
   config: {
     questionnaire_id?: string;
     questionnaire_ids?: string[];
