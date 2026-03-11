@@ -420,7 +420,7 @@ const ParticipantLibrary: React.FC = () => {
                 type="number"
                 value={ageMax}
                 onChange={e => setAgeMax(e.target.value)}
-                placeholder="Age ≤"
+                placeholder={t('participantLibrary.ageMax')}
                 className="w-1/2 px-3 py-2 text-[13px] border border-stone-200 rounded-lg focus:outline-none focus:border-emerald-300"
               />
             </div>
