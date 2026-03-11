@@ -378,10 +378,37 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
         </div>
 
         {el.type !== 'spacer' && el.type !== 'divider' && (
-          <div>
-            <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Title</label>
-            <input type="text" value={el.config.title || ''} onChange={(e) => updateElement(el.id, { title: e.target.value })}
-              className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Title</label>
+              <input type="text" value={el.config.title || ''} onChange={(e) => updateElement(el.id, { title: e.target.value })}
+                className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+            </div>
+            {el.type !== 'text_block' && (
+              <div>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">Description</label>
+                <input type="text" value={el.config.content || ''} onChange={(e) => updateElement(el.id, { content: e.target.value })}
+                  placeholder="Optional description shown below the title"
+                  className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+              </div>
+            )}
+            <div>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">Icon</label>
+              <div className="flex flex-wrap gap-1">
+                <button onClick={() => updateElement(el.id, { icon: '' })}
+                  className={`w-7 h-7 rounded-lg border flex items-center justify-center text-[9px] transition-colors ${
+                    !el.config.icon ? 'border-emerald-400 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                  }`} title="No icon">✕</button>
+                {ICON_OPTIONS.filter(o => o.value).map(o => (
+                  <button key={o.value} onClick={() => updateElement(el.id, { icon: o.value })}
+                    className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-colors ${
+                      el.config.icon === o.value ? 'border-emerald-400 bg-emerald-50 text-emerald-600' : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                    }`} title={o.label}>
+                    {getLucideIcon(o.value, 14, el.config.icon === o.value ? 'text-emerald-600' : 'text-stone-400')}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
