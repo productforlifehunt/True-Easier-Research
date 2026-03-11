@@ -1352,11 +1352,14 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                                   <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-stone-100" onClick={(e) => e.stopPropagation()}>
                                     <GripVertical size={12} className="text-stone-300" />
                                   </div>
-                                  <div className="flex-1 min-w-0">
+                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5">
-                                      {getLucideIcon(getElementIcon(el.type), 12, 'text-stone-500')}
+                                      {getLucideIcon(el.config.icon || getElementIcon(el.type), 12, 'text-stone-500')}
                                       <span className="text-[11px] font-medium text-stone-700 truncate">{getElementLabel(el)}</span>
                                     </div>
+                                    {el.config.content && el.type !== 'text_block' && (
+                                      <p className="text-[9px] text-stone-400 truncate mt-0.5 pl-[18px]">{el.config.content}</p>
+                                    )}
                                   </div>
                                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                     <button onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !(el.config.visible !== false) }); }} className="p-0.5 hover:bg-stone-100 rounded">
