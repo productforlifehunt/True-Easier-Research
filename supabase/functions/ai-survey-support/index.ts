@@ -36,7 +36,23 @@ serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { action, question, questionType, options, currentAnswer, questionConfig, messages, questionnaire } = body
+    const { action, question, questionType, options, currentAnswer, questionConfig, messages, questionnaire, language } = body
+
+    // Build language instruction based on app language setting
+    // 根据应用语言设置构建语言指令
+    const langCode = language || 'en'
+    const langInstruction = langCode === 'zh'
+      ? `LANGUAGE RULE: The user's app is set to Chinese. You MUST respond in Chinese by default. However, be smart about it:
+- If the user sends a full sentence entirely in English, they clearly prefer English for this message — respond in English.
+- If the user mixes Chinese and English (e.g. uses English abbreviations like "AI", "APP", technical terms), still respond in Chinese.
+- Short greetings like "hi", "hello" are universal — respond in Chinese since the app is set to Chinese.
+- If you're unsure whether the user is writing in English or Chinese (ambiguous words), respond in Chinese and optionally ask: "你是想用英文交流吗？"
+- NEVER mix languages in your response. Either fully Chinese or fully English.`
+      : `LANGUAGE RULE: The user's app is set to English. You MUST respond in English by default. However:
+- If the user sends a full sentence entirely in Chinese, respond in Chinese.
+- If the user mixes languages, respond in English.
+- Short greetings are universal — respond in English.
+- NEVER mix languages in your response.`
 
     let systemPrompt = ''
     let userMessage = ''
@@ -53,13 +69,13 @@ serve(async (req) => {
       }
 
       case 'ai_assist': {
-        systemPrompt = `You are a helpful survey assistant. Help the participant understand the question and provide a better answer. Be concise (2-3 sentences max).`
+        systemPrompt = `You are a helpful survey assistant. Help the participant understand the question and provide a better answer. Be concise (2-3 sentences max).\n\n${langInstruction}`
         userMessage = `Question: "${question}"\nQuestion type: ${questionType}\nCurrent answer: ${currentAnswer || 'None yet'}\n\nHelp me answer this question.`
         break
       }
 
       case 'ai_enhance': {
-        systemPrompt = `You are a writing assistant. Improve the participant's survey answer. Return ONLY the improved text, nothing else.`
+        systemPrompt = `You are a writing assistant. Improve the participant's survey answer. Return ONLY the improved text, nothing else.\n\n${langInstruction}`
         userMessage = `Question: "${question}"\nOriginal answer: "${currentAnswer}"\n\nImprove this answer:`
         break
       }
@@ -72,7 +88,7 @@ serve(async (req) => {
           : ''
         const configStr = questionConfig ? `\nQuestion config: ${JSON.stringify(questionConfig)}` : ''
         
-        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\nCurrent question: "${question || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}\nCurrent answer: "${currentAnswer || 'N/A'}"${optionsStr}${configStr}\n\n${modeInstruction || 'Help the user with this question. Be flexible and understand their intent.'}`
+        systemPrompt = `You are a helpful AI assistant for survey participants. Be concise and supportive.\n\n${langInstruction}\n\nCurrent question: "${question || 'N/A'}"\nQuestion type: ${questionType || 'unknown'}\nCurrent answer: "${currentAnswer || 'N/A'}"${optionsStr}${configStr}\n\n${modeInstruction || 'Help the user with this question. Be flexible and understand their intent.'}`
         
         const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages]
         const aiMessage = await callAI(fullMessages, 0.7, 1000)
@@ -97,7 +113,7 @@ serve(async (req) => {
         const unansweredStr = unanswered.length > 0
           ? `\n\nUNANSWERED REQUIRED (${unanswered.length}):\n${unanswered.map((q: any) => `- "${q.question_text}" [${q.id}]`).join('\n')}`
           : '\n\nAll required questions answered.'
-        systemPrompt = `You are helping a participant complete "${title}".\n\nQUESTIONS:\n${questionSummary}${unansweredStr}\n\nTo fill answers include:\n<<<FILL_ANSWERS>>>\n[{"question_id":"uuid","value":"answer"}]\n<<<END_FILL>>>\n\nExplain what you're filling before the block.`
+        systemPrompt = `You are helping a participant complete "${title}".\n\n${langInstruction}\n\nQUESTIONS:\n${questionSummary}${unansweredStr}\n\nTo fill answers include:\n<<<FILL_ANSWERS>>>\n[{"question_id":"uuid","value":"answer"}]\n<<<END_FILL>>>\n\nExplain what you're filling before the block.`
         const fullMsgs = [{ role: 'system', content: systemPrompt }, ...messages]
         const aiMsg = await callAI(fullMsgs, 0.7, 2000)
         let fillCommands: any[] = []

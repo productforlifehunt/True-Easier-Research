@@ -25,7 +25,7 @@ const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-survey-su
 const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
   question, value, onResponse, children, aiConfig, compact = false,
 }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const MODE_LABELS: { key: AiMode; label: string }[] = [
     { key: 'all', label: t('ai.mode.all') },
@@ -71,6 +71,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
     }
   }, []);
 
+
   const callAI = useCallback(async (action: string, extra: any = {}) => {
     const { data: { session } } = await supabase.auth.getSession();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -87,12 +88,13 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
         options: question.options,
         currentAnswer: value,
         questionConfig: question.question_config,
+        language: lang,
         ...extra,
       }),
     });
     if (!res.ok) throw new Error(`AI request failed: ${res.status}`);
     return await res.json();
-  }, [question, value, normalizedType]);
+  }, [question, value, normalizedType, lang]);
 
   // Parse AI response and fill the form field
   const parseAndFill = useCallback((aiAnswer: string) => {
@@ -143,7 +145,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
           ? `${cleanText}\n\n✅ Filled: ${typeof parsedValue === 'object' ? JSON.stringify(parsedValue) : String(parsedValue)}`
           : `✅ Filled: ${typeof parsedValue === 'object' ? JSON.stringify(parsedValue) : String(parsedValue)}`;
         setChatMessages(prev => [...prev, { role: 'assistant', content: displayMsg }]);
-        toast.success('AI filled the answer — review and correct if needed');
+        toast.success(lang === 'zh' ? 'AI 已填写答案 — 请检查并修改' : 'AI filled the answer — review and correct if needed');
       } else {
         setChatMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
       }
@@ -164,7 +166,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) { toast.error('Speech recognition not supported'); return; }
     const recognition = new SpeechRecognition();
-    recognition.lang = navigator.language || 'en-US';
+    recognition.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = (event: any) => {
@@ -266,7 +268,7 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
                 {chatLoading && (
                   <div className="flex items-center gap-1 text-stone-400 text-[11px]">
                     <Loader2 size={12} className="animate-spin" />
-                    AI is thinking...
+                    {t('ai.thinking')}
                   </div>
                 )}
               </div>
