@@ -18,6 +18,7 @@ import { type LogicRule, dbRowToLogicRule, logicRuleToDbRow } from '../utils/log
 import { saveTimeWindows, loadTimeWindowsBatch } from '../utils/timeWindowSync';
 import { loadNotificationConfigs, saveNotificationConfigs, type NotificationConfig } from '../utils/notificationConfigSync';
 import ComponentBuilder from './ComponentBuilder';
+import FunctionalElementsTab from './FunctionalElementsTab';
 import NotificationEditor from './NotificationEditor';
 import AIEditChatbot from './AIEditChatbot';
 import SaveTemplateModal from './SaveTemplateModal';
