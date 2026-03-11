@@ -45,38 +45,38 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
   const aiEnabled = layout.ai_assistant_enabled ?? false;
   const aiConfig = layout.ai_assistant_config || { display_mode: 'popup' as const, position: 'bottom-right' as const };
 
-  // Toggle project AI assistant on/off — syncs ai_assistant elements in all tabs
+  // Which tabs currently have an ai_assistant element
+  const tabsWithAi = new Set(
+    layout.tabs.filter(tab => tab.elements.some(e => e.type === 'ai_assistant')).map(t => t.id)
+  );
+
+  // Build a default AI element config
+  const makeAiElement = useCallback((tabElementCount: number): LayoutElement => ({
+    id: crypto.randomUUID(),
+    type: 'ai_assistant',
+    config: {
+      visible: true,
+      title: aiConfig.title || (lang === 'zh' ? 'AI 助手' : 'AI Assistant'),
+      content: aiConfig.description || '',
+      icon: aiConfig.icon || 'MessageCircle',
+      ai_display_mode: aiConfig.display_mode,
+      ai_position: aiConfig.position,
+    },
+    order_index: tabElementCount,
+  }), [aiConfig, lang]);
+
+  // Toggle project AI on/off — add/remove from ALL tabs
   const toggleProjectAi = useCallback(() => {
     const newEnabled = !aiEnabled;
-    let updatedTabs = layout.tabs;
-
-    if (newEnabled) {
-      // Add ai_assistant element to each tab that doesn't already have one
-      updatedTabs = layout.tabs.map(tab => {
-        const hasAi = tab.elements.some(e => e.type === 'ai_assistant');
-        if (hasAi) return tab;
-        const aiElement: LayoutElement = {
-          id: crypto.randomUUID(),
-          type: 'ai_assistant',
-          config: {
-            visible: true,
-            title: aiConfig.title || (lang === 'zh' ? 'AI 助手' : 'AI Assistant'),
-            content: aiConfig.description || '',
-            icon: aiConfig.icon || 'MessageCircle',
-            ai_display_mode: aiConfig.display_mode,
-            ai_position: aiConfig.position,
-          },
-          order_index: tab.elements.length,
-        };
-        return { ...tab, elements: [...tab.elements, aiElement] };
-      });
-    } else {
-      // Remove ai_assistant elements from all tabs
-      updatedTabs = layout.tabs.map(tab => ({
-        ...tab,
-        elements: tab.elements.filter(e => e.type !== 'ai_assistant'),
-      }));
-    }
+    const updatedTabs = newEnabled
+      ? layout.tabs.map(tab => {
+          if (tab.elements.some(e => e.type === 'ai_assistant')) return tab;
+          return { ...tab, elements: [...tab.elements, makeAiElement(tab.elements.length)] };
+        })
+      : layout.tabs.map(tab => ({
+          ...tab,
+          elements: tab.elements.filter(e => e.type !== 'ai_assistant'),
+        }));
 
     onUpdate({
       ...layout,
@@ -84,12 +84,34 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
       ai_assistant_enabled: newEnabled,
       ai_assistant_config: aiConfig,
     });
-  }, [aiEnabled, layout, aiConfig, onUpdate, lang]);
+  }, [aiEnabled, layout, aiConfig, onUpdate, makeAiElement]);
 
-  // Update AI config at project level
+  // Toggle AI assistant on a specific tab
+  const toggleTabAi = useCallback((tabId: string) => {
+    const hasAi = tabsWithAi.has(tabId);
+    const updatedTabs = layout.tabs.map(tab => {
+      if (tab.id !== tabId) return tab;
+      if (hasAi) {
+        // Remove
+        return { ...tab, elements: tab.elements.filter(e => e.type !== 'ai_assistant') };
+      } else {
+        // Add
+        return { ...tab, elements: [...tab.elements, makeAiElement(tab.elements.length)] };
+      }
+    });
+    // If all tabs now have no AI, disable the toggle
+    const anyHasAi = updatedTabs.some(t => t.elements.some(e => e.type === 'ai_assistant'));
+    onUpdate({
+      ...layout,
+      tabs: updatedTabs,
+      ai_assistant_enabled: anyHasAi,
+      ai_assistant_config: aiConfig,
+    });
+  }, [layout, tabsWithAi, aiConfig, onUpdate, makeAiElement]);
+
+  // Update AI config at project level — sync to all ai_assistant elements
   const updateAiConfig = useCallback((updates: Partial<typeof aiConfig>) => {
     const newConfig = { ...aiConfig, ...updates };
-    // Also update config on all existing ai_assistant elements
     const updatedTabs = layout.tabs.map(tab => ({
       ...tab,
       elements: tab.elements.map(e => {
@@ -130,7 +152,7 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
                 {lang === 'zh' ? '项目 AI 助手' : 'Project AI Assistant'}
               </span>
               <p className="text-[10px] text-stone-400">
-                {lang === 'zh' ? '启用后自动添加到所有页面' : 'Auto-added to all tabs when enabled'}
+                {lang === 'zh' ? '为参与者提供项目级 AI 辅助' : 'Project-level AI for participants'}
               </p>
             </div>
           </div>
@@ -143,9 +165,10 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
           </button>
         </div>
 
-        {/* Compact config when enabled */}
+        {/* Config when enabled */}
         {aiEnabled && (
-          <div className="mt-3 pt-3 border-t border-stone-200 space-y-2">
+          <div className="mt-3 pt-3 border-t border-stone-200 space-y-2.5">
+            {/* Display mode */}
             <div className="flex gap-1.5">
               {(['popup', 'card'] as const).map(mode => (
                 <button key={mode} type="button"
@@ -161,6 +184,8 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
                 </button>
               ))}
             </div>
+
+            {/* Position (popup mode only) */}
             {aiConfig.display_mode === 'popup' && (
               <div className="flex gap-1.5">
                 {(['bottom-right', 'bottom-left', 'center'] as const).map(pos => (
@@ -176,6 +201,32 @@ const LayoutTabWrapper: React.FC<LayoutTabWrapperProps> = ({
                 ))}
               </div>
             )}
+
+            {/* Tab selection — which tabs show AI assistant */}
+            <div>
+              <label className="block text-[10px] font-medium text-stone-400 mb-1.5">
+                {lang === 'zh' ? '显示在哪些页面' : 'Show on tabs'}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {layout.tabs.map(tab => {
+                  const hasAi = tabsWithAi.has(tab.id);
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => toggleTabAi(tab.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-medium border transition-colors ${
+                        hasAi
+                          ? 'border-emerald-400 bg-emerald-50 text-emerald-600'
+                          : 'border-stone-200 text-stone-400 hover:border-stone-300'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>
