@@ -6,10 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-// Dev-stage key; hardcoded to bypass stale Supabase secret
-const OPENROUTER_API_KEY = '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'
+// Use Lovable AI Gateway (auto-provisioned key) with same model
+const OPENROUTER_API_KEY = Deno.env.get('LOVABLE_API_KEY') || Deno.env.get('OPENROUTER_API_KEY') || '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'
 const AI_MODEL = 'google/gemini-3-flash-preview'
-const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const AI_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions'
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   const res = await fetch(AI_URL, {
