@@ -267,6 +267,7 @@ function App() {
                     <Route path="/easyresearch/responses" element={<RequireResearcher><ResponsesPage /></RequireResearcher>} />
                     <Route path="/easyresearch/settings" element={<RequireResearcher><ResearcherSettings /></RequireResearcher>} />
                     <Route path="/easyresearch/participants" element={<RequireResearcher><ParticipantsPage /></RequireResearcher>} />
+                    <Route path="/easyresearch/admin" element={<RequireResearcher><AdminDashboard /></RequireResearcher>} />
                     
                     {/* Participant Library */}
                     <Route path="/easyresearch/participant-library" element={<ParticipantLibrary />} />
