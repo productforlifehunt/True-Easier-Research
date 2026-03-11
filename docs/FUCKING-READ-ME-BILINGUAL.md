@@ -542,7 +542,13 @@ Templates are NEVER hardcoded in frontend — always in the database. / 模板�
 
 ## 8. RESEARCH RESPONSE / 研究响应
 
-<!-- CRC STARTS -->
+<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
+<!-- ✅ T1-8.1: Each question type writes to exactly ONE answer column (answer_text/answer_number/answer_array/answer_json) / 每种类型只写入一个响应列 -->
+<!-- ✅ T1-8.2: Layout types never create response rows / 布局类型不创建响应行 -->
+<!-- ✅ T1-8.3: Enrollment creates correctly with participant_type_id and auto-numbered participant_number / 注册正确创建 -->
+<!-- ✅ T1-8.4: All 6 response sub-views render: Summary, Individual, Table, Cross-Tab, Export, Participants / 6个响应子视图正常渲染 -->
+<!-- ✅ T1-8.5: Export produces correct CSV Wide, CSV Long, SPSS, JSON formats with UTF-8 BOM / 导出格式正确 -->
+<!-- ✅ T1-8.6: `submissionRuntime.ts` pipeline executes: Quality Check → Quota Check → Save → Webhook / 提交管道正常执行 -->
 <!-- CRC ENDS -->
 
 This section covers how participant responses are stored, how participants enroll, and how researchers view/analyze/export response data.
