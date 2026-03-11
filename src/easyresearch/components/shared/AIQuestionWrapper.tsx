@@ -27,9 +27,13 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
 }) => {
   const { t } = useI18n();
 
-const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
-  question, value, onResponse, children, aiConfig, compact = false,
-}) => {
+  const MODE_LABELS: { key: AiMode; label: string }[] = [
+    { key: 'all', label: t('ai.mode.all') },
+    { key: 'explain', label: t('ai.mode.explain') },
+    { key: 'improve', label: t('ai.mode.improve') },
+    { key: 'chat', label: t('ai.mode.chat') },
+    { key: 'fill', label: t('ai.mode.fill') },
+  ];
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [showAiSupport, setShowAiSupport] = useState(false);
