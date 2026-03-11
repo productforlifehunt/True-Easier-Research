@@ -43,7 +43,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
   activeQuestionnaireId, compact = false,
   onOpenQuestionnaire, onSelectTimelineDay, renderQuestionnaireCard,
   stopPropagation = false,
-  completedTodoIds = new Set(), onToggleTodo, onOpenAiAssistant,
+  completedTodoIds = new Set(), onToggleTodo, onOpenAiAssistant, onOpenDirectMessage,
 }) => {
   if (el.config.visible === false) return null;
 
