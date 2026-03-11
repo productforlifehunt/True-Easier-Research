@@ -488,7 +488,7 @@ const ParticipantLibrary: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-              <h3 className="text-[15px] font-semibold text-stone-800">Invite to Study</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800">{t('participantLibrary.inviteTitle')}</h3>
               <button onClick={() => setInviteTarget(null)} className="p-1 rounded-lg hover:bg-stone-100 transition-colors">
                 <X size={16} className="text-stone-400" />
               </button>
