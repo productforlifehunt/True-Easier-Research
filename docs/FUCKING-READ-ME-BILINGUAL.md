@@ -228,7 +228,7 @@ All config is stored as flat database columns (NOT JSONB). Each question type on
 
 **Text / 文本:** `cfg_max_length`
 
-**Choice / 选择:** `cfg_allow_multiple`, `cfg_layout`, `cfg_columns_count`, `cfg_yes_label`, `cfg_no_label`, `cfg_columns`
+**Choice / 选择:** `cfg_allow_multiple`, `cfg_yes_label`, `cfg_no_label`, `cfg_columns`
 
 **File / 文件:** `cfg_max_files`, `cfg_max_size_mb`, `cfg_accepted_types`
 
