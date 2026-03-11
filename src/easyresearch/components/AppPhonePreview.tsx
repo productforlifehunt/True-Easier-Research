@@ -445,7 +445,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const notchHeight = 28;
 
   const phoneContent = (
-    <div className="rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
+    <div className="rounded-[2rem] overflow-hidden flex flex-col relative" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
       {/* Notch */}
       <div className="flex-shrink-0 flex items-center justify-center relative" style={{ height: `${notchHeight}px` }}>
         <div className="w-20 h-4 bg-stone-900 rounded-b-2xl absolute top-0" />
@@ -494,6 +494,25 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           renderElements()
         )}
       </div>
+
+      {/* Floating AI Assistant button (popup mode) — positioned at bottom of phone */}
+      {popupAiElement && !activeQuestionnaireId && !editable && (() => {
+        const pos = popupAiElement.config.ai_position || 'bottom-right';
+        const iconName = popupAiElement.config.icon || 'MessageCircle';
+        const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
+        const title = popupAiElement.config.title || popupAiElement.config.button_label || 'AI';
+        const posClass = pos === 'bottom-left' ? 'left-4' : pos === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4';
+        return (
+          <button
+            type="button"
+            onClick={() => onOpenAiAssistant?.()}
+            className={`absolute bottom-4 ${posClass} z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[11px] font-medium`}
+          >
+            <FloatIcon size={14} />
+            {title}
+          </button>
+        );
+      })()}
     </div>
   );
 
