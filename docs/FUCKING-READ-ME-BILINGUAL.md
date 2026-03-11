@@ -901,15 +901,14 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 
 ## 14. AI FEATURES / AI 功能
 
-<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
-<!-- ✅ T1-14.1: AI model is `google/gemini-3.1-flash-lite-preview` via OpenRouter — NOT any other model / AI 模型正确 -->
-<!-- ✅ T1-14.2: Voice input uses Web Speech API (browser-based, zero cost) — no server-side STT / 语音输入用浏览器API -->
-<!-- ✅ T1-14.3: 3-level AI inheritance: Project → Questionnaire → Question, each can override / 三级AI继承正常 -->
-<!-- ✅ T1-14.4: AI fills answers on frontend ONLY — never writes directly to database / AI仅在前端填写 -->
-<!-- ✅ T1-14.5: `ai_assistant` layout element type works in both 'popup' and 'card' display modes / AI助手元素两种显示模式正常 -->
-<!-- ✅ T1-14.6: OpenRouter API key is hardcoded in edge function (NOT from Supabase secrets) to prevent shadow keys / API密钥硬编码防止被覆盖 -->
-<!-- ✅ T1-14.7: Questionnaire-level AI toggles propagate to child questions when batch-apply is enabled / 问卷级AI开关批量传播到问题 -->
-<!-- CRC ENDS -->
+> **CRC — TYPE 1 必查项 / MUST-CHECK ITEMS**
+> - ✅ T1-14.1: AI model is `google/gemini-3.1-flash-lite-preview` via OpenRouter — NOT any other model / AI 模型正确
+> - ✅ T1-14.2: Voice input uses Web Speech API (browser-based, zero cost) — no server-side STT / 语音输入用浏览器API
+> - ✅ T1-14.3: 3-level AI inheritance: Project → Questionnaire → Question, each can override / 三级AI继承正常
+> - ✅ T1-14.4: AI fills answers on frontend ONLY — never writes directly to database / AI仅在前端填写
+> - ✅ T1-14.5: `ai_assistant` layout element type works in both 'popup' and 'card' display modes / AI助手元素两种显示模式正常
+> - ✅ T1-14.6: OpenRouter API key is hardcoded in edge function (NOT from Supabase secrets) to prevent shadow keys / API密钥硬编码防止被覆盖
+> - ✅ T1-14.7: Questionnaire-level AI toggles propagate to child questions when batch-apply is enabled / 问卷级AI开关批量传播到问题
 
 AI features operate at **3 levels**: Project, Questionnaire, and Question. Each level can configure AI behavior independently with inheritance from parent levels.
 
