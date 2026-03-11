@@ -510,7 +510,7 @@ const ParticipantLibrary: React.FC = () => {
 
               {/* Select study */}
               <div>
-                <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Select a study</label>
+                <label className="text-[12px] font-semibold text-stone-600 mb-2 block">{t('participantLibrary.selectStudy')}</label>
                 {loadingProjects ? (
                   <div className="text-[13px] text-stone-400 py-3">Loading your studies...</div>
                 ) : myProjects.length === 0 ? (
