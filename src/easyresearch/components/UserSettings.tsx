@@ -99,7 +99,7 @@ const UserSettings: React.FC = () => {
       toast.success(t('settings.saved'));
     } catch (err: any) {
       console.error('Save error:', err);
-      toast.error('Failed to save');
+      toast.error(t('toast.saveFailed'));
     }
   };
 
