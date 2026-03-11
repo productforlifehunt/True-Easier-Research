@@ -1,1 +1,1 @@
-google/gemini-3.1-flash-lite-preview  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
+google/gemini-3.1-flash-lite-preview — key stored in Supabase secrets (OPENROUTER_API_KEY)

@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-const OPENROUTER_API_KEY = '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'
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || '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'
 const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 
 
