@@ -17,7 +17,12 @@
 
 ## 1. WHAT IS Easier Research / 什么是 Easier Research
 
-<!-- CRC STARTS -->
+<!-- CRC STARTS — TYPE 1 必查项 / MUST-CHECK ITEMS -->
+<!-- ✅ T1-1.1: All routes under `/easyresearch/*` load correctly (no blank screens, no 404) / 所有 `/easyresearch/*` 路由正常加载 -->
+<!-- ✅ T1-1.2: All data reads use `careDb` (schema: care_connector), all auth uses `careAuth` from `external-client.ts` / 数据读取用 careDb，认证用 careAuth -->
+<!-- ✅ T1-1.3: No JSONB config blobs anywhere — all config in flat `cfg_*` columns / 无 JSONB 配置 -->
+<!-- ✅ T1-1.4: No `survey_question` table references in code — only `question` / 代码中无 survey_question 引用 -->
+<!-- ✅ T1-1.5: 3-tier hierarchy intact: research_project → questionnaire → question / 三层架构完整 -->
 <!-- CRC ENDS -->
 
 Easier Research (branded "Easier") is a sub-app living under `/easyresearch/*` within the larger True-Easier-Research platform. It is a bilingual (English + Chinese) research platform for creating surveys, longitudinal studies, and UX research projects.
