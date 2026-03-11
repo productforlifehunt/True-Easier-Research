@@ -1427,7 +1427,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                 {showAddElement && (
                   <div className="p-2 bg-stone-50 rounded-xl border border-stone-200 space-y-2 max-h-[300px] overflow-y-auto">
-                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Layout Elements</p>
+                    <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '布局部件' : 'Layout Elements'}</p>
                     <div className="grid grid-cols-3 gap-1">
                       {LAYOUT_ELEMENTS.map(et => (
                         <button key={et.type} onClick={() => addElement(et.type, { title: lang === 'zh' ? et.label_zh : et.label_en })}
