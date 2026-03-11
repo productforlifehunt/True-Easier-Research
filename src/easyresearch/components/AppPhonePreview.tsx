@@ -29,6 +29,8 @@ interface AppPhonePreviewProps {
   filterParticipantTypeId?: string | null;
   /** Open project-level AI Assistant dialog */
   onOpenAiAssistant?: () => void;
+  /** Project title fallback for header */
+  projectTitle?: string;
 }
 
 const ICON_MAP: Record<string, React.FC<any>> = {
