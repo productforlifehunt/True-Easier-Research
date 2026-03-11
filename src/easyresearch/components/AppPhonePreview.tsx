@@ -380,9 +380,9 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
   // ── Elements list (with or without DnD) ──
   const renderElements = () => {
-    // For the element list, use ALL elements in editable mode (so user can see/drag the ai_assistant),
-    // but in preview mode, exclude popup-mode ai_assistant (rendered as floating)
-    const elementsToRender = editable ? (activeTab?.elements || []) : normalElements;
+    // Always exclude popup-mode AI elements from inline rendering — they render as floating buttons
+    // 始终将弹窗模式的 AI 元素排除在内联渲染之外——它们以浮动按钮形式渲染
+    const elementsToRender = normalElements;
 
     if (!activeTab || elementsToRender.length === 0) {
       return (
