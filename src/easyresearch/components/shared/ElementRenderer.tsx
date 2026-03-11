@@ -561,20 +561,51 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
         </div>
       ) : null;
 
-    case 'ai_assistant':
+    case 'ai_assistant': {
+      const displayMode = el.config.ai_display_mode || 'popup';
+      const iconName = el.config.icon || 'MessageCircle';
+      const IconComp = (allIcons as any)[iconName] || MessageCircle;
+      const title = el.config.title || el.config.button_label || 'AI Assistant';
+      const description = el.config.content || '';
+
+      if (displayMode === 'card') {
+        // Inline card mode / 内嵌卡片模式
+        return (
+          <button
+            type="button"
+            onClick={wrap(() => onOpenAiAssistant?.())}
+            className={`w-full ${pad} rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between cursor-pointer hover:bg-emerald-100/70 transition-colors`}
+          >
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+                <IconComp size={compact ? 14 : 16} className="text-white" />
+              </div>
+              <div className="min-w-0 text-left">
+                <span className={`${txtSm} font-medium text-emerald-700 block`}>{title}</span>
+                {description && <span className={`${txtXs} text-emerald-500 block truncate`}>{description}</span>}
+              </div>
+            </div>
+            <ChevronRight size={compact ? 14 : 16} className="text-emerald-400 shrink-0" />
+          </button>
+        );
+      }
+
+      // Popup/floating mode — render a floating-style button at position / 浮动弹窗模式
+      const position = el.config.ai_position || 'bottom-right';
+      const positionClass = position === 'bottom-left' ? 'justify-start' : position === 'center' ? 'justify-center' : 'justify-end';
       return (
-        <button
-          type="button"
-          onClick={wrap(() => onOpenAiAssistant?.())}
-          className={`w-full ${pad} rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between cursor-pointer hover:bg-emerald-100 transition-colors`}
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles size={compact ? 14 : 16} className="text-emerald-500" />
-            <span className={`${txtSm} font-medium text-emerald-700`}>{el.config.title || 'AI Assistant'}</span>
-          </div>
-          <ChevronRight size={compact ? 14 : 16} className="text-emerald-400" />
-        </button>
+        <div className={`w-full flex ${positionClass} ${pad}`}>
+          <button
+            type="button"
+            onClick={wrap(() => onOpenAiAssistant?.())}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors"
+          >
+            <IconComp size={compact ? 14 : 16} />
+            <span className={`${txtSm} font-medium`}>{title}</span>
+          </button>
+        </div>
       );
+    }
 
     case 'direct_message':
       return (
