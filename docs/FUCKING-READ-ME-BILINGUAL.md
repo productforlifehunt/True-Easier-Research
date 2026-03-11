@@ -930,9 +930,9 @@ Component: `AdminDashboard.tsx`
 
 ## SYSTEM INVENTORY / 系统清单
 
-**Active builder tabs: 9** — Settings, Questionnaires, Components, Logic, Flow, Layout, Preview, Translation, Responses (includes Participants sub-view)
+**Active builder tabs: 12** — Settings, Questionnaires, Components, Elements (Function Elements), Logic, Flow, Notifications, Translation, Layout, Preview, Participants, Responses
 
-**活跃标签页：9个** — 设置、问卷、组件、逻辑、流程、布局、预览、翻译、响应（含参与者子视图）
+**活跃标签页：12个** — 设置、问卷、组件、功能部件、逻辑、流程、通知、翻译、布局、预览、参与者、响应
 
 **Active response sub-views: 6** — Summary, Individual, Table, Cross-Tab, Export, Participants
 
