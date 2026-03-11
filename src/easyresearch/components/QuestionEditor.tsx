@@ -1465,7 +1465,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 <input type="checkbox" checked={localQuestion.question_config?.allow_voice ?? localQuestion.allow_voice ?? false}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_voice: e.target.checked }, allow_voice: e.target.checked })}
                   className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                <Mic size={12} className="text-emerald-500" /> {t('ai.voiceInput')}
+                <Mic size={12} className="text-emerald-500" /> {t('ai.voiceInputLabel')}
               </label>
               <label className="flex items-center gap-2 text-[12px] text-stone-600 cursor-pointer">
                 <input type="checkbox" checked={localQuestion.question_config?.allow_ai_assist ?? localQuestion.allow_ai_assist ?? false}
