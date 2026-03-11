@@ -971,7 +971,7 @@ const SurveyBuilder: React.FC = () => {
           await Promise.all([syncQuestions(newProject.id), syncLogicRules(newProject.id)]);
           const allNotifs = [...projectNotifications, ...questionnaireConfigs.flatMap(qc => qc.notifications || [])];
           await saveNotificationConfigs(newProject.id, allNotifs);
-          toast.success('Project created successfully!');
+          toast.success(t('toast.projectCreated'));
           navigate(`/easyresearch/project/${newProject.id}`);
         }
       }
