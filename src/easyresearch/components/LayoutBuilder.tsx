@@ -1440,7 +1440,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                     {questionnaires.filter(q => q.questionnaire_type === 'survey').length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Questionnaires</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '问卷' : 'Questionnaires'}</p>
                         <div className="space-y-0.5">
                           {questionnaires.filter(q => q.questionnaire_type === 'survey').map(q => (
                             <button key={q.id} onClick={() => addQuestionnaire(q)}
