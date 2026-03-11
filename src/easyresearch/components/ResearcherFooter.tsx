@@ -19,9 +19,9 @@ const ResearcherFooter: React.FC = () => {
             {t('brand.copyright')}
           </p>
           <div className="flex items-center gap-5">
-            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">Terms</a>
-            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">Privacy</a>
-            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">Support</a>
+            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">{t('footer.terms')}</a>
+            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">{t('footer.privacy')}</a>
+            <a href="#" className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors font-light">{t('footer.support')}</a>
           </div>
         </div>
       </div>
