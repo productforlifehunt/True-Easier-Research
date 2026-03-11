@@ -1430,6 +1430,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 frameHeight={selectedDevice.height}
                 filterParticipantTypeId={filterParticipantTypeId}
                 onOpenAiAssistant={() => toast('AI Assistant will open here for participants', { icon: '🤖', duration: 4000 })}
+                projectTitle={projectTitle}
               />
               <p className="text-[11px] text-stone-400 text-center mt-2 font-light">{selectedDevice.label} — {selectedDevice.width}×{selectedDevice.height}</p>
             </div>

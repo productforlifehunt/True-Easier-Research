@@ -20,7 +20,7 @@ interface State extends ErrorBoundaryState {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  private retryTimeoutId: NodeJS.Timeout | null = null
+  private retryTimeoutId: ReturnType<typeof setTimeout> | null = null
 
   constructor(props: Props) {
     super(props)
@@ -71,7 +71,7 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     // In production, this would send to error monitoring service
-    if (process.env.NODE_ENV === 'production' && this.props.enableReporting !== false) {
+    if (import.meta.env.PROD && this.props.enableReporting !== false) {
       // Example: Send to error monitoring service with enhanced details
       // errorReportingService.captureException(error, {
       //   extra: { ...errorInfo, errorDetails },
@@ -180,7 +180,7 @@ class ErrorBoundary extends Component<Props, State> {
               </a>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className="mt-8 text-left">
                 <summary className="cursor-pointer text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                   Error Details (Development Only)

@@ -29,6 +29,8 @@ interface AppPhonePreviewProps {
   filterParticipantTypeId?: string | null;
   /** Open project-level AI Assistant dialog */
   onOpenAiAssistant?: () => void;
+  /** Project title fallback for header */
+  projectTitle?: string;
 }
 
 const ICON_MAP: Record<string, React.FC<any>> = {
@@ -42,7 +44,7 @@ const ICON_MAP: Record<string, React.FC<any>> = {
 const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   layout, questionnaires, participantTypes, studyDuration = 7,
   activeTabId: controlledTabId, onActiveTabChange,
-  highlightedElementId, onElementClick,
+  highlightedElementId, onElementClick, projectTitle,
   editable = false, onRemoveElement, onUpdateElement,
   scale = 1, frameWidth = 375, frameHeight = 680,
   filterParticipantTypeId,
@@ -438,7 +440,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       {layout.show_header && (
         <div className="flex-shrink-0 px-5 py-2.5" style={{ backgroundColor: primaryColor }}>
           <h1 className="text-[15px] font-bold text-white">
-            {layout.header_title || activeTab?.label || 'Home'}
+            {layout.header_title || projectTitle || activeTab?.label || 'Home'}
           </h1>
           {layout.header_description && (
             <p className="text-[11px] text-white/70 mt-0.5 line-clamp-1">{layout.header_description}</p>
