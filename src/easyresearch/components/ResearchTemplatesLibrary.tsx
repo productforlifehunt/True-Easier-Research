@@ -131,32 +131,34 @@ const ResearchTemplatesLibrary: React.FC<Props> = ({ projectId, onApplyTemplate 
     return list;
   }, [search, selectedCategory, sortBy]);
 
+  const { t, lang } = useI18n();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <BookTemplate size={22} className="text-emerald-600" />
         <div>
-          <h2 className="text-lg font-bold text-stone-800">Research Templates Library / 研究模板库</h2>
-          <p className="text-xs text-stone-500">{TEMPLATES.length} professional templates across {CATEGORIES.length - 1} categories / {TEMPLATES.length}个专业模板覆盖{CATEGORIES.length - 1}个类别</p>
+          <h2 className="text-lg font-bold text-stone-800">{t('templates.title')}</h2>
+          <p className="text-xs text-stone-500">{t('templates.subtitle').replace('{count}', String(TEMPLATES.length)).replace('{categories}', String(CATEGORIES.length - 1))}</p>
         </div>
       </div>
 
-      {/* Search & Filters / 搜索和筛选 */}
+      {/* Search & Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search templates... / 搜索模板..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('templates.searchPlaceholder')}
             className="w-full pl-9 pr-3 py-2 text-sm border border-stone-200 rounded-lg focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400" />
         </div>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
           className="px-3 py-2 text-sm border border-stone-200 rounded-lg bg-white">
-          <option value="popularity">Popular / 热门</option>
-          <option value="name">Name / 名称</option>
-          <option value="questions">Questions / 题数</option>
+          <option value="popularity">{t('templates.sortPopular')}</option>
+          <option value="name">{t('templates.sortName')}</option>
+          <option value="questions">{t('templates.sortQuestions')}</option>
         </select>
       </div>
 
-      {/* Category pills / 类别标签 */}
+      {/* Category pills */}
       <div className="flex flex-wrap gap-2">
         {CATEGORIES.map(cat => (
           <button key={cat} onClick={() => setSelectedCategory(cat)}
@@ -166,7 +168,7 @@ const ResearchTemplatesLibrary: React.FC<Props> = ({ projectId, onApplyTemplate 
         ))}
       </div>
 
-      {/* Template grid / 模板网格 */}
+      {/* Template grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map(tmpl => (
           <div key={tmpl.id} className="bg-white rounded-xl border border-stone-200 p-4 hover:shadow-md transition-shadow group">
@@ -177,9 +179,9 @@ const ResearchTemplatesLibrary: React.FC<Props> = ({ projectId, onApplyTemplate 
                 <span className="text-[10px] font-medium">{tmpl.popularity}%</span>
               </div>
             </div>
-            <h3 className="text-sm font-bold text-stone-800 mb-0.5">{tmpl.name}</h3>
-            <p className="text-[10px] text-stone-400 mb-2">{tmpl.nameZh}</p>
-            <p className="text-xs text-stone-500 mb-3 line-clamp-2">{tmpl.description}</p>
+            <h3 className="text-sm font-bold text-stone-800 mb-0.5">{lang === 'zh' ? tmpl.nameZh : tmpl.name}</h3>
+            <p className="text-[10px] text-stone-400 mb-2">{lang === 'zh' ? tmpl.name : tmpl.nameZh}</p>
+            <p className="text-xs text-stone-500 mb-3 line-clamp-2">{lang === 'zh' ? tmpl.descriptionZh : tmpl.description}</p>
             <div className="flex items-center gap-3 text-[10px] text-stone-400 mb-3">
               <span className="flex items-center gap-1"><Users size={10} />{tmpl.questionCount} Q</span>
               <span className="flex items-center gap-1"><Clock size={10} />{tmpl.estimatedTime}</span>
@@ -193,11 +195,11 @@ const ResearchTemplatesLibrary: React.FC<Props> = ({ projectId, onApplyTemplate 
             <div className="flex gap-2">
               <button onClick={() => setPreviewTemplate(tmpl)}
                 className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200 transition-colors">
-                <Eye size={12} /> Preview / 预览
+                <Eye size={12} /> {t('templates.preview')}
               </button>
               <button onClick={() => onApplyTemplate?.(tmpl)}
                 className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
-                <Copy size={12} /> Use / 使用
+                <Copy size={12} /> {t('templates.use')}
               </button>
             </div>
           </div>
@@ -207,31 +209,31 @@ const ResearchTemplatesLibrary: React.FC<Props> = ({ projectId, onApplyTemplate 
       {filtered.length === 0 && (
         <div className="text-center py-12 text-stone-400">
           <BookTemplate size={32} className="mx-auto mb-2 opacity-40" />
-          <p className="text-sm">No templates match your search / 没有匹配的模板</p>
+          <p className="text-sm">{t('templates.noMatch')}</p>
         </div>
       )}
 
-      {/* Preview Modal / 预览弹窗 */}
+      {/* Preview Modal */}
       {previewTemplate && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setPreviewTemplate(null)}>
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-stone-800 mb-1">{previewTemplate.name}</h3>
-            <p className="text-xs text-stone-400 mb-4">{previewTemplate.nameZh}</p>
-            <p className="text-sm text-stone-600 mb-4">{previewTemplate.description}</p>
-            <h4 className="text-xs font-semibold text-stone-500 uppercase mb-2">Sections / 章节</h4>
+            <h3 className="text-lg font-bold text-stone-800 mb-1">{lang === 'zh' ? previewTemplate.nameZh : previewTemplate.name}</h3>
+            <p className="text-xs text-stone-400 mb-4">{lang === 'zh' ? previewTemplate.name : previewTemplate.nameZh}</p>
+            <p className="text-sm text-stone-600 mb-4">{lang === 'zh' ? previewTemplate.descriptionZh : previewTemplate.description}</p>
+            <h4 className="text-xs font-semibold text-stone-500 uppercase mb-2">{t('templates.sections')}</h4>
             <div className="space-y-2 mb-4">
               {previewTemplate.sections.map((s, i) => (
                 <div key={i} className="flex items-center justify-between px-3 py-2 bg-stone-50 rounded-lg">
                   <span className="text-sm text-stone-700">{s.name}</span>
-                  <span className="text-xs text-stone-400">{s.questionCount} questions</span>
+                  <span className="text-xs text-stone-400">{s.questionCount} {t('preview.questions')}</span>
                 </div>
               ))}
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setPreviewTemplate(null)} className="flex-1 px-4 py-2 text-sm bg-stone-100 text-stone-600 rounded-lg">Close / 关闭</button>
+              <button onClick={() => setPreviewTemplate(null)} className="flex-1 px-4 py-2 text-sm bg-stone-100 text-stone-600 rounded-lg">{t('common.close')}</button>
               <button onClick={() => { onApplyTemplate?.(previewTemplate); setPreviewTemplate(null); }}
                 className="flex-1 px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
-                Apply Template / 应用模板
+                {t('templates.applyTemplate')}
               </button>
             </div>
           </div>

@@ -149,12 +149,12 @@ const ParticipantLibrary: React.FC = () => {
   // Open invite modal — load researcher's projects
   const openInviteModal = async (participant: ParticipantProfile) => {
     if (!user) {
-      toast.error('Please sign in to invite participants');
+      toast.error(t('toast.signInToInvite'));
       return;
     }
     setInviteTarget(participant);
     setSelectedProjectId('');
-    setInviteMessage(`Hi ${participant.full_name || 'there'}, I'd like to invite you to participate in my research study.`);
+    setInviteMessage('');
     setLoadingProjects(true);
 
     // Find researcher record for current user
