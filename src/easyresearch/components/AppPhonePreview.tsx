@@ -368,9 +368,23 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
     );
   };
 
+  // ── Separate popup-mode AI elements from normal elements ──
+  const normalElements = activeTab?.elements.filter(e => {
+    if (e.type === 'ai_assistant' && (e.config.ai_display_mode || 'popup') === 'popup') return false;
+    return true;
+  }) || [];
+
+  const popupAiElement = activeTab?.elements.find(
+    e => e.type === 'ai_assistant' && (e.config.ai_display_mode || 'popup') === 'popup' && e.config.visible !== false
+  );
+
   // ── Elements list (with or without DnD) ──
   const renderElements = () => {
-    if (!activeTab || activeTab.elements.length === 0) {
+    // For the element list, use ALL elements in editable mode (so user can see/drag the ai_assistant),
+    // but in preview mode, exclude popup-mode ai_assistant (rendered as floating)
+    const elementsToRender = editable ? (activeTab?.elements || []) : normalElements;
+
+    if (!activeTab || elementsToRender.length === 0) {
       return (
         <div className="py-16 text-center">
           <p className="text-[12px] text-stone-400">No elements on this tab</p>
@@ -379,7 +393,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
       );
     }
 
-    const hasWidths = activeTab.elements.some(e => e.config.width && e.config.width !== '100%');
+    const hasWidths = elementsToRender.some(e => e.config.width && e.config.width !== '100%');
     const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
 
     if (editable) {
@@ -410,7 +424,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
 
     return (
       <div className={containerClass}>
-        {activeTab.elements.map((el, idx) => {
+        {elementsToRender.map((el, idx) => {
           const w = el.config.width || '100%';
           const wrapped = renderElementWrapper(el, idx);
           if (!wrapped) return null;
@@ -431,7 +445,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
   const notchHeight = 28;
 
   const phoneContent = (
-    <div className="rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
+    <div className="rounded-[2rem] overflow-hidden flex flex-col relative" style={{ backgroundColor: bgColor, height: `${frameHeight}px` }}>
       {/* Notch */}
       <div className="flex-shrink-0 flex items-center justify-center relative" style={{ height: `${notchHeight}px` }}>
         <div className="w-20 h-4 bg-stone-900 rounded-b-2xl absolute top-0" />
@@ -480,6 +494,25 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
           renderElements()
         )}
       </div>
+
+      {/* Floating AI Assistant button (popup mode) — positioned at bottom of phone */}
+      {popupAiElement && !activeQuestionnaireId && !editable && (() => {
+        const pos = popupAiElement.config.ai_position || 'bottom-right';
+        const iconName = popupAiElement.config.icon || 'MessageCircle';
+        const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
+        const title = popupAiElement.config.title || popupAiElement.config.button_label || 'AI';
+        const posClass = pos === 'bottom-left' ? 'left-4' : pos === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4';
+        return (
+          <button
+            type="button"
+            onClick={() => onOpenAiAssistant?.()}
+            className={`absolute bottom-4 ${posClass} z-20 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[11px] font-medium`}
+          >
+            <FloatIcon size={14} />
+            {title}
+          </button>
+        );
+      })()}
     </div>
   );
 

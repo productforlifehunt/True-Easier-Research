@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft, MessageCircle, icons as allIcons } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
 import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submissionRuntime';
@@ -382,19 +382,25 @@ const ParticipantAppView: React.FC = () => {
   };
 
   // Memoize tab content to prevent unnecessary re-renders during tab switches
+  // Filter out popup-mode ai_assistant elements (rendered as floating button separately)
   const tabContentMap = useMemo(() => {
     if (!layout) return {};
     const map: Record<string, React.ReactNode> = {};
     for (const tab of layout.tabs) {
-      if (tab.elements.length === 0) {
+      // Filter out popup-mode AI elements — they render as floating buttons
+      const inlineElements = tab.elements.filter(el => {
+        if (el.type === 'ai_assistant' && (el.config.ai_display_mode || 'popup') === 'popup') return false;
+        return true;
+      });
+      if (inlineElements.length === 0) {
         map[tab.id] = <div className="py-16 text-center"><p className="text-[13px] text-stone-400">No content on this tab</p></div>;
         continue;
       }
-      const hasWidths = tab.elements.some(e => e.config.width && e.config.width !== '100%');
+      const hasWidths = inlineElements.some(e => e.config.width && e.config.width !== '100%');
       const containerClass = hasWidths ? 'flex flex-wrap gap-3 py-4' : 'space-y-3 py-4';
       map[tab.id] = (
         <div className={containerClass}>
-          {tab.elements.map(el => {
+          {inlineElements.map(el => {
             const w = el.config.width || '100%';
             const content = renderElement(el);
             if (!content) return null;
@@ -405,6 +411,16 @@ const ParticipantAppView: React.FC = () => {
     }
     return map;
   }, [layout, questionnaires, responses, selectedTimelineDay, completedTodoIds, activeQuestionnaireId]);
+
+  // Find popup-mode AI element on current tab
+  const currentTabPopupAi = useMemo(() => {
+    if (!layout) return null;
+    const tab = layout.tabs.find(t => t.id === currentTabId);
+    if (!tab) return null;
+    return tab.elements.find(e =>
+      e.type === 'ai_assistant' && (e.config.ai_display_mode || 'popup') === 'popup' && e.config.visible !== false
+    ) || null;
+  }, [layout, currentTabId]);
 
   const renderTabContent = () => {
     if (!layout) return null;
@@ -495,7 +511,26 @@ const ParticipantAppView: React.FC = () => {
         )}
       </div>
 
-      {/* Project-level AI Assistant chatbot — hide when inside a questionnaire (it has its own) */}
+      {/* Floating AI Assistant button (popup mode) — driven by ai_assistant element config */}
+      {currentTabPopupAi && !activeQuestionnaireId && !showProjectAiChat && (() => {
+        const pos = currentTabPopupAi.config.ai_position || 'bottom-right';
+        const iconName = currentTabPopupAi.config.icon || 'MessageCircle';
+        const FloatIcon = (allIcons as any)[iconName] || MessageCircle;
+        const title = currentTabPopupAi.config.title || currentTabPopupAi.config.button_label || 'AI';
+        const posClass = pos === 'bottom-left' ? 'left-4' : pos === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-4';
+        return (
+          <button
+            type="button"
+            onClick={() => setShowProjectAiChat(true)}
+            className={`fixed bottom-20 ${posClass} z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors text-[13px] font-medium`}
+          >
+            <FloatIcon size={16} />
+            {title}
+          </button>
+        );
+      })()}
+
+      {/* Project-level AI Assistant chatbot popup — opened from floating button */}
       {showProjectAiChat && !activeQuestionnaireId && (() => {
         const allQuestions = questionnaires.flatMap(q => q.questions || []);
         const projectTitle = project?.title || 'Study';
