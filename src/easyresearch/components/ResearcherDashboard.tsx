@@ -372,7 +372,7 @@ const ResearcherDashboard: React.FC = () => {
                         {project.title}
                       </h3>
                       <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium border ${getStatusColor(project.status)}`}>
-                        {project.status}
+                        {t(`status.${project.status}`) || project.status}
                       </span>
                     </div>
                     <p className="text-[13px] text-stone-400 line-clamp-1 mb-2 font-light">{project.description}</p>
