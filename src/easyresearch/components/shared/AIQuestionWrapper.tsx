@@ -22,13 +22,10 @@ interface AIQuestionWrapperProps {
 
 const EDGE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-survey-support`;
 
-const MODE_LABELS: { key: AiMode; label: string }[] = [
-  { key: 'all', label: 'All My Help' },
-  { key: 'explain', label: 'Explain' },
-  { key: 'improve', label: 'Improve' },
-  { key: 'chat', label: 'Chat' },
-  { key: 'fill', label: 'Fill' },
-];
+const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
+  question, value, onResponse, children, aiConfig, compact = false,
+}) => {
+  const { t } = useI18n();
 
 const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
   question, value, onResponse, children, aiConfig, compact = false,
