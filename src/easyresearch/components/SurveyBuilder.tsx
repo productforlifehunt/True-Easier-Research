@@ -156,7 +156,7 @@ type TabId = 'questionnaires' | 'components' | 'func_elements' | 'logic' | 'flow
 
 const SurveyBuilder: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
