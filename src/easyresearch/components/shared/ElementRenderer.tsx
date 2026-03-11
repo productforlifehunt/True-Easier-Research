@@ -613,7 +613,7 @@ const ElementRenderer: React.FC<ElementRendererProps> = ({
       return (
         <button
           type="button"
-          onClick={wrap(() => onOpenAiAssistant?.())}
+          onClick={wrap(() => onOpenDirectMessage?.())}
           className={`w-full ${pad} rounded-xl border border-blue-200 bg-blue-50/50 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors shadow-sm`}
         >
           <div className="flex items-center gap-2">
