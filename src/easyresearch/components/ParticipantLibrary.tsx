@@ -563,7 +563,7 @@ const ParticipantLibrary: React.FC = () => {
                 onClick={() => setInviteTarget(null)}
                 className="px-4 py-2 text-[13px] font-medium text-stone-500 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={sendInvitation}
