@@ -1455,7 +1455,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
                     {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).length > 0 && (
                       <>
-                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">Forms & Components</p>
+                        <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">{lang === 'zh' ? '表单与组件' : 'Forms & Components'}</p>
                         <div className="space-y-0.5">
                           {questionnaires.filter(q => ['consent', 'screening', 'profile', 'help', 'custom', 'onboarding'].includes(q.questionnaire_type)).map(q => {
                             const TypeIcon = q.questionnaire_type === 'consent' ? Shield : q.questionnaire_type === 'screening' ? ClipboardCheck : q.questionnaire_type === 'profile' ? User : q.questionnaire_type === 'help' ? HelpCircle : q.questionnaire_type === 'onboarding' ? Layers : Plus;
