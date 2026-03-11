@@ -740,12 +740,15 @@ These tabs are visible in the project editor:
 | 1 | `settings` | Settings / 设置 | `SurveySettings.tsx` | Project config: title, methodology, schedule, participant types, incentives, sharing link / 项目配置 |
 | 2 | `questionnaires` | Questionnaires / 问卷 | `QuestionnaireList.tsx` | Add/edit questionnaires and their questions, drag-drop reorder, per-question config / 问卷和问题编辑 |
 | 3 | `components` | Components / 组件 | `ComponentBuilder.tsx` | Non-survey instruments: consent, screening, profile, help, custom. Same questionnaire schema. / 非调查工具 |
-| 4 | `logic` | Logic / 逻辑 | `SurveyLogic.tsx` | Skip/show/hide rules per questionnaire. Visual rule cards. / 跳转规则 |
-| 5 | `flow` | Flow / 流程 | `SurveyFlowVisualizer.tsx` | Visual node diagram of survey structure with logic arrows / 调查流程图 |
-| 6 | `layout` | Layout / 布局 | `LayoutBuilder.tsx` (via `LayoutTabWrapper.tsx`) | Participant app UI: tabs, elements, popups, public pages / 参与者应用UI |
-| 7 | `preview` | Preview / 预览 | `SurveyPreview.tsx` | Live phone preview of participant experience / 实时预览 |
+| 4 | `func_elements` | Elements / 功能部件 | `FunctionalElementsTab.tsx` | View/customize/clone function elements (ecogram, progress, timeline, etc.), manage custom paid elements / 查看、自定义、克隆功能部件，管理定制部件 |
+| 5 | `logic` | Logic / 逻辑 | `SurveyLogic.tsx` | Skip/show/hide rules per questionnaire. Visual rule cards. / 跳转规则 |
+| 6 | `flow` | Flow / 流程 | `SurveyFlowVisualizer.tsx` | Visual node diagram of survey structure with logic arrows / 调查流程图 |
+| 7 | `notifications` | Notifications / 通知 | `NotificationEditor.tsx` | Push/email notification configuration / 通知配置 |
 | 8 | `translations` | Translation / 翻译 | `SurveyTranslationManager.tsx` | Side-by-side translation editor, AI auto-translate, 14 locales / 翻译编辑器 |
-| 9 | `responses` | Responses / 回复 | `ProjectResponsesTab.tsx` | Analysis hub with 6 sub-views (see Section 8.4) / 分析中心 |
+| 9 | `layout` | Layout / 布局 | `LayoutBuilder.tsx` (via `LayoutTabWrapper.tsx`) | Participant app UI: tabs, elements, popups, public pages / 参与者应用UI |
+| 10 | `preview` | Preview / 预览 | `SurveyPreview.tsx` | Live phone preview of participant experience / 实时预览 |
+| 11 | `participants` | Participants / 参与者 | `ProjectParticipantsTab.tsx` | Participant enrollment and management / 参与者注册管理 |
+| 12 | `responses` | Responses / 回复 | `ProjectResponsesTab.tsx` | Analysis hub with 6 sub-views (see Section 8.4) / 分析中心 |
 
 The Responses tab only shows after project save (needs `projectId`). It displays live response count in the tab label.
 
