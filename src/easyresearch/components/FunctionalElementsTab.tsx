@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Link2, BarChart3, Calendar, MessageCircle, Copy, Edit3, Lock, Mail, Sparkles, icons } from 'lucide-react';
+import { Plus, Link2, BarChart3, Calendar, MessageCircle, Copy, Edit3, Lock, Mail, Sparkles, icons, ChevronDown, ChevronUp, Save, X, Eye } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
@@ -14,6 +14,9 @@ const PUBLIC_FUNCTION_ELEMENTS = [
   { type: 'direct_message', label_en: 'Message Researcher', label_zh: '联系研究者', icon: 'MessageCircle', desc_en: 'Direct message with researcher', desc_zh: '与研究者直接消息', customizable: false },
   { type: 'ai_assistant', label_en: 'AI Assistant', label_zh: 'AI 助手', icon: 'MessageCircle', desc_en: 'Project-level AI chatbot', desc_zh: '项目级AI聊天机器人', customizable: false },
 ];
+
+// Available icons for picker / 可选图标
+const ICON_OPTIONS = ['Link2', 'BarChart3', 'Calendar', 'MessageCircle', 'Sparkles', 'Eye', 'Edit3', 'Star', 'Heart', 'Zap', 'Target', 'Award', 'BookOpen', 'Clock', 'Users', 'Bell', 'Shield', 'Activity'];
 
 interface UserFunctionElement {
   id: string;
@@ -49,6 +52,10 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
   const [customElements, setCustomElements] = useState<CustomFunctionElement[]>([]);
   const [showCloneForm, setShowCloneForm] = useState<string | null>(null);
   const [cloneName, setCloneName] = useState({ en: '', zh: '' });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<UserFunctionElement>>({});
+  const [showIconPicker, setShowIconPicker] = useState(false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -84,6 +91,35 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
     setShowCloneForm(null);
     setCloneName({ en: '', zh: '' });
     fetchElements();
+  };
+
+  const startEdit = (el: UserFunctionElement) => {
+    setEditingId(el.id);
+    setEditForm({ ...el });
+    setShowIconPicker(false);
+  };
+
+  const saveEdit = async () => {
+    if (!editingId || !editForm) return;
+    const { error } = await (supabase as any).from('user_function_element').update({
+      name_en: editForm.name_en,
+      name_zh: editForm.name_zh,
+      description_en: editForm.description_en,
+      description_zh: editForm.description_zh,
+      icon: editForm.icon,
+      element_config: editForm.element_config,
+    }).eq('id', editingId);
+    if (error) { toast.error('Failed: ' + error.message); return; }
+    toast.success(lang === 'zh' ? '已保存' : 'Saved');
+    setEditingId(null);
+    setEditForm({});
+    fetchElements();
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+    setShowIconPicker(false);
   };
 
   const deleteUserElement = async (id: string) => {
@@ -177,20 +213,170 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
           </div>
           <div className="divide-y divide-stone-100">
             {userElements.map(el => (
-              <div key={el.id} className="px-5 py-3.5 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-                  {getLucideIcon(el.icon, 16, 'text-blue-500')}
+              <div key={el.id}>
+                {/* Row / 行 */}
+                <div className="px-5 py-3.5 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                    {getLucideIcon(el.icon, 16, 'text-blue-500')}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[13px] font-semibold text-stone-800">{lang === 'zh' ? el.name_zh : el.name_en}</span>
+                    <p className="text-[11px] text-stone-400">
+                      {lang === 'zh' ? `基于: ${PUBLIC_FUNCTION_ELEMENTS.find(p => p.type === el.base_type)?.label_zh || el.base_type}` : `Based on: ${PUBLIC_FUNCTION_ELEMENTS.find(p => p.type === el.base_type)?.label_en || el.base_type}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {/* Preview toggle / 预览 */}
+                    <button onClick={() => setPreviewId(previewId === el.id ? null : el.id)}
+                      className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-400 hover:text-blue-600 transition-colors"
+                      title={lang === 'zh' ? '预览' : 'Preview'}>
+                      <Eye size={14} />
+                    </button>
+                    {/* Edit / 编辑 */}
+                    <button onClick={() => editingId === el.id ? cancelEdit() : startEdit(el)}
+                      className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-400 hover:text-blue-600 transition-colors"
+                      title={lang === 'zh' ? '编辑' : 'Edit'}>
+                      <Edit3 size={14} />
+                    </button>
+                    {/* Delete / 删除 */}
+                    <button onClick={() => deleteUserElement(el.id)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-500 transition-colors"
+                      title={lang === 'zh' ? '删除' : 'Delete'}>
+                      <Plus size={14} className="rotate-45" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-[13px] font-semibold text-stone-800">{lang === 'zh' ? el.name_zh : el.name_en}</span>
-                  <p className="text-[11px] text-stone-400">
-                    {lang === 'zh' ? `基于: ${PUBLIC_FUNCTION_ELEMENTS.find(p => p.type === el.base_type)?.label_zh || el.base_type}` : `Based on: ${PUBLIC_FUNCTION_ELEMENTS.find(p => p.type === el.base_type)?.label_en || el.base_type}`}
-                  </p>
-                </div>
-                <button onClick={() => deleteUserElement(el.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-500 transition-colors">
-                  <Plus size={14} className="rotate-45" />
-                </button>
+
+                {/* Preview panel / 预览面板 */}
+                {previewId === el.id && editingId !== el.id && (
+                  <div className="px-5 pb-4">
+                    <div className="bg-stone-50 rounded-xl border border-stone-200 p-4 space-y-2">
+                      <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider mb-2">
+                        {lang === 'zh' ? '预览' : 'Preview'}
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-[12px]">
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '英文名称' : 'English Name'}:</span>
+                          <p className="font-medium text-stone-700">{el.name_en}</p>
+                        </div>
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '中文名称' : 'Chinese Name'}:</span>
+                          <p className="font-medium text-stone-700">{el.name_zh}</p>
+                        </div>
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '英文描述' : 'English Desc'}:</span>
+                          <p className="text-stone-600">{el.description_en || '—'}</p>
+                        </div>
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '中文描述' : 'Chinese Desc'}:</span>
+                          <p className="text-stone-600">{el.description_zh || '—'}</p>
+                        </div>
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '图标' : 'Icon'}:</span>
+                          <div className="flex items-center gap-1 mt-0.5">{getLucideIcon(el.icon, 14, 'text-blue-500')} <span className="text-stone-600">{el.icon}</span></div>
+                        </div>
+                        <div>
+                          <span className="text-stone-400">{lang === 'zh' ? '基础类型' : 'Base Type'}:</span>
+                          <p className="text-stone-600">{el.base_type}</p>
+                        </div>
+                      </div>
+                      {el.element_config && Object.keys(el.element_config).length > 0 && (
+                        <div className="mt-2">
+                          <span className="text-stone-400 text-[11px]">{lang === 'zh' ? '配置' : 'Config'}:</span>
+                          <pre className="text-[10px] bg-white rounded-lg p-2 border border-stone-200 mt-1 overflow-x-auto text-stone-600">
+                            {JSON.stringify(el.element_config, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Edit panel / 编辑面板 */}
+                {editingId === el.id && (
+                  <div className="px-5 pb-4">
+                    <div className="bg-blue-50/50 rounded-xl border border-blue-200 p-4 space-y-3">
+                      <div className="text-[11px] font-semibold text-blue-600 uppercase tracking-wider">
+                        {lang === 'zh' ? '编辑自定义部件' : 'Edit Custom Element'}
+                      </div>
+
+                      {/* Names / 名称 */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '英文名称' : 'English Name'}</label>
+                          <input value={editForm.name_en || ''} onChange={e => setEditForm({ ...editForm, name_en: e.target.value })}
+                            className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] focus:border-blue-300 focus:ring-1 focus:ring-blue-200 outline-none" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '中文名称' : 'Chinese Name'}</label>
+                          <input value={editForm.name_zh || ''} onChange={e => setEditForm({ ...editForm, name_zh: e.target.value })}
+                            className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] focus:border-blue-300 focus:ring-1 focus:ring-blue-200 outline-none" />
+                        </div>
+                      </div>
+
+                      {/* Descriptions / 描述 */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '英文描述' : 'English Description'}</label>
+                          <textarea value={editForm.description_en || ''} onChange={e => setEditForm({ ...editForm, description_en: e.target.value })}
+                            rows={2} className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] focus:border-blue-300 focus:ring-1 focus:ring-blue-200 outline-none resize-none" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '中文描述' : 'Chinese Description'}</label>
+                          <textarea value={editForm.description_zh || ''} onChange={e => setEditForm({ ...editForm, description_zh: e.target.value })}
+                            rows={2} className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[12px] focus:border-blue-300 focus:ring-1 focus:ring-blue-200 outline-none resize-none" />
+                        </div>
+                      </div>
+
+                      {/* Icon picker / 图标选择 */}
+                      <div>
+                        <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '图标' : 'Icon'}</label>
+                        <div className="mt-1 flex items-center gap-2">
+                          <button onClick={() => setShowIconPicker(!showIconPicker)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-[12px] hover:bg-stone-50 transition-colors">
+                            {getLucideIcon(editForm.icon || 'Sparkles', 14, 'text-blue-500')}
+                            <span className="text-stone-600">{editForm.icon}</span>
+                            {showIconPicker ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+                          </button>
+                        </div>
+                        {showIconPicker && (
+                          <div className="mt-2 grid grid-cols-9 gap-1.5 p-2 bg-white rounded-lg border border-stone-200">
+                            {ICON_OPTIONS.map(iconName => (
+                              <button key={iconName} onClick={() => { setEditForm({ ...editForm, icon: iconName }); setShowIconPicker(false); }}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${editForm.icon === iconName ? 'bg-blue-100 ring-1 ring-blue-300' : 'hover:bg-stone-100'}`}>
+                                {getLucideIcon(iconName, 14, editForm.icon === iconName ? 'text-blue-600' : 'text-stone-500')}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Config JSON editor / 配置JSON编辑器 */}
+                      <div>
+                        <label className="text-[10px] text-stone-500 font-medium">{lang === 'zh' ? '配置 (JSON)' : 'Config (JSON)'}</label>
+                        <textarea
+                          value={JSON.stringify(editForm.element_config || {}, null, 2)}
+                          onChange={e => {
+                            try { setEditForm({ ...editForm, element_config: JSON.parse(e.target.value) }); } catch {}
+                          }}
+                          rows={4}
+                          className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-stone-200 text-[11px] font-mono focus:border-blue-300 focus:ring-1 focus:ring-blue-200 outline-none resize-none" />
+                      </div>
+
+                      {/* Actions / 操作 */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button onClick={saveEdit}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-[11px] font-medium hover:bg-blue-600 transition-colors">
+                          <Save size={12} /> {lang === 'zh' ? '保存' : 'Save'}
+                        </button>
+                        <button onClick={cancelEdit}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-stone-100 text-stone-600 rounded-lg text-[11px] font-medium hover:bg-stone-200 transition-colors">
+                          <X size={12} /> {lang === 'zh' ? '取消' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
