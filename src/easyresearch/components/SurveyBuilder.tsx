@@ -1146,6 +1146,11 @@ const SurveyBuilder: React.FC = () => {
           />
         )}
 
+        {/* Functional Elements Tab / 功能部件标签 */}
+        {activeTab === 'func_elements' && (
+          <FunctionalElementsTab projectId={projectId} />
+        )}
+
         {/* Participants Tab */}
         {activeTab === 'participants' && projectId && (
           <ProjectParticipantsTab projectId={projectId} />
