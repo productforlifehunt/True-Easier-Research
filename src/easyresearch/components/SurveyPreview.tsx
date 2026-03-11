@@ -166,6 +166,7 @@ const SurveyPreview: React.FC<SurveyPreviewProps> = ({
             frameWidth={selectedDevice.width}
             frameHeight={selectedDevice.height}
             filterParticipantTypeId={filterParticipantTypeId}
+            projectTitle={projectTitle}
           />
         </div>
 
