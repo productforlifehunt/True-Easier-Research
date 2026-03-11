@@ -20,7 +20,7 @@ interface State extends ErrorBoundaryState {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  private retryTimeoutId: NodeJS.Timeout | null = null
+  private retryTimeoutId: ReturnType<typeof setTimeout> | null = null
 
   constructor(props: Props) {
     super(props)
