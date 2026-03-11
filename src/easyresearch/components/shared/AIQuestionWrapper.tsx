@@ -225,13 +225,13 @@ const AIQuestionWrapper: React.FC<AIQuestionWrapperProps> = ({
           {showAiSupport && (
             <div className="bg-white">
               {/* 5 Mode Buttons */}
-              <div className="flex flex-wrap gap-2 p-3 border-b border-stone-100 bg-stone-50">
+              <div className="flex gap-1.5 p-2.5 border-b border-stone-100 bg-stone-50 overflow-x-auto">
                 {MODE_LABELS.map(({ key, label }) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => setAiMode(key)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${
+                    className={`px-3 py-1 rounded-md text-[11px] font-medium transition-all whitespace-nowrap shrink-0 ${
                       aiMode === key
                         ? 'bg-emerald-500 text-white shadow-sm'
                         : 'bg-white text-stone-600 border border-stone-200 hover:border-emerald-300 hover:text-emerald-600'
