@@ -880,6 +880,52 @@ Auto-saved to flat tables with 1.5s debounce via `saveLayoutToDb()`. Loaded via 
 
 通过 `saveLayoutToDb()` 1.5秒防抖自动保存，通过 `loadLayoutFromDb()` 加载，均在 `layoutSync.ts` 中。一切都是扁平列或关系表——无JSONB。
 
+### 12.6 Function Elements / 功能部件
+
+Function elements are interactive app components available in the Layout Builder. They are divided into three categories:
+
+功能部件是布局构建器中可用的交互式应用组件，分为三类：
+
+**Standard (Public) / 标准（公共）：** `ecogram`, `progress`, `timeline`, `start_date_picker`, `direct_message`, `ai_assistant`. Always available. Some can be customized (cloned with custom name/config), some cannot.
+
+**标准（公共）：** 生态图、进度、时间线、设置开始日期、联系研究者、AI助手。始终可用。部分可自定义（以自定义名称/配置克隆），部分不可。
+
+- Customizable: `ecogram`, `progress`, `timeline` — user can clone and rename / 可自定义的用户可以克隆并重命名
+- Not customizable: `start_date_picker`, `direct_message`, `ai_assistant` — shown grayed out / 不可自定义的显示为灰色
+
+**User-Customized / 用户自定义：** Stored in `care_connector.user_function_element`. Created when user clones a standard element with a custom name. Per-user, per-project.
+
+**用户自定义：** 存储在 `care_connector.user_function_element`。用户克隆标准部件并自定义名称时创建。按用户、按项目。
+
+- `id`, `user_id`, `project_id`, `base_type`, `name_en`, `name_zh`, `description_en`, `description_zh`, `icon`, `element_config`
+
+**Private/Custom (Paid) / 定制部件（付费）：** Stored in `care_connector.custom_function_element`. Created by admin for specific users. Bespoke elements for paid customization.
+
+**定制部件（付费）：** 存储在 `care_connector.custom_function_element`。由管理员为特定用户创建。为付费定制的专属部件。
+
+- `id`, `user_id`, `name_en`, `name_zh`, `description_en`, `description_zh`, `icon`, `element_config`, `is_public`
+- Junction table `care_connector.custom_element_user` — allows one element to be assigned to multiple users / 联接表允许一个部件分配给多个用户
+- `element_id`, `user_id`, `granted_at`
+- RLS: users see own + public elements + elements assigned via junction table / 用户可见自有、公共和通过联接表分配的部件
+
+In the Layout Builder element picker, these three sections appear in order: Standard Function Elements → User-Customized → Custom Elements (with "Contact for Custom Build" CTA).
+
+在布局构建器元素选择器中，这三个部分按序显示：标准功能部件 → 用户自定义 → 定制部件（含"联系我们定制"按钮）。
+
+### 12.7 Admin Dashboard / 管理员面板
+
+Route: `/easyresearch/admin` — only accessible to `guowei.jiang.work@gmail.com`. Protected by email check in component + RequireResearcher wrapper.
+
+路由：`/easyresearch/admin` — 仅 `guowei.jiang.work@gmail.com` 可访问。通过组件中的邮箱检查和 RequireResearcher 包装器保护。
+
+Features / 功能：
+- List all `custom_function_element` entries / 列出所有定制部件
+- Create, edit, delete custom elements / 创建、编辑、删除定制部件
+- Assign elements to users via email lookup (through `researcher` table) / 通过邮箱查找（通过 researcher 表）将部件分配给用户
+- View/remove user assignments from `custom_element_user` junction table / 查看/移除联接表中的用户分配
+
+Component: `AdminDashboard.tsx`
+
 ---
 
 ## SYSTEM INVENTORY / 系统清单
