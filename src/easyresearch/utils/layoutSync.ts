@@ -256,6 +256,10 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
     elements: (elementsByTab.get(tab.id) || []).map(toLayoutElement),
   }));
 
+  // Infer ai_assistant_enabled from presence of ai_assistant elements
+  const hasAiAssistant = tabs.some(t => t.elements.some(e => e.type === 'ai_assistant'));
+  const firstAiEl = tabs.flatMap(t => t.elements).find(e => e.type === 'ai_assistant');
+
   return {
     tabs,
     bottom_nav: tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id })),
@@ -267,6 +271,14 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
       background_color: proj?.layout_theme_background_color || '#f5f5f4',
       card_style: (proj?.layout_theme_card_style as any) || 'elevated',
     },
+    ai_assistant_enabled: hasAiAssistant,
+    ai_assistant_config: hasAiAssistant && firstAiEl ? {
+      display_mode: firstAiEl.config.ai_display_mode || 'popup',
+      position: firstAiEl.config.ai_position || 'bottom-right',
+      icon: firstAiEl.config.icon,
+      title: firstAiEl.config.title,
+      description: firstAiEl.config.content,
+    } : undefined,
   };
 }
 
