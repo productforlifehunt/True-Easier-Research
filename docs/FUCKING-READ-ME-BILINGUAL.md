@@ -922,8 +922,8 @@ Each question inherits AI settings from its parent questionnaire but can overrid
 - 当参与者请求时，AI 可以批量填写所有问题
 - Voice input uses Web Speech API (free, no API cost)
 - 语音输入使用 Web Speech API（免费，无 API 费用）
-- AI chat uses OpenRouter API: model `openai/gpt-oss-120b`
-- AI 聊天使用 OpenRouter API：模型 `openai/gpt-oss-120b`
+- AI chat uses OpenRouter API: model `google/gemini-3.1-flash-lite-preview`
+- AI 聊天使用 OpenRouter API：模型 `google/gemini-3.1-flash-lite-preview`
 
 ### 14.6 AI UI Integration / AI 界面集成
 
