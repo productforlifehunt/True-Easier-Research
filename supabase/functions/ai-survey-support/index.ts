@@ -14,6 +14,7 @@ const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
 console.log('ACTIVE KEY PREFIX:', OPENROUTER_API_KEY.substring(0, 30), '...', OPENROUTER_API_KEY.substring(OPENROUTER_API_KEY.length - 10))
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
+  console.log('callAI: model=', AI_MODEL, 'key_end=', OPENROUTER_API_KEY.slice(-10))
   const res = await fetch(AI_URL, {
     method: 'POST',
     headers: {
@@ -26,8 +27,9 @@ async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   })
   if (!res.ok) {
     const errorText = await res.text()
-    console.error('OpenRouter error:', errorText)
-    throw new Error(`AI API failed: ${res.status}`)
+    console.error('OpenRouter error status:', res.status, 'headers:', JSON.stringify(Object.fromEntries(res.headers.entries())))
+    console.error('OpenRouter error body:', errorText)
+    throw new Error(`AI API failed: ${res.status} - ${errorText}`)
   }
   const data = await res.json()
   return data.choices?.[0]?.message?.content?.trim() || ''
