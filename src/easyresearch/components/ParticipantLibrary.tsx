@@ -501,7 +501,7 @@ const ParticipantLibrary: React.FC = () => {
                   <span className="text-[13px] font-semibold text-white">{(inviteTarget.full_name?.[0] || '?').toUpperCase()}</span>
                 </div>
                 <div>
-                  <p className="text-[14px] font-medium text-stone-800">{inviteTarget.full_name || 'Anonymous'}</p>
+                  <p className="text-[14px] font-medium text-stone-800">{inviteTarget.full_name || t('participantLibrary.anonymous')}</p>
                   <p className="text-[12px] text-stone-400">
                     {[inviteTarget.occupation, inviteTarget.country].filter(Boolean).join(' · ')}
                   </p>
