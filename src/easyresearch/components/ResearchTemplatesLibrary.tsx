@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BookTemplate, Search, Star, Clock, Users, Copy, Eye, Filter, Sparkles } from 'lucide-react';
-
+import { useI18n } from '../hooks/useI18n';
 interface Template {
   id: string;
   name: string;
