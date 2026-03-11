@@ -545,7 +545,7 @@ const ParticipantLibrary: React.FC = () => {
               {/* Message */}
               {myProjects.length > 0 && (
                 <div>
-                  <label className="text-[12px] font-semibold text-stone-600 mb-2 block">Invitation message</label>
+                  <label className="text-[12px] font-semibold text-stone-600 mb-2 block">{t('participantLibrary.invitationMessage')}</label>
                   <textarea
                     value={inviteMessage}
                     onChange={e => setInviteMessage(e.target.value)}
