@@ -7,6 +7,7 @@ import {
   Layers, FileText, Package, Globe, Lock
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../hooks/useI18n';
 import toast from 'react-hot-toast';
 import {
   fetchProjectTemplates,
@@ -53,9 +54,20 @@ const CATEGORY_COLORS: Record<string, string> = {
   custom: 'from-stone-400 to-stone-500',
 };
 
+const CATEGORY_KEYS: Record<string, string> = {
+  all: 'templates.all',
+  academic: 'templates.academic',
+  healthcare: 'templates.healthcare',
+  ux: 'templates.ux',
+  market: 'templates.market',
+  hr: 'templates.hr',
+  customer: 'templates.customer',
+};
+
 const TemplateLibrary: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedType, setSelectedType] = useState<'all' | TemplateType>('all');
@@ -65,22 +77,22 @@ const TemplateLibrary: React.FC = () => {
   const [templates, setTemplates] = useState<DisplayTemplate[]>([]);
 
   const categories = [
-    { id: 'all', name: 'All', icon: Filter },
-    { id: 'academic', name: 'Academic', icon: GraduationCap },
-    { id: 'healthcare', name: 'Healthcare', icon: Stethoscope },
-    { id: 'ux', name: 'UX', icon: Palette },
-    { id: 'market', name: 'Market', icon: ShoppingBag },
-    { id: 'hr', name: 'HR', icon: Building2 },
-    { id: 'customer', name: 'Customer', icon: MessageSquare },
+    { id: 'all', icon: Filter },
+    { id: 'academic', icon: GraduationCap },
+    { id: 'healthcare', icon: Stethoscope },
+    { id: 'ux', icon: Palette },
+    { id: 'market', icon: ShoppingBag },
+    { id: 'hr', icon: Building2 },
+    { id: 'customer', icon: MessageSquare },
   ];
 
-  const typeFilters: { id: 'all' | TemplateType; name: string; icon: any; description: string }[] = [
-    { id: 'all', name: 'All Types', icon: Layers, description: 'Show all templates' },
-    { id: 'research', name: 'Research Project', icon: Package, description: 'Complete project with questionnaires, settings & layout' },
-    { id: 'questionnaire', name: 'Questionnaire', icon: FileText, description: 'Single questionnaire to import into an existing project' },
+  const typeFilters: { id: 'all' | TemplateType; nameKey: string; icon: any; descKey: string }[] = [
+    { id: 'all', nameKey: 'templates.allTypes', icon: Layers, descKey: 'templates.showAll' },
+    { id: 'research', nameKey: 'templates.researchProject', icon: Package, descKey: 'templates.researchProjectDesc' },
+    { id: 'questionnaire', nameKey: 'templates.questionnaire', icon: FileText, descKey: 'templates.questionnaireDesc' },
   ];
 
-  // Load templates from DB
+  // Load templates from DB / 从数据库加载模板
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -128,19 +140,19 @@ const TemplateLibrary: React.FC = () => {
     load();
   }, [user?.id]);
 
-  const filteredTemplates = templates.filter(t => {
+  const filteredTemplates = templates.filter(tmpl => {
     const matchesSearch = !searchQuery ||
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
-    const matchesType = selectedType === 'all' || t.templateType === selectedType;
+      tmpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tmpl.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tmpl.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = selectedCategory === 'all' || tmpl.category === selectedCategory;
+    const matchesType = selectedType === 'all' || tmpl.templateType === selectedType;
     return matchesSearch && matchesCategory && matchesType;
   });
 
   const handleUseTemplate = async (template: DisplayTemplate) => {
     if (!user) {
-      toast.success('Please sign in to use this template.');
+      toast.success(t('dashboard.signInToStart'));
       navigate('/easyresearch/auth?redirectTo=/easyresearch/templates&redirect=researcher');
       return;
     }
@@ -156,8 +168,6 @@ const TemplateLibrary: React.FC = () => {
           navigate(`/easyresearch/project/${result.projectId}`);
         }
       } else {
-        // For questionnaire templates, navigate to create a new project first
-        // then import the questionnaire template
         toast.success('Create a project first, then import this questionnaire from the template marketplace.');
         navigate('/easyresearch/create-survey');
       }
@@ -168,8 +178,8 @@ const TemplateLibrary: React.FC = () => {
     }
   };
 
-  const researchCount = filteredTemplates.filter(t => t.templateType === 'research').length;
-  const questionnaireCount = filteredTemplates.filter(t => t.templateType === 'questionnaire').length;
+  const researchCount = filteredTemplates.filter(tmpl => tmpl.templateType === 'research').length;
+  const questionnaireCount = filteredTemplates.filter(tmpl => tmpl.templateType === 'questionnaire').length;
 
   if (loading) {
     return (
@@ -184,15 +194,15 @@ const TemplateLibrary: React.FC = () => {
       {/* Hero */}
       <div className="bg-white" style={{ borderBottom: '1px solid rgba(16,185,129,0.08)' }}>
         <div className="max-w-5xl mx-auto px-6 py-12">
-          <h1 className="text-3xl font-bold tracking-tight text-stone-800 mb-3">Templates</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-stone-800 mb-3">{t('templates.title')}</h1>
           <p className="text-[15px] text-stone-400 mb-6 max-w-lg font-light">
-            Start with a professionally designed template and customize it.
+            {t('templates.subtitle')}
           </p>
           <div className="relative max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
             <input
               type="text"
-              placeholder="Search templates..."
+              placeholder={t('templates.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl text-[14px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
@@ -202,7 +212,7 @@ const TemplateLibrary: React.FC = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Type filter pills */}
+        {/* Type filter pills / 类型筛选 */}
         <div className="flex gap-2 mb-5">
           {typeFilters.map(tf => (
             <button
@@ -215,12 +225,12 @@ const TemplateLibrary: React.FC = () => {
               }`}
             >
               <tf.icon size={15} />
-              <span>{tf.name}</span>
+              <span>{t(tf.nameKey)}</span>
             </button>
           ))}
         </div>
 
-        {/* Category pills */}
+        {/* Category pills / 分类筛选 */}
         <div className="flex gap-1.5 mb-8 overflow-x-auto pb-1">
           {categories.map(cat => (
             <button
@@ -233,58 +243,60 @@ const TemplateLibrary: React.FC = () => {
               }`}
             >
               <cat.icon size={14} />
-              {cat.name}
+              {t(CATEGORY_KEYS[cat.id] || `templates.${cat.id}`)}
             </button>
           ))}
         </div>
 
         <p className="text-[13px] text-stone-300 mb-5">
-          {filteredTemplates.length} templates
+          {filteredTemplates.length} {t('templates.templates')}
           {selectedType === 'all' && filteredTemplates.length > 0 && (
-            <span className="ml-2">· {researchCount} research, {questionnaireCount} questionnaires</span>
+            <span className="ml-2">· {researchCount} {t('templates.research')}, {questionnaireCount} {t('templates.questionnaires').toLowerCase()}</span>
           )}
         </p>
 
-        {/* Research Projects Section */}
-        {(selectedType === 'all' || selectedType === 'research') && filteredTemplates.filter(t => t.templateType === 'research').length > 0 && (
+        {/* Research Projects Section / 研究项目部分 */}
+        {(selectedType === 'all' || selectedType === 'research') && filteredTemplates.filter(tmpl => tmpl.templateType === 'research').length > 0 && (
           <>
             {selectedType === 'all' && (
               <div className="flex items-center gap-2 mb-4 mt-2">
                 <Package size={16} className="text-emerald-600" />
-                <h2 className="text-[14px] font-semibold text-stone-700">Research Projects</h2>
+                <h2 className="text-[14px] font-semibold text-stone-700">{t('templates.researchProjects')}</h2>
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {filteredTemplates.filter(t => t.templateType === 'research').map(template => (
+              {filteredTemplates.filter(tmpl => tmpl.templateType === 'research').map(template => (
                 <TemplateCard
                   key={template.id}
                   template={template}
                   onPreview={() => setPreviewTemplate(template)}
                   onUse={() => handleUseTemplate(template)}
                   creating={creating}
+                  t={t}
                 />
               ))}
             </div>
           </>
         )}
 
-        {/* Questionnaire Templates Section */}
-        {(selectedType === 'all' || selectedType === 'questionnaire') && filteredTemplates.filter(t => t.templateType === 'questionnaire').length > 0 && (
+        {/* Questionnaire Templates Section / 问卷模板部分 */}
+        {(selectedType === 'all' || selectedType === 'questionnaire') && filteredTemplates.filter(tmpl => tmpl.templateType === 'questionnaire').length > 0 && (
           <>
             {selectedType === 'all' && (
               <div className="flex items-center gap-2 mb-4 mt-2">
                 <FileText size={16} className="text-blue-600" />
-                <h2 className="text-[14px] font-semibold text-stone-700">Questionnaires</h2>
+                <h2 className="text-[14px] font-semibold text-stone-700">{t('templates.questionnaires')}</h2>
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.filter(t => t.templateType === 'questionnaire').map(template => (
+              {filteredTemplates.filter(tmpl => tmpl.templateType === 'questionnaire').map(template => (
                 <TemplateCard
                   key={template.id}
                   template={template}
                   onPreview={() => setPreviewTemplate(template)}
                   onUse={() => handleUseTemplate(template)}
                   creating={creating}
+                  t={t}
                 />
               ))}
             </div>
@@ -294,13 +306,13 @@ const TemplateLibrary: React.FC = () => {
         {filteredTemplates.length === 0 && (
           <div className="text-center py-16 bg-white rounded-2xl border border-stone-100">
             <Search className="w-8 h-8 mx-auto mb-3 text-stone-200" />
-            <p className="text-[14px] font-medium text-stone-800 mb-1">No templates found</p>
-            <p className="text-[13px] text-stone-400 font-light">Try adjusting your search or filter.</p>
+            <p className="text-[14px] font-medium text-stone-800 mb-1">{t('templates.noResults')}</p>
+            <p className="text-[13px] text-stone-400 font-light">{t('templates.adjustFilter')}</p>
           </div>
         )}
       </div>
 
-      {/* Preview Modal */}
+      {/* Preview Modal / 预览模态框 */}
       {previewTemplate && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPreviewTemplate(null)}>
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
@@ -317,7 +329,7 @@ const TemplateLibrary: React.FC = () => {
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-blue-100 text-blue-700'
                     }`}>
-                      {previewTemplate.templateType === 'research' ? 'Research Project' : 'Questionnaire'}
+                      {previewTemplate.templateType === 'research' ? t('templates.researchProject') : t('templates.questionnaire')}
                     </span>
                     {previewTemplate.isPublic
                       ? <Globe size={12} className="text-emerald-400" />
@@ -325,7 +337,7 @@ const TemplateLibrary: React.FC = () => {
                     }
                   </div>
                   <p className="text-[12px] text-stone-400">
-                    {previewTemplate.estimatedTime} min
+                    {previewTemplate.estimatedTime} {t('templates.min')}
                   </p>
                 </div>
               </div>
@@ -338,14 +350,14 @@ const TemplateLibrary: React.FC = () => {
             </div>
             <div className="border-t border-stone-100 p-4 flex gap-2">
               <button onClick={() => setPreviewTemplate(null)} className="flex-1 py-2.5 rounded-xl text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors">
-                Close
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() => { setPreviewTemplate(null); handleUseTemplate(previewTemplate); }}
                 disabled={creating}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm shadow-emerald-200"
               >
-                {previewTemplate.templateType === 'research' ? 'Create Project' : 'Use Questionnaire'}
+                {previewTemplate.templateType === 'research' ? t('templates.createProject') : t('templates.useQuestionnaire')}
               </button>
             </div>
           </div>
@@ -355,13 +367,14 @@ const TemplateLibrary: React.FC = () => {
   );
 };
 
-// Extracted card component
+// Extracted card component / 模板卡片组件
 const TemplateCard: React.FC<{
   template: DisplayTemplate;
   onPreview: () => void;
   onUse: () => void;
   creating: boolean;
-}> = ({ template, onPreview, onUse, creating }) => (
+  t: (key: string) => string;
+}> = ({ template, onPreview, onUse, creating, t }) => (
   <div className="bg-white rounded-2xl border border-stone-100 hover:border-emerald-200 hover:shadow-md hover:shadow-emerald-50 transition-all overflow-hidden group">
     <div className="p-5">
       <div className="flex items-start justify-between mb-4">
@@ -378,7 +391,7 @@ const TemplateCard: React.FC<{
               ? 'bg-emerald-100 text-emerald-700'
               : 'bg-blue-100 text-blue-700'
           }`}>
-            {template.templateType === 'research' ? 'Project' : 'Questionnaire'}
+            {template.templateType === 'research' ? t('templates.project') : t('templates.questionnaire')}
           </span>
         </div>
       </div>
@@ -387,7 +400,7 @@ const TemplateCard: React.FC<{
       </h3>
       <p className="text-[13px] text-stone-400 mb-3 line-clamp-2 leading-relaxed font-light">{template.description}</p>
       <div className="flex items-center gap-3 text-[12px] text-stone-300">
-        <span>{template.estimatedTime} min</span>
+        <span>{template.estimatedTime} {t('templates.min')}</span>
       </div>
     </div>
     <div className="border-t border-stone-100 p-3 flex gap-2" style={{ backgroundColor: 'rgba(16,185,129,0.02)' }}>
@@ -395,7 +408,7 @@ const TemplateCard: React.FC<{
         onClick={onPreview}
         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-stone-400 hover:bg-white hover:text-stone-600 transition-colors"
       >
-        <Eye size={13} /> Preview
+        <Eye size={13} /> {t('templates.preview')}
       </button>
       <button
         onClick={onUse}
@@ -403,7 +416,7 @@ const TemplateCard: React.FC<{
         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 shadow-sm shadow-emerald-200"
       >
         {creating ? <Loader2 size={13} className="animate-spin" /> : <Copy size={13} />}
-        {creating ? 'Creating...' : template.templateType === 'research' ? 'Use' : 'Import'}
+        {creating ? t('templates.creating') : template.templateType === 'research' ? t('templates.use') : t('templates.import')}
       </button>
     </div>
   </div>

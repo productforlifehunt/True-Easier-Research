@@ -12,30 +12,30 @@ const FeaturesPage: React.FC = () => {
   const { t } = useI18n();
 
   const coreFeatures = [
-    { icon: Layers, title: 'Multiple Question Types', desc: 'Likert scales, multiple choice, open-ended, matrix, ranking, and more — all optimized for research.' },
-    { icon: GitBranch, title: 'Skip Logic & Branching', desc: 'Create intelligent survey paths that adapt based on participant responses.' },
-    { icon: Clock, title: 'Longitudinal & ESM Studies', desc: 'Run multi-day experience sampling with hourly, daily, or event-triggered questionnaires.' },
-    { icon: Users, title: 'Participant Types', desc: 'Define participant roles (e.g. caregiver, patient) and assign tailored questionnaires to each.' },
-    { icon: Shield, title: 'Consent & Screening', desc: 'Built-in consent forms and screening questionnaires with automatic eligibility filtering.' },
-    { icon: Bell, title: 'Smart Notifications', desc: 'Per-questionnaire notification schedules with participant Do Not Disturb periods.' },
+    { icon: Layers, title: t('features.questionTypes'), desc: t('features.questionTypes.desc') },
+    { icon: GitBranch, title: t('features.skipLogic'), desc: t('features.skipLogic.desc') },
+    { icon: Clock, title: t('features.longitudinal'), desc: t('features.longitudinal.desc') },
+    { icon: Users, title: t('features.participantTypes'), desc: t('features.participantTypes.desc') },
+    { icon: Shield, title: t('features.consent'), desc: t('features.consent.desc') },
+    { icon: Bell, title: t('features.notifications'), desc: t('features.notifications.desc') },
   ];
 
   const aiFeatures = [
-    { icon: Wand2, title: 'AI Survey Builder', desc: 'Describe your research goals and let AI generate a complete questionnaire in seconds.' },
-    { icon: Bot, title: 'AI Auto-Answer', desc: 'Participants can let AI draft responses from voice or text, reducing survey fatigue.' },
-    { icon: Mic, title: 'Voice Input', desc: 'Complete surveys without typing a single word — speak your answers naturally.' },
-    { icon: MessageSquare, title: 'AI Chatbot Assistance', desc: 'Built-in chatbot helps participants understand questions and navigate studies.' },
+    { icon: Wand2, title: t('features.aiBuilder'), desc: t('features.aiBuilder.desc') },
+    { icon: Bot, title: t('features.aiAutoAnswer'), desc: t('features.aiAutoAnswer.desc') },
+    { icon: Mic, title: t('features.voiceInput'), desc: t('features.voiceInput.desc') },
+    { icon: MessageSquare, title: t('features.chatbot'), desc: t('features.chatbot.desc') },
   ];
 
   const platformFeatures = [
-    { icon: Globe, title: 'Web & Mobile', desc: 'Responsive design works everywhere. Native push notifications via Capacitor.' },
-    { icon: Smartphone, title: 'Mobile-First Design', desc: 'Optimized for phone participation with native app-like feel and bottom navigation.' },
-    { icon: PieChart, title: 'Real-Time Analytics', desc: 'Monitor response rates, completion times, and data quality as they happen.' },
-    { icon: BarChart3, title: 'Visual Dashboards', desc: 'Charts, summaries, and exportable reports for every study.' },
-    { icon: Download, title: 'Data Export', desc: 'Export raw data in CSV or JSON for analysis in SPSS, R, or Python.' },
-    { icon: Lock, title: 'Privacy & Security', desc: 'End-to-end encryption, GDPR-ready, with granular access controls.' },
-    { icon: Repeat, title: 'Templates & Reuse', desc: 'Save projects, questionnaires, or individual questions as reusable templates.' },
-    { icon: FileText, title: 'Multi-Questionnaire Projects', desc: 'Combine daily logs, hourly check-ins, and one-time surveys in a single study.' },
+    { icon: Globe, title: t('features.webMobile'), desc: t('features.webMobile.desc') },
+    { icon: Smartphone, title: t('features.mobileFirst'), desc: t('features.mobileFirst.desc') },
+    { icon: PieChart, title: t('features.analytics'), desc: t('features.analytics.desc') },
+    { icon: BarChart3, title: t('features.dashboards'), desc: t('features.dashboards.desc') },
+    { icon: Download, title: t('features.export'), desc: t('features.export.desc') },
+    { icon: Lock, title: t('features.privacy'), desc: t('features.privacy.desc') },
+    { icon: Repeat, title: t('features.templatesReuse'), desc: t('features.templatesReuse.desc') },
+    { icon: FileText, title: t('features.multiQuestionnaire'), desc: t('features.multiQuestionnaire.desc') },
   ];
 
   return (
@@ -45,14 +45,14 @@ const FeaturesPage: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-radial from-emerald-50/60 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-[-0.035em] text-stone-800 mb-5">
-            Everything you need to make
+            {t('features.hero.title1')}
             <br />
             <span className="bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent">
-              research easier
+              {t('features.hero.title2')}
             </span>
           </h1>
           <p className="text-lg text-stone-400 max-w-lg mx-auto leading-relaxed font-light">
-            From one-time surveys to multi-week longitudinal studies — designed for researchers who need reliability and flexibility.
+            {t('features.hero.subtitle')}
           </p>
         </div>
       </section>
@@ -61,9 +61,9 @@ const FeaturesPage: React.FC = () => {
       <section className="py-20 lg:py-28">
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-14">
-            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">Research Tools</p>
+            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">{t('features.research.label')}</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800">
-              Core research features
+              {t('features.research.title')}
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -84,12 +84,12 @@ const FeaturesPage: React.FC = () => {
       <section className="py-20 lg:py-28 bg-stone-50/60">
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-14 text-center">
-            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-3">AI-Powered</p>
+            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-3">{t('features.ai.label')}</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800 mb-3">
-              AI makes research easier
+              {t('features.ai.title')}
             </h2>
             <p className="text-[15px] text-stone-400 max-w-md mx-auto font-light">
-              AI assists both researchers and participants — from survey creation to response collection.
+              {t('features.ai.subtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
@@ -110,9 +110,9 @@ const FeaturesPage: React.FC = () => {
       <section className="py-20 lg:py-28">
         <div className="max-w-5xl mx-auto px-6">
           <div className="mb-14">
-            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">Platform</p>
+            <p className="text-[12px] font-bold tracking-widest text-emerald-600 uppercase mb-2">{t('features.platform.label')}</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em] text-stone-800">
-              Everything else you need
+              {t('features.platform.title')}
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
