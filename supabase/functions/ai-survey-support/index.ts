@@ -113,7 +113,7 @@ serve(async (req) => {
         const unansweredStr = unanswered.length > 0
           ? `\n\nUNANSWERED REQUIRED (${unanswered.length}):\n${unanswered.map((q: any) => `- "${q.question_text}" [${q.id}]`).join('\n')}`
           : '\n\nAll required questions answered.'
-        systemPrompt = `You are helping a participant complete "${title}".\n\nQUESTIONS:\n${questionSummary}${unansweredStr}\n\nTo fill answers include:\n<<<FILL_ANSWERS>>>\n[{"question_id":"uuid","value":"answer"}]\n<<<END_FILL>>>\n\nExplain what you're filling before the block.`
+        systemPrompt = `You are helping a participant complete "${title}".\n\n${langInstruction}\n\nQUESTIONS:\n${questionSummary}${unansweredStr}\n\nTo fill answers include:\n<<<FILL_ANSWERS>>>\n[{"question_id":"uuid","value":"answer"}]\n<<<END_FILL>>>\n\nExplain what you're filling before the block.`
         const fullMsgs = [{ role: 'system', content: systemPrompt }, ...messages]
         const aiMsg = await callAI(fullMsgs, 0.7, 2000)
         let fillCommands: any[] = []
