@@ -164,72 +164,88 @@ export async function loadLayoutFromDb(projectId: string): Promise<AppLayout | n
   }
 
   // Convert element rows → in-memory LayoutElement
-  const toLayoutElement = (row: AppTabElementRow): LayoutElement => ({
-    id: row.id,
-    type: row.type as LayoutElement['type'],
-    order_index: row.order_index,
-    config: {
-      questionnaire_id: row.questionnaire_id || undefined,
-      questionnaire_ids: row.questionnaire_ids || undefined,
-      title: row.title || undefined,
-      content: row.content || undefined,
-      visible: row.visible ?? true,
-      participant_types: row.participant_types || undefined,
-      width: row.width || undefined,
-      style: {
-        padding: row.style_padding || undefined,
-        background: row.style_background || undefined,
-        border_radius: row.style_border_radius || undefined,
-        height: row.style_height || undefined,
-        margin: row.style_margin || undefined,
-        opacity: row.style_opacity != null ? Number(row.style_opacity) : undefined,
-        border: row.style_border || undefined,
-        border_color: row.style_border_color || undefined,
-        shadow: (row.style_shadow as any) || undefined,
-        text_align: (row.style_text_align as any) || undefined,
-        content_align: (row.style_content_align as any) || undefined,
-        font_size: row.style_font_size || undefined,
-        font_weight: row.style_font_weight || undefined,
-        text_color: row.style_text_color || undefined,
-        bg_color: row.style_bg_color || undefined,
-        overflow: (row.style_overflow as any) || undefined,
+  const toLayoutElement = (row: AppTabElementRow): LayoutElement => {
+    const base: LayoutElement = {
+      id: row.id,
+      type: row.type as LayoutElement['type'],
+      order_index: row.order_index,
+      config: {
+        questionnaire_id: row.questionnaire_id || undefined,
+        questionnaire_ids: row.questionnaire_ids || undefined,
+        title: row.title || undefined,
+        content: row.content || undefined,
+        visible: row.visible ?? true,
+        participant_types: row.participant_types || undefined,
+        width: row.width || undefined,
+        style: {
+          padding: row.style_padding || undefined,
+          background: row.style_background || undefined,
+          border_radius: row.style_border_radius || undefined,
+          height: row.style_height || undefined,
+          margin: row.style_margin || undefined,
+          opacity: row.style_opacity != null ? Number(row.style_opacity) : undefined,
+          border: row.style_border || undefined,
+          border_color: row.style_border_color || undefined,
+          shadow: (row.style_shadow as any) || undefined,
+          text_align: (row.style_text_align as any) || undefined,
+          content_align: (row.style_content_align as any) || undefined,
+          font_size: row.style_font_size || undefined,
+          font_weight: row.style_font_weight || undefined,
+          text_color: row.style_text_color || undefined,
+          bg_color: row.style_bg_color || undefined,
+          overflow: (row.style_overflow as any) || undefined,
+        },
+        button_action: row.button_action || undefined,
+        button_label: row.button_label || undefined,
+        button_border_radius: row.button_border_radius || undefined,
+        card_display_style: (row.card_display_style as any) || undefined,
+        show_frequency: row.show_frequency ?? undefined,
+        
+        image_url: row.image_url || undefined,
+        show_question_count: row.show_question_count ?? undefined,
+        show_estimated_time: row.show_estimated_time ?? undefined,
+        
+        screening_criteria: row.screening_criteria || undefined,
+        progress_style: (row.progress_style as any) || undefined,
+        timeline_start_hour: row.timeline_start_hour ?? undefined,
+        timeline_end_hour: row.timeline_end_hour ?? undefined,
+        timeline_days: row.timeline_days ?? undefined,
+        todo_layout: (row.todo_layout as any) || undefined,
+        todo_auto_scroll: row.todo_auto_scroll ?? undefined,
+        todo_cards: (todosByElement.get(row.id) || []).map(tc => ({
+          id: tc.id,
+          type: tc.type as 'questionnaire' | 'custom',
+          questionnaire_id: tc.questionnaire_id || undefined,
+          title: tc.title || undefined,
+          description: tc.description || undefined,
+          completion_trigger: (tc.completion_trigger as any) || undefined,
+        })),
+        help_sections: (helpsByElement.get(row.id) || []).map(hs => ({
+          title: hs.title,
+          content: hs.content,
+        })),
+        tab_sections: (tabSecsByElement.get(row.id) || []).map(ts => ({
+          id: ts.id,
+          label: ts.label,
+          question_ids: ts.question_ids || [],
+        })),
       },
-      button_action: row.button_action || undefined,
-      button_label: row.button_label || undefined,
-      button_border_radius: row.button_border_radius || undefined,
-      card_display_style: (row.card_display_style as any) || undefined,
-      show_frequency: row.show_frequency ?? undefined,
-      
-      image_url: row.image_url || undefined,
-      show_question_count: row.show_question_count ?? undefined,
-      show_estimated_time: row.show_estimated_time ?? undefined,
-      
-      screening_criteria: row.screening_criteria || undefined,
-      progress_style: (row.progress_style as any) || undefined,
-      timeline_start_hour: row.timeline_start_hour ?? undefined,
-      timeline_end_hour: row.timeline_end_hour ?? undefined,
-      timeline_days: row.timeline_days ?? undefined,
-      todo_layout: (row.todo_layout as any) || undefined,
-      todo_auto_scroll: row.todo_auto_scroll ?? undefined,
-      todo_cards: (todosByElement.get(row.id) || []).map(tc => ({
-        id: tc.id,
-        type: tc.type as 'questionnaire' | 'custom',
-        questionnaire_id: tc.questionnaire_id || undefined,
-        title: tc.title || undefined,
-        description: tc.description || undefined,
-        completion_trigger: (tc.completion_trigger as any) || undefined,
-      })),
-      help_sections: (helpsByElement.get(row.id) || []).map(hs => ({
-        title: hs.title,
-        content: hs.content,
-      })),
-      tab_sections: (tabSecsByElement.get(row.id) || []).map(ts => ({
-        id: ts.id,
-        label: ts.label,
-        question_ids: ts.question_ids || [],
-      })),
-    },
-  });
+    };
+
+    // For ai_assistant elements, repurpose DB columns:
+    // card_display_style → ai_display_mode, button_action → ai_position, screening_criteria → icon
+    if (row.type === 'ai_assistant') {
+      base.config.ai_display_mode = (row.card_display_style as any) || 'popup';
+      base.config.ai_position = (row.button_action as any) || 'bottom-right';
+      base.config.icon = row.screening_criteria || 'MessageCircle';
+      // Clear repurposed fields from their original meaning
+      base.config.card_display_style = undefined;
+      base.config.button_action = undefined;
+      base.config.screening_criteria = undefined;
+    }
+
+    return base;
+  };
 
   // Convert tab rows → in-memory LayoutTab
   const tabs: LayoutTab[] = (tabRows as AppTabRow[]).map(tab => ({
