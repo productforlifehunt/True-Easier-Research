@@ -1,28 +1,26 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Language } from '../lib/translations';
+// i18n support for Easier Research
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
-export const LANGUAGES = [
-  { code: 'en', name: 'English', dir: 'ltr' },
-  { code: 'zh', name: '中文', dir: 'ltr' },
-  { code: 'es', name: 'Español', dir: 'ltr' },
-  { code: 'fr', name: 'Français', dir: 'ltr' },
-  { code: 'de', name: 'Deutsch', dir: 'ltr' },
-  { code: 'ja', name: '日本語', dir: 'ltr' },
-  { code: 'ko', name: '한국어', dir: 'ltr' },
-  { code: 'pt', name: 'Português', dir: 'ltr' },
-  { code: 'ar', name: 'العربية', dir: 'rtl' },
-  { code: 'hi', name: 'हिन्दी', dir: 'ltr' },
-  { code: 'ru', name: 'Русский', dir: 'ltr' },
-  { code: 'it', name: 'Italiano', dir: 'ltr' },
+export type Language = 'en' | 'zh' | 'es' | 'fr' | 'de' | 'ja' | 'ko' | 'pt' | 'ar' | 'hi' | 'ru' | 'it';
+
+export const LANGUAGES: { code: Language; name: string; nativeName: string; dir?: 'rtl' | 'ltr' }[] = [
+  { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
 ];
 
-type Translations = {
-  [key: string]: {
-    [lang in Language]: string;
-  };
-};
+type TranslationDict = Record<string, Record<Language, string>>;
 
-export const translations: Translations = {
+const translations: TranslationDict = {
   'common.signIn': { en: 'Sign In', zh: '登录', es: 'Iniciar sesión', fr: 'Se connecter', de: 'Anmelden', ja: 'サインイン', ko: '로그인', pt: 'Entrar', ar: 'تسجيل الدخول', hi: 'साइन इन', ru: 'Войти', it: 'Accedi' },
   'common.signOut': { en: 'Sign Out', zh: '登出', es: 'Cerrar sesión', fr: 'Se déconnecter', de: 'Abmelden', ja: 'サインアウト', ko: '로그아웃', pt: 'Sair', ar: 'تسجيل الخروج', hi: 'साइन आउट', ru: 'Выйти', it: 'Esci' },
   'common.save': { en: 'Save', zh: '保存', es: 'Guardar', fr: 'Enregistrer', de: 'Speichern', ja: '保存', ko: '저장', pt: 'Salvar', ar: 'حفظ', hi: 'सहेजें', ru: 'Сохранить', it: 'Salva' },
