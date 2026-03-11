@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { corsHeaders } from '../_shared/cors.ts'
 
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
+const OPENROUTER_API_KEY = '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'
+const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,14 +35,30 @@ serve(async (req) => {
       const body = await req.json()
       const { text, language = 'en', user_id, action } = body
 
-      if (!OPENROUTER_API_KEY) {
-        throw new Error('OpenRouter API key not configured')
-      }
-
       if (action === 'enhance_text') {
         const systemPrompt = language === 'zh' 
-          ? `你是一位专业的痴呆症照护文字助手，拥有丰富的医疗护理和写作经验。你的任务是改善用户提供的照护描述，使其更加清晰、详细、专业且富有同理心。\n\n改善要求:\n1. 保持原始含义和关键信息完整不变\n2. 提高文本的清晰度和可读性\n3. 添加适当的细节使描述更完整\n4. 使用专业但温暖的语言风格\n5. 确保文字流畅自然\n6. 保持尊重和关怀的语气\n\n请直接返回改善后的文本，不要添加任何解释或前缀。`
-          : `You are a professional dementia caregiving writing assistant with extensive experience in healthcare and compassionate communication. Your task is to enhance the user's caregiving description to make it clearer, more detailed, professional, and empathetic.\n\nEnhancement requirements:\n1. Preserve the original meaning and key information\n2. Improve clarity and readability\n3. Add appropriate details to make the description more complete\n4. Use professional yet warm language\n5. Ensure natural flow and coherence\n6. Maintain a respectful and caring tone\n\nReturn only the enhanced text without any explanations or prefixes.`
+          ? `你是一位专业的痴呆症照护文字助手，拥有丰富的医疗护理和写作经验。你的任务是改善用户提供的照护描述，使其更加清晰、详细、专业且富有同理心。
+
+改善要求:
+1. 保持原始含义和关键信息完整不变
+2. 提高文本的清晰度和可读性
+3. 添加适当的细节使描述更完整
+4. 使用专业但温暖的语言风格
+5. 确保文字流畅自然
+6. 保持尊重和关怀的语气
+
+请直接返回改善后的文本，不要添加任何解释或前缀。`
+          : `You are a professional dementia caregiving writing assistant with extensive experience in healthcare and compassionate communication. Your task is to enhance the user's caregiving description to make it clearer, more detailed, professional, and empathetic.
+
+Enhancement requirements:
+1. Preserve the original meaning and key information
+2. Improve clarity and readability
+3. Add appropriate details to make the description more complete
+4. Use professional yet warm language
+5. Ensure natural flow and coherence
+6. Maintain a respectful and caring tone
+
+Return only the enhanced text without any explanations or prefixes.`
 
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -52,7 +69,7 @@ serve(async (req) => {
             'X-Title': 'Care Connector Survey Assistant'
           },
           body: JSON.stringify({
-            model: 'openai/gpt-oss-120b',
+            model: AI_MODEL,
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: text }
@@ -79,8 +96,32 @@ serve(async (req) => {
 
       if (action === 'improve_text') {
         const systemPrompt = language === 'zh' 
-          ? `你是一位经验丰富的痴呆症照护顾问和写作指导专家。基于用户提供的照护描述，你需要提供3个不同角度的具体改进建议。\n\n建议要求:\n1. 每个建议都应该从不同角度改进描述（如：增加细节、改善结构、强调重要信息等）\n2. 建议要具体、可操作、有实质性帮助\n3. 保持专业性和同理心\n4. 每个建议应该是完整的改写版本，而非修改指导\n5. 建议长度适中，不要过短或过长\n\n请以JSON数组格式返回3个建议，格式如下:\n[\"第一个改进版本\", \"第二个改进版本\", \"第三个改进版本\"]\n\n只返回JSON数组，不要添加任何其他文字。`
-          : `You are an experienced dementia care consultant and writing coach. Based on the user's caregiving description, provide 3 different improvement suggestions from various perspectives.\n\nRequirements:\n1. Each suggestion should improve the description from a different angle (e.g., adding details, improving structure, emphasizing key points)\n2. Suggestions must be specific, actionable, and genuinely helpful\n3. Maintain professionalism and empathy\n4. Each suggestion should be a complete rewrite, not editing instructions\n5. Keep suggestions at a moderate length\n\nReturn 3 suggestions as a JSON array in this format:\n[\"First improved version\", \"Second improved version\", \"Third improved version\"]\n\nReturn only the JSON array without any additional text.`
+          ? `你是一位经验丰富的痴呆症照护顾问和写作指导专家。基于用户提供的照护描述，你需要提供3个不同角度的具体改进建议。
+
+建议要求:
+1. 每个建议都应该从不同角度改进描述（如：增加细节、改善结构、强调重要信息等）
+2. 建议要具体、可操作、有实质性帮助
+3. 保持专业性和同理心
+4. 每个建议应该是完整的改写版本，而非修改指导
+5. 建议长度适中，不要过短或过长
+
+请以JSON数组格式返回3个建议，格式如下:
+["第一个改进版本", "第二个改进版本", "第三个改进版本"]
+
+只返回JSON数组，不要添加任何其他文字。`
+          : `You are an experienced dementia care consultant and writing coach. Based on the user's caregiving description, provide 3 different improvement suggestions from various perspectives.
+
+Requirements:
+1. Each suggestion should improve the description from a different angle (e.g., adding details, improving structure, emphasizing key points)
+2. Suggestions must be specific, actionable, and genuinely helpful
+3. Maintain professionalism and empathy
+4. Each suggestion should be a complete rewrite, not editing instructions
+5. Keep suggestions at a moderate length
+
+Return 3 suggestions as a JSON array in this format:
+["First improved version", "Second improved version", "Third improved version"]
+
+Return only the JSON array without any additional text.`
 
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -91,7 +132,7 @@ serve(async (req) => {
             'X-Title': 'Care Connector Survey Assistant'
           },
           body: JSON.stringify({
-            model: 'openai/gpt-oss-120b',
+            model: AI_MODEL,
             messages: [
               { role: 'system', content: systemPrompt },
               { role: 'user', content: text }
@@ -139,10 +180,6 @@ serve(async (req) => {
       throw new Error('No audio file provided')
     }
 
-    if (!OPENROUTER_API_KEY) {
-      throw new Error('OpenRouter API key not configured')
-    }
-
     const whisperFormData = new FormData()
     whisperFormData.append('file', audioFile)
     whisperFormData.append('model', 'whisper-1')
@@ -171,8 +208,48 @@ serve(async (req) => {
     }
 
     const analysisPrompt = language === 'zh'
-      ? `你是一位专业的痴呆症照护数据分析助手。用户刚才通过语音描述了他们的照护经历。转录文本如下:\n\n"${transcribedText}"\n\n请分析这段描述并提取以下结构化信息:\n\n1. description: 对用户描述的内容进行清晰、完整的总结（保持关键细节，使用专业但温暖的语言）\n2. person_doing_with: 如果提到与他人一起进行照护活动，提取相关人员信息（例如："母亲"、"父亲"、"护工"、"家人"等）。如果没有提到他人，返回空字符串。\n3. type: 判断这段描述的主要类型:\n   - "care_activity" (照护活动) - 描述具体的照护行动或日常活动\n   - "care_need" (照护需求) - 表达需要的帮助或资源\n   - "struggle" (困难挣扎) - 描述遇到的挑战、困难或情感压力\n\n请以JSON格式返回，只包含这三个字段。格式示例:\n{\n  "description": "详细的描述内容",\n  "person_doing_with": "相关人员或空字符串",\n  "type": "care_activity 或 care_need 或 struggle"\n}\n\n只返回JSON对象，不要添加任何其他文字或解释。`
-      : `You are a professional dementia caregiving data analysis assistant. The user just described their caregiving experience via voice. The transcribed text is:\n\n"${transcribedText}"\n\nPlease analyze this description and extract the following structured information:\n\n1. description: A clear, complete summary of what the user described (maintain key details, use professional yet warm language)\n2. person_doing_with: If they mentioned doing caregiving activities with others, extract relevant person information (e.g., "mother", "father", "caregiver", "family"). If no one else was mentioned, return an empty string.\n3. type: Determine the primary type of this description:\n   - "care_activity" - Describes specific caregiving actions or daily activities\n   - "care_need" - Expresses needed help or resources\n   - "struggle" - Describes challenges, difficulties, or emotional stress\n\nReturn in JSON format with only these three fields. Format example:\n{\n  "description": "detailed description content",\n  "person_doing_with": "relevant person or empty string",\n  "type": "care_activity or care_need or struggle"\n}\n\nReturn only the JSON object without any additional text or explanations.`
+      ? `你是一位专业的痴呆症照护数据分析助手。用户刚才通过语音描述了他们的照护经历。转录文本如下:
+
+"${transcribedText}"
+
+请分析这段描述并提取以下结构化信息:
+
+1. description: 对用户描述的内容进行清晰、完整的总结（保持关键细节，使用专业但温暖的语言）
+2. person_doing_with: 如果提到与他人一起进行照护活动，提取相关人员信息（例如："母亲"、"父亲"、"护工"、"家人"等）。如果没有提到他人，返回空字符串。
+3. type: 判断这段描述的主要类型:
+   - "care_activity" (照护活动) - 描述具体的照护行动或日常活动
+   - "care_need" (照护需求) - 表达需要的帮助或资源
+   - "struggle" (困难挣扎) - 描述遇到的挑战、困难或情感压力
+
+请以JSON格式返回，只包含这三个字段。格式示例:
+{
+  "description": "详细的描述内容",
+  "person_doing_with": "相关人员或空字符串",
+  "type": "care_activity 或 care_need 或 struggle"
+}
+
+只返回JSON对象，不要添加任何其他文字或解释。`
+      : `You are a professional dementia caregiving data analysis assistant. The user just described their caregiving experience via voice. The transcribed text is:
+
+"${transcribedText}"
+
+Please analyze this description and extract the following structured information:
+
+1. description: A clear, complete summary of what the user described (maintain key details, use professional yet warm language)
+2. person_doing_with: If they mentioned doing caregiving activities with others, extract relevant person information (e.g., "mother", "father", "caregiver", "family"). If no one else was mentioned, return an empty string.
+3. type: Determine the primary type of this description:
+   - "care_activity" - Describes specific caregiving actions or daily activities
+   - "care_need" - Expresses needed help or resources
+   - "struggle" - Describes challenges, difficulties, or emotional stress
+
+Return in JSON format with only these three fields. Format example:
+{
+  "description": "detailed description content",
+  "person_doing_with": "relevant person or empty string",
+  "type": "care_activity or care_need or struggle"
+}
+
+Return only the JSON object without any additional text or explanations.`
 
     const analysisResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -183,7 +260,7 @@ serve(async (req) => {
         'X-Title': 'Care Connector Voice Assistant'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
+        model: AI_MODEL,
         messages: [
           {
             role: 'system',
@@ -192,8 +269,7 @@ serve(async (req) => {
           { role: 'user', content: analysisPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 800,
-        response_format: { type: 'json_object' }
+        max_tokens: 800
       })
     })
 

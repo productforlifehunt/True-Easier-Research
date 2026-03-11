@@ -2,11 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY_V2') || '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'
+const OPENROUTER_API_KEY = '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'
+const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,10 +19,6 @@ serve(async (req) => {
 
     if (!message) {
       throw new Error('No message provided')
-    }
-
-    if (!OPENROUTER_API_KEY) {
-      throw new Error('OpenRouter API key not configured')
     }
 
     const systemPrompt = `You are a friendly research assistant helping people learn about a 7-day dementia caregiver experience study.
@@ -68,7 +65,7 @@ Behavior Rules:
         'X-Title': 'Care Connector How-to Assistant'
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
+        model: AI_MODEL,
         messages: messages,
         temperature: 0.7,
         max_tokens: 800

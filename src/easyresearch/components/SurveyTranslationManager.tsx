@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 // Multi-Language Survey Translation Manager
 // 多语言调查翻译管理器
+// All AI calls go through edge function — NO direct OpenRouter calls from frontend
 interface Props {
   projectId: string;
   questions: any[];
@@ -35,119 +36,78 @@ const SUPPORTED_LOCALES = [
   { code: 'ms', name: 'Bahasa Melayu', flag: 'MS' },
 ];
 
-const OPENROUTER_KEY = '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';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const SurveyTranslationManager: React.FC<Props> = ({ projectId, questions, onQuestionsUpdate }) => {
   const [activeLocales, setActiveLocales] = useState<string[]>(['en']);
   const [selectedLocale, setSelectedLocale] = useState<string>('en');
   const [translations, setTranslations] = useState<Record<string, Record<string, Translation>>>({});
-  // translations[questionId][locale] = Translation
   const [translating, setTranslating] = useState(false);
   const [showAddLocale, setShowAddLocale] = useState(false);
 
   // Load existing translations from question_config / 从 question_config 加载现有翻译
   useEffect(() => {
     const existing: Record<string, Record<string, Translation>> = {};
-    const locales = new Set<string>(['en']);
-
+    const localeSet = new Set<string>(['en']);
+    
     questions.forEach((q: any) => {
-      existing[q.id] = existing[q.id] || {};
-      // Base English
-      existing[q.id]['en'] = {
-        locale: 'en',
-        question_text: q.question_text || '',
-        question_description: q.question_description || '',
-        options: q.options?.map((o: any) => ({ id: o.id, text: o.option_text })),
-      };
-      // Load translations from config
-      const trns = q.question_config?.translations;
-      if (trns && typeof trns === 'object') {
-        Object.entries(trns).forEach(([locale, data]: [string, any]) => {
-          locales.add(locale);
-          existing[q.id][locale] = {
-            locale,
-            question_text: data.question_text || '',
-            question_description: data.question_description || '',
-            options: data.options,
-          };
+      const t = q.question_config?.translations;
+      if (t && typeof t === 'object') {
+        existing[q.id] = {};
+        Object.keys(t).forEach(locale => {
+          localeSet.add(locale);
+          existing[q.id][locale] = t[locale];
         });
       }
     });
-
+    
     setTranslations(existing);
-    setActiveLocales([...locales]);
+    setActiveLocales(Array.from(localeSet));
   }, [questions]);
 
-  // Translation coverage stats / 翻译覆盖率统计
-  const coverageStats = useMemo(() => {
-    const stats: Record<string, { total: number; translated: number }> = {};
-    const translatableQuestions = questions.filter((q: any) => 
-      !['section_header', 'divider', 'image_block'].includes(q.question_type)
-    );
-    
-    activeLocales.forEach(locale => {
-      if (locale === 'en') return;
-      let translated = 0;
-      translatableQuestions.forEach((q: any) => {
-        if (translations[q.id]?.[locale]?.question_text) translated++;
-      });
-      stats[locale] = { total: translatableQuestions.length, translated };
-    });
-    return stats;
-  }, [translations, activeLocales, questions]);
-
-  const addLocale = (code: string) => {
-    if (!activeLocales.includes(code)) {
-      setActiveLocales(prev => [...prev, code]);
-      setSelectedLocale(code);
+  const addLocale = (localeCode: string) => {
+    if (!activeLocales.includes(localeCode)) {
+      setActiveLocales([...activeLocales, localeCode]);
     }
     setShowAddLocale(false);
   };
 
-  const updateTranslation = (questionId: string, locale: string, field: string, value: string) => {
-    setTranslations(prev => ({
-      ...prev,
-      [questionId]: {
-        ...prev[questionId],
-        [locale]: {
-          ...(prev[questionId]?.[locale] || { locale, question_text: '', question_description: '' }),
-          [field]: value,
-        },
-      },
-    }));
+  const availableLocales = SUPPORTED_LOCALES.filter(l => !activeLocales.includes(l.code));
+
+  // Get translation status for a question / 获取问题的翻译状态
+  const getTranslationStatus = (questionId: string, locale: string): 'complete' | 'partial' | 'missing' => {
+    const t = translations[questionId]?.[locale];
+    if (!t) return 'missing';
+    if (t.question_text) return 'complete';
+    return 'partial';
   };
 
-  const updateOptionTranslation = (questionId: string, locale: string, optionId: string, text: string) => {
-    setTranslations(prev => {
-      const existing = prev[questionId]?.[locale] || { locale, question_text: '', options: [] };
-      const options = (existing.options || []).map(o => o.id === optionId ? { ...o, text } : o);
-      if (!options.find(o => o.id === optionId)) {
-        options.push({ id: optionId, text });
-      }
-      return {
-        ...prev,
-        [questionId]: {
-          ...prev[questionId],
-          [locale]: { ...existing, options },
-        },
-      };
+  // Count translations / 统计翻译数量
+  const translationStats = useMemo(() => {
+    const stats: Record<string, { complete: number; partial: number; missing: number }> = {};
+    activeLocales.forEach(locale => {
+      if (locale === 'en') return;
+      stats[locale] = { complete: 0, partial: 0, missing: 0 };
+      questions.forEach((q: any) => {
+        const status = getTranslationStatus(q.id, locale);
+        stats[locale][status]++;
+      });
     });
-  };
+    return stats;
+  }, [activeLocales, questions, translations]);
 
-  // AI auto-translate / AI 自动翻译
-  const autoTranslate = async (targetLocale: string) => {
+  // AI translate all questions for a locale / AI翻译所有问题到指定语言
+  const translateAll = async (targetLocale: string) => {
     const locale = SUPPORTED_LOCALES.find(l => l.code === targetLocale);
     if (!locale) return;
 
     setTranslating(true);
     try {
-      const toTranslate = questions
-        .filter((q: any) => !['section_header', 'divider', 'image_block'].includes(q.question_type))
-        .filter((q: any) => !translations[q.id]?.[targetLocale]?.question_text)
-        .slice(0, 50); // Batch limit
-
+      const toTranslate = questions.filter((q: any) => getTranslationStatus(q.id, targetLocale) !== 'complete');
+      
       if (toTranslate.length === 0) {
-        toast('All questions already translated / 所有问题已翻译');
+        toast.success('All questions already translated!');
         setTranslating(false);
         return;
       }
@@ -166,21 +126,26 @@ ${JSON.stringify(items, null, 2)}
 
 Respond with a JSON array matching the input structure with translated text/description/options. ONLY valid JSON, no markdown.`;
 
-      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      // Call through edge function — NOT direct OpenRouter
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-survey-support`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_KEY}`,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-001',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.2,
+          action: 'translate',
+          prompt,
         }),
       });
 
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`Translation failed: ${errText}`);
+      }
+
       const data = await resp.json();
-      const content = data.choices?.[0]?.message?.content || '';
+      const content = data.response || '';
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       
       if (jsonMatch) {
@@ -200,226 +165,212 @@ Respond with a JSON array matching the input structure with translated text/desc
         });
 
         setTranslations(newTranslations);
-        toast.success(`Translated ${translated.length} questions to ${locale.name} / 已翻译 ${translated.length} 个问题`);
+
+        // Save translations to question_config / 保存翻译到 question_config
+        const updatedQuestions = questions.map((q: any) => {
+          if (newTranslations[q.id]) {
+            return {
+              ...q,
+              question_config: {
+                ...q.question_config,
+                translations: newTranslations[q.id],
+              },
+            };
+          }
+          return q;
+        });
+
+        onQuestionsUpdate(updatedQuestions);
+        toast.success(`Translated ${toTranslate.length} questions to ${locale.name}`);
+      } else {
+        throw new Error('Could not parse translation response');
       }
-    } catch (e: any) {
-      toast.error('Translation failed / 翻译失败: ' + e.message);
+    } catch (error) {
+      console.error('Translation error:', error);
+      toast.error('Translation failed. Please try again.');
     } finally {
       setTranslating(false);
     }
   };
 
-  // Save translations back to question_config / 保存翻译到 question_config
-  const saveTranslations = async () => {
-    try {
-      const updates = questions.map((q: any) => {
-        const qTranslations: Record<string, any> = {};
-        activeLocales.forEach(locale => {
-          if (locale === 'en') return;
-          const t = translations[q.id]?.[locale];
-          if (t?.question_text) {
-            qTranslations[locale] = {
-              question_text: t.question_text,
-              question_description: t.question_description || '',
-              options: t.options,
-            };
-          }
-        });
+  // Manual edit translation / 手动编辑翻译
+  const updateTranslation = (questionId: string, locale: string, field: string, value: string) => {
+    const newTranslations = { ...translations };
+    if (!newTranslations[questionId]) newTranslations[questionId] = {};
+    if (!newTranslations[questionId][locale]) {
+      newTranslations[questionId][locale] = { locale, question_text: '' };
+    }
+    (newTranslations[questionId][locale] as any)[field] = value;
+    setTranslations(newTranslations);
+  };
 
+  // Save current translations / 保存当前翻译
+  const saveTranslations = () => {
+    const updatedQuestions = questions.map((q: any) => {
+      if (translations[q.id]) {
         return {
           ...q,
           question_config: {
-            ...(q.question_config || {}),
-            translations: qTranslations,
-            active_locales: activeLocales,
+            ...q.question_config,
+            translations: translations[q.id],
           },
         };
-      });
-
-      // Batch update to DB
-      for (const q of updates) {
-        await supabase.from('question').update({
-          question_config: q.question_config,
-        }).eq('id', q.id);
       }
-
-      onQuestionsUpdate(updates);
-      toast.success('Translations saved / 翻译已保存');
-    } catch (e: any) {
-      toast.error('Save failed / 保存失败: ' + e.message);
-    }
+      return q;
+    });
+    onQuestionsUpdate(updatedQuestions);
+    toast.success('Translations saved!');
   };
-
-  const translatableQuestions = questions.filter((q: any) => 
-    !['section_header', 'divider', 'image_block'].includes(q.question_type)
-  );
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Globe className="w-5 h-5" />
-          Survey Translations / 调查翻译
-        </h3>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Globe className="w-5 h-5 text-blue-500" />
+          <h3 className="font-semibold text-stone-800">Multi-Language Translations</h3>
+        </div>
         <button
           onClick={saveTranslations}
-          className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 flex items-center gap-2"
+          className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700"
         >
-          <Check className="w-4 h-4" /> Save All / 保存全部
+          Save All
         </button>
       </div>
 
-      {/* Locale tabs / 语言标签 */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Locale tabs */}
+      <div className="flex gap-1 flex-wrap items-center">
         {activeLocales.map(code => {
           const locale = SUPPORTED_LOCALES.find(l => l.code === code);
-          const stats = coverageStats[code];
+          const stats = translationStats[code];
           return (
             <button
               key={code}
               onClick={() => setSelectedLocale(code)}
-              className={`px-3 py-1.5 text-sm rounded-lg border flex items-center gap-2 transition ${
-                selectedLocale === code ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground hover:bg-muted/30'
+              className={`px-3 py-1.5 text-xs rounded-lg flex items-center gap-1.5 transition-colors ${
+                selectedLocale === code
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               }`}
             >
-              <span>{locale?.flag || 'lang'}</span>
+              <span className="font-medium">{locale?.flag || code.toUpperCase()}</span>
               <span>{locale?.name || code}</span>
-              {stats && (
-                <span className={`text-xs ${stats.translated === stats.total ? 'text-green-600' : 'text-amber-600'}`}>
-                  {stats.translated}/{stats.total}
+              {stats && code !== 'en' && (
+                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] ${
+                  stats.missing === 0 ? 'bg-green-200 text-green-800' : 'bg-amber-200 text-amber-800'
+                }`}>
+                  {stats.complete}/{questions.length}
                 </span>
               )}
             </button>
           );
         })}
+        
         <div className="relative">
           <button
             onClick={() => setShowAddLocale(!showAddLocale)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-dashed border-border text-muted-foreground hover:bg-muted/30 flex items-center gap-1"
+            className="px-2 py-1.5 text-xs rounded-lg bg-stone-50 text-stone-400 hover:bg-stone-100 border border-dashed border-stone-300"
           >
-            <Plus className="w-3.5 h-3.5" /> Add Language / 添加语言
+            <Plus className="w-3 h-3" />
           </button>
-          {showAddLocale && (
-            <div className="absolute top-full left-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto w-48">
-              {SUPPORTED_LOCALES.filter(l => !activeLocales.includes(l.code)).map(l => (
+          {showAddLocale && availableLocales.length > 0 && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto w-48">
+              {availableLocales.map(locale => (
                 <button
-                  key={l.code}
-                  onClick={() => addLocale(l.code)}
-                  className="w-full px-3 py-2 text-sm text-left hover:bg-muted/30 flex items-center gap-2 text-foreground"
+                  key={locale.code}
+                  onClick={() => addLocale(locale.code)}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-stone-50 flex items-center gap-2"
                 >
-                  <span>{l.flag}</span> {l.name}
+                  <span className="font-medium text-stone-500">{locale.flag}</span>
+                  <span>{locale.name}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
-
-        {selectedLocale !== 'en' && (
-          <button
-            onClick={() => autoTranslate(selectedLocale)}
-            disabled={translating}
-            className="ml-auto px-3 py-1.5 text-sm rounded-lg bg-primary/10 text-primary hover:bg-primary/20 flex items-center gap-1"
-          >
-            {translating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            AI Translate All / AI 翻译全部
-          </button>
-        )}
       </div>
 
-      {/* Translation grid / 翻译网格 */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="max-h-[500px] overflow-y-auto">
-          {translatableQuestions.map((q: any, idx: number) => {
-            const enText = q.question_text || '';
-            const localeTranslation = translations[q.id]?.[selectedLocale];
-            const hasTranslation = !!localeTranslation?.question_text;
+      {/* AI translate button */}
+      {selectedLocale !== 'en' && (
+        <button
+          onClick={() => translateAll(selectedLocale)}
+          disabled={translating}
+          className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {translating ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Translating...</>
+          ) : (
+            <><Sparkles className="w-4 h-4" /> AI Translate All to {SUPPORTED_LOCALES.find(l => l.code === selectedLocale)?.name}</>
+          )}
+        </button>
+      )}
 
-            return (
-              <div key={q.id} className="border-b border-border last:border-b-0">
-                <div className="grid grid-cols-2 divide-x divide-border">
-                  {/* Source (English) / 源文（英文） */}
-                  <div className="p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] px-1.5 py-0.5 bg-muted rounded font-mono">Q{idx + 1}</span>
-                      <span className="text-[10px] text-muted-foreground">{q.question_type}</span>
-                    </div>
-                    <div className="text-sm text-foreground">{enText}</div>
-                    {q.question_description && (
-                      <div className="text-xs text-muted-foreground mt-1">{q.question_description}</div>
-                    )}
-                    {q.options?.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        {q.options.map((o: any) => (
-                          <div key={o.id} className="text-xs text-muted-foreground pl-3 border-l-2 border-border">
-                            {o.option_text}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Target locale / 目标语言 */}
-                  <div className="p-3">
-                    {selectedLocale === 'en' ? (
-                      <div className="text-xs text-muted-foreground italic">Source language / 源语言</div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-1 mb-1">
-                          {hasTranslation ? (
-                            <Check className="w-3 h-3 text-green-500" />
-                          ) : (
-                            <AlertTriangle className="w-3 h-3 text-amber-500" />
-                          )}
-                          <span className="text-[10px] text-muted-foreground">
-                            {hasTranslation ? 'Translated / 已翻译' : 'Missing / 缺失'}
-                          </span>
-                        </div>
-                        <textarea
-                          value={localeTranslation?.question_text || ''}
-                          onChange={e => updateTranslation(q.id, selectedLocale, 'question_text', e.target.value)}
-                          placeholder={`Translate: "${enText.slice(0, 60)}..."`}
-                          rows={2}
-                          className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-foreground resize-none"
-                        />
-                        {q.question_description && (
-                          <input
-                            value={localeTranslation?.question_description || ''}
-                            onChange={e => updateTranslation(q.id, selectedLocale, 'question_description', e.target.value)}
-                            placeholder="Description translation..."
-                            className="w-full px-2 py-1.5 text-xs border border-border rounded bg-background text-foreground"
-                          />
-                        )}
-                        {q.options?.length > 0 && (
-                          <div className="space-y-1">
-                            {q.options.map((o: any) => (
-                              <div key={o.id} className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground w-20 truncate">{o.option_text}</span>
-                                <span className="text-muted-foreground">→</span>
-                                <input
-                                  value={localeTranslation?.options?.find((t: any) => t.id === o.id)?.text || ''}
-                                  onChange={e => updateOptionTranslation(q.id, selectedLocale, o.id, e.target.value)}
-                                  placeholder={o.option_text}
-                                  className="flex-1 px-2 py-1 text-xs border border-border rounded bg-background text-foreground"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+      {/* Translation table */}
+      <div className="space-y-3">
+        {questions.map((q: any) => {
+          const t = translations[q.id]?.[selectedLocale];
+          const status = selectedLocale === 'en' ? 'complete' : getTranslationStatus(q.id, selectedLocale);
+          
+          return (
+            <div key={q.id} className="bg-white border border-stone-200 rounded-lg p-3">
+              <div className="flex items-start gap-2 mb-2">
+                {status === 'complete' && <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />}
+                {status === 'partial' && <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />}
+                {status === 'missing' && <Languages className="w-4 h-4 text-stone-300 mt-0.5 flex-shrink-0" />}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-stone-400 mb-1">Original (EN)</p>
+                  <p className="text-sm text-stone-700">{q.question_text}</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {translatableQuestions.length === 0 && (
-        <div className="p-8 text-center text-muted-foreground">
-          No questions to translate / 没有可翻译的问题
-        </div>
-      )}
+              {selectedLocale !== 'en' && (
+                <div className="mt-2 pl-6">
+                  <p className="text-xs text-stone-400 mb-1">
+                    {SUPPORTED_LOCALES.find(l => l.code === selectedLocale)?.name} translation
+                  </p>
+                  <textarea
+                    value={t?.question_text || ''}
+                    onChange={(e) => updateTranslation(q.id, selectedLocale, 'question_text', e.target.value)}
+                    placeholder="Enter translation..."
+                    className="w-full text-sm border border-stone-200 rounded-lg px-3 py-2 min-h-[60px] resize-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                  />
+                  {q.options && q.options.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs text-stone-400">Options</p>
+                      {q.options.map((opt: any, oi: number) => {
+                        const translatedOpt = t?.options?.find((to: any) => to.id === opt.id);
+                        return (
+                          <div key={opt.id} className="flex items-center gap-2">
+                            <span className="text-xs text-stone-400 w-20 truncate">{opt.option_text}</span>
+                            <input
+                              value={translatedOpt?.text || ''}
+                              onChange={(e) => {
+                                const newOpts = [...(t?.options || q.options.map((o: any) => ({ id: o.id, text: '' })))];
+                                const idx = newOpts.findIndex((no: any) => no.id === opt.id);
+                                if (idx >= 0) newOpts[idx] = { ...newOpts[idx], text: e.target.value };
+                                else newOpts.push({ id: opt.id, text: e.target.value });
+                                
+                                const newTranslations = { ...translations };
+                                if (!newTranslations[q.id]) newTranslations[q.id] = {};
+                                newTranslations[q.id][selectedLocale] = {
+                                  ...(newTranslations[q.id][selectedLocale] || { locale: selectedLocale, question_text: '' }),
+                                  options: newOpts,
+                                };
+                                setTranslations(newTranslations);
+                              }}
+                              placeholder={`${opt.option_text} translation...`}
+                              className="flex-1 text-xs border border-stone-200 rounded px-2 py-1"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

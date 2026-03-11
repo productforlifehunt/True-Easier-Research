@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 // AI-Powered Text & Sentiment Analysis for open-ended responses
 // AI 驱动的文本与情感分析（用于开放式回答）
+// All AI calls go through edge function — NO direct OpenRouter calls from frontend
 interface Props {
   projectId: string;
   responses: any[];
@@ -32,7 +33,8 @@ interface AIAnalysisResult {
   summary: string;
 }
 
-const OPENROUTER_KEY = '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';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const AITextAnalysis: React.FC<Props> = ({ projectId, responses, questions }) => {
   const [analyzing, setAnalyzing] = useState(false);
@@ -51,52 +53,43 @@ const AITextAnalysis: React.FC<Props> = ({ projectId, responses, questions }) =>
   const questionResponses = useMemo(() => {
     if (!selectedQuestion) return [];
     return responses
-      .filter(r => r.question_id === selectedQuestion && r.response_text)
-      .map(r => r.response_text)
-      .filter(Boolean);
+      .filter((r: any) => r.question_id === selectedQuestion && r.response_value)
+      .map((r: any) => String(r.response_value));
   }, [responses, selectedQuestion]);
 
-  // Local word frequency analysis (no AI needed) / 本地词频分析
-  const computeLocalWordCloud = (texts: string[]) => {
-    const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'and', 'but', 'or', 'nor', 'not', 'so', 'yet', 'both', 'either', 'neither', 'each', 'every', 'all', 'any', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'only', 'own', 'same', 'than', 'too', 'very', 'just', 'because', 'if', 'when', 'while', 'although', 'though', 'that', 'this', 'these', 'those', 'i', 'me', 'my', 'mine', 'we', 'us', 'our', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'it', 'its', 'they', 'them', 'their', 'what', 'which', 'who', 'whom', 'how', 'where', 'why', 'about', 'also', 'really', 'like', 'think', 'know', 'get', 'got', 'go', 'going', 'make', 'making']);
-    const freq: Record<string, number> = {};
+  // Simple word frequency for local word cloud / 简单词频统计
+  const computeWordCloud = (texts: string[]) => {
+    const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'shall', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'and', 'but', 'or', 'not', 'no', 'nor', 'so', 'yet', 'both', 'either', 'neither', 'each', 'every', 'all', 'any', 'few', 'more', 'most', 'other', 'some', 'such', 'than', 'too', 'very', 'just', 'about', 'it', 'its', 'i', 'me', 'my', 'we', 'our', 'you', 'your', 'he', 'him', 'his', 'she', 'her', 'they', 'them', 'their', 'this', 'that', 'these', 'those', 'what', 'which', 'who', 'whom', 'when', 'where', 'why', 'how']);
+    const wordCount: Record<string, number> = {};
     texts.forEach(text => {
-      const words = text.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff\s]/g, '').split(/\s+/);
-      words.forEach(w => {
-        if (w.length > 2 && !stopWords.has(w)) {
-          freq[w] = (freq[w] || 0) + 1;
+      text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).forEach(word => {
+        if (word.length > 2 && !stopWords.has(word)) {
+          wordCount[word] = (wordCount[word] || 0) + 1;
         }
       });
     });
-    return Object.entries(freq)
+    return Object.entries(wordCount)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 50)
+      .slice(0, 30)
       .map(([word, count]) => ({ word, count }));
   };
 
-  // Quick local analysis when question is selected
-  React.useEffect(() => {
-    if (questionResponses.length > 0) {
-      setLocalWordCloud(computeLocalWordCloud(questionResponses));
-    } else {
-      setLocalWordCloud([]);
-    }
-  }, [questionResponses]);
-
-  // AI Analysis via OpenRouter / 通过 OpenRouter 进行 AI 分析
-  const runAIAnalysis = async () => {
+  const runAnalysis = async () => {
     if (questionResponses.length === 0) {
-      toast.error('No text responses to analyze / 没有可分析的文本回复');
+      toast.error('No responses to analyze');
       return;
     }
 
     setAnalyzing(true);
     try {
-      const sampleSize = Math.min(questionResponses.length, 100);
-      const sample = questionResponses.slice(0, sampleSize);
-      const questionText = textQuestions.find((q: any) => q.id === selectedQuestion)?.question_text || '';
+      // Compute local word cloud
+      const wc = computeWordCloud(questionResponses);
+      setLocalWordCloud(wc);
 
-      const prompt = `Analyze these ${sampleSize} survey responses to the question: "${questionText}"
+      const sampleSize = Math.min(questionResponses.length, 50);
+      const sample = questionResponses.slice(0, sampleSize);
+
+      const prompt = `Analyze these ${sampleSize} survey responses for themes and sentiment.
 
 Responses:
 ${sample.map((r, i) => `${i + 1}. ${r}`).join('\n')}
@@ -111,21 +104,26 @@ Provide a JSON analysis with this exact structure:
 
 Respond with ONLY valid JSON, no markdown.`;
 
-      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      // Call through edge function — NOT direct OpenRouter
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-survey-support`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_KEY}`,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-001',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.3,
+          action: 'text_analysis',
+          prompt,
         }),
       });
 
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`AI analysis failed: ${errText}`);
+      }
+
       const data = await resp.json();
-      const content = data.choices?.[0]?.message?.content || '';
+      const content = data.response || '';
       
       // Parse JSON from response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -135,16 +133,17 @@ Respond with ONLY valid JSON, no markdown.`;
           themes: parsed.themes || [],
           sentiment: parsed.sentiment || { positive: 0, negative: 0, neutral: 0, total: sampleSize },
           keyInsights: parsed.keyInsights || [],
-          wordCloud: localWordCloud,
+          wordCloud: wc,
           summary: parsed.summary || '',
         });
-        toast.success(`Analyzed ${sampleSize} responses / 已分析 ${sampleSize} 条回复`);
       } else {
-        throw new Error('Failed to parse AI response');
+        throw new Error('Could not parse AI response');
       }
-    } catch (e: any) {
-      console.error('AI analysis error:', e);
-      toast.error('Analysis failed / 分析失败: ' + e.message);
+
+      toast.success('Analysis complete!');
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      toast.error('Analysis failed. Please try again.');
     } finally {
       setAnalyzing(false);
     }
@@ -152,188 +151,140 @@ Respond with ONLY valid JSON, no markdown.`;
 
   const sentimentColor = (s: string) => {
     switch (s) {
-      case 'positive': return 'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-300';
-      case 'negative': return 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-300';
-      case 'mixed': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-800 dark:text-gray-300';
+      case 'positive': return 'text-green-600 bg-green-50';
+      case 'negative': return 'text-red-600 bg-red-50';
+      case 'mixed': return 'text-amber-600 bg-amber-50';
+      default: return 'text-stone-600 bg-stone-50';
     }
   };
 
-  const maxWordCount = localWordCloud.length > 0 ? localWordCloud[0].count : 1;
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Sparkles className="w-5 h-5" />
-          AI Text Analysis / AI 文本分析
-        </h3>
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="w-5 h-5 text-purple-500" />
+        <h3 className="font-semibold text-stone-800">AI Text Analysis</h3>
       </div>
 
-      {/* Question selector / 问题选择器 */}
-      <div className="flex gap-3 items-end">
-        <div className="flex-1">
-          <label className="text-xs text-muted-foreground mb-1 block">Select open-ended question / 选择开放式问题</label>
-          <select
-            value={selectedQuestion}
-            onChange={e => { setSelectedQuestion(e.target.value); setAnalysisResult(null); }}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground"
-          >
-            <option value="">Choose... / 选择...</option>
-            {textQuestions.map((q: any) => (
-              <option key={q.id} value={q.id}>
-                {q.question_text?.slice(0, 60) || 'Untitled'}
-                {' '}({responses.filter(r => r.question_id === q.id && r.response_text).length} responses)
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          onClick={runAIAnalysis}
-          disabled={analyzing || !selectedQuestion || questionResponses.length === 0}
-          className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
-        >
-          {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {analyzing ? 'Analyzing... / 分析中...' : 'Run AI Analysis / 运行 AI 分析'}
-        </button>
-      </div>
-
-      {selectedQuestion && questionResponses.length > 0 && (
+      {textQuestions.length === 0 ? (
+        <p className="text-sm text-stone-500 italic">No text-type questions found in this survey.</p>
+      ) : (
         <>
-          <div className="text-sm text-muted-foreground">
-            {questionResponses.length} text responses / {questionResponses.length} 条文本回复
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="text-xs text-stone-500 mb-1 block">Select question to analyze</label>
+              <select
+                value={selectedQuestion}
+                onChange={(e) => { setSelectedQuestion(e.target.value); setAnalysisResult(null); }}
+                className="w-full text-sm border border-stone-200 rounded-lg px-3 py-2"
+              >
+                <option value="">Choose a question...</option>
+                {textQuestions.map((q: any) => (
+                  <option key={q.id} value={q.id}>
+                    {q.question_text?.substring(0, 60)}...
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={runAnalysis}
+              disabled={!selectedQuestion || analyzing || questionResponses.length === 0}
+              className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+            >
+              {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Analyze
+            </button>
           </div>
 
-          {/* Word Cloud (always visible, local computation) / 词云 */}
-          {localWordCloud.length > 0 && (
-            <div className="bg-card border border-border rounded-lg p-4">
-              <div className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                <Tag className="w-4 h-4" /> Word Frequency / 词频
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {localWordCloud.slice(0, 40).map(({ word, count }) => {
-                  const size = Math.max(12, Math.min(28, 12 + (count / maxWordCount) * 16));
-                  const opacity = 0.4 + (count / maxWordCount) * 0.6;
-                  return (
-                    <span
-                      key={word}
-                      className="text-primary hover:bg-primary/10 px-1 rounded cursor-default transition"
-                      style={{ fontSize: `${size}px`, opacity }}
-                      title={`${word}: ${count}`}
-                    >
-                      {word}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
+          {selectedQuestion && (
+            <p className="text-xs text-stone-400">{questionResponses.length} responses available</p>
           )}
 
-          {/* AI Results / AI 分析结果 */}
           {analysisResult && (
-            <div className="space-y-4">
-              {/* Summary / 摘要 */}
-              <div className="bg-card border border-primary/20 rounded-lg p-4">
-                <div className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" /> AI Summary / AI 摘要
-                </div>
-                <p className="text-sm text-muted-foreground">{analysisResult.summary}</p>
+            <div className="space-y-4 mt-4">
+              {/* Summary */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-purple-800 mb-2 flex items-center gap-1">
+                  <MessageSquare className="w-4 h-4" /> Summary
+                </h4>
+                <p className="text-sm text-purple-700">{analysisResult.summary}</p>
               </div>
 
-              {/* Sentiment breakdown / 情感分布 */}
-              <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm font-medium text-foreground mb-3">Sentiment / 情感</div>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label: 'Positive / 积极', value: analysisResult.sentiment.positive, color: 'bg-green-500', total: analysisResult.sentiment.total },
-                    { label: 'Neutral / 中性', value: analysisResult.sentiment.neutral, color: 'bg-gray-400', total: analysisResult.sentiment.total },
-                    { label: 'Negative / 消极', value: analysisResult.sentiment.negative, color: 'bg-red-500', total: analysisResult.sentiment.total },
-                  ].map(s => (
-                    <div key={s.label} className="text-center">
-                      <div className="text-2xl font-bold text-foreground">{s.value}</div>
-                      <div className="text-xs text-muted-foreground">{s.label}</div>
-                      <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
-                        <div className={`h-full ${s.color} rounded-full`} style={{ width: `${s.total > 0 ? (s.value / s.total) * 100 : 0}%` }} />
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">{s.total > 0 ? Math.round((s.value / s.total) * 100) : 0}%</div>
+              {/* Sentiment Overview */}
+              <div className="bg-white border border-stone-200 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-stone-700 mb-3 flex items-center gap-1">
+                  <TrendingUp className="w-4 h-4" /> Sentiment Distribution
+                </h4>
+                <div className="flex gap-4">
+                  {['positive', 'negative', 'neutral'].map(s => (
+                    <div key={s} className={`flex-1 rounded-lg p-3 text-center ${sentimentColor(s)}`}>
+                      <div className="text-2xl font-bold">{(analysisResult.sentiment as any)[s]}</div>
+                      <div className="text-xs capitalize mt-1">{s}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Themes / 主题 */}
-              <div className="bg-card border border-border rounded-lg p-4">
-                <div className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" /> Themes / 主题 ({analysisResult.themes.length})
-                </div>
-                <div className="space-y-3">
-                  {analysisResult.themes.map((theme, i) => (
-                    <div key={i} className="border border-border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm text-foreground">{theme.theme}</span>
+              {/* Themes */}
+              {analysisResult.themes.length > 0 && (
+                <div className="bg-white border border-stone-200 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-stone-700 mb-3 flex items-center gap-1">
+                    <Tag className="w-4 h-4" /> Key Themes
+                  </h4>
+                  <div className="space-y-3">
+                    {analysisResult.themes.map((theme, i) => (
+                      <div key={i} className="border-l-3 border-purple-400 pl-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">{theme.count} mentions</span>
-                          <span className={`px-2 py-0.5 text-xs rounded ${sentimentColor(theme.sentiment)}`}>
+                          <span className="font-medium text-sm text-stone-800">{theme.theme}</span>
+                          <span className="text-xs bg-stone-100 px-2 py-0.5 rounded-full">{theme.count} mentions</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${sentimentColor(theme.sentiment)}`}>
                             {theme.sentiment}
                           </span>
                         </div>
+                        {theme.exampleResponses?.length > 0 && (
+                          <p className="text-xs text-stone-500 mt-1 italic">"{theme.exampleResponses[0]}"</p>
+                        )}
                       </div>
-                      {theme.exampleResponses.length > 0 && (
-                        <div className="space-y-1 mt-2">
-                          {theme.exampleResponses.slice(0, 2).map((ex, j) => (
-                            <div key={j} className="text-xs text-muted-foreground italic pl-3 border-l-2 border-border">
-                              "{ex.slice(0, 120)}{ex.length > 120 ? '...' : ''}"
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Key Insights / 关键发现 */}
-              {analysisResult.keyInsights.length > 0 && (
-                <div className="bg-card border border-border rounded-lg p-4">
-                  <div className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" /> Key Insights / 关键发现
+                    ))}
                   </div>
-                  <ul className="space-y-2">
+                </div>
+              )}
+
+              {/* Key Insights */}
+              {analysisResult.keyInsights.length > 0 && (
+                <div className="bg-white border border-stone-200 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-stone-700 mb-2 flex items-center gap-1">
+                    <BarChart3 className="w-4 h-4" /> Key Insights
+                  </h4>
+                  <ul className="space-y-1">
                     {analysisResult.keyInsights.map((insight, i) => (
-                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="text-primary font-bold">{i + 1}.</span>
-                        {insight}
+                      <li key={i} className="text-sm text-stone-600 flex gap-2">
+                        <span className="text-purple-400">•</span> {insight}
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Raw responses / 原始回复 */}
-          <details className="bg-card border border-border rounded-lg">
-            <summary className="p-3 text-sm font-medium text-foreground cursor-pointer hover:bg-muted/30">
-              Raw Responses / 原始回复 ({questionResponses.length})
-            </summary>
-            <div className="p-3 pt-0 max-h-64 overflow-y-auto space-y-2">
-              {questionResponses.slice(0, 50).map((text, i) => (
-                <div key={i} className="text-xs text-muted-foreground p-2 bg-muted/30 rounded">
-                  {text}
+              {/* Word Cloud (simple display) */}
+              {localWordCloud.length > 0 && (
+                <div className="bg-white border border-stone-200 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-stone-700 mb-2">Word Frequency</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {localWordCloud.slice(0, 20).map(({ word, count }, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200"
+                        style={{ fontSize: `${Math.max(11, Math.min(18, 10 + count * 2))}px` }}
+                      >
+                        {word} <span className="text-purple-400 text-xs">({count})</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              ))}
-              {questionResponses.length > 50 && (
-                <div className="text-xs text-muted-foreground text-center">... and {questionResponses.length - 50} more</div>
               )}
             </div>
-          </details>
+          )}
         </>
-      )}
-
-      {selectedQuestion && questionResponses.length === 0 && (
-        <div className="p-8 text-center text-muted-foreground">
-          No text responses yet for this question / 此问题暂无文本回复
-        </div>
       )}
     </div>
   );
