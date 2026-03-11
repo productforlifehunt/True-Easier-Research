@@ -5,6 +5,7 @@ import type { ParticipantType } from './ParticipantTypeManager';
 import AppPhonePreview from './AppPhonePreview';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 import BrandIcon from './BrandIcon';
+import { useI18n } from '../hooks/useI18n';
 
 // Survey Preview — uses the EXACT same shared components as the real participant app
 // 调查预览 — 使用与真实参与者应用完全相同的共享组件
