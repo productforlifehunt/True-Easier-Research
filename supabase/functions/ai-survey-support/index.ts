@@ -11,6 +11,7 @@ const corsHeaders = {
 const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY') || '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'
 const AI_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const AI_URL = 'https://openrouter.ai/api/v1/chat/completions'
+console.log('ACTIVE KEY PREFIX:', OPENROUTER_API_KEY.substring(0, 30), '...', OPENROUTER_API_KEY.substring(OPENROUTER_API_KEY.length - 10))
 
 async function callAI(messages: any[], temperature = 0.7, maxTokens = 1000) {
   const res = await fetch(AI_URL, {
