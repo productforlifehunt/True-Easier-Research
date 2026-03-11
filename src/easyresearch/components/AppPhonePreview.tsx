@@ -405,7 +405,7 @@ const AppPhonePreview: React.FC<AppPhonePreviewProps> = ({
               {...provided.droppableProps}
               className={`${containerClass} min-h-[100px] transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/30 rounded-xl' : ''}`}
             >
-              {activeTab.elements.map((el, idx) => {
+              {elementsToRender.map((el, idx) => {
                 const w = el.config.width || '100%';
                 const wrapped = renderElementWrapper(el, idx);
                 if (!wrapped) return null;
