@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ChevronRight, Hash, Network } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { loadProfileData } from '../utils/enrollmentSync';
 
 interface Enrollment {
