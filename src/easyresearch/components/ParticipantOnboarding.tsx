@@ -473,11 +473,11 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 {selectedType?.numbering_enabled && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5">
-                      Participant Number <span className="text-stone-400">(e.g., {selectedType?.number_prefix || 'P'}001)</span>
+                      {lang === 'zh' ? '参与者编号' : 'Participant Number'} <span className="text-stone-400">(e.g., {selectedType?.number_prefix || 'P'}001)</span>
                     </label>
                     <input type="text" value={participantNumber} onChange={(e) => setParticipantNumber(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                      placeholder={`${selectedType?.number_prefix || 'P'}### (leave blank for auto-assign)`} />
+                      placeholder={`${selectedType?.number_prefix || 'P'}### (${lang === 'zh' ? '留空自动分配' : 'leave blank for auto-assign'})`} />
                   </div>
                 )}
 
