@@ -228,6 +228,7 @@ const ProfileQuestionsBuilder: React.FC<{
   questions: ProfileQuestion[];
   onChange: (questions: ProfileQuestion[]) => void;
 }> = ({ questions, onChange }) => {
+  const { t } = useI18n();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const addQuestion = (type: ProfileQuestion['type']) => {
