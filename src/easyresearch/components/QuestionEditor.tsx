@@ -880,7 +880,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.allow_multiple || false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_multiple: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow multiple selections
+              {t('qe.allowMultiple')}
             </label>
             <p className="text-[11px] text-stone-400">Add options above with image URLs in the option value field, or use text labels as visual options.</p>
           </div>
