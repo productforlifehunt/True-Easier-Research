@@ -857,7 +857,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Size (MB)</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxSizeMB')}</label>
                 <input type="number" value={localQuestion.question_config?.max_size_mb ?? 10} min={1} max={100}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_size_mb: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
