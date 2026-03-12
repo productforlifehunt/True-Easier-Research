@@ -383,9 +383,9 @@ const ProfileQuestionsBuilder: React.FC<{
           { type: 'multiselect' as const, label: t('ss.typeMultiSelect'), color: 'stone' },
           { type: 'scale' as const, label: t('ss.typeScale'), color: 'stone' },
         ].map(bt => (
-          <button key={t.type} onClick={() => addQuestion(t.type)}
+          <button key={bt.type} onClick={() => addQuestion(bt.type)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-dashed border-stone-200 text-stone-500 hover:border-emerald-300 hover:text-emerald-600 transition-colors">
-            <Plus size={10} /> {t.label}
+            <Plus size={10} /> {bt.label}
           </button>
         ))}
       </div>
