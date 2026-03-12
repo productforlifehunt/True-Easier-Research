@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Edit2, Save, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 
 interface CompletedSurveyViewProps {
