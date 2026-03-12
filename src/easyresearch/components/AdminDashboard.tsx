@@ -4,7 +4,7 @@ import { Shield, Plus, Trash2, Users, Lock, Sparkles, ArrowLeft, Edit3, Save, X 
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 const ADMIN_EMAIL = 'guowei.jiang.work@gmail.com';
 

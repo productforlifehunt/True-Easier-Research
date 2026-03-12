@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FlaskConical, Plus, Trash2, BarChart3, Users, Percent, ArrowRight, CheckCircle, TrendingUp, Shuffle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface Variant {
   id: string;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Users, Globe, ExternalLink, Settings, AlertCircle, CheckCircle2, Copy, Link2, Mail, Zap, DollarSign, Filter, Microscope, Factory, Briefcase, Target, Building } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Panel Recruitment Hub – Multi-platform participant recruitment management
 // 面板招募中心 – 多平台参与者招募管理

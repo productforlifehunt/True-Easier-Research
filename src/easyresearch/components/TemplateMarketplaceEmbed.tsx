@@ -12,7 +12,7 @@ import {
   type QuestionnaireTemplate,
   type ProjectTemplate,
 } from '../services/templateService';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 type TemplateType = 'research' | 'questionnaire';
 

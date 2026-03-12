@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import {
   fetchProjectTemplates,
   fetchQuestionnaireTemplates,

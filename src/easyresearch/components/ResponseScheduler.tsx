@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, Clock, Bell, TrendingUp, Users, ChevronRight, Plus, Trash2, Play, Pause, BarChart3 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface TimePoint {
   id: string;
