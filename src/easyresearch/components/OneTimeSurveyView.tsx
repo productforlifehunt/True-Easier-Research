@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
 import { Mic, ChevronRight, ChevronLeft, Check, X, Copy } from 'lucide-react';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
 import { filterQuestionsByParticipantType } from '../utils/participantTypeFilter';

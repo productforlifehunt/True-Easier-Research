@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Bot, X, Send, Loader2, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 interface AIProjectBuilderProps {
   isOpen: boolean;

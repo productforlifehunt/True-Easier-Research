@@ -8,7 +8,7 @@ import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submission
 import { validateSurveyResponse } from '../services/validationService';
 import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 import ParticipantOnboarding from './ParticipantOnboarding';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
