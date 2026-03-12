@@ -492,7 +492,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                     filter === 'general' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
                   }`}
                 >
-                  General ({generalCount})
+                  {t('ql.general')} ({generalCount})
                 </button>
                 {q.tab_sections!.map(section => (
                   <button
