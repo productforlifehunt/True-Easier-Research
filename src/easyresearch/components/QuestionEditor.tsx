@@ -1352,7 +1352,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Validation Rules */}
         {['text_short', 'text_long', 'number', 'email', 'phone'].includes(localQuestion.question_type) && (
           <div className="space-y-3 pt-3 border-t border-stone-100">
-            <label className="text-[12px] font-medium text-stone-400">Validation</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.validation')}</label>
             {['text_short', 'text_long'].includes(localQuestion.question_type) && (
               <div className="grid grid-cols-2 gap-2">
                 <div>
