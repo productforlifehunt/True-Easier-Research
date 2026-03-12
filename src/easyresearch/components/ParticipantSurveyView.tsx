@@ -475,7 +475,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       }
     } catch (error) {
       console.error('Copy failed:', error);
-      toast.error('Failed to copy. Please manually select and copy the text.');
+      bToast.error('Failed to copy. Please manually select and copy the text.', '复制失败，请手动选择并复制文本。');
     }
   };
 
