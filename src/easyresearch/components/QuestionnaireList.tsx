@@ -843,7 +843,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                           : `${q.questions_per_page} questions per page`}
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-stone-400 mt-1.5">Leave empty for unlimited (all on one page). Set to 1 for one-at-a-time navigation.</p>
+                                  <p className="text-[10px] text-stone-400 mt-1.5">{t('ql.unlimitedHint')}</p>
                                   {q.tab_sections && q.tab_sections.length > 0 && (
                                     <div className="mt-3 space-y-2">
                                       <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">Per-tab overrides:</p>
