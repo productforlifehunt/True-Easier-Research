@@ -3,7 +3,7 @@ import { Search, MapPin, Briefcase, Users, Filter, UserPlus, Mail, X, ChevronRig
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 interface ParticipantProfile {
   user_id: string;

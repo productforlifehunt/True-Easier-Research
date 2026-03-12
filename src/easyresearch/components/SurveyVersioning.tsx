@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { History, RotateCcw, GitBranch, Users, Clock, Eye, ChevronRight, Plus, Save } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 interface Version {
   id: string;

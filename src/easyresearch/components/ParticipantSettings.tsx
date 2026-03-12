@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { authClient, supabase } from '../../lib/supabase';
 import { Bell, Moon, User, LogOut, LogIn, FileText, Network } from 'lucide-react';
 import { useI18n } from '../hooks/useI18n';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 import EcogramBuilder, { EcogramMember } from './EcogramBuilder';
 import { scheduleStudyNotifications, requestNotificationPermission } from '../services/notificationService';
 import { loadDndSetting, saveDndSetting, loadProfileData, saveProfileData, loadEcogramData, saveEcogramData } from '../utils/enrollmentSync';

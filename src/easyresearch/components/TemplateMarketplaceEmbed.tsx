@@ -12,7 +12,7 @@ import {
   type QuestionnaireTemplate,
   type ProjectTemplate,
 } from '../services/templateService';
-import { bToast } from '../utils/bilingualToast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 type TemplateType = 'research' | 'questionnaire';
 
