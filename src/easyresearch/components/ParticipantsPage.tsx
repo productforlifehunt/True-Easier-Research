@@ -135,7 +135,7 @@ const ParticipantsPage: React.FC = () => {
     invited: t('pp.invited'),
     active: t('pp.active'),
     completed: t('pp.completed'),
-    withdrawn: 'Withdrawn',
+    withdrawn: t('pp.withdrawn'),
   };
 
   const getStatusBadge = (status: string) => {
