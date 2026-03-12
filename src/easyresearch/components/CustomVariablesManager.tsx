@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Variable, Plus, Trash2, Copy, Link, Code } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Custom Variables / URL Parameters / Embedded Data Manager
 // 自定义变量 / URL 参数 / 嵌入式数据管理器
