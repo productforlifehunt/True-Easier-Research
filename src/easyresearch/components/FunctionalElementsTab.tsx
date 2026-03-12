@@ -124,7 +124,7 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
 
   const deleteUserElement = async (id: string) => {
     await (supabase as any).from('user_function_element').delete().eq('id', id);
-    toast.success(lang === 'zh' ? '已删除' : 'Deleted');
+    bToast.success('Deleted', '已删除');
     fetchElements();
   };
 

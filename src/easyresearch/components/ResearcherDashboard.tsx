@@ -230,12 +230,12 @@ const ResearcherDashboard: React.FC = () => {
           sourceLayout.bottom_nav = sourceLayout.tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id }));
           await saveLayoutToDb(newProject.id, sourceLayout);
         }
-        toast.success(t('toast.duplicated'));
+        bToast.success('Project duplicated', '项目已复制');
         loadDashboardData();
       }
     } catch (error) {
       console.error('Error duplicating project:', error);
-      toast.error(t('toast.duplicateFailed'));
+      bToast.error('Duplicate failed', '复制失败');
     } finally {
       setActionLoading(false);
     }

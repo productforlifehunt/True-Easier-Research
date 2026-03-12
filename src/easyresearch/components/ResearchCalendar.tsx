@@ -81,7 +81,7 @@ const ResearchCalendar: React.FC<Props> = ({ projectId }) => {
     save([...events, newEvent]);
     setForm({ title: '', type: 'milestone', description: '', date: '', status: 'upcoming' });
     setShowCreate(false);
-    toast.success('Event created / 事件已创建');
+    bToast.success('Event created', '事件已创建');
   };
 
   const deleteEvent = (id: string) => {

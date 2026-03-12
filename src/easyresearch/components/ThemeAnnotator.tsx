@@ -92,7 +92,7 @@ const ThemeAnnotator: React.FC<Props> = ({ projectId, questionnaires }) => {
     };
     saveThemes([...themes, newTheme]);
     setNewThemeName('');
-    toast.success('Theme created / 主题已创建');
+    bToast.success('Theme created', '主题已创建');
   };
 
   const deleteTheme = (id: string) => {
