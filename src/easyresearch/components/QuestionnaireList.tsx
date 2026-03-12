@@ -987,7 +987,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
                                         }} className="w-3 h-3 rounded" />
-                                        Do Not Disturb allowed
+                                        {t('ql.dndAllowed')}
                                       </label>
                                     </div>
                                   </div>
