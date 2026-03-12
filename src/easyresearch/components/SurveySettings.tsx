@@ -101,43 +101,43 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
             <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('project.methodology')}</label>
             <CustomDropdown
               options={[
-                { value: 'one_time', label: 'One-time' },
-                { value: 'multi_time', label: 'Multiple time' },
+                { value: 'one_time', label: t('ss.oneTime') },
+                { value: 'multi_time', label: t('ss.multipleTime') },
               ]}
               value={project.methodology_type || 'one_time'}
               onChange={(v) => onUpdateProject({ ...project, methodology_type: v })}
-              placeholder="Select type"
+              placeholder={t('ss.selectType')}
             />
           </div>
 
           {/* Longitudinal-specific: Duration dropdown */}
           {isLongitudinal && (
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Duration</label>
-              <CustomDropdown options={[{value:'1',label:'1 Day'},{value:'3',label:'3 Days'},{value:'7',label:'1 Week'},{value:'14',label:'2 Weeks'},{value:'30',label:'1 Month'},{value:'90',label:'3 Months'}]} value={String(project.study_duration || '7')} onChange={(v) => onUpdateProject({ ...project, study_duration: parseInt(v) })} placeholder="Duration" />
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('ss.duration')}</label>
+              <CustomDropdown options={[{value:'1',label:t('ss.1day')},{value:'3',label:t('ss.3days')},{value:'7',label:t('ss.1week')},{value:'14',label:t('ss.2weeks')},{value:'30',label:t('ss.1month')},{value:'90',label:t('ss.3months')}]} value={String(project.study_duration || '7')} onChange={(v) => onUpdateProject({ ...project, study_duration: parseInt(v) })} placeholder={t('ss.duration')} />
             </div>
           )}
 
           {/* Start & End Date — always shown */}
           <div className="grid grid-cols-2 gap-3">
-            <InputField label="Start Date" type="datetime-local" value={project.start_at || ''} onChange={(e) => onUpdateProject({ ...project, start_at: (e.target as HTMLInputElement).value })} />
-            <InputField label="End Date" type="datetime-local" value={project.end_at || ''} onChange={(e) => onUpdateProject({ ...project, end_at: (e.target as HTMLInputElement).value })} />
+            <InputField label={t('ss.startDate')} type="datetime-local" value={project.start_at || ''} onChange={(e) => onUpdateProject({ ...project, start_at: (e.target as HTMLInputElement).value })} />
+            <InputField label={t('ss.endDate')} type="datetime-local" value={project.end_at || ''} onChange={(e) => onUpdateProject({ ...project, end_at: (e.target as HTMLInputElement).value })} />
           </div>
 
           {/* Longitudinal toggles */}
           {isLongitudinal && (
             <div className="divide-y divide-stone-100">
-              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label="Allow Do Not Disturb" desc="Allow participants to set quiet hours to pause notifications" />
-              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label="Custom Start Date" desc="Allow participants to choose when to begin" />
+              <Toggle enabled={project.allow_participant_dnd || false} onChange={(v) => onUpdateProject({ ...project, allow_participant_dnd: v })} label={t('ss.allowDnd')} desc={t('ss.allowDndDesc')} />
+              <Toggle enabled={project.allow_start_date_selection || false} onChange={(v) => onUpdateProject({ ...project, allow_start_date_selection: v })} label={t('ss.customStartDate')} desc={t('ss.customStartDateDesc')} />
             </div>
           )}
         </div>
       </SectionCard>
 
       {/* Capacity */}
-      <SectionCard icon={Users} iconBg="from-cyan-50 to-teal-50" iconColor="text-cyan-600" title="Capacity">
+      <SectionCard icon={Users} iconBg="from-cyan-50 to-teal-50" iconColor="text-cyan-600" title={t('ss.capacity')}>
         <div className="space-y-3">
-          <InputField label="Max Participants" type="number" value={project.max_participant || ''} onChange={(e) => onUpdateProject({ ...project, max_participant: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder="Unlimited" />
+          <InputField label={t('ss.maxParticipants')} type="number" value={project.max_participant || ''} onChange={(e) => onUpdateProject({ ...project, max_participant: parseInt((e.target as HTMLInputElement).value) || undefined })} placeholder={t('ss.unlimited')} />
         </div>
       </SectionCard>
 
@@ -148,40 +148,40 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
       <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5">
         <div className="flex items-center gap-2.5 mb-3">
           <Share2 size={16} className="text-emerald-600" />
-          <h3 className="text-[14px] font-semibold text-stone-800">Share Study</h3>
+          <h3 className="text-[14px] font-semibold text-stone-800">{t('ss.shareStudy')}</h3>
         </div>
-        <p className="text-[12px] text-stone-500 mb-4 font-light">Share this link or code with participants.</p>
+        <p className="text-[12px] text-stone-500 mb-4 font-light">{t('ss.shareDesc')}</p>
 
         {!canShare && (
           <div className="p-3 rounded-xl bg-white/80 border border-emerald-100 mb-4">
-            <p className="text-[12px] text-stone-500">Save the project first to generate a share link.</p>
+            <p className="text-[12px] text-stone-500">{t('ss.saveFirst')}</p>
           </div>
         )}
 
         {project.survey_code && (
           <div className="mb-4">
-            <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Study Code</label>
+            <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('ss.studyCode')}</label>
             <div className="flex items-center gap-2">
               <div className="px-4 py-2.5 rounded-xl bg-white border-2 border-emerald-300">
                 <span className="text-xl font-bold tracking-widest text-emerald-600">{project.survey_code}</span>
               </div>
               <button onClick={() => { navigator.clipboard.writeText(project.survey_code || ''); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
                 className="px-3 py-2.5 rounded-xl text-[13px] font-medium text-white bg-emerald-500 hover:bg-emerald-600 flex items-center gap-1.5 transition-colors">
-                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}
+                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t('ss.copied') : t('ss.copy')}
               </button>
             </div>
           </div>
         )}
 
         <div>
-          <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Study Link</label>
+          <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('ss.studyLink')}</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-stone-200">
               <Link2 size={14} className="text-emerald-500 shrink-0" />
               <input type="text" value={participantLink} readOnly disabled={!canShare} className="flex-1 bg-transparent border-none outline-none text-[12px] text-stone-600" />
             </div>
             <button onClick={copyToClipboard} disabled={!canShare} className="px-3 py-2 rounded-xl text-[13px] font-medium text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 flex items-center gap-1.5 transition-colors">
-              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t('ss.copied') : t('ss.copy')}
             </button>
           </div>
         </div>
@@ -189,9 +189,9 @@ const SurveySettings: React.FC<SurveySettingsProps> = ({ project, onUpdateProjec
         {canShare && (
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
-              { icon: QrCode, label: 'QR Code', action: () => window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(participantLink)}`, '_blank'), actionLabel: 'Download' },
-              { icon: Code, label: 'Embed', action: () => { navigator.clipboard.writeText(`<iframe src="${participantLink}" width="100%" height="600" frameborder="0"></iframe>`); setCopied(true); setTimeout(() => setCopied(false), 2000); }, actionLabel: 'Copy' },
-              { icon: Mail, label: 'Email', action: () => window.open(`mailto:?subject=${encodeURIComponent(`Participate: ${project.title}`)}&body=${encodeURIComponent(`Join: ${participantLink}`)}`, '_blank'), actionLabel: 'Compose' },
+              { icon: QrCode, label: t('ss.qrCode'), action: () => window.open(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(participantLink)}`, '_blank'), actionLabel: t('ss.download') },
+              { icon: Code, label: t('ss.embed'), action: () => { navigator.clipboard.writeText(`<iframe src="${participantLink}" width="100%" height="600" frameborder="0"></iframe>`); setCopied(true); setTimeout(() => setCopied(false), 2000); }, actionLabel: t('ss.copy') },
+              { icon: Mail, label: t('ss.email'), action: () => window.open(`mailto:?subject=${encodeURIComponent(`Participate: ${project.title}`)}&body=${encodeURIComponent(`Join: ${participantLink}`)}`, '_blank'), actionLabel: t('ss.compose') },
             ].map(d => (
               <div key={d.label} className="bg-white rounded-xl p-3 text-center border border-emerald-100">
                 <d.icon size={20} className="text-emerald-500 mx-auto mb-2" />
