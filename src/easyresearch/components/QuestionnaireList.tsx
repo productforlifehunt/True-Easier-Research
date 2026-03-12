@@ -519,7 +519,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               }}
               className="shrink-0 px-2 py-1 rounded-full text-[10px] font-medium text-stone-400 border border-dashed border-stone-300 hover:border-emerald-400 hover:text-emerald-500 transition-colors"
             >
-              + Tab
+              {t('ql.addTab')}
             </button>
 
             {/* Spacer */}
