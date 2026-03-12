@@ -755,7 +755,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'text_block' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.content')}</label>
               <textarea
                 value={localQuestion.question_config?.content || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content: e.target.value } })}
