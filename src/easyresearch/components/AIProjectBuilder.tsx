@@ -112,7 +112,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
           status: 'draft',
         }).select().single();
 
-      if (error || !project) { toast.error('Failed to create project'); return; }
+      if (error || !project) { bToast.error('Failed to create project', '创建项目失败'); return; }
 
       // Create questionnaires
       const questionnaires = p.questionnaires || [{ title: p.title || 'Survey', questions: p.questions || [] }];
