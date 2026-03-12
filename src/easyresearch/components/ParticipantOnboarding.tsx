@@ -285,7 +285,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         {q.type === 'select' && (
           <select value={val || ''} onChange={(e) => update(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white">
-            <option value="">Select...</option>
+            <option value="">{t('onboard.select')}</option>
             {(q.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         )}
