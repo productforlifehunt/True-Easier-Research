@@ -3,7 +3,7 @@ import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Clock
 import CustomDropdown from './CustomDropdown';
 import { supabase } from '../../lib/supabase';
 import type { QuestionnaireConfig } from './QuestionnaireList';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Popup data model / 弹窗数据模型
 export interface PopupConfig {
