@@ -659,7 +659,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {(localQuestion.question_type === 'likert' || localQuestion.question_type === 'likert_scale') && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Scale Range</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.scaleRange')}</label>
               <select value={localQuestion.question_config?.scale_type || '1-5'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, scale_type: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
                 <option value="1-5">1-5</option><option value="1-7">1-7</option><option value="1-10">1-10</option><option value="0-10">0-10</option>
