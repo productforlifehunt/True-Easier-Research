@@ -46,7 +46,7 @@ const DistributionManager: React.FC<Props> = ({ projectId, surveyCode, surveyTit
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
-    toast.success('Copied! / 已复制！');
+    bToast.success('Copied!', '已复制！');
     setTimeout(() => setCopied(false), 2000);
   };
 
