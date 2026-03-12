@@ -1199,7 +1199,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.randomize_variants || false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, randomize_variants: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Randomize display order
+              {t('qe.randomizeOrder')}
             </label>
             <div>
               <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
