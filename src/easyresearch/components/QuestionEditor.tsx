@@ -1085,7 +1085,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Variant A URL</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.variantAUrl')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_a_url || ''}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_url: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design A" />
