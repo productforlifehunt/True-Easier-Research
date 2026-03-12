@@ -497,9 +497,9 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 <button onClick={() => setStep('info')} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
                   <ChevronLeft size={16} className="text-stone-500" />
                 </button>
-                <h2 className="text-lg font-bold text-stone-800">Your Profile</h2>
+                <h2 className="text-lg font-bold text-stone-800">{t('onboard.profileInfo')}</h2>
               </div>
-              <p className="text-[12px] text-stone-400 font-light mb-5">Please fill out the following information before starting.</p>
+              <p className="text-[12px] text-stone-400 font-light mb-5">{lang === 'zh' ? '请在开始前填写以下信息。' : 'Please fill out the following information before starting.'}</p>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                 {profileQuestions.map(q => renderProfileField(q))}
               </div>
