@@ -669,8 +669,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="w-14 h-14 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
             <FileText size={24} className="text-stone-300" />
           </div>
-          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">No Questionnaires</h2>
-          <p className="text-[13px] text-stone-400">Add questionnaires like "Hourly Log", "Daily Log", etc.</p>
+          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">{t('ql.noQuestionnaires')}</h2>
+          <p className="text-[13px] text-stone-400">{t('ql.noQuestionnairesHint')}</p>
         </div>
       ) : (
         <DragDropContext onDragEnd={handleQuestionnaireDragEnd}>
