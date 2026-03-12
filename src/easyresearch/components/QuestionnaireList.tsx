@@ -657,7 +657,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="flex items-center gap-1.5">
             <Bell size={13} className="text-stone-400" />
             <p className="text-[12px] text-stone-500">
-              Configure project-level notifications in the <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>Notifications</strong> tab.
+              {t('ql.configureNotifications')} <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>{t('ql.notificationsTab')}</strong>
+            </p>
             </p>
           </div>
         </div>
