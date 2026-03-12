@@ -98,7 +98,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
       navigate(`/easyresearch/inbox/${newConv.id}`);
     } catch (err) {
       console.error('Error starting conversation:', err);
-      toast.error('Failed to start conversation');
+      bToast.error('Failed to start conversation', '开始对话失败');
     }
   };
 
