@@ -939,7 +939,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {(q.notifications || []).map((notif, ni) => (
                                   <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-[11px] font-medium text-stone-600">Notification #{ni + 1}</span>
+                                      <span className="text-[11px] font-medium text-stone-600">{t('ql.notifNum')} #{ni + 1}</span>
                                       <div className="flex items-center gap-1.5">
                                         <button onClick={() => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
