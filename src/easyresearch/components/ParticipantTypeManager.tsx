@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, ChevronDown, ChevronUp, Users, Shield, ClipboardCheck, X, Hash } from 'lucide-react';
+import { useI18n } from '../hooks/useI18n';
 
 export interface ParticipantType {
   id: string;
@@ -29,6 +30,7 @@ interface ParticipantTypeManagerProps {
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
 
 const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ participantTypes, onUpdate, questionnaires = [] }) => {
+  const { t } = useI18n();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
@@ -49,37 +51,28 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
   };
 
   const updateType = (id: string, updates: Partial<ParticipantType>) => {
-    onUpdate(participantTypes.map(t => t.id === id ? { ...t, ...updates } : t));
+    onUpdate(participantTypes.map(pt => pt.id === id ? { ...pt, ...updates } : pt));
   };
 
   const removeType = (id: string) => {
-    onUpdate(participantTypes.filter(t => t.id !== id));
+    onUpdate(participantTypes.filter(pt => pt.id !== id));
     if (expandedId === id) setExpandedId(null);
   };
-
-  const Toggle = ({ enabled, onChange, label, desc }: { enabled: boolean; onChange: (v: boolean) => void; label: string; desc: string }) => (
-    <div className="flex items-center justify-between py-2">
-      <div><p className="text-[12px] font-medium text-stone-700">{label}</p><p className="text-[11px] text-stone-400">{desc}</p></div>
-      <button onClick={() => onChange(!enabled)} className={`relative w-9 h-[18px] rounded-full transition-colors shrink-0 ${enabled ? 'bg-emerald-500' : 'bg-stone-200'}`}>
-        <span className="absolute top-[1px] w-4 h-4 bg-white rounded-full shadow-sm transition-transform" style={{ left: enabled ? '20px' : '1px' }} />
-      </button>
-    </div>
-  );
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="text-[15px] font-semibold text-stone-800">Participant Types</h3>
+          <h3 className="text-[15px] font-semibold text-stone-800">{t('pt.title')}</h3>
           <p className="text-[12px] text-stone-400 font-light mt-0.5">
-            Define different types of participants, each with their own consent, screening, and relations
+            {t('pt.desc')}
           </p>
         </div>
         <button
           onClick={addType}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
         >
-          <Plus size={14} /> Add Type
+          <Plus size={14} /> {t('pt.addType')}
         </button>
       </div>
 
@@ -88,9 +81,9 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
           <div className="w-14 h-14 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
             <Users size={24} className="text-stone-300" />
           </div>
-          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">No Participant Types</h2>
+          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">{t('pt.noTypes')}</h2>
           <p className="text-[13px] text-stone-400 font-light">
-            E.g., "Primary Caregiver" gets hourly + daily logs, "Family Member" gets daily only
+            {t('pt.noTypesExample')}
           </p>
         </div>
       ) : (
@@ -109,16 +102,16 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                     <h4 className="text-[14px] font-semibold text-stone-800 truncate">{pt.name}</h4>
                     <div className="flex items-center gap-3 mt-0.5">
                       {pt.relations.length > 0 && (
-                        <span className="text-[11px] text-stone-400">{pt.relations.length} relations</span>
+                        <span className="text-[11px] text-stone-400">{pt.relations.length} {t('pt.relations').toLowerCase()}</span>
                       )}
                       {questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id)).length > 0 && (
                         <span className="text-[11px] text-amber-500 flex items-center gap-0.5">
-                          <Shield size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id)).length} consent
+                          <Shield size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id)).length} {t('pt.consentForms').toLowerCase()}
                         </span>
                       )}
                       {questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id)).length > 0 && (
                         <span className="text-[11px] text-orange-500 flex items-center gap-0.5">
-                          <ClipboardCheck size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id)).length} screening
+                          <ClipboardCheck size={10} /> {questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id)).length} {t('pt.screeningQuestionnaires').toLowerCase()}
                         </span>
                       )}
                     </div>
@@ -140,17 +133,17 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                     {/* Basic */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[12px] font-medium text-stone-400 mb-1">Type Name</label>
+                        <label className="block text-[12px] font-medium text-stone-400 mb-1">{t('pt.typeName')}</label>
                         <input
                           type="text"
                           value={pt.name}
                           onChange={(e) => updateType(pt.id, { name: e.target.value })}
                           className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                          placeholder="E.g., Primary Caregiver"
+                          placeholder={t('pt.typeNamePlaceholder')}
                         />
                       </div>
                       <div>
-                        <label className="block text-[12px] font-medium text-stone-400 mb-1">Color</label>
+                        <label className="block text-[12px] font-medium text-stone-400 mb-1">{t('pt.color')}</label>
                         <div className="flex gap-1.5">
                           {COLORS.map(c => (
                             <button
@@ -164,25 +157,25 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[12px] font-medium text-stone-400 mb-1">Description</label>
+                      <label className="block text-[12px] font-medium text-stone-400 mb-1">{t('pt.descriptionLabel')}</label>
                       <textarea
                         value={pt.description}
                         onChange={(e) => updateType(pt.id, { description: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
                         rows={2}
-                        placeholder="Description of this participant type..."
+                        placeholder={t('pt.descriptionPlaceholder')}
                       />
                     </div>
 
                     {/* Auto-Numbering */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                       <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <Hash size={12} /> Auto-Numbering
+                        <Hash size={12} /> {t('pt.autoNumbering')}
                       </h5>
                       <div className="flex items-center justify-between py-1">
                         <div>
-                          <p className="text-[12px] font-medium text-stone-700">Auto-Number Participants</p>
-                          <p className="text-[11px] text-stone-400">Assign sequential IDs when participants enroll (e.g., {pt.number_prefix || 'P1'}001)</p>
+                          <p className="text-[12px] font-medium text-stone-700">{t('pt.autoNumberParticipants')}</p>
+                          <p className="text-[11px] text-stone-400">{t('pt.autoNumberDesc')} (e.g., {pt.number_prefix || 'P1'}001)</p>
                         </div>
                         <button
                           onClick={() => updateType(pt.id, { numbering_enabled: !pt.numbering_enabled })}
@@ -193,7 +186,7 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                       </div>
                       {pt.numbering_enabled && (
                         <div className="pl-3 border-l-2 border-indigo-200">
-                          <label className="block text-[11px] font-medium text-stone-400 mb-1">Number Prefix</label>
+                          <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('pt.numberPrefix')}</label>
                           <input
                             type="text"
                             value={pt.number_prefix || ''}
@@ -208,8 +201,8 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
 
                     {/* Relations */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                      <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Relations</h5>
-                      <p className="text-[11px] text-stone-400">Define relationship options participants can choose</p>
+                      <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">{t('pt.relations')}</h5>
+                      <p className="text-[11px] text-stone-400">{t('pt.relationsDesc')}</p>
                       {pt.relations.map((rel, rIdx) => (
                         <div key={rIdx} className="flex items-center gap-1.5">
                           <input
@@ -231,59 +224,59 @@ const ParticipantTypeManager: React.FC<ParticipantTypeManagerProps> = ({ partici
                         onClick={() => updateType(pt.id, { relations: [...pt.relations, ''] })}
                         className="text-[11px] text-emerald-500 hover:text-emerald-600 font-medium"
                       >
-                        + Add Relation
+                        {t('pt.addRelation')}
                       </button>
                     </div>
 
-                    {/* Consent Forms — synced from questionnaire table */}
+                    {/* Consent Forms */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                       <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <Shield size={12} /> Consent Forms
+                        <Shield size={12} /> {t('pt.consentForms')}
                       </h5>
                       {(() => {
                         const assigned = questionnaires.filter(q => q.questionnaire_type === 'consent' && q.assigned_participant_types.includes(pt.id));
                         const unassigned = questionnaires.filter(q => q.questionnaire_type === 'consent' && !q.assigned_participant_types.includes(pt.id));
                         return (
                           <>
-                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">No consent forms assigned to this type.</p>}
+                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">{t('pt.noConsentAssigned')}</p>}
                             {assigned.map(q => (
                               <div key={q.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100">
                                 <Shield size={11} className="text-emerald-500 shrink-0" />
                                 <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
-                                <span className="text-[10px] text-emerald-500 font-medium">Assigned</span>
+                                <span className="text-[10px] text-emerald-500 font-medium">{t('common.assigned')}</span>
                               </div>
                             ))}
                             {unassigned.length > 0 && (
-                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other consent form{unassigned.length > 1 ? 's' : ''} exist but not assigned to this type</p>
+                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other consent form{unassigned.length > 1 ? 's' : ''}</p>
                             )}
-                            <p className="text-[10px] text-stone-400">Manage consent forms in the Questionnaires tab. Assign them via "Assigned Types" in questionnaire settings.</p>
+                            <p className="text-[10px] text-stone-400">{t('pt.manageConsentHint')}</p>
                           </>
                         );
                       })()}
                     </div>
 
-                    {/* Screening — synced from questionnaire table */}
+                    {/* Screening */}
                     <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                       <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-                        <ClipboardCheck size={12} /> Screening Questionnaires
+                        <ClipboardCheck size={12} /> {t('pt.screeningQuestionnaires')}
                       </h5>
                       {(() => {
                         const assigned = questionnaires.filter(q => q.questionnaire_type === 'screening' && q.assigned_participant_types.includes(pt.id));
                         const unassigned = questionnaires.filter(q => q.questionnaire_type === 'screening' && !q.assigned_participant_types.includes(pt.id));
                         return (
                           <>
-                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">No screening questionnaires assigned to this type.</p>}
+                            {assigned.length === 0 && <p className="text-[11px] text-stone-400 italic">{t('pt.noScreeningAssigned')}</p>}
                             {assigned.map(q => (
                               <div key={q.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-amber-50 border border-amber-100">
                                 <ClipboardCheck size={11} className="text-amber-500 shrink-0" />
                                 <span className="text-[12px] text-stone-700 flex-1 truncate">{q.title}</span>
-                                <span className="text-[10px] text-amber-500 font-medium">Assigned</span>
+                                <span className="text-[10px] text-amber-500 font-medium">{t('common.assigned')}</span>
                               </div>
                             ))}
                             {unassigned.length > 0 && (
-                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other screening set{unassigned.length > 1 ? 's' : ''} exist but not assigned to this type</p>
+                              <p className="text-[10px] text-stone-400 mt-1">{unassigned.length} other screening set{unassigned.length > 1 ? 's' : ''}</p>
                             )}
-                            <p className="text-[10px] text-stone-400">Manage screening in the Questionnaires tab. Assign them via "Assigned Types" in questionnaire settings.</p>
+                            <p className="text-[10px] text-stone-400">{t('pt.manageConsentHint')}</p>
                           </>
                         );
                       })()}
