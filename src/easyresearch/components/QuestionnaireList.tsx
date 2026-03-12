@@ -1071,7 +1071,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {/* AI Preview hint */}
                                 <p className="text-[10px] text-stone-400 flex items-center gap-1"><Eye size={10} /> {t('ai.previewHint')}</p>
 
-                                <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">You can also customize AI settings per question in the question editor below.</p>
+                                <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">{t('ql.aiCustomizePerQ')}</p>
                               </div>
 
                               {participantTypes.length > 0 && (
