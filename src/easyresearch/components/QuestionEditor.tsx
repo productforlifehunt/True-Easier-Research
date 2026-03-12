@@ -524,7 +524,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                 placeholder="e.g., Tab icon" maxLength={4} />
             </div>
-            <p className="text-[11px] text-stone-400">All questions after this section header (until the next one) will be grouped into this tab.</p>
+            <p className="text-[11px] text-stone-400">{t('qe.sectionTabHint')}</p>
           </div>
         )}
 
@@ -606,17 +606,17 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </Droppable>
             </DragDropContext>
             <button onClick={addOption} className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-stone-200 text-[12px] text-stone-400 hover:border-emerald-300 hover:text-emerald-500 transition-colors">
-              + Add Option
+              {t('qe.addOption')}
             </button>
             <div className="mt-3 space-y-2">
               <label className="flex items-center gap-2 text-[12px] text-stone-600">
                 <input type="checkbox" checked={localQuestion.allow_other || false} onChange={(e) => updateLocal({ allow_other: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                Add "Other" option
+                {t('qe.addOther')}
               </label>
               {localQuestion.question_type === 'multiple_choice' && (
                 <label className="flex items-center gap-2 text-[12px] text-stone-600">
                   <input type="checkbox" checked={localQuestion.allow_none || false} onChange={(e) => updateLocal({ allow_none: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                  Add "None of the above"
+                  {t('qe.addNone')}
                 </label>
               )}
             </div>
@@ -626,14 +626,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Date/Time Configuration */}
         {(localQuestion.question_type === 'date' || localQuestion.question_type === 'time') && (
           <div className="space-y-2">
-            <label className="text-[12px] font-medium text-stone-400">Date/Time Settings</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.dateTimeSettings')}</label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.validation_rule?.allow_future_dates !== false} onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, allow_future_dates: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow future dates/times
+              {t('qe.allowFuture')}
             </label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.validation_rule?.allow_past_dates !== false} onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, allow_past_dates: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow past dates/times
+              {t('qe.allowPast')}
             </label>
           </div>
         )}
@@ -659,7 +659,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {(localQuestion.question_type === 'likert' || localQuestion.question_type === 'likert_scale') && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Scale Range</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.scaleRange')}</label>
               <select value={localQuestion.question_config?.scale_type || '1-5'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, scale_type: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
                 <option value="1-5">1-5</option><option value="1-7">1-7</option><option value="1-10">1-10</option><option value="0-10">0-10</option>
@@ -667,18 +667,18 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Min Label</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.minLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.min_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, min_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Strongly Disagree" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Label</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.max_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Strongly Agree" />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Custom Labels (one per line, overrides default)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.customLabels')}</label>
               <textarea value={localQuestion.question_config?.custom_labels?.join('\n') || ''} onChange={(e) => {
                 const labels = e.target.value.split('\n').filter(l => l.trim());
                 updateLocal({ question_config: { ...localQuestion.question_config, custom_labels: labels.length > 0 ? labels : undefined } });
@@ -692,7 +692,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Rating Configuration */}
         {localQuestion.question_type === 'rating' && (
           <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Max Stars</label>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.maxStars')}</label>
             <select value={localQuestion.question_config?.max_value ?? 5} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_value: Number(e.target.value) } })}
               className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
               <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="7">7</option><option value="10">10</option>
@@ -705,7 +705,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'matrix' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Column Headers (one per line)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.columnHeaders')}</label>
               <textarea
                 value={(localQuestion.question_config?.columns || []).join('\n')}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, columns: e.target.value.split('\n').filter(l => l.trim()) } })}
@@ -714,7 +714,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 placeholder="Strongly Disagree&#10;Disagree&#10;Neutral&#10;Agree&#10;Strongly Agree"
               />
             </div>
-            <p className="text-[11px] text-stone-400">Row items are defined in the Options section above. Each row will have the same column choices.</p>
+            <p className="text-[11px] text-stone-400">{t('qe.matrixRowHint')}</p>
           </div>
         )}
 
@@ -722,12 +722,12 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'yes_no' && (
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Yes Label</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.yesLabel')}</label>
               <input type="text" value={localQuestion.question_config?.yes_label || 'Yes'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, yes_label: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">No Label</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.noLabel')}</label>
               <input type="text" value={localQuestion.question_config?.no_label || 'No'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, no_label: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
             </div>
@@ -738,7 +738,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'instruction' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content Type</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.contentType')}</label>
               <select value={localQuestion.question_config?.content_type || 'text'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content_type: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 bg-white">
                 <option value="text">Plain Text</option>
@@ -755,7 +755,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'text_block' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.content')}</label>
               <textarea
                 value={localQuestion.question_config?.content || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content: e.target.value } })}
@@ -765,7 +765,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Size (px)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.fontSize')}</label>
               <input type="number" value={localQuestion.question_config?.font_size ?? 14} min={10} max={32}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, font_size: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
@@ -779,7 +779,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Style</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.style')}</label>
                 <select value={localQuestion.question_config?.style || 'solid'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, style: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
@@ -789,13 +789,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Color</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.color')}</label>
                 <input type="color" value={localQuestion.question_config?.color || '#e5e7eb'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, color: e.target.value } })}
                   className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Thickness</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.thickness')}</label>
                 <input type="number" value={localQuestion.question_config?.thickness ?? 1} min={1} max={10}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, thickness: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
@@ -897,7 +897,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 placeholder="YouTube, Vimeo, or direct MP4 URL" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Poster Image (optional)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.posterImage')}</label>
               <input type="text" value={localQuestion.question_config?.poster_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, poster_url: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="Thumbnail URL" />
@@ -951,7 +951,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Type</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.type')}</label>
                 <select value={localQuestion.question_config?.embed_type || 'iframe'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_type: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
@@ -961,7 +961,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.height')}</label>
                 <select value={localQuestion.question_config?.embed_height || '400px'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_height: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
@@ -973,7 +973,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.allow_fullscreen !== false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_fullscreen: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow fullscreen
+              {t('qe.allowFullscreen')}
             </label>
           </div>
         )}
@@ -1018,13 +1018,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Find pricing info" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tree Structure (JSON)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.treeStructure')}</label>
               <textarea value={JSON.stringify(localQuestion.question_config?.tree_data || [], null, 2)}
                 onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, tree_data: JSON.parse(e.target.value) } }); } catch {} }}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={6} />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Correct Answer (node label)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.correctAnswer')}</label>
               <input type="text" value={localQuestion.question_config?.correct_answer || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, correct_answer: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
@@ -1036,13 +1036,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'first_click' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.testImageUrl')}</label>
               <input type="text" value={localQuestion.question_config?.test_image_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/mockup.png" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.task')}</label>
               <textarea value={localQuestion.question_config?.task_description || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Where would you click to...?" />
@@ -1060,13 +1060,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'five_second_test' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.testImageUrl')}</label>
               <input type="text" value={localQuestion.question_config?.test_image_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/design.png" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Duration (sec)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.displayDuration')}</label>
               <input type="number" value={localQuestion.question_config?.test_duration ?? 5} min={1} max={30}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_duration: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
@@ -1085,13 +1085,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Variant A URL</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.variantAUrl')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_a_url || ''}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_url: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design A" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Label A</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.labelA')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_a_label || 'Design A'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
@@ -1099,13 +1099,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Variant B URL</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.variantBUrl')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_b_url || ''}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_b_url: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design B" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Label B</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.labelB')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_b_label || 'Design B'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_b_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
@@ -1124,14 +1124,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'prototype_test' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Prototype URL</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.prototypeUrl')}</label>
               <input type="text" value={localQuestion.question_config?.prototype_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, prototype_url: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://figma.com/proto/..." />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Platform</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.platform')}</label>
                 <select value={localQuestion.question_config?.prototype_platform || 'figma'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, prototype_platform: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
@@ -1140,7 +1140,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Height</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.height')}</label>
                 <select value={localQuestion.question_config?.embed_height || '600px'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_height: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
@@ -1149,7 +1149,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </div>
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tasks (JSON)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.tasksJson')}</label>
               <textarea value={JSON.stringify(localQuestion.question_config?.task_list || [], null, 2)}
                 onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, task_list: JSON.parse(e.target.value) } }); } catch {} }}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={4} />
@@ -1161,7 +1161,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'max_diff' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Items Per Set</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.itemsPerSet')}</label>
               <input type="number" value={localQuestion.question_config?.items_per_set ?? 4} min={3} max={7}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, items_per_set: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
@@ -1169,13 +1169,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Best Label</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.bestLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.best_label || 'Most Important'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, best_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Worst Label</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.worstLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.worst_label || 'Least Important'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, worst_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
@@ -1193,16 +1193,16 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.show_labels !== false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, show_labels: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Show variant labels
+              {t('qe.showLabels')}
             </label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.question_config?.randomize_variants || false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, randomize_variants: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Randomize display order
+              {t('qe.randomizeOrder')}
             </label>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.followupQuestion')}</label>
               <input type="text" value={localQuestion.question_config?.followup_question || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Why did you choose this design?" />
@@ -1214,25 +1214,25 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'heatmap' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Test Image URL</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.testImageUrl')}</label>
               <input type="text" value={localQuestion.question_config?.test_image_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_image_url: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/page-screenshot.png" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.task')}</label>
               <textarea value={localQuestion.question_config?.task_description || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Click all areas that grab your attention" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Clicks</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxClicks')}</label>
               <input type="number" value={localQuestion.question_config?.max_clicks ?? 10} min={1} max={50}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_clicks: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.followupQuestion')}</label>
               <input type="text" value={localQuestion.question_config?.followup_question || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="What stood out most?" />
@@ -1243,7 +1243,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Conjoint Analysis Configuration */}
         {localQuestion.question_type === 'conjoint' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Conjoint Attributes</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">{t('qe.conjointAttributes')}</p>
             {(localQuestion.question_config?.conjoint_attributes || []).map((attr: any, ai: number) => (
               <div key={ai} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
                 <div className="flex gap-2">
@@ -1278,23 +1278,23 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                     const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
                     attrs[ai] = { ...attrs[ai], levels: [...(attrs[ai].levels || []), ''] };
                     updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
-                  }} className="text-[10px] text-emerald-500 hover:underline">+ Add level</button>
+                  }} className="text-[10px] text-emerald-500 hover:underline">{t('qe.addLevel')}</button>
                 </div>
               </div>
             ))}
             <button onClick={() => {
               const attrs = [...(localQuestion.question_config?.conjoint_attributes || []), { name: '', levels: ['', ''] }];
               updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
-            }} className="text-[11px] text-blue-500 hover:underline">+ Add attribute</button>
+            }} className="text-[11px] text-blue-500 hover:underline">{t('qe.addAttribute')}</button>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] text-stone-400 mb-1">Profiles per task</label>
+                <label className="block text-[11px] text-stone-400 mb-1">{t('qe.profilesPerTask')}</label>
                 <input type="number" value={localQuestion.question_config?.profiles_per_task ?? 3} min={2} max={5}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, profiles_per_task: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] text-stone-400 mb-1"># Choice tasks</label>
+                <label className="block text-[11px] text-stone-400 mb-1">{t('qe.choiceTasks')}</label>
                 <input type="number" value={localQuestion.question_config?.num_choice_tasks ?? 6} min={1} max={20}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, num_choice_tasks: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
@@ -1304,7 +1304,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.include_none_option ?? true}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, include_none_option: e.target.checked } })}
                 className="rounded border-stone-300" />
-              Include "None of these" option
+              {t('qe.includeNone')}
             </label>
           </div>
         )}
@@ -1312,21 +1312,21 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Kano Model Configuration */}
         {localQuestion.question_type === 'kano' && (
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">Kano Paired Questions</p>
+            <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">{t('qe.kanoPaired')}</p>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Functional question</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.functionalQ')}</label>
               <input type="text" value={localQuestion.question_config?.kano_functional || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_functional: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were present?" />
             </div>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Dysfunctional question</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.dysfunctionalQ')}</label>
               <input type="text" value={localQuestion.question_config?.kano_dysfunctional || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_dysfunctional: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were absent?" />
             </div>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Response categories (one per line)</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.responseCategories')}</label>
               <textarea value={(localQuestion.question_config?.kano_categories || []).join('\n')}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_categories: e.target.value.split('\n').filter(Boolean) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] border border-stone-200 resize-none" rows={5}
@@ -1338,13 +1338,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
           <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-            <label className="text-[12px] font-medium text-stone-400">Response Type</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.responseType')}</label>
             <select value={localQuestion.response_required || 'optional'} onChange={(e) => {
               const val = e.target.value;
               updateLocal({ response_required: val, required: val === 'force' });
             }}
               className="px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400">
-              <option value="optional">Optional</option><option value="request">Request</option><option value="force">Required</option>
+              <option value="optional">{t('qe.optional')}</option><option value="request">{t('qe.request')}</option><option value="force">{t('qe.required')}</option>
             </select>
           </div>
         )}
@@ -1352,17 +1352,17 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Validation Rules */}
         {['text_short', 'text_long', 'number', 'email', 'phone'].includes(localQuestion.question_type) && (
           <div className="space-y-3 pt-3 border-t border-stone-100">
-            <label className="text-[12px] font-medium text-stone-400">Validation</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.validation')}</label>
             {['text_short', 'text_long'].includes(localQuestion.question_type) && (
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Min Length</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.minLength')}</label>
                   <input type="number" value={localQuestion.validation_rule?.min_length ?? ''} min={0}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, min_length: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="0" />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Max Length</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.maxLength')}</label>
                   <input type="number" value={localQuestion.validation_rule?.max_length ?? ''} min={1}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_length: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="No limit" />
@@ -1372,13 +1372,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_type === 'number' && (
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Min Value</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.minValue')}</label>
                   <input type="number" value={localQuestion.validation_rule?.min_value ?? ''}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, min_value: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Max Value</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.maxValue')}</label>
                   <input type="number" value={localQuestion.validation_rule?.max_value ?? ''}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_value: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
@@ -1392,20 +1392,20 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {questionnaireType === 'screening' && (
           <div className="space-y-3 pt-3 border-t border-stone-100">
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium text-red-500">Screening Logic</span>
+              <span className="text-[12px] font-medium text-red-500">{t('qe.screeningLogic')}</span>
             </div>
             <p className="text-[11px] text-stone-400">
               Set which answer value should disqualify a participant. If a participant selects this value, they will not pass screening.
             </p>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Disqualify if answer equals</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.disqualifyIfEquals')}</label>
               {localQuestion.question_type === 'yes_no' ? (
                 <select
                   value={localQuestion.question_config?.disqualify_value || ''}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
                 >
-                  <option value="">No disqualification</option>
+                  <option value="">{t('qe.noDisqualification')}</option>
                   <option value="yes">{localQuestion.question_config?.yes_label || 'Yes'}</option>
                   <option value="no">{localQuestion.question_config?.no_label || 'No'}</option>
                 </select>
@@ -1415,7 +1415,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
                 >
-                  <option value="">No disqualification</option>
+                  <option value="">{t('qe.noDisqualification')}</option>
                   {localQuestion.options.map(opt => (
                     <option key={opt.id} value={opt.option_text}>{opt.option_text}</option>
                   ))}
@@ -1445,7 +1445,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
           {/* Preview */}
           <div className="p-3 rounded-xl bg-stone-50">
-            <p className="text-[11px] font-medium text-stone-400 mb-2">Preview</p>
+            <p className="text-[11px] font-medium text-stone-400 mb-2">{t('qe.preview')}</p>
             <div className="bg-white p-3 rounded-lg border border-stone-100">
               <p className="text-[13px] font-medium text-stone-800 mb-1.5">
                 {localQuestion.question_text || 'Enter your question'}
@@ -1497,7 +1497,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {/* Section Name */}
         <div>
-          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section</label>
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.section')}</label>
           <input type="text" value={localQuestion.section_name || ''} onChange={(e) => updateLocal({ section_name: e.target.value })}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
             placeholder="e.g., Demographics" />
