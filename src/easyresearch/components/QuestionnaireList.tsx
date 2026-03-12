@@ -304,7 +304,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     const isAssigning = assigningQuestionId === question.id;
     const hasTabs = q.tab_sections && q.tab_sections.length > 0;
     const currentTab = hasTabs ? getQuestionTab(q, question.id) : null;
-    const currentTabLabel = currentTab === 'general' ? 'General' : q.tab_sections?.find(s => s.id === currentTab)?.label;
+    const currentTabLabel = currentTab === 'general' ? t('ql.general') : q.tab_sections?.find(s => s.id === currentTab)?.label;
 
     return (
       <div
@@ -329,7 +329,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
           {/* Required badge */}
           {(question.response_required === 'force' || (!question.response_required && question.required)) && (
-            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">Req</span>
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">{t('qe.validation')}</span>
           )}
 
           {/* Type */}
@@ -379,7 +379,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl border border-stone-200 shadow-xl py-1 min-w-[140px]" onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => assignQuestionToTab(q.id, question.id, 'general')}
                   className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-stone-50 flex items-center justify-between ${currentTab === 'general' ? 'text-emerald-600 font-medium' : 'text-stone-600'}`}>
-                  General {currentTab === 'general' && <Check size={10} />}
+                   General {currentTab === 'general' && <Check size={10} />}
                 </button>
                 {q.tab_sections!.map(s => (
                   <button key={s.id} onClick={() => assignQuestionToTab(q.id, question.id, s.id)}
@@ -436,7 +436,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                         />
                         <span className="text-[12px] text-stone-600 group-hover:text-stone-800 transition-colors">{pt.name}</span>
                         {isInherited && assigned && (
-                          <span className="text-[9px] text-stone-400 italic">(inherited)</span>
+                          <span className="text-[9px] text-stone-400 italic">({t('common.inherited')})</span>
                         )}
                       </label>
                     );
@@ -481,7 +481,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                 !filter ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
               }`}
             >
-              All ({q.questions.length})
+              {t('ql.all')} ({q.questions.length})
             </button>
 
             {hasTabs && (
@@ -492,7 +492,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                     filter === 'general' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
                   }`}
                 >
-                  General ({generalCount})
+                  {t('ql.general')} ({generalCount})
                 </button>
                 {q.tab_sections!.map(section => (
                   <button
@@ -519,7 +519,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               }}
               className="shrink-0 px-2 py-1 rounded-full text-[10px] font-medium text-stone-400 border border-dashed border-stone-300 hover:border-emerald-400 hover:text-emerald-500 transition-colors"
             >
-              + Tab
+              {t('ql.addTab')}
             </button>
 
             {/* Spacer */}
@@ -692,11 +692,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                           <div className="flex items-center gap-3 px-4 py-3">
                             <div {...provided.dragHandleProps} className="flex items-center gap-0.5 shrink-0 cursor-grab active:cursor-grabbing px-1.5 py-1 rounded-lg hover:bg-stone-100 transition-colors" title="Drag to reorder">
                               <ArrowUpDown size={13} className="text-stone-300" />
-                              <span className="text-[9px] text-stone-300 font-medium">Move</span>
+                              <span className="text-[9px] text-stone-300 font-medium">{t('ql.move')}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">Questionnaire {idx + 1}</span>
+                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">{t('ql.questionnaire')} {idx + 1}</span>
                                 <CustomDropdown
                                   options={[
                                     { value: 'survey', label: 'Questionnaire' },
@@ -737,7 +737,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   onChange={(e) => updateQuestionnaire(q.id, { title: e.target.value })}
                                   onClick={(e) => e.stopPropagation()}
                                   className="text-[14px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-0.5 -ml-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 flex-1 transition-colors"
-                                  placeholder="Questionnaire title"
+                                  placeholder={t('ql.questionnaireTitle')}
                                 />
                               </div>
                               <div className="flex items-center gap-3 mt-0.5 flex-wrap">
@@ -811,7 +811,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 <div>
                                   <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ql.description')}</label>
                                   <textarea value={q.description} onChange={(e) => updateQuestionnaire(q.id, { description: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Describe this questionnaire..." />
+                                    className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder={t('ql.describePlaceholder')} />
                                 </div>
                                 <div>
                                   <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ql.estDuration')}</label>
@@ -843,10 +843,10 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                           : `${q.questions_per_page} questions per page`}
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-stone-400 mt-1.5">Leave empty for unlimited (all on one page). Set to 1 for one-at-a-time navigation.</p>
+                                  <p className="text-[10px] text-stone-400 mt-1.5">{t('ql.unlimitedHint')}</p>
                                   {q.tab_sections && q.tab_sections.length > 0 && (
                                     <div className="mt-3 space-y-2">
-                                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">Per-tab overrides:</p>
+                                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">{t('ql.perTabOverrides')}</p>
                                       {q.tab_sections.map((section, si) => (
                                         <div key={section.id} className="flex items-center gap-2">
                                           <span className="text-[11px] text-stone-500 w-20 truncate" title={section.label}>{section.label}</span>
@@ -864,7 +864,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                             className="w-20 px-2 py-1 rounded-lg text-[11px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                                           />
                                           <span className="text-[10px] text-stone-400">
-                                            {section.questions_per_page == null ? '(uses default)' : `${section.questions_per_page}/page`}
+                                            {section.questions_per_page == null ? t('ql.usesDefault') : `${section.questions_per_page}/${t('ql.perPage')}`}
                                           </span>
                                         </div>
                                       ))}
@@ -890,15 +890,15 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               {/* Completion Actions */}
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">Completion</h5>
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">{t('ql.completion')}</h5>
                                 <div>
-                                  <label className="block text-[11px] text-stone-500 mb-1">Thank-you message</label>
+                                  <label className="block text-[11px] text-stone-500 mb-1">{t('ql.thankYouMsg')}</label>
                                   <textarea value={(q as any).custom_thank_you_message || ''} rows={2}
                                     onChange={(e) => updateQuestionnaire(q.id, { custom_thank_you_message: e.target.value } as any)}
-                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder="Thank you for participating! Your response has been recorded." />
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder={t('ql.thankYouPlaceholder')} />
                                 </div>
                                 <div>
-                                  <label className="block text-[11px] text-stone-500 mb-1">Redirect URL (after completion)</label>
+                                  <label className="block text-[11px] text-stone-500 mb-1">{t('ql.redirectUrl')}</label>
                                   <input type="url" value={(q as any).redirect_url || ''}
                                     onChange={(e) => updateQuestionnaire(q.id, { redirect_url: e.target.value } as any)}
                                     className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://example.com/thank-you" />
@@ -907,7 +907,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> Notifications</h5>
+                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Bell size={11} /> {t('ql.notifications')}</h5>
                                   <button onClick={() => {
                                     const existing = q.notifications || [];
                                     const newNotif: NotificationConfig = {
@@ -930,16 +930,16 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     };
                                     updateQuestionnaire(q.id, { notifications: [...existing, newNotif] });
                                   }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
-                                    <Plus size={10} /> Add
+                                     <Plus size={10} /> {t('ql.addNotif')}
                                   </button>
                                 </div>
                                 {(!q.notifications || q.notifications.length === 0) && (
-                                  <p className="text-[11px] text-stone-400 italic">No notifications configured. Click Add to create one.</p>
+                                  <p className="text-[11px] text-stone-400 italic">{t('ql.noNotifConfigured')}</p>
                                 )}
                                 {(q.notifications || []).map((notif, ni) => (
                                   <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="text-[11px] font-medium text-stone-600">Notification #{ni + 1}</span>
+                                      <span className="text-[11px] font-medium text-stone-600">{t('ql.notifNum')} #{ni + 1}</span>
                                       <div className="flex items-center gap-1.5">
                                         <button onClick={() => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, enabled: !n.enabled } : n);
@@ -958,11 +958,11 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     <input type="text" value={notif.title} onChange={(e) => {
                                       const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
                                       updateQuestionnaire(q.id, { notifications: updated });
-                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
+                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder={t('ql.notifTitle')} />
                                     <textarea value={notif.body} onChange={(e) => {
                                       const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
                                       updateQuestionnaire(q.id, { notifications: updated });
-                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder="Notification body" />
+                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200 resize-none" rows={2} placeholder={t('ql.notifBody')} />
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <select value={notif.notification_type} onChange={(e) => {
                                         const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, notification_type: e.target.value } : n);
@@ -973,21 +973,21 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                         <option value="sms">SMS</option>
                                         <option value="push_email">Push+Email</option>
                                       </select>
-                                      <span className="text-[10px] text-stone-400">Synced with questionnaire schedule</span>
+                                      <span className="text-[10px] text-stone-400">{t('ql.syncedWithSchedule')}</span>
                                       <div className="flex items-center gap-1">
-                                        <label className="text-[10px] text-stone-400">Before:</label>
+                                        <label className="text-[10px] text-stone-400">{t('ql.before')}</label>
                                         <input type="number" value={notif.minutes_before} onChange={(e) => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, minutes_before: parseInt(e.target.value) || 5 } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
                                         }} className="w-14 px-1.5 py-1 rounded-lg text-[10px] border border-stone-200" />
-                                        <span className="text-[10px] text-stone-400">min</span>
+                                        <span className="text-[10px] text-stone-400">{t('ql.minUnit')}</span>
                                       </div>
                                       <label className="flex items-center gap-1 text-[10px] text-stone-400">
                                         <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, dnd_allowed: e.target.checked } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
                                         }} className="w-3 h-3 rounded" />
-                                        Do Not Disturb allowed
+                                        {t('ql.dndAllowed')}
                                       </label>
                                     </div>
                                   </div>
@@ -1130,6 +1130,7 @@ const QuestionLogicEditor: React.FC<{
   logicRules: LogicRule[];
   onUpdateLogic: (rules: LogicRule[]) => void;
 }> = ({ question, allQuestions, questionnaireId, projectId, logicRules, onUpdateLogic }) => {
+  const { t } = useI18n();
   const questionRules = logicRules.filter(r => r.sourceQuestionId === question.id && r.questionnaireId === questionnaireId);
   const [expanded, setExpanded] = useState(questionRules.length > 0);
 
@@ -1179,7 +1180,7 @@ const QuestionLogicEditor: React.FC<{
       >
         {expanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         <GitBranch size={11} />
-        Logic Rules ({questionRules.length})
+        {t('ql.logicRules')} ({questionRules.length})
       </button>
 
       {expanded && (
