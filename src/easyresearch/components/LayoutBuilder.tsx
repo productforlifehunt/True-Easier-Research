@@ -1309,14 +1309,14 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 {layout.show_header !== false && (
                   <>
                     <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.headerTitle')}</label>
                       <input type="text"
                         value={layout.header_title || projectTitle || ''}
                         onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                        placeholder="Enter header title"
+                        placeholder={t('layout.enterTitle')}
                         className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                       {projectTitle && (
-                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                        <p className="text-[9px] text-stone-400 mt-1">{t('layout.syncedFromSettings')}</p>
                       )}
                     </div>
                     <div>
