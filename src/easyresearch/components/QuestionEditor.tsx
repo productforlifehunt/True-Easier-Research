@@ -1024,7 +1024,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={6} />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Correct Answer (node label)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.correctAnswer')}</label>
               <input type="text" value={localQuestion.question_config?.correct_answer || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, correct_answer: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
