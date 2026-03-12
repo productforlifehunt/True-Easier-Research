@@ -1343,7 +1343,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Background</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.background')}</label>
                   <input type="color" value={layout.theme?.background_color || '#f5f5f4'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
