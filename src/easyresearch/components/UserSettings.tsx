@@ -96,10 +96,10 @@ const UserSettings: React.FC = () => {
       if (fields.full_name) {
         await supabase.auth.updateUser({ data: { full_name: fields.full_name } });
       }
-      toast.success(t('settings.saved'));
+      bToast.success('Saved', '已保存');
     } catch (err: any) {
       console.error('Save error:', err);
-      toast.error(t('toast.saveFailed'));
+      bToast.error('Save failed', '保存失败');
     }
   };
 
