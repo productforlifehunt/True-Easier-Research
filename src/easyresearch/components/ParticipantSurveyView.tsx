@@ -407,7 +407,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleVoiceInput = async (questionId: string) => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Voice input is not supported in this browser. Please use Chrome or Safari.');
+      bToast.error('Voice input is not supported in this browser. Please use Chrome or Safari.', '此浏览器不支持语音输入，请使用 Chrome 或 Safari。');
       return;
     }
 
