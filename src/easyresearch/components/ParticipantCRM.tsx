@@ -120,7 +120,7 @@ const ParticipantCRM: React.FC<Props> = ({ projectId }) => {
     const newTags = [...new Set([...profile.tags, tagInput.trim()])];
     saveMeta(enrollmentId, newTags, profile.notes);
     setTagInput('');
-    toast.success('Tag added / 标签已添加');
+    bToast.success('Tag added', '标签已添加');
   };
 
   const removeTag = (enrollmentId: string, tag: string) => {
