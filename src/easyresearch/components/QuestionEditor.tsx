@@ -78,7 +78,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center">
             <Settings className="text-stone-300" size={20} />
           </div>
-          <p className="text-[13px] text-stone-400 font-light">Select a question to edit</p>
+          <p className="text-[13px] text-stone-400 font-light">{t('qe.selectQuestion')}</p>
         </div>
       </div>
     );
