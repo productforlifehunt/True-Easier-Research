@@ -1304,7 +1304,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={layout.show_header !== false} onChange={(e) => onUpdate({ ...layout, show_header: e.target.checked })} className="rounded border-stone-300" />
-                  <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
+                  <span className="text-[11px] text-stone-600 font-medium">{t('layout.showHeader')}</span>
                 </label>
                 {layout.show_header !== false && (
                   <>
