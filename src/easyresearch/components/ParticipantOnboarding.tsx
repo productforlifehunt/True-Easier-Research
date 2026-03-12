@@ -416,11 +416,11 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               {project?.methodology_type === 'multi_time' && (
                 <div className="mb-6 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
                   <h3 className="text-[13px] font-semibold text-stone-700 mb-2 flex items-center gap-2">
-                    <Calendar size={14} className="text-emerald-500" /> Study Information
+                    <Calendar size={14} className="text-emerald-500" /> {t('onboard.studyInfo')}
                   </h3>
                   <div className="space-y-1.5 text-[12px] text-stone-500 font-light">
-                    <p>This longitudinal study tracks your experiences over time.</p>
-                    <p className="flex items-center gap-1.5"><Clock size={11} className="text-stone-400" /> Duration: {project?.study_duration || 7} days</p>
+                    <p>{t('onboard.longitudinalDesc')}</p>
+                    <p className="flex items-center gap-1.5"><Clock size={11} className="text-stone-400" /> {t('survey.duration')}: {project?.study_duration || 7} {t('survey.days')}</p>
                   </div>
                 </div>
               )}
