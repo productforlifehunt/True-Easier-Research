@@ -973,7 +973,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.allow_fullscreen !== false}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, allow_fullscreen: e.target.checked } })}
                 className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow fullscreen
+              {t('qe.allowFullscreen')}
             </label>
           </div>
         )}
