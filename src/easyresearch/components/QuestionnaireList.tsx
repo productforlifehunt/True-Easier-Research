@@ -481,7 +481,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                 !filter ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
               }`}
             >
-              All ({q.questions.length})
+              {t('ql.all')} ({q.questions.length})
             </button>
 
             {hasTabs && (
