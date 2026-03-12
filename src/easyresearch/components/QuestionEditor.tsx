@@ -1304,7 +1304,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               <input type="checkbox" checked={localQuestion.question_config?.include_none_option ?? true}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, include_none_option: e.target.checked } })}
                 className="rounded border-stone-300" />
-              Include "None of these" option
+              {t('qe.includeNone')}
             </label>
           </div>
         )}
