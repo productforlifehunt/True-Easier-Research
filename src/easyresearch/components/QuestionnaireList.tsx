@@ -573,7 +573,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="text-center py-10 px-4">
             <FileText className="mx-auto text-stone-200 mb-2" size={28} />
             <p className="text-[12px] text-stone-400">
-              {q.questions.length === 0 ? 'No questions yet. Add your first question above.' : `No questions in this tab. Use the folder icon to assign questions.`}
+              {q.questions.length === 0 ? t('ql.noQuestionsYet') : t('ql.noQuestionsInTab')}
             </p>
           </div>
         ) : (
@@ -629,21 +629,21 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       <>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[16px] font-semibold text-stone-800">Questionnaires</h3>
-          <p className="text-[12px] text-stone-400 mt-0.5">Each questionnaire has its own questions, schedule, and settings</p>
+          <h3 className="text-[16px] font-semibold text-stone-800">{t('ql.title')}</h3>
+          <p className="text-[12px] text-stone-400 mt-0.5">{t('ql.desc')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowTemplates(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors"
           >
-            <Layers size={14} /> From Templates
+            <Layers size={14} /> {t('ql.fromTemplates')}
           </button>
           <button
             onClick={addQuestionnaire}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
           >
-            <Plus size={14} /> Add Questionnaire
+            <Plus size={14} /> {t('ql.addQuestionnaire')}
           </button>
         </div>
       </div>
@@ -657,7 +657,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="flex items-center gap-1.5">
             <Bell size={13} className="text-stone-400" />
             <p className="text-[12px] text-stone-500">
-              Configure project-level notifications in the <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>Notifications</strong> tab.
+              {t('ql.configureNotifications')} <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>{t('ql.notificationsTab')}</strong>
             </p>
           </div>
         </div>
@@ -668,8 +668,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="w-14 h-14 rounded-2xl bg-stone-50 flex items-center justify-center mx-auto mb-4">
             <FileText size={24} className="text-stone-300" />
           </div>
-          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">No Questionnaires</h2>
-          <p className="text-[13px] text-stone-400">Add questionnaires like "Hourly Log", "Daily Log", etc.</p>
+          <h2 className="text-[15px] font-semibold text-stone-700 mb-1">{t('ql.noQuestionnaires')}</h2>
+          <p className="text-[13px] text-stone-400">{t('ql.noQuestionnairesHint')}</p>
         </div>
       ) : (
         <DragDropContext onDragEnd={handleQuestionnaireDragEnd}>
@@ -788,7 +788,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               }`}
                             >
                               {openSection === 'settings' ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                              <Settings size={12} /> Settings
+                              <Settings size={12} /> {t('nav.settings')}
                             </button>
                             <div className="w-px bg-stone-100" />
                             <button
@@ -809,19 +809,19 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                             <div className="border-t border-stone-100 px-4 py-4 space-y-4 bg-stone-50/30">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Description</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ql.description')}</label>
                                   <textarea value={q.description} onChange={(e) => updateQuestionnaire(q.id, { description: e.target.value })}
                                     className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Describe this questionnaire..." />
                                 </div>
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Est. Duration (min)</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ql.estDuration')}</label>
                                   <input type="number" value={q.estimated_duration} onChange={(e) => updateQuestionnaire(q.id, { estimated_duration: parseInt(e.target.value) || 5 })}
                                     className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
                                 </div>
                               </div>
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> Questions Per Page</h5>
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> {t('ql.questionsPerPage')}</h5>
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <input
@@ -875,7 +875,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Frequency</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ne.frequency')}</label>
                                   <CustomDropdown options={frequencyOptions} value={q.frequency} onChange={(v) => updateQuestionnaire(q.id, { frequency: v })} placeholder="Select frequency" />
                                 </div>
                                 <QuestionnaireScheduleEditor
@@ -1070,12 +1070,12 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                 {/* AI Preview hint */}
                                 <p className="text-[10px] text-stone-400 flex items-center gap-1"><Eye size={10} /> {t('ai.previewHint')}</p>
 
-                                <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">You can also customize AI settings per question in the question editor below.</p>
+                                <p className="text-[10px] text-stone-400 border-t border-stone-100 pt-2">{t('ql.aiCustomizePerQ')}</p>
                               </div>
 
                               {participantTypes.length > 0 && (
                                 <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> Assigned Types</h5>
+                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> {t('ql.assignedTypes')}</h5>
                                   <div className="space-y-1.5">
                                     {participantTypes.map(pt => {
                                       const assigned = q.assigned_participant_types.includes(pt.id);

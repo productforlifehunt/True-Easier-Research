@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { bToast } from '../utils/bilingualToast';
 import { loadProfileData } from '../utils/enrollmentSync';
+import { useI18n } from '../hooks/useI18n';
 
 interface Enrollment {
   id: string;
@@ -23,12 +24,13 @@ interface Project { id: string; title: string; }
 
 // Inline component to load profile data from flat table
 const ProfileDataSection: React.FC<{ enrollmentId: string }> = ({ enrollmentId }) => {
+  const { t } = useI18n();
   const [data, setData] = useState<Record<string, any>>({});
   useEffect(() => { loadProfileData(enrollmentId).then(setData); }, [enrollmentId]);
   if (!data || Object.keys(data).length === 0) return null;
   return (
     <div>
-      <h3 className="text-[13px] font-semibold text-stone-700 mb-2">Profile Data</h3>
+      <h3 className="text-[13px] font-semibold text-stone-700 mb-2">{t('pp.profileData')}</h3>
       <div className="space-y-1.5">
         {Object.entries(data).map(([key, value]) => (
           <div key={key} className="p-2.5 rounded-lg bg-stone-50">
@@ -44,6 +46,7 @@ const ProfileDataSection: React.FC<{ enrollmentId: string }> = ({ enrollmentId }
 const ParticipantsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const projectIdFromUrl = searchParams.get('project');
 
@@ -128,6 +131,13 @@ const ParticipantsPage: React.FC = () => {
     finally { setSendingInvite(false); }
   };
 
+  const statusLabels: Record<string, string> = {
+    invited: t('pp.invited'),
+    active: t('pp.active'),
+    completed: t('pp.completed'),
+    withdrawn: 'Withdrawn',
+  };
+
   const getStatusBadge = (status: string) => {
     const config: Record<string, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
       invited: { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', icon: <Mail size={12} /> },
@@ -136,7 +146,7 @@ const ParticipantsPage: React.FC = () => {
       withdrawn: { bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-100', icon: <XCircle size={12} /> }
     };
     const c = config[status] || config.invited;
-    return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${c.bg} ${c.text} ${c.border}`}>{c.icon}{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
+    return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${c.bg} ${c.text} ${c.border}`}>{c.icon}{statusLabels[status] || status}</span>;
   };
 
   const filteredEnrollments = enrollments.filter(e => {
@@ -159,27 +169,34 @@ const ParticipantsPage: React.FC = () => {
     const a = document.createElement('a'); a.href = url; a.download = 'participants.csv'; a.click();
   };
 
+  const filterTabs = [
+    { key: 'all', label: t('pp.all') },
+    { key: 'invited', label: t('pp.invited') },
+    { key: 'active', label: t('pp.active') },
+    { key: 'completed', label: t('pp.completed') },
+  ];
+
   return (
     <>
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-stone-800">Participants</h1>
-            <p className="text-[13px] text-stone-400 mt-1 font-light">Manage and invite participants to your studies</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-stone-800">{t('pp.title')}</h1>
+            <p className="text-[13px] text-stone-400 mt-1 font-light">{t('pp.subtitle')}</p>
           </div>
           <button onClick={() => setShowInviteModal(true)} disabled={!selectedProject}
             className="px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm shadow-emerald-200 flex items-center gap-1.5 disabled:opacity-50">
-            <UserPlus size={16} /> Invite
+            <UserPlus size={16} /> {t('pp.invite')}
           </button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           {[
-            { label: 'Total', value: enrollments.length, icon: Users, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
-            { label: 'Invited', value: enrollments.filter(e => e.status === 'invited').length, icon: Mail, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
-            { label: 'Active', value: enrollments.filter(e => e.status === 'active').length, icon: CheckCircle, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
-            { label: 'Completed', value: enrollments.filter(e => e.status === 'completed').length, icon: Clock, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' }
+            { label: t('pp.total'), value: enrollments.length, icon: Users, gradient: 'from-emerald-50 to-teal-50', iconColor: 'text-emerald-600' },
+            { label: t('pp.invited'), value: enrollments.filter(e => e.status === 'invited').length, icon: Mail, gradient: 'from-amber-50 to-orange-50', iconColor: 'text-amber-600' },
+            { label: t('pp.active'), value: enrollments.filter(e => e.status === 'active').length, icon: CheckCircle, gradient: 'from-sky-50 to-blue-50', iconColor: 'text-sky-600' },
+            { label: t('pp.completed'), value: enrollments.filter(e => e.status === 'completed').length, icon: Clock, gradient: 'from-violet-50 to-purple-50', iconColor: 'text-violet-600' }
           ].map(stat => (
             <div key={stat.label} className={`bg-gradient-to-br ${stat.gradient} rounded-2xl p-5 border border-white/60`}>
               <stat.icon size={16} className={`${stat.iconColor} mb-3`} strokeWidth={1.5} />
@@ -194,14 +211,14 @@ const ParticipantsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <select value={selectedProject} onChange={(e) => setSelectedProject(e.target.value)} disabled={projects.length === 0}
               className="px-3 py-1.5 rounded-full text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 disabled:opacity-50">
-              {projects.length === 0 && <option value="" disabled>No projects</option>}
+              {projects.length === 0 && <option value="" disabled>{t('pp.noProjects')}</option>}
               {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
             <div className="flex gap-1 bg-stone-100 rounded-full p-0.5">
-              {['all', 'invited', 'active', 'completed'].map(tab => (
-                <button key={tab} onClick={() => setStatusFilter(tab)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium capitalize transition-all ${statusFilter === tab ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>
-                  {tab === 'all' ? 'All' : tab}
+              {filterTabs.map(tab => (
+                <button key={tab.key} onClick={() => setStatusFilter(tab.key)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${statusFilter === tab.key ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -209,7 +226,7 @@ const ParticipantsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-300" />
-              <input type="text" placeholder="Search email or ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              <input type="text" placeholder={t('pp.searchPlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 pr-3 py-1.5 rounded-full w-48 text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white" />
             </div>
             <button onClick={exportToCSV} disabled={filteredEnrollments.length === 0}
@@ -228,13 +245,13 @@ const ParticipantsPage: React.FC = () => {
               <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
                 <Users className="text-emerald-500" size={24} />
               </div>
-              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">{projects.length === 0 ? 'No Projects Yet' : 'No Participants'}</h3>
+              <h3 className="text-[15px] font-semibold text-stone-800 mb-1.5">{projects.length === 0 ? t('pp.noProjectsYet') : t('pp.noParticipants')}</h3>
               <p className="text-[13px] text-stone-400 mb-5 max-w-sm mx-auto font-light">
-                {projects.length === 0 ? 'Create a project first.' : 'Invite participants to start collecting responses.'}
+                {projects.length === 0 ? t('pp.createFirst') : t('pp.inviteToCollect')}
               </p>
               <button onClick={() => projects.length === 0 ? navigate('/easyresearch/dashboard?create=true') : setShowInviteModal(true)}
                 className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">
-                {projects.length === 0 ? 'Create Project' : <><UserPlus size={14} /> Invite</>}
+                {projects.length === 0 ? t('pp.createProject') : <><UserPlus size={14} /> {t('pp.invite')}</>}
               </button>
             </div>
           ) : (
@@ -242,10 +259,10 @@ const ParticipantsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-stone-100" style={{ backgroundColor: 'rgba(16,185,129,0.03)' }}>
-                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Participant</th>
-                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">ID / Role</th>
-                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Status</th>
-                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">Enrolled</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('pp.participant')}</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('pp.idRole')}</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('pp.status')}</th>
+                    <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider">{t('pp.enrolled')}</th>
                     <th className="text-left px-4 py-3 text-[12px] font-medium text-stone-400 uppercase tracking-wider"></th>
                   </tr>
                 </thead>
@@ -282,22 +299,22 @@ const ParticipantsPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4" onClick={() => setShowInviteModal(false)}>
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
-              <h2 className="text-[15px] font-semibold text-stone-800">Invite Participant</h2>
+              <h2 className="text-[15px] font-semibold text-stone-800">{t('pp.inviteParticipant')}</h2>
               <button onClick={() => setShowInviteModal(false)} className="p-1 rounded-lg hover:bg-stone-50"><X size={16} className="text-stone-400" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Email Address</label>
+                <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('pp.emailAddress')}</label>
                 <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="participant@example.com"
                   className="w-full px-3.5 py-2.5 rounded-xl text-[14px] bg-stone-50/50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                   onKeyDown={(e) => e.key === 'Enter' && sendInvitation()} />
               </div>
               <div className="flex gap-2">
                 <button onClick={() => setShowInviteModal(false)}
-                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50">Cancel</button>
+                  className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50">{t('pp.cancel')}</button>
                 <button onClick={sendInvitation} disabled={sendingInvite || !inviteEmail.trim()}
                   className="flex-1 py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 disabled:opacity-50 shadow-sm shadow-emerald-200">
-                  {sendingInvite ? 'Adding...' : 'Add'}
+                  {sendingInvite ? t('pp.adding') : t('pp.add')}
                 </button>
               </div>
             </div>
@@ -311,7 +328,7 @@ const ParticipantsPage: React.FC = () => {
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-xl border border-stone-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 sticky top-0 bg-white z-10">
               <div>
-                <h2 className="text-[15px] font-semibold text-stone-800">Participant Details</h2>
+                <h2 className="text-[15px] font-semibold text-stone-800">{t('pp.participantDetails')}</h2>
                 <p className="text-[12px] text-stone-400">{selectedEnrollment.participant_email}</p>
               </div>
               <button onClick={() => setSelectedEnrollment(null)} className="p-1.5 rounded-lg hover:bg-stone-50">
@@ -322,39 +339,39 @@ const ParticipantsPage: React.FC = () => {
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-xl bg-stone-50">
-                  <p className="text-[11px] text-stone-400">Status</p>
+                  <p className="text-[11px] text-stone-400">{t('pp.status')}</p>
                   <div className="mt-1">{getStatusBadge(selectedEnrollment.status)}</div>
                 </div>
                 <div className="p-3 rounded-xl bg-stone-50">
-                  <p className="text-[11px] text-stone-400">Enrolled</p>
+                  <p className="text-[11px] text-stone-400">{t('pp.enrolled')}</p>
                   <p className="text-[13px] font-medium text-stone-700 mt-1">{new Date(selectedEnrollment.created_at).toLocaleDateString()}</p>
                 </div>
                 {selectedEnrollment.participant_number && (
                   <div className="p-3 rounded-xl bg-indigo-50">
-                    <p className="text-[11px] text-indigo-400">Participant #</p>
+                    <p className="text-[11px] text-indigo-400">{t('pp.participantNum')}</p>
                     <p className="text-[14px] font-bold text-indigo-600 mt-1">{selectedEnrollment.participant_number}</p>
                   </div>
                 )}
                 {selectedEnrollment.study_start_date && (
                   <div className="p-3 rounded-xl bg-stone-50">
-                    <p className="text-[11px] text-stone-400">Study Start</p>
+                    <p className="text-[11px] text-stone-400">{t('pp.studyStart')}</p>
                     <p className="text-[13px] font-medium text-stone-700 mt-1">{selectedEnrollment.study_start_date}</p>
                   </div>
                 )}
               </div>
 
-              {/* Profile Data — loaded from flat enrollment_profile_response table */}
+              {/* Profile Data */}
               <ProfileDataSection enrollmentId={selectedEnrollment.id} />
 
               {/* Survey Responses */}
               <div>
                 <h3 className="text-[13px] font-semibold text-stone-700 mb-2">
-                  Survey Responses ({enrollmentResponses.length})
+                  {t('pp.surveyResponses')} ({enrollmentResponses.length})
                 </h3>
                 {responsesLoading ? (
                   <div className="py-6 text-center"><div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-500 border-t-transparent mx-auto"></div></div>
                 ) : enrollmentResponses.length === 0 ? (
-                  <p className="text-[12px] text-stone-400 py-4 text-center">No responses yet</p>
+                  <p className="text-[12px] text-stone-400 py-4 text-center">{t('pp.noResponsesYet')}</p>
                 ) : (
                   <div className="space-y-1.5 max-h-60 overflow-y-auto">
                     {enrollmentResponses.slice(0, 50).map(r => (
@@ -363,14 +380,16 @@ const ParticipantsPage: React.FC = () => {
                         <span className="text-stone-500">{r.response_text?.substring(0, 100) || JSON.stringify(r.response_value)?.substring(0, 100) || '-'}</span>
                       </div>
                     ))}
-                    {enrollmentResponses.length > 50 && <p className="text-[11px] text-stone-400 text-center">+{enrollmentResponses.length - 50} more</p>}
+                    {enrollmentResponses.length > 50 && <p className="text-[11px] text-stone-400 text-center">+{enrollmentResponses.length - 50} {t('pp.more')}</p>}
                   </div>
                 )}
               </div>
             </div>
             <div className="px-5 pb-5">
               <button onClick={() => setSelectedEnrollment(null)}
-                className="w-full py-2.5 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-200">Close</button>
+                className="w-full py-2.5 rounded-full text-[13px] font-medium text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors">
+                {t('pp.close')}
+              </button>
             </div>
           </div>
         </div>
