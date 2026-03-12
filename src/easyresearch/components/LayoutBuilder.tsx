@@ -1403,7 +1403,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                         className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Icon</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">{t('layout.icon')}</label>
                       <select value={activeTab.icon} onChange={(e) => updateTab(activeTab.id, { icon: e.target.value })}
                         className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                         {ICON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
