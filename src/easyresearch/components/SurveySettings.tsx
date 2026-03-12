@@ -339,8 +339,8 @@ const ProfileQuestionsBuilder: React.FC<{
                       </button>
                     </div>
                   ))}
-                  <button onClick={() => updateQuestion(q.id, { options: [...(q.options || []), `Option ${(q.options?.length || 0) + 1}`] })}
-                    className="text-[11px] text-emerald-500 hover:text-emerald-600">+ Add option</button>
+                  <button onClick={() => updateQuestion(q.id, { options: [...(q.options || []), `${t('ss.option')} ${(q.options?.length || 0) + 1}`] })}
+                    className="text-[11px] text-emerald-500 hover:text-emerald-600">+ {t('ss.addOption')}</button>
                 </div>
               )}
               {q.type === 'scale' && (
