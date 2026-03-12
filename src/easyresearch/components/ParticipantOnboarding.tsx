@@ -397,7 +397,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               <button onClick={handleScreeningNext}
                 className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40"
                 disabled={screeningQuestions.some(sq => sq.required && !screeningResponses[sq.id])}>
-                Continue <ChevronRight size={16} />
+                {t('onboard.continue')} <ChevronRight size={16} />
               </button>
             </>
           )}
