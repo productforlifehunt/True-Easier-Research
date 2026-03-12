@@ -789,7 +789,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               }`}
                             >
                               {openSection === 'settings' ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                              <Settings size={12} /> Settings
+                              <Settings size={12} /> {t('nav.settings')}
                             </button>
                             <div className="w-px bg-stone-100" />
                             <button
