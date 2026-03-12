@@ -73,7 +73,7 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
 
   const startConversation = async (enrollment: Enrollment) => {
     if (!user || !enrollment.participant_id) {
-      toast.error('Cannot message: participant has not joined yet');
+      bToast.error('Cannot message: participant has not joined yet', '无法发消息：参与者尚未加入');
       return;
     }
     try {
