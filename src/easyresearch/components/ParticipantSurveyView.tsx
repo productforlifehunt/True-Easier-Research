@@ -369,7 +369,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
     // Check quota
     if (isQuotaFull) {
-      toast.error('This survey has reached its quota. Thank you for your interest. / 此调查已达到配额上限，感谢您的关注。');
+      bToast.error('This survey has reached its quota. Thank you for your interest.', '此调查已达到配额上限，感谢您的关注。');
       return;
     }
 
