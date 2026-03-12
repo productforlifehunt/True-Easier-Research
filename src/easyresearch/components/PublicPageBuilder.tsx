@@ -113,10 +113,10 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
 
   const deletePage = async (id: string) => {
     const { error } = await (supabase as any).from('app_public_page').delete().eq('id', id);
-    if (error) { toast.error('Failed to delete'); return; }
+    if (error) { bToast.error('Failed to delete', '删除失败'); return; }
     setPages(prev => prev.filter(p => p.id !== id));
     if (activePageId === id) setActivePageId(pages.find(p => p.id !== id)?.id || null);
-    toast.success('Page deleted');
+    bToast.success('Page deleted', '页面已删除');
   };
 
   const updatePage = async (id: string, field: string, value: any) => {
