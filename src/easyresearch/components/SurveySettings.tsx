@@ -316,7 +316,7 @@ const ProfileQuestionsBuilder: React.FC<{
                   </select>
                   <label className="flex items-center gap-1.5 text-[12px] text-stone-600">
                     <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(q.id, { required: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                    Required
+                    {t('ss.required')}
                   </label>
                 </div>
               )}
