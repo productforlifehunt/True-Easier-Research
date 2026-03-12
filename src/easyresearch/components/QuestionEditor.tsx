@@ -1091,7 +1091,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Design A" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Label A</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.labelA')}</label>
                 <input type="text" value={localQuestion.question_config?.variant_a_label || 'Design A'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, variant_a_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
