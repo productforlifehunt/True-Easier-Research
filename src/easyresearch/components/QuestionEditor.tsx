@@ -832,7 +832,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Width</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxWidth')}</label>
               <select value={localQuestion.question_config?.max_width || '100%'}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_width: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
