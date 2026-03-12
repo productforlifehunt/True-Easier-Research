@@ -713,12 +713,10 @@ const translations: TranslationDict = {
   'onboard.yes': { en: 'Yes', zh: '是', es: 'Sí', fr: 'Oui', de: 'Ja', ja: 'はい', ko: '예', pt: 'Sim', ar: 'نعم', hi: 'हाँ', ru: 'Да', it: 'Sì' },
   'onboard.no': { en: 'No', zh: '否', es: 'No', fr: 'Non', de: 'Nein', ja: 'いいえ', ko: '아니오', pt: 'Não', ar: 'لا', hi: 'नहीं', ru: 'Нет', it: 'No' },
 
-  // Common shared / 通用
+  // Common shared (non-duplicate) / 通用（非重复）
   'common.failedSave': { en: 'Failed to save', zh: '保存失败', es: 'Error al guardar', fr: 'Échec de la sauvegarde', de: 'Speichern fehlgeschlagen', ja: '保存に失敗', ko: '저장 실패', pt: 'Falha ao salvar', ar: 'فشل الحفظ', hi: 'सहेजने में विफल', ru: 'Не удалось сохранить', it: 'Salvataggio fallito' },
   'common.untitledStudy': { en: 'Untitled Study', zh: '未命名研究', es: 'Estudio sin título', fr: 'Étude sans titre', de: 'Studie ohne Titel', ja: '無題の研究', ko: '제목 없는 연구', pt: 'Estudo sem título', ar: 'دراسة بدون عنوان', hi: 'शीर्षकहीन अध्ययन', ru: 'Исследование без названия', it: 'Studio senza titolo' },
-  'common.add': { en: 'Add', zh: '添加', es: 'Agregar', fr: 'Ajouter', de: 'Hinzufügen', ja: '追加', ko: '추가', pt: 'Adicionar', ar: 'إضافة', hi: 'जोड़ें', ru: 'Добавить', it: 'Aggiungi' },
-  'common.save': { en: 'Save', zh: '保存', es: 'Guardar', fr: 'Enregistrer', de: 'Speichern', ja: '保存', ko: '저장', pt: 'Salvar', ar: 'حفظ', hi: 'सहेजें', ru: 'Сохранить', it: 'Salva' },
-  'common.cancel': { en: 'Cancel', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ja: 'キャンセル', ko: '취소', pt: 'Cancelar', ar: 'إلغاء', hi: 'रद्द करें', ru: 'Отмена', it: 'Annulla' },
+  'common.add': { en: 'Add', zh: '添加', es: 'Agregar', fr: 'Ajouter', de: 'Hinzufügen', ja: '追加', ko: '추加', pt: 'Adicionar', ar: 'إضافة', hi: 'जोड़ें', ru: 'Добавить', it: 'Aggiungi' },
   'common.general': { en: 'General', zh: '通用', es: 'General', fr: 'Général', de: 'Allgemein', ja: '一般', ko: '일반', pt: 'Geral', ar: 'عام', hi: 'सामान्य', ru: 'Общее', it: 'Generale' },
   'common.assigned': { en: 'Assigned', zh: '已分配', es: 'Asignado', fr: 'Assigné', de: 'Zugewiesen', ja: '割り当て済み', ko: '할당됨', pt: 'Atribuído', ar: 'معين', hi: 'सौंपा गया', ru: 'Назначено', it: 'Assegnato' },
   'common.inherited': { en: 'inherited', zh: '继承', es: 'heredado', fr: 'hérité', de: 'geerbt', ja: '継承', ko: '상속', pt: 'herdado', ar: 'موروث', hi: 'विरासत', ru: 'унаследовано', it: 'ereditato' },
