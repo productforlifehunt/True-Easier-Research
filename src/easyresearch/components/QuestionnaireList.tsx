@@ -1130,6 +1130,7 @@ const QuestionLogicEditor: React.FC<{
   logicRules: LogicRule[];
   onUpdateLogic: (rules: LogicRule[]) => void;
 }> = ({ question, allQuestions, questionnaireId, projectId, logicRules, onUpdateLogic }) => {
+  const { t } = useI18n();
   const questionRules = logicRules.filter(r => r.sourceQuestionId === question.id && r.questionnaireId === questionnaireId);
   const [expanded, setExpanded] = useState(questionRules.length > 0);
 
