@@ -678,7 +678,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Custom Labels (one per line, overrides default)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.customLabels')}</label>
               <textarea value={localQuestion.question_config?.custom_labels?.join('\n') || ''} onChange={(e) => {
                 const labels = e.target.value.split('\n').filter(l => l.trim());
                 updateLocal({ question_config: { ...localQuestion.question_config, custom_labels: labels.length > 0 ? labels : undefined } });
