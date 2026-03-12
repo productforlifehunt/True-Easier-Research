@@ -975,7 +975,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                       </select>
                                       <span className="text-[10px] text-stone-400">{t('ql.syncedWithSchedule')}</span>
                                       <div className="flex items-center gap-1">
-                                        <label className="text-[10px] text-stone-400">Before:</label>
+                                        <label className="text-[10px] text-stone-400">{t('ql.before')}</label>
                                         <input type="number" value={notif.minutes_before} onChange={(e) => {
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, minutes_before: parseInt(e.target.value) || 5 } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
