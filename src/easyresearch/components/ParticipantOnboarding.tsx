@@ -373,7 +373,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                           <button key={v} onClick={() => setScreeningResponses(prev => ({ ...prev, [sq.id]: v }))}
                             className={`flex-1 py-3 rounded-xl text-[13px] font-medium border-2 transition-all capitalize ${
                               screeningResponses[sq.id] === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-500'}`}>
-                            {v}
+                            {v === 'yes' ? t('onboard.yes') : t('onboard.no')}
                           </button>
                         ))}
                       </div>
