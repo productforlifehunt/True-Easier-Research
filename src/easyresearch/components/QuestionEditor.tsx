@@ -1018,7 +1018,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Find pricing info" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tree Structure (JSON)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.treeStructure')}</label>
               <textarea value={JSON.stringify(localQuestion.question_config?.tree_data || [], null, 2)}
                 onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, tree_data: JSON.parse(e.target.value) } }); } catch {} }}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={6} />
