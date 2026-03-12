@@ -181,7 +181,7 @@ Respond with a JSON array matching the input structure with translated text/desc
         });
 
         onQuestionsUpdate(updatedQuestions);
-        toast.success(`Translated ${toTranslate.length} questions to ${locale.name}`);
+        bToast.success(`Translated ${toTranslate.length} questions to ${locale.name}`, `已翻译 ${toTranslate.length} 个问题到${locale.name}`);
       } else {
         throw new Error('Could not parse translation response');
       }
