@@ -692,7 +692,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Rating Configuration */}
         {localQuestion.question_type === 'rating' && (
           <div>
-            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Max Stars</label>
+            <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.maxStars')}</label>
             <select value={localQuestion.question_config?.max_value ?? 5} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_value: Number(e.target.value) } })}
               className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white">
               <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="7">7</option><option value="10">10</option>
