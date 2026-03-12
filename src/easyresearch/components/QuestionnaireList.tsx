@@ -892,7 +892,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
                                 <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5">{t('ql.completion')}</h5>
                                 <div>
-                                  <label className="block text-[11px] text-stone-500 mb-1">Thank-you message</label>
+                                  <label className="block text-[11px] text-stone-500 mb-1">{t('ql.thankYouMsg')}</label>
                                   <textarea value={(q as any).custom_thank_you_message || ''} rows={2}
                                     onChange={(e) => updateQuestionnaire(q.id, { custom_thank_you_message: e.target.value } as any)}
                                     className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder="Thank you for participating! Your response has been recorded." />
