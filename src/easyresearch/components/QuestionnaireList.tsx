@@ -895,7 +895,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <label className="block text-[11px] text-stone-500 mb-1">{t('ql.thankYouMsg')}</label>
                                   <textarea value={(q as any).custom_thank_you_message || ''} rows={2}
                                     onChange={(e) => updateQuestionnaire(q.id, { custom_thank_you_message: e.target.value } as any)}
-                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder="Thank you for participating! Your response has been recorded." />
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder={t('ql.thankYouPlaceholder')} />
                                 </div>
                                 <div>
                                   <label className="block text-[11px] text-stone-500 mb-1">Redirect URL (after completion)</label>
