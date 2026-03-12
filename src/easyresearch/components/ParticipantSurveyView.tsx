@@ -430,7 +430,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
     recognition.onerror = () => {
       setIsRecording(null);
-      toast.error('Voice input failed. Please try again.');
+      bToast.error('Voice input failed. Please try again.', '语音输入失败，请重试。');
     };
 
     recognition.onend = () => {
