@@ -6,7 +6,7 @@ import {
   Calendar, Shield, ClipboardCheck, User, HelpCircle, Layers, BarChart3, Link2, CheckSquare, Maximize2,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 import BrandIcon from './BrandIcon';
