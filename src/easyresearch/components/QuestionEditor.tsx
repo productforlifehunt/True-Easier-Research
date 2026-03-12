@@ -851,7 +851,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Files</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxFiles')}</label>
                 <input type="number" value={localQuestion.question_config?.max_files ?? 1} min={1} max={10}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_files: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
