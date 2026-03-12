@@ -1314,7 +1314,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           <div className="space-y-3">
             <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">{t('qe.kanoPaired')}</p>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Functional question</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.functionalQ')}</label>
               <input type="text" value={localQuestion.question_config?.kano_functional || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_functional: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were present?" />
