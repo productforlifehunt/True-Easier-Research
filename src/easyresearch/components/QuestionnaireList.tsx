@@ -629,8 +629,8 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
       <>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[16px] font-semibold text-stone-800">Questionnaires</h3>
-          <p className="text-[12px] text-stone-400 mt-0.5">Each questionnaire has its own questions, schedule, and settings</p>
+          <h3 className="text-[16px] font-semibold text-stone-800">{t('ql.title')}</h3>
+          <p className="text-[12px] text-stone-400 mt-0.5">{t('ql.desc')}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
