@@ -217,7 +217,7 @@ const ConversationView: React.FC = () => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
+            placeholder={lang === 'zh' ? '输入消息...' : 'Type a message...'}
             rows={1}
             className="flex-1 resize-none rounded-2xl bg-stone-100 px-4 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition-all max-h-32"
             style={{ minHeight: '40px' }}
