@@ -714,7 +714,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 placeholder="Strongly Disagree&#10;Disagree&#10;Neutral&#10;Agree&#10;Strongly Agree"
               />
             </div>
-            <p className="text-[11px] text-stone-400">Row items are defined in the Options section above. Each row will have the same column choices.</p>
+            <p className="text-[11px] text-stone-400">{t('qe.matrixRowHint')}</p>
           </div>
         )}
 
