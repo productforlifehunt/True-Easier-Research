@@ -236,7 +236,7 @@ const ParticipantAppView: React.FC = () => {
         if (insertError) throw insertError;
       }
 
-      toast.success('Response submitted!');
+      bToast.success('Response submitted!', '回复已提交！');
 
       // Runtime: quality + webhooks (non-blocking) / 运行时：质量+Webhook（非阻塞）
       const qualityFlags = runQualityChecks(responses, {}, 60); // No per-question timing in app view
