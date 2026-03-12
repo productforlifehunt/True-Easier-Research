@@ -392,7 +392,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {/* Question Type */}
         <div>
-          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Type</label>
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.type')}</label>
           <CustomDropdown
             options={[
               // Layout & Media
