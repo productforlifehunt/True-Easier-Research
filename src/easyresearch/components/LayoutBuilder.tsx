@@ -1284,12 +1284,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-[15px] font-semibold text-stone-800">Layout Builder</h3>
-            <p className="text-[12px] text-stone-400 font-light mt-0.5">Design how participants see your study — preview is live and identical to the actual app</p>
+            <h3 className="text-[15px] font-semibold text-stone-800">{t('layout.title')}</h3>
+            <p className="text-[12px] text-stone-400 font-light mt-0.5">{t('layout.subtitle')} — {lang === 'zh' ? '预览与实际应用完全一致' : 'preview is live and identical to the actual app'}</p>
           </div>
           <button onClick={() => onUpdate(getDefaultLayout(questionnaires))}
             className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300">
-            Reset Default
+            {t('layout.resetDefault')}
           </button>
         </div>
 
