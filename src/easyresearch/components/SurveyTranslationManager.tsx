@@ -107,7 +107,7 @@ const SurveyTranslationManager: React.FC<Props> = ({ projectId, questions, onQue
       const toTranslate = questions.filter((q: any) => getTranslationStatus(q.id, targetLocale) !== 'complete');
       
       if (toTranslate.length === 0) {
-        toast.success('All questions already translated!');
+        bToast.success('All questions already translated!', '所有问题已翻译完毕！');
         setTranslating(false);
         return;
       }
