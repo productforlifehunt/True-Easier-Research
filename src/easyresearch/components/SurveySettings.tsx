@@ -351,7 +351,7 @@ const ProfileQuestionsBuilder: React.FC<{
                       className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
                   </div>
                   <div>
-                    <label className="text-[11px] text-stone-400">Max</label>
+                    <label className="text-[11px] text-stone-400">{t('ss.max')}</label>
                     <input type="number" value={q.config?.max ?? 5} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, max: Number(e.target.value) } })}
                       className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
                   </div>
