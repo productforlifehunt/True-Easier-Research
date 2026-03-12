@@ -446,7 +446,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       if (navigator.clipboard && window.isSecureContext) {
         try {
           await navigator.clipboard.writeText(text);
-          toast.success('Copied to clipboard!');
+          bToast.success('Copied to clipboard!', '已复制到剪贴板！');
           return;
         } catch (clipboardError) {
           // Fall through to execCommand fallback
