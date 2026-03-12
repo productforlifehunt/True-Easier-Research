@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { BookOpen, Plus, Search, Tag, Star, Link2, Lightbulb, MessageSquare, TrendingUp, Trash2, Edit2, Check, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Research Repository – Insights Library for aggregating findings across projects
 // 研究仓库 – 洞察库，用于跨项目汇总研究发现
