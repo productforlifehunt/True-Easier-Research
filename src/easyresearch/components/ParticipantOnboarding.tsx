@@ -433,10 +433,10 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Email Address</label>
+                  <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('onboard.yourEmail')}</label>
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                    placeholder="Enter your email" required />
+                    placeholder={t('onboard.enterEmail')} required />
                 </div>
 
                 {/* Participant Type Selection */}
