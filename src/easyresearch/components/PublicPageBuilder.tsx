@@ -104,11 +104,11 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       order_index: pages.length,
     };
     const { data, error } = await (supabase as any).from('app_public_page').insert(newPage).select().single();
-    if (error) { toast.error('Failed to create page'); return; }
+    if (error) { bToast.error('Failed to create page', '创建页面失败'); return; }
     const created: PublicPage = { ...data, blocks: [] };
     setPages(prev => [...prev, created]);
     setActivePageId(created.id);
-    toast.success('Page created');
+    bToast.success('Page created', '页面已创建');
   };
 
   const deletePage = async (id: string) => {
