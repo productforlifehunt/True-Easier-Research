@@ -1149,7 +1149,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </div>
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Tasks (JSON)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.tasksJson')}</label>
               <textarea value={JSON.stringify(localQuestion.question_config?.task_list || [], null, 2)}
                 onChange={(e) => { try { updateLocal({ question_config: { ...localQuestion.question_config, task_list: JSON.parse(e.target.value) } }); } catch {} }}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] font-mono border border-stone-200 resize-none" rows={4} />
