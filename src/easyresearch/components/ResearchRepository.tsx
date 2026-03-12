@@ -111,7 +111,7 @@ const ResearchRepository: React.FC<Props> = ({ projectId }) => {
     saveInsights([newInsight, ...insights]);
     setForm({ title: '', description: '', insight_type: 'finding', severity: 'medium', tags: '', status: 'draft' });
     setShowCreate(false);
-    toast.success('Insight created / 洞察已创建');
+    bToast.success('Insight created', '洞察已创建');
   };
 
   const handleUpdate = (id: string) => {
