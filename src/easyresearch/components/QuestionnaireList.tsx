@@ -692,7 +692,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                           <div className="flex items-center gap-3 px-4 py-3">
                             <div {...provided.dragHandleProps} className="flex items-center gap-0.5 shrink-0 cursor-grab active:cursor-grabbing px-1.5 py-1 rounded-lg hover:bg-stone-100 transition-colors" title="Drag to reorder">
                               <ArrowUpDown size={13} className="text-stone-300" />
-                              <span className="text-[9px] text-stone-300 font-medium">Move</span>
+                              <span className="text-[9px] text-stone-300 font-medium">{t('ql.move')}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
