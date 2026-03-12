@@ -161,7 +161,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
             }
           }
         });
-        toast.success(t('ai.filledAnswers').replace('{n}', String(fills.length)));
+        bToast.success(t('ai.filledAnswers').replace('{n}', String(fills.length)), t('ai.filledAnswers').replace('{n}', String(fills.length)));
       }
 
       setMessages(prev => [...prev, {
