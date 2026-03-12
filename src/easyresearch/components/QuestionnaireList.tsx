@@ -1076,7 +1076,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
 
                               {participantTypes.length > 0 && (
                                 <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-2">
-                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> Assigned Types</h5>
+                                  <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><Users size={11} /> {t('ql.assignedTypes')}</h5>
                                   <div className="space-y-1.5">
                                     {participantTypes.map(pt => {
                                       const assigned = q.assigned_participant_types.includes(pt.id);
