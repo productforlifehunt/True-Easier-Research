@@ -170,12 +170,12 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
   };
 
   const sendInvitation = async () => {
-    if (!inviteEmail.trim()) { toast.error('Please enter a valid email'); return; }
+    if (!inviteEmail.trim()) { bToast.error('Please enter a valid email', '请输入有效邮箱'); return; }
     setSendingInvite(true);
     try {
       const emailLower = inviteEmail.trim().toLowerCase();
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectId).eq('participant_email', emailLower).maybeSingle();
-      if (existing) { toast.error('This participant is already enrolled'); setSendingInvite(false); return; }
+      if (existing) { bToast.error('This participant is already enrolled', '该参与者已经注册'); setSendingInvite(false); return; }
 
       const participantNumber = await generateParticipantNumber(inviteTypeId || undefined);
 
@@ -189,18 +189,18 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
 
       const { error } = await supabase.from('enrollment').insert(insertData);
       if (error) throw error;
-      toast.success(`${t('nav.participants')}: ${emailLower} added`);
+      bToast.success(`Participant ${emailLower} added`, `参与者 ${emailLower} 已添加`);
       setShowInviteModal(false); setInviteEmail(''); setInviteTypeId(''); loadEnrollments();
-    } catch (error: any) { console.error('Error sending invitation:', error); toast.error('Failed to create invitation'); }
+    } catch (error: any) { console.error('Error sending invitation:', error); bToast.error('Failed to create invitation', '创建邀请失败'); }
     finally { setSendingInvite(false); }
   };
 
   const inviteFromLibrary = async (profile: ParticipantProfile) => {
     const email = profile.email || '';
-    if (!email) { toast.error('This participant has no email'); return; }
+    if (!email) { bToast.error('This participant has no email', '该参与者没有邮箱'); return; }
     try {
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', projectId).eq('participant_email', email.toLowerCase()).maybeSingle();
-      if (existing) { toast.error('Already enrolled'); return; }
+      if (existing) { bToast.error('Already enrolled', '已经注册'); return; }
       const participantNumber = await generateParticipantNumber(undefined);
       const { error } = await supabase.from('enrollment').insert({
         project_id: projectId,
@@ -210,9 +210,9 @@ const ProjectParticipantsTab: React.FC<Props> = ({ projectId }) => {
         ...(participantNumber ? { participant_number: participantNumber } : {}),
       });
       if (error) throw error;
-      toast.success(`Invited ${profile.full_name}`);
+      bToast.success(`Invited ${profile.full_name}`, `已邀请 ${profile.full_name}`);
       loadEnrollments();
-    } catch (e: any) { toast.error('Failed to invite'); }
+    } catch (e: any) { bToast.error('Failed to invite', '邀请失败'); }
   };
 
   // Lookup helpers
