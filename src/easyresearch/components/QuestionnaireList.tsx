@@ -737,7 +737,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   onChange={(e) => updateQuestionnaire(q.id, { title: e.target.value })}
                                   onClick={(e) => e.stopPropagation()}
                                   className="text-[14px] font-semibold text-stone-800 bg-transparent border border-transparent hover:border-stone-200 focus:border-emerald-400 focus:bg-white rounded-lg px-2 py-0.5 -ml-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-w-0 flex-1 transition-colors"
-                                  placeholder="Questionnaire title"
+                                  placeholder={t('ql.questionnaireTitle')}
                                 />
                               </div>
                               <div className="flex items-center gap-3 mt-0.5 flex-wrap">
