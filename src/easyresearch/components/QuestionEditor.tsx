@@ -1445,7 +1445,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
           {/* Preview */}
           <div className="p-3 rounded-xl bg-stone-50">
-            <p className="text-[11px] font-medium text-stone-400 mb-2">Preview</p>
+            <p className="text-[11px] font-medium text-stone-400 mb-2">{t('qe.preview')}</p>
             <div className="bg-white p-3 rounded-lg border border-stone-100">
               <p className="text-[13px] font-medium text-stone-800 mb-1.5">
                 {localQuestion.question_text || 'Enter your question'}
