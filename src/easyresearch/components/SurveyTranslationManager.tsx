@@ -187,7 +187,7 @@ Respond with a JSON array matching the input structure with translated text/desc
       }
     } catch (error) {
       console.error('Translation error:', error);
-      toast.error('Translation failed. Please try again.');
+      bToast.error('Translation failed. Please try again.', '翻译失败，请重试。');
     } finally {
       setTranslating(false);
     }
