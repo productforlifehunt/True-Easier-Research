@@ -83,7 +83,7 @@ const ParticipantHome: React.FC = () => {
         for (const p of ownedRes.data) {
           items.push({
             id: p.id, project_id: p.id,
-            title: p.title || 'Untitled Study',
+            title: p.title || t('common.untitledStudy'),
             description: p.description || '',
             project_type: p.project_type || 'survey',
             study_duration: p.study_duration,

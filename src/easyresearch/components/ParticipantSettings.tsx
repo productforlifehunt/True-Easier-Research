@@ -100,7 +100,7 @@ const ParticipantSettings: React.FC = () => {
       }
 
       toast.success(t('resSettings.saved'));
-    } catch (error) { console.error('Error saving settings:', error); toast.error('Failed to save'); }
+    } catch (error) { console.error('Error saving settings:', error); toast.error(t('common.failedSave')); }
     finally { setSaving(false); }
   };
 

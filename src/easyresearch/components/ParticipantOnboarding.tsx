@@ -39,7 +39,7 @@ interface ParticipantOnboardingProps {
 }
 
 const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId, onComplete }) => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [project, setProject] = useState<any>(null);
   const [email, setEmail] = useState('');
   const [participantNumber, setParticipantNumber] = useState('');
