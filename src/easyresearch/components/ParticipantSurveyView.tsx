@@ -466,9 +466,9 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       try {
         const successful = document.execCommand('copy');
         if (successful) {
-          toast.success('Copied to clipboard!');
+          bToast.success('Copied to clipboard!', '已复制到剪贴板！');
         } else {
-          toast.error('Copy failed. Please manually select and copy the text.');
+          bToast.error('Copy failed. Please manually select and copy the text.', '复制失败，请手动选择并复制文本。');
         }
       } finally {
         document.body.removeChild(textArea);
