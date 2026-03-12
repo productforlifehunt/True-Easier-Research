@@ -493,7 +493,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           const el = document.getElementById(`question-${firstErrorQ.id}`);
           el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        toast.error('Please complete all required questions.');
+        bToast.error('Please complete all required questions.', '请完成所有必答题。');
         return;
       }
     }
