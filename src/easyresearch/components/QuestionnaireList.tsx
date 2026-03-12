@@ -934,7 +934,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   </button>
                                 </div>
                                 {(!q.notifications || q.notifications.length === 0) && (
-                                  <p className="text-[11px] text-stone-400 italic">No notifications configured. Click Add to create one.</p>
+                                  <p className="text-[11px] text-stone-400 italic">{t('ql.noNotifConfigured')}</p>
                                 )}
                                 {(q.notifications || []).map((notif, ni) => (
                                   <div key={notif.id} className="p-2.5 rounded-lg border border-stone-100 bg-stone-50/50 space-y-2">
