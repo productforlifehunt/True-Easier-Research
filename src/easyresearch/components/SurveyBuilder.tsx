@@ -79,7 +79,7 @@ import VideoHighlightReels from './VideoHighlightReels';
 import RegressionAnalysis from './RegressionAnalysis';
 import { useI18n } from '../hooks/useI18n';
 
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 interface Question {
   id: string;

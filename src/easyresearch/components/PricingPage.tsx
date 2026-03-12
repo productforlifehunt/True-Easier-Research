@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, HelpCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ const PricingPage: React.FC = () => {
     if (planName === 'Enterprise') { window.location.href = 'mailto:sales@easierresearch.com?subject=Enterprise Plan Inquiry'; return; }
     if (!user) { localStorage.setItem('intended_plan', JSON.stringify({ plan: planName.toLowerCase(), billingPeriod })); navigate('/easyresearch/auth'); return; }
     window.location.href = `mailto:support@easierresearch.com?subject=Upgrade to ${planName} Plan&body=Hi, I'd like to upgrade to the ${planName} plan (${billingPeriod} billing). My account email is ${user.email}.`;
-    toast.success(t('resSettings.saved'));
+    bToast.success('Request sent!', '请求已发送！');
   };
 
   const plans = [

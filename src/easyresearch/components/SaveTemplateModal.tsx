@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Globe, Lock, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { saveProjectAsTemplate, saveQuestionnaireAsTemplate } from '../services/templateService';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface Props {
   projectId: string;
@@ -49,13 +49,13 @@ const SaveTemplateModal: React.FC<Props> = ({ projectId, questionnaires, project
       }
 
       if ('error' in result) {
-        toast.error(result.error);
+        bToast.error(result.error, result.error);
       } else {
-        toast.success('Template saved!');
+        bToast.success('Template saved!', '模板已保存！');
         onClose();
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save template');
+      bToast.error(err.message || 'Failed to save template', err.message || '保存模板失败');
     } finally {
       setSaving(false);
     }

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot, Minimize2, CheckCircle2, Mic, MicOff } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
-import toast from 'react-hot-toast';
+import { bToast } from '../../utils/bilingualToast';
 import { useI18n } from '../../hooks/useI18n';
 
 interface AIChatbotPopupProps {
@@ -31,7 +31,7 @@ const VoiceInputButton: React.FC<{ onTranscript: (text: string) => void; primary
     }
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Speech recognition not supported in this browser');
+      bToast.error('Speech recognition not supported in this browser', '此浏览器不支持语音识别');
       return;
     }
     const recognition = new SpeechRecognition();
@@ -161,7 +161,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
             }
           }
         });
-        toast.success(t('ai.filledAnswers').replace('{n}', String(fills.length)));
+        bToast.success(t('ai.filledAnswers').replace('{n}', String(fills.length)), t('ai.filledAnswers').replace('{n}', String(fills.length)));
       }
 
       setMessages(prev => [...prev, {
@@ -170,7 +170,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
         fills: fills.length > 0 ? fills : undefined,
       }]);
     } catch (err: any) {
-      toast.error(err.message || t('ai.requestFailed'));
+      bToast.error(err.message || t('ai.requestFailed'), err.message || t('ai.requestFailed'));
       setMessages(prev => [...prev, { role: 'assistant', content: t('ai.errorTryAgain') }]);
     } finally {
       setLoading(false);

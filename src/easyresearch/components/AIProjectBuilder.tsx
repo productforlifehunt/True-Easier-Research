@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Bot, X, Send, Loader2, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 interface AIProjectBuilderProps {
   isOpen: boolean;
@@ -67,7 +67,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
         projectData: result.projectData,
       }]);
     } catch (err: any) {
-      toast.error(err.message || 'AI request failed');
+      bToast.error(err.message || 'AI request failed', err.message || 'AI 请求失败');
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
           researcher = newR;
         }
       }
-      if (!researcher) { toast.error('Researcher profile not found'); return; }
+      if (!researcher) { bToast.error('Researcher profile not found', '未找到研究者资料'); return; }
 
       const p = generatedProject;
       const { data: project, error } = await supabase
@@ -112,7 +112,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
           status: 'draft',
         }).select().single();
 
-      if (error || !project) { toast.error('Failed to create project'); return; }
+      if (error || !project) { bToast.error('Failed to create project', '创建项目失败'); return; }
 
       // Create questionnaires
       const questionnaires = p.questionnaires || [{ title: p.title || 'Survey', questions: p.questions || [] }];
@@ -165,11 +165,11 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
         }
       }
 
-      toast.success('Project created successfully!');
+      bToast.success('Project created successfully!', '项目创建成功！');
       onProjectCreated(project.id);
       onClose();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create project');
+      bToast.error(err.message || 'Failed to create project', err.message || '创建项目失败');
     } finally {
       setCreating(false);
     }

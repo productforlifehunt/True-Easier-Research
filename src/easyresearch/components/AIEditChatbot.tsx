@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { X, Send, Loader2, CheckCircle2, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { SurveyProject } from './SurveyBuilder';
 import type { LogicRule } from '../utils/logicEngine';
@@ -401,7 +401,7 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = (props) => {
       if (fills.length > 0) {
         const count = applyFormFills(fills, activeTab, props);
         if (count > 0) {
-          toast.success(`AI filled ${count} field${count > 1 ? 's' : ''} on the form — review and click Save when ready`);
+          bToast.success(`AI filled ${count} field${count > 1 ? 's' : ''} — review and click Save`, `AI 已填充 ${count} 个字段 — 请检查后点击保存`);
         }
       }
 
@@ -411,7 +411,7 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = (props) => {
         fills: fills.length > 0 ? fills : undefined,
       }]);
     } catch (err: any) {
-      toast.error(err.message || 'AI request failed');
+      bToast.error(err.message || 'AI request failed', err.message || 'AI 请求失败');
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
     } finally {
       setLoading(false);

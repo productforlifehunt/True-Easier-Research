@@ -8,7 +8,7 @@ import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submission
 import { validateSurveyResponse } from '../services/validationService';
 import { normalizeLegacyQuestionType, groupQuestionsBySections } from '../constants/questionTypes';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 import ParticipantOnboarding from './ParticipantOnboarding';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
@@ -369,14 +369,14 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
     // Check quota
     if (isQuotaFull) {
-      toast.error('This survey has reached its quota. Thank you for your interest. / 此调查已达到配额上限，感谢您的关注。');
+      bToast.error('This survey has reached its quota. Thank you for your interest.', '此调查已达到配额上限，感谢您的关注。');
       return;
     }
 
     // Check terminal actions (disqualify / end_survey)
     const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
     if (terminal.disqualified) {
-      toast.error('Based on your responses, you are not eligible for this study.');
+      bToast.error('Based on your responses, you are not eligible for this study.', '根据您的回答，您不符合此研究的资格。');
       return;
     }
     if (terminal.endSurvey) {
@@ -407,7 +407,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
   const handleVoiceInput = async (questionId: string) => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Voice input is not supported in this browser. Please use Chrome or Safari.');
+      bToast.error('Voice input is not supported in this browser. Please use Chrome or Safari.', '此浏览器不支持语音输入，请使用 Chrome 或 Safari。');
       return;
     }
 
@@ -430,7 +430,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
     recognition.onerror = () => {
       setIsRecording(null);
-      toast.error('Voice input failed. Please try again.');
+      bToast.error('Voice input failed. Please try again.', '语音输入失败，请重试。');
     };
 
     recognition.onend = () => {
@@ -446,7 +446,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       if (navigator.clipboard && window.isSecureContext) {
         try {
           await navigator.clipboard.writeText(text);
-          toast.success('Copied to clipboard!');
+          bToast.success('Copied to clipboard!', '已复制到剪贴板！');
           return;
         } catch (clipboardError) {
           // Fall through to execCommand fallback
@@ -466,16 +466,16 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       try {
         const successful = document.execCommand('copy');
         if (successful) {
-          toast.success('Copied to clipboard!');
+          bToast.success('Copied to clipboard!', '已复制到剪贴板！');
         } else {
-          toast.error('Copy failed. Please manually select and copy the text.');
+          bToast.error('Copy failed. Please manually select and copy the text.', '复制失败，请手动选择并复制文本。');
         }
       } finally {
         document.body.removeChild(textArea);
       }
     } catch (error) {
       console.error('Copy failed:', error);
-      toast.error('Failed to copy. Please manually select and copy the text.');
+      bToast.error('Failed to copy. Please manually select and copy the text.', '复制失败，请手动选择并复制文本。');
     }
   };
 
@@ -493,7 +493,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
           const el = document.getElementById(`question-${firstErrorQ.id}`);
           el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        toast.error('Please complete all required questions.');
+        bToast.error('Please complete all required questions.', '请完成所有必答题。');
         return;
       }
     }
@@ -502,7 +502,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     
     try {
       if (!projectId) {
-        toast.error('Missing survey id');
+        bToast.error('Missing survey id', '缺少调查 ID');
         return;
       }
 
@@ -526,7 +526,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
         if (enrollError || !newEnrollment?.id) {
           console.error('Error creating enrollment:', enrollError);
-          toast.error('Error enrolling in study. Please try again.');
+          bToast.error('Error enrolling in study. Please try again.', '加入研究时出错，请重试。');
           return;
         }
 
@@ -624,7 +624,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         .insert(responseInserts);
 
       if (responseError) {
-        toast.error(`Error saving responses: ${responseError.message}`);
+        bToast.error(`Error saving responses: ${responseError.message}`, `保存回答时出错: ${responseError.message}`);
         setSubmitting(false);
         return;
       }
@@ -637,7 +637,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       // Quota check (non-blocking for per-row insert model, but fire webhooks)
       const quotaResult = await checkQuotas(projectId, responses);
       if (!quotaResult.allowed) {
-        toast.error(quotaResult.reason || 'Survey quota reached.');
+        bToast.error(quotaResult.reason || 'Survey quota reached.', quotaResult.reason || '调查配额已满。');
         setSubmitting(false);
         return;
       }
@@ -684,7 +684,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         navigate(`/easyresearch/survey/${projectId}/complete`);
       }
     } catch (error) {
-      toast.error('Error submitting survey. Please try again.');
+      bToast.error('Error submitting survey. Please try again.', '提交调查时出错，请重试。');
     } finally {
       setSubmitting(false);
     }
@@ -1742,7 +1742,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                         window.location.reload();
                       } catch (error) {
                         console.error('Error deleting:', error);
-                        toast.error('Failed to delete survey response');
+                        bToast.error('Failed to delete survey response', '删除调查回答失败');
                       }
                     }
                   }}

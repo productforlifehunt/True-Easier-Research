@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Globe, Plus, Check, AlertTriangle, Copy, Languages, Loader2, Sparkles } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Multi-Language Survey Translation Manager
 // 多语言调查翻译管理器
@@ -107,7 +107,7 @@ const SurveyTranslationManager: React.FC<Props> = ({ projectId, questions, onQue
       const toTranslate = questions.filter((q: any) => getTranslationStatus(q.id, targetLocale) !== 'complete');
       
       if (toTranslate.length === 0) {
-        toast.success('All questions already translated!');
+        bToast.success('All questions already translated!', '所有问题已翻译完毕！');
         setTranslating(false);
         return;
       }
@@ -181,13 +181,13 @@ Respond with a JSON array matching the input structure with translated text/desc
         });
 
         onQuestionsUpdate(updatedQuestions);
-        toast.success(`Translated ${toTranslate.length} questions to ${locale.name}`);
+        bToast.success(`Translated ${toTranslate.length} questions to ${locale.name}`, `已翻译 ${toTranslate.length} 个问题到${locale.name}`);
       } else {
         throw new Error('Could not parse translation response');
       }
     } catch (error) {
       console.error('Translation error:', error);
-      toast.error('Translation failed. Please try again.');
+      bToast.error('Translation failed. Please try again.', '翻译失败，请重试。');
     } finally {
       setTranslating(false);
     }
@@ -219,7 +219,7 @@ Respond with a JSON array matching the input structure with translated text/desc
       return q;
     });
     onQuestionsUpdate(updatedQuestions);
-    toast.success('Translations saved!');
+    bToast.success('Translations saved!', '翻译已保存！');
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FileText, Download, Printer, BarChart3, PieChart, TrendingUp, Clock, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from 'recharts';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Automated Report Generator — One-click research reports
 // 自动报告生成器 — 一键生成研究报告
@@ -166,7 +166,7 @@ const ReportGenerator: React.FC<Props> = ({ projectId, projectTitle, responses, 
       a.download = `report-${projectId.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.html`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Report generated! / 报告已生成！');
+      bToast.success('Report generated!', '报告已生成！');
     } finally {
       setGenerating(false);
     }
