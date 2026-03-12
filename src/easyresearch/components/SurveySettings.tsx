@@ -323,7 +323,7 @@ const ProfileQuestionsBuilder: React.FC<{
               {q.config?.placeholder !== undefined || q.type === 'text' ? (
                 <input type="text" value={q.config?.placeholder || ''} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, placeholder: e.target.value } })}
                   className="w-full px-3 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  placeholder="Placeholder text (optional)" />
+                  placeholder={t('ss.placeholderText')} />
               ) : null}
               {['select', 'multiselect'].includes(q.type) && (
                 <div className="space-y-1">
