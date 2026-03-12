@@ -958,7 +958,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     <input type="text" value={notif.title} onChange={(e) => {
                                       const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, title: e.target.value } : n);
                                       updateQuestionnaire(q.id, { notifications: updated });
-                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder="Notification title" />
+                                    }} className="w-full px-2 py-1 rounded-lg text-[11px] border border-stone-200" placeholder={t('ql.notifTitle')} />
                                     <textarea value={notif.body} onChange={(e) => {
                                       const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, body: e.target.value } : n);
                                       updateQuestionnaire(q.id, { notifications: updated });
