@@ -930,7 +930,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     };
                                     updateQuestionnaire(q.id, { notifications: [...existing, newNotif] });
                                   }} className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 hover:text-emerald-600 transition-colors">
-                                    <Plus size={10} /> Add
+                                     <Plus size={10} /> {t('ql.addNotif')}
                                   </button>
                                 </div>
                                 {(!q.notifications || q.notifications.length === 0) && (
