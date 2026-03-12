@@ -356,9 +356,9 @@ const ProfileQuestionsBuilder: React.FC<{
                       className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
                   </div>
                   <div>
-                    <label className="text-[11px] text-stone-400">Min Label</label>
+                    <label className="text-[11px] text-stone-400">{t('ss.minLabel')}</label>
                     <input type="text" value={q.config?.min_label || ''} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, min_label: e.target.value } })}
-                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" placeholder="e.g. Strongly Disagree" />
+                      className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" placeholder={t('ss.minLabelPlaceholder')} />
                   </div>
                   <div>
                     <label className="text-[11px] text-stone-400">Max Label</label>
