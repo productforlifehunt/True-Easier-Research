@@ -1372,7 +1372,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             {localQuestion.question_type === 'number' && (
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Min Value</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.minValue')}</label>
                   <input type="number" value={localQuestion.validation_rule?.min_value ?? ''}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, min_value: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
