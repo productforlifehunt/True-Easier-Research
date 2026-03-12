@@ -864,7 +864,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                             className="w-20 px-2 py-1 rounded-lg text-[11px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                                           />
                                           <span className="text-[10px] text-stone-400">
-                                            {section.questions_per_page == null ? '(uses default)' : `${section.questions_per_page}/page`}
+                                            {section.questions_per_page == null ? t('ql.usesDefault') : `${section.questions_per_page}/${t('ql.perPage')}`}
                                           </span>
                                         </div>
                                       ))}
