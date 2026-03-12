@@ -898,7 +898,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" placeholder={t('ql.thankYouPlaceholder')} />
                                 </div>
                                 <div>
-                                  <label className="block text-[11px] text-stone-500 mb-1">Redirect URL (after completion)</label>
+                                  <label className="block text-[11px] text-stone-500 mb-1">{t('ql.redirectUrl')}</label>
                                   <input type="url" value={(q as any).redirect_url || ''}
                                     onChange={(e) => updateQuestionnaire(q.id, { redirect_url: e.target.value } as any)}
                                     className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="https://example.com/thank-you" />
