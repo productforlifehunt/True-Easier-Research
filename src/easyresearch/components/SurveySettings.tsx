@@ -346,7 +346,7 @@ const ProfileQuestionsBuilder: React.FC<{
               {q.type === 'scale' && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[11px] text-stone-400">Min</label>
+                    <label className="text-[11px] text-stone-400">{t('ss.min')}</label>
                     <input type="number" value={q.config?.min ?? 1} onChange={(e) => updateQuestion(q.id, { config: { ...q.config, min: Number(e.target.value) } })}
                       className="w-full px-2 py-1 rounded-lg text-[12px] border border-stone-200" />
                   </div>
