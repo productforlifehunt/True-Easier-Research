@@ -1278,7 +1278,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                     const attrs = [...(localQuestion.question_config?.conjoint_attributes || [])];
                     attrs[ai] = { ...attrs[ai], levels: [...(attrs[ai].levels || []), ''] };
                     updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
-                  }} className="text-[10px] text-emerald-500 hover:underline">+ Add level</button>
+                  }} className="text-[10px] text-emerald-500 hover:underline">{t('qe.addLevel')}</button>
                 </div>
               </div>
             ))}
