@@ -401,7 +401,7 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = (props) => {
       if (fills.length > 0) {
         const count = applyFormFills(fills, activeTab, props);
         if (count > 0) {
-          toast.success(`AI filled ${count} field${count > 1 ? 's' : ''} on the form — review and click Save when ready`);
+          bToast.success(`AI filled ${count} field${count > 1 ? 's' : ''} — review and click Save`, `AI 已填充 ${count} 个字段 — 请检查后点击保存`);
         }
       }
 
