@@ -609,7 +609,7 @@ const ParticipantAppView: React.FC = () => {
                     navigate(`/easyresearch/inbox/${newConv.id}`);
                   } catch (err) {
                     console.error('Error creating conversation:', err);
-                    toast.error('Failed to open conversation');
+                    bToast.error('Failed to open conversation', '无法打开对话');
                   }
                 }}
                 className="flex-1 py-2 rounded-lg bg-emerald-500 text-white text-[13px] font-medium hover:bg-emerald-600"

@@ -68,7 +68,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
     if (!localQuestion || !question) return;
     onUpdateQuestion(question.id, localQuestion);
     setHasChanges(false);
-    toast.success('Question saved!');
+    bToast.success('Question saved!', '问题已保存！');
   };
 
   if (!question || !localQuestion) {

@@ -62,8 +62,8 @@ const SettingsPage: React.FC = () => {
       if (researcher?.organization_id && settings.organization_name.trim()) {
         await supabase.from('organization').update({ name: settings.organization_name.trim() }).eq('id', researcher.organization_id);
       }
-      toast.success(t('resSettings.saved'));
-    } catch (error) { console.error('Error saving settings:', error); toast.error('Failed to save'); }
+      bToast.success('Settings saved', '设置已保存');
+    } catch (error) { console.error('Error saving settings:', error); bToast.error('Failed to save', '保存失败'); }
     finally { setSaving(false); }
   };
 

@@ -425,8 +425,8 @@ const UserSettings: React.FC = () => {
               try {
                 const { error } = await supabase.auth.resetPasswordForEmail(formData.email, { redirectTo: `${window.location.origin}/easyresearch/auth` });
                 if (error) throw error;
-                toast.success('Password reset email sent!');
-              } catch (err: any) { toast.error(err.message || 'Failed to send reset email'); }
+                bToast.success('Password reset email sent!', '密码重置邮件已发送！');
+              } catch (err: any) { bToast.error(err.message || 'Failed to send reset email', '发送重置邮件失败'); }
             }}
             className="w-full p-3.5 rounded-xl text-left hover:bg-stone-50 transition-colors border border-stone-100">
             <p className="text-[13px] font-medium text-stone-700">{t('settings.changePassword')}</p>

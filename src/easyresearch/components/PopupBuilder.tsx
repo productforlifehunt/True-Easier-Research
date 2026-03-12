@@ -142,7 +142,7 @@ const PopupBuilder: React.FC<PopupBuilderProps> = ({ projectId, questionnaires }
         );
       }
     }
-    toast.success('Popups saved / 弹窗已保存');
+    bToast.success('Popups saved', '弹窗已保存');
   }, [projectId]);
 
   const addPopup = () => {

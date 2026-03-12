@@ -41,9 +41,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const transcript = event.results[0][0].transcript;
       const currentVal = value || '';
       onResponse(question.id, currentVal ? `${currentVal} ${transcript}` : transcript);
-      toast.success('Voice input captured');
+      bToast.success('Voice input captured', '语音输入已捕获');
     };
-    recognition.onerror = () => { toast.error('Voice input failed'); setIsRecording(false); };
+    recognition.onerror = () => { bToast.error('Voice input failed', '语音输入失败'); setIsRecording(false); };
     recognition.onend = () => setIsRecording(false);
     recognitionRef.current = recognition;
     recognition.start();
