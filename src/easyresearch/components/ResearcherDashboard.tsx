@@ -181,7 +181,7 @@ const ResearcherDashboard: React.FC = () => {
     try {
       const { data: researcher } = await supabase
         .from('researcher').select('organization_id, id').eq('user_id', user?.id).maybeSingle();
-      if (!researcher) { toast.error(t('toast.researcherNotFound')); return; }
+      if (!researcher) { bToast.error('Researcher not found', '未找到研究者'); return; }
 
       const { data: newProject, error } = await supabase
         .from('research_project')
