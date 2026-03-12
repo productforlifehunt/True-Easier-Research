@@ -67,8 +67,10 @@ interface QuestionnaireListProps {
   onSwitchToNotifications?: () => void;
 }
 
-// Frequency options — labels are resolved at render time via t()
-const FREQ_KEYS: Record<string, string> = { once: 'ql.oneTime', multiple: 'ql.multipleTime' };
+const frequencyOptions = [
+  { value: 'once', label: 'One-time' },
+  { value: 'multiple', label: 'Multiple time' },
+];
 
 const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
   questionnaires, participantTypes, onUpdate, project, projectId, logicRules = [], onUpdateLogic,
