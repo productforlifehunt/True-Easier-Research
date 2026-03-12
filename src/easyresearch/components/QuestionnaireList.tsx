@@ -696,7 +696,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">Questionnaire {idx + 1}</span>
+                                <span className="text-[11px] font-bold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full whitespace-nowrap">{t('ql.questionnaire')} {idx + 1}</span>
                                 <CustomDropdown
                                   options={[
                                     { value: 'survey', label: 'Questionnaire' },
