@@ -1285,7 +1285,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             <button onClick={() => {
               const attrs = [...(localQuestion.question_config?.conjoint_attributes || []), { name: '', levels: ['', ''] }];
               updateLocal({ question_config: { ...localQuestion.question_config, conjoint_attributes: attrs } });
-            }} className="text-[11px] text-blue-500 hover:underline">+ Add attribute</button>
+            }} className="text-[11px] text-blue-500 hover:underline">{t('qe.addAttribute')}</button>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[11px] text-stone-400 mb-1">Profiles per task</label>
