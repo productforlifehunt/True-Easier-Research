@@ -920,7 +920,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'audio_block' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Audio URL</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.audioUrl')}</label>
               <input type="text" value={localQuestion.question_config?.audio_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, audio_url: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
