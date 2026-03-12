@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Eraser, Filter, AlertTriangle, CheckCircle2, Trash2, RotateCcw, Download, Zap, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Data Cleaning Studio – Pre-analysis data preparation and transformation tool
 // 数据清洗工作室 – 分析前数据准备和转换工具
