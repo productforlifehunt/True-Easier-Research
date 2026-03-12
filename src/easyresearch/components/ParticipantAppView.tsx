@@ -201,7 +201,7 @@ const ParticipantAppView: React.FC = () => {
       }
 
       if (!enrollmentId) {
-        toast.error('Unable to create enrollment.');
+        bToast.error('Unable to create enrollment.', '无法创建登记。');
         return;
       }
 
