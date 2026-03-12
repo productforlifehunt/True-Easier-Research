@@ -127,7 +127,7 @@ const ResearchRepository: React.FC<Props> = ({ projectId }) => {
     } : i);
     saveInsights(updated);
     setEditingId(null);
-    toast.success('Insight updated / 洞察已更新');
+    bToast.success('Insight updated', '洞察已更新');
   };
 
   const handleDelete = (id: string) => {
