@@ -1405,7 +1405,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, disqualify_value: e.target.value || null } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
                 >
-                  <option value="">No disqualification</option>
+                  <option value="">{t('qe.noDisqualification')}</option>
                   <option value="yes">{localQuestion.question_config?.yes_label || 'Yes'}</option>
                   <option value="no">{localQuestion.question_config?.no_label || 'No'}</option>
                 </select>
