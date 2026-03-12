@@ -1418,10 +1418,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <h5 className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
+                  <h5 className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">{t('layout.elements')}</h5>
                   <button onClick={() => setShowAddElement(!showAddElement)}
                     className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium">
-                    <Plus size={12} /> Add
+                    <Plus size={12} /> {t('layout.addElement')}
                   </button>
                 </div>
 
