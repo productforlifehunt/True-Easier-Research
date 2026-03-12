@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
 import { User, Bell, Lock, Mail, Phone, LogOut, LogIn, Edit2, Save, Moon, Plus, X, Globe, Smartphone, Users, ChevronDown, ChevronUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface DndPeriod {
   id?: string;
