@@ -573,7 +573,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="text-[11px] px-2 py-1 rounded-lg border border-stone-200 bg-white text-stone-500"
                 defaultValue=""
               >
-                <option value="">Pre-fill...</option>
+                <option value="">{t('qe.preFill')}</option>
                 {preFillTemplates.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
               </select>
             </div>
