@@ -307,12 +307,12 @@ const ProfileQuestionsBuilder: React.FC<{
                     if (!['select', 'multiselect'].includes(newType)) updates.options = undefined;
                     onChange(questions.map(qq => qq.id === q.id ? { ...qq, ...updates } : qq));
                   }} className="px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-                    <option value="text">Text</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="select">Dropdown</option>
-                    <option value="multiselect">Multi-Select</option>
-                    <option value="scale">Scale</option>
+                    <option value="text">{t('ss.typeText')}</option>
+                    <option value="number">{t('ss.typeNumber')}</option>
+                    <option value="date">{t('ss.typeDate')}</option>
+                    <option value="select">{t('ss.typeDropdown')}</option>
+                    <option value="multiselect">{t('ss.typeMultiSelect')}</option>
+                    <option value="scale">{t('ss.typeScale')}</option>
                   </select>
                   <label className="flex items-center gap-1.5 text-[12px] text-stone-600">
                     <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(q.id, { required: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
