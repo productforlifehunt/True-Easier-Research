@@ -637,7 +637,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
             onClick={() => setShowTemplates(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors"
           >
-            <Layers size={14} /> From Templates
+            <Layers size={14} /> {t('ql.fromTemplates')}
           </button>
           <button
             onClick={addQuestionnaire}
