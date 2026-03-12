@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Image as ImageIcon, Mic, MicOff } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
-import toast from 'react-hot-toast';
+import { bToast } from '../../utils/bilingualToast';
 
 interface QuestionRendererProps {
   question: any;
