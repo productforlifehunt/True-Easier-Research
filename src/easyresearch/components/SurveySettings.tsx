@@ -295,7 +295,7 @@ const ProfileQuestionsBuilder: React.FC<{
                 value={q.question}
                 onChange={(e) => updateQuestion(q.id, { question: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
-                placeholder={q.type === 'section' ? 'Section heading' : 'Question text'}
+                placeholder={q.type === 'section' ? t('ss.sectionHeading') : t('ss.questionText')}
               />
               {q.type !== 'section' && (
                 <div className="flex items-center gap-3">
