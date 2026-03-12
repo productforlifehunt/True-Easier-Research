@@ -546,7 +546,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Min Label</label>
+                 <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.minLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.min_label || ''} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, min_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" placeholder="Very Negative" />
               </div>
