@@ -567,7 +567,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {['single_choice', 'multiple_choice', 'dropdown', 'checkbox_group', 'ranking', 'matrix', 'image_choice'].includes(localQuestion.question_type) && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-[12px] font-medium text-stone-400">Options</label>
+              <label className="text-[12px] font-medium text-stone-400">{t('qe.options')}</label>
               <select
                 onChange={(e) => { const t = preFillTemplates.find(t => t.name === e.target.value); if (t) applyTemplate(t); e.target.value = ''; }}
                 className="text-[11px] px-2 py-1 rounded-lg border border-stone-200 bg-white text-stone-500"
