@@ -1042,7 +1042,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/mockup.png" />
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Task</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.task')}</label>
               <textarea value={localQuestion.question_config?.task_description || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, task_description: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Where would you click to...?" />
