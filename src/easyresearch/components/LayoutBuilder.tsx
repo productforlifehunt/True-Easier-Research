@@ -1668,8 +1668,8 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <div className="sticky top-24">
                 <div className="bg-stone-50 rounded-xl border border-dashed border-stone-200 p-6 text-center">
                   <Edit3 size={20} className="text-stone-300 mx-auto mb-2" />
-                  <p className="text-[12px] text-stone-400 font-medium">Select an element</p>
-                  <p className="text-[10px] text-stone-300 mt-1">Click any element in the list or preview to edit its properties</p>
+                  <p className="text-[12px] text-stone-400 font-medium">{t('layout.selectElement')}</p>
+                  <p className="text-[10px] text-stone-300 mt-1">{t('layout.selectElementDesc')}</p>
                 </div>
               </div>
             )}
