@@ -1555,7 +1555,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       className={`space-y-0.5 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}>
                       {activeTab.elements.length === 0 ? (
                         <div className="py-6 text-center text-[11px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
-                          Click "Add" above to add elements
+                          {t('layout.clickAddAbove')}
                         </div>
                       ) : (
                         activeTab.elements.map((el, elIdx) => (
