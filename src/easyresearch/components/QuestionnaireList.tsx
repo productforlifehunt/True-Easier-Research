@@ -973,7 +973,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                         <option value="sms">SMS</option>
                                         <option value="push_email">Push+Email</option>
                                       </select>
-                                      <span className="text-[10px] text-stone-400">Synced with questionnaire schedule</span>
+                                      <span className="text-[10px] text-stone-400">{t('ql.syncedWithSchedule')}</span>
                                       <div className="flex items-center gap-1">
                                         <label className="text-[10px] text-stone-400">Before:</label>
                                         <input type="number" value={notif.minutes_before} onChange={(e) => {
