@@ -514,7 +514,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'section_header' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section Color</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.sectionColor')}</label>
               <input type="color" value={localQuestion.question_config?.section_color || '#10b981'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, section_color: e.target.value } })}
                 className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
             </div>
