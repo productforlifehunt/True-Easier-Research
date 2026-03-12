@@ -524,7 +524,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                 placeholder="e.g., Tab icon" maxLength={4} />
             </div>
-            <p className="text-[11px] text-stone-400">All questions after this section header (until the next one) will be grouped into this tab.</p>
+            <p className="text-[11px] text-stone-400">{t('qe.sectionTabHint')}</p>
           </div>
         )}
 
