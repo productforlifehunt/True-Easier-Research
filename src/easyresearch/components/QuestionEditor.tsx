@@ -1320,7 +1320,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were present?" />
             </div>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Dysfunctional question</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.dysfunctionalQ')}</label>
               <input type="text" value={localQuestion.question_config?.kano_dysfunctional || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_dysfunctional: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were absent?" />
