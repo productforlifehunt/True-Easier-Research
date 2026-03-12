@@ -705,7 +705,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'matrix' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Column Headers (one per line)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.columnHeaders')}</label>
               <textarea
                 value={(localQuestion.question_config?.columns || []).join('\n')}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, columns: e.target.value.split('\n').filter(l => l.trim()) } })}
