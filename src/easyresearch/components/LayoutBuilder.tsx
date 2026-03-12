@@ -1225,7 +1225,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[11px] font-medium text-stone-400">
-                  Font Size: {el.config.style?.font_size || 'Default'}
+                  {t('layout.fontSize')}: {el.config.style?.font_size || (lang === 'zh' ? '默认' : 'Default')}
                 </label>
                 {el.config.style?.font_size && (
                   <button onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: undefined } })}
