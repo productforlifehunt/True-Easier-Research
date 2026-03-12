@@ -502,7 +502,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     
     try {
       if (!projectId) {
-        toast.error('Missing survey id');
+        bToast.error('Missing survey id', '缺少调查 ID');
         return;
       }
 
