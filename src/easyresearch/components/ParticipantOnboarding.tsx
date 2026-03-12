@@ -237,14 +237,13 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-orange-50 flex items-center justify-center">
               <AlertCircle className="text-orange-500" size={24} />
             </div>
-            <h2 className="text-lg font-bold text-stone-800 mb-2">Not Eligible</h2>
+            <h2 className="text-lg font-bold text-stone-800 mb-2">{t('survey.notEligible')}</h2>
             <p className="text-[13px] text-stone-500 font-light mb-4">
-              Based on your screening responses, you do not meet the eligibility criteria for this study.
-              Thank you for your interest.
+              {t('onboard.notEligibleDesc')}
             </p>
             <button onClick={() => navigate('/easyresearch')}
               className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500">
-              Return Home
+              {t('onboard.returnHome')}
             </button>
           </div>
         </div>
