@@ -1392,7 +1392,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {questionnaireType === 'screening' && (
           <div className="space-y-3 pt-3 border-t border-stone-100">
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium text-red-500">Screening Logic</span>
+              <span className="text-[12px] font-medium text-red-500">{t('qe.screeningLogic')}</span>
             </div>
             <p className="text-[11px] text-stone-400">
               Set which answer value should disqualify a participant. If a participant selects this value, they will not pass screening.
