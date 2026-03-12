@@ -1497,7 +1497,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {/* Section Name */}
         <div>
-          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Section</label>
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.section')}</label>
           <input type="text" value={localQuestion.section_name || ''} onChange={(e) => updateLocal({ section_name: e.target.value })}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
             placeholder="e.g., Demographics" />
