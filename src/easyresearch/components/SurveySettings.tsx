@@ -235,7 +235,7 @@ const ProfileQuestionsBuilder: React.FC<{
       id: crypto.randomUUID(),
       question: type === 'section' ? t('ss.sectionTitle') : '',
       type,
-      options: ['select', 'multiselect'].includes(type) ? ['Option 1', 'Option 2'] : undefined,
+      options: ['select', 'multiselect'].includes(type) ? [`${t('ss.option')} 1`, `${t('ss.option')} 2`] : undefined,
       required: false,
       config: type === 'scale' ? { min: 1, max: 5, min_label: '', max_label: '' } : undefined,
     };
