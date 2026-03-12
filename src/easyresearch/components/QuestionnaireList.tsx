@@ -436,7 +436,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                         />
                         <span className="text-[12px] text-stone-600 group-hover:text-stone-800 transition-colors">{pt.name}</span>
                         {isInherited && assigned && (
-                          <span className="text-[9px] text-stone-400 italic">(inherited)</span>
+                          <span className="text-[9px] text-stone-400 italic">({t('common.inherited')})</span>
                         )}
                       </label>
                     );
