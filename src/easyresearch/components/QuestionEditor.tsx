@@ -1344,7 +1344,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               updateLocal({ response_required: val, required: val === 'force' });
             }}
               className="px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400">
-              <option value="optional">Optional</option><option value="request">Request</option><option value="force">Required</option>
+              <option value="optional">{t('qe.optional')}</option><option value="request">{t('qe.request')}</option><option value="force">{t('qe.required')}</option>
             </select>
           </div>
         )}
