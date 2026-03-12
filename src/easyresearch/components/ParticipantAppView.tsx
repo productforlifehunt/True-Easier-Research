@@ -173,7 +173,7 @@ const ParticipantAppView: React.FC = () => {
       return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
     });
     if (unanswered.length > 0) {
-      toast.error(`Please answer: "${unanswered[0].question_text}"`);
+      bToast.error(`Please answer: "${unanswered[0].question_text}"`, `请回答："${unanswered[0].question_text}"`);
       return;
     }
 

@@ -129,10 +129,10 @@ const UserSettings: React.FC = () => {
       if (error) throw error;
       await supabase.auth.updateUser({ data: { full_name: formData.full_name } });
       setEditingProfile(false);
-      toast.success(t('settings.profileSaved'));
+      bToast.success('Profile saved', '资料已保存');
     } catch (err: any) {
       console.error('Save error:', err);
-      toast.error(t('toast.saveProfileFailed'));
+      bToast.error('Failed to save profile', '保存资料失败');
     } finally {
       setSavingProfile(false);
     }
