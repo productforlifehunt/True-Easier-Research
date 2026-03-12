@@ -1398,7 +1398,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               Set which answer value should disqualify a participant. If a participant selects this value, they will not pass screening.
             </p>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Disqualify if answer equals</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.disqualifyIfEquals')}</label>
               {localQuestion.question_type === 'yes_no' ? (
                 <select
                   value={localQuestion.question_config?.disqualify_value || ''}
