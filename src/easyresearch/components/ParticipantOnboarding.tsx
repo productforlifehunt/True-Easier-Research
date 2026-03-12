@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { ChevronRight, Calendar, Clock, ChevronLeft, AlertCircle, ShieldCheck, Users } from 'lucide-react';
 import { saveProfileData } from '../utils/enrollmentSync';
+import { useI18n } from '../hooks/useI18n';
 
 interface ParticipantTypeInfo {
   id: string;
