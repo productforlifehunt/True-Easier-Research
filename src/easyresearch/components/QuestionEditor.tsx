@@ -1202,7 +1202,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               {t('qe.randomizeOrder')}
             </label>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Follow-up Question</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.followupQuestion')}</label>
               <input type="text" value={localQuestion.question_config?.followup_question || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, followup_question: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="Why did you choose this design?" />
