@@ -369,7 +369,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
       <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
         {/* Question Text */}
         <div>
-          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Question Text</label>
+          <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.questionText')}</label>
           <textarea
             value={localQuestion.question_text}
             onChange={(e) => updateLocal({ question_text: e.target.value })}
