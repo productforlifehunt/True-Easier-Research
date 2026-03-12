@@ -169,7 +169,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
       onProjectCreated(project.id);
       onClose();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create project');
+      bToast.error(err.message || 'Failed to create project', err.message || '创建项目失败');
     } finally {
       setCreating(false);
     }

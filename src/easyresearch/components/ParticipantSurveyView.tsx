@@ -1742,7 +1742,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
                         window.location.reload();
                       } catch (error) {
                         console.error('Error deleting:', error);
-                        toast.error('Failed to delete survey response');
+                        bToast.error('Failed to delete survey response', '删除调查回答失败');
                       }
                     }
                   }}
