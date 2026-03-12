@@ -351,7 +351,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
   return (
     <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b border-stone-100">
-        <h3 className="text-[14px] font-semibold text-stone-800">Settings</h3>
+        <h3 className="text-[14px] font-semibold text-stone-800">{t('qe.settings')}</h3>
         <button
           onClick={saveChanges}
           disabled={!hasChanges}
