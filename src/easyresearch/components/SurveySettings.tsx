@@ -233,7 +233,7 @@ const ProfileQuestionsBuilder: React.FC<{
   const addQuestion = (type: ProfileQuestion['type']) => {
     const newQ: ProfileQuestion = {
       id: crypto.randomUUID(),
-      question: type === 'section' ? 'Section Title' : '',
+      question: type === 'section' ? t('ss.sectionTitle') : '',
       type,
       options: ['select', 'multiselect'].includes(type) ? ['Option 1', 'Option 2'] : undefined,
       required: false,
