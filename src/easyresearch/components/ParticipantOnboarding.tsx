@@ -387,7 +387,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                       <select value={screeningResponses[sq.id] || ''}
                         onChange={e => setScreeningResponses(prev => ({ ...prev, [sq.id]: e.target.value }))}
                         className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] bg-white">
-                        <option value="">Select...</option>
+                        <option value="">{t('onboard.select')}</option>
                         {(sq.options || []).map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     )}
