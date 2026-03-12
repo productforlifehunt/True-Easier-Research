@@ -257,7 +257,7 @@ const ParticipantAppView: React.FC = () => {
       }
     } catch (err) {
       console.error('Error submitting:', err);
-      toast.error('Failed to submit. Please try again.');
+      bToast.error('Failed to submit. Please try again.', '提交失败，请重试。');
     } finally {
       setSubmitting(false);
     }
