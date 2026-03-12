@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Layers, Plus, Trash2, Filter, Users, BarChart3, Save, Play, X, ChevronDown } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Advanced Segmentation Engine – Build complex participant segments for analysis
 // 高级分群引擎 – 构建复杂的参与者分群用于分析

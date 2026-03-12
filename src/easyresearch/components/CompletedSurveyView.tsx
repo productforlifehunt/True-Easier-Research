@@ -183,7 +183,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
       setEditMode(false);
     } catch (error) {
       console.error('Error saving responses:', error);
-      toast.error('Failed to save changes');
+      bToast.error('Failed to save changes', '保存更改失败');
     }
   };
 

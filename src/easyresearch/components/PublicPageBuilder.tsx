@@ -458,7 +458,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                     <div className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-stone-100">
                       <Globe size={12} className="text-stone-400 shrink-0" />
                       <code className="text-[10px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{activePage.slug}</code>
-                      <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${activePage.slug}`); toast.success('URL copied'); }}
+                      <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${activePage.slug}`); bToast.success('URL copied', 'URL已复制'); }}
                         className="shrink-0"><Copy size={12} className="text-emerald-600 hover:text-emerald-700" /></button>
                     </div>
                   )}

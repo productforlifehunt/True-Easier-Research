@@ -59,7 +59,7 @@ const CustomVariablesManager: React.FC<Props> = ({ projectId, surveyCode, variab
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied / 已复制');
+    bToast.success('Copied', '已复制');
   };
 
   return (

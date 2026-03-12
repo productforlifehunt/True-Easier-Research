@@ -132,7 +132,7 @@ const ResearchRepository: React.FC<Props> = ({ projectId }) => {
 
   const handleDelete = (id: string) => {
     saveInsights(insights.filter(i => i.id !== id));
-    toast.success('Insight deleted / 洞察已删除');
+    bToast.success('Insight deleted', '洞察已删除');
   };
 
   const startEdit = (insight: Insight) => {

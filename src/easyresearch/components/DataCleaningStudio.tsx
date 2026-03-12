@@ -170,7 +170,7 @@ const DataCleaningStudio: React.FC<Props> = ({ projectId, questionnaires }) => {
     a.download = `clean_data_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Clean data exported / 清洁数据已导出');
+    bToast.success('Clean data exported', '清洁数据已导出');
   };
 
   const toggleRule = (id: string) => {
