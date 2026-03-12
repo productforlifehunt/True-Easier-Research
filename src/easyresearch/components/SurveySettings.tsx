@@ -375,14 +375,14 @@ const ProfileQuestionsBuilder: React.FC<{
       {/* Add Question Buttons */}
       <div className="flex flex-wrap gap-1.5 pt-2">
         {[
-          { type: 'section' as const, label: '§ Section', color: 'emerald' },
-          { type: 'text' as const, label: 'Text', color: 'stone' },
-          { type: 'number' as const, label: 'Number', color: 'stone' },
-          { type: 'date' as const, label: 'Date', color: 'stone' },
-          { type: 'select' as const, label: 'Dropdown', color: 'stone' },
-          { type: 'multiselect' as const, label: 'Multi-Select', color: 'stone' },
-          { type: 'scale' as const, label: 'Scale', color: 'stone' },
-        ].map(t => (
+          { type: 'section' as const, label: `§ ${t('ss.typeSection')}`, color: 'emerald' },
+          { type: 'text' as const, label: t('ss.typeText'), color: 'stone' },
+          { type: 'number' as const, label: t('ss.typeNumber'), color: 'stone' },
+          { type: 'date' as const, label: t('ss.typeDate'), color: 'stone' },
+          { type: 'select' as const, label: t('ss.typeDropdown'), color: 'stone' },
+          { type: 'multiselect' as const, label: t('ss.typeMultiSelect'), color: 'stone' },
+          { type: 'scale' as const, label: t('ss.typeScale'), color: 'stone' },
+        ].map(bt => (
           <button key={t.type} onClick={() => addQuestion(t.type)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border border-dashed border-stone-200 text-stone-500 hover:border-emerald-300 hover:text-emerald-600 transition-colors">
             <Plus size={10} /> {t.label}
