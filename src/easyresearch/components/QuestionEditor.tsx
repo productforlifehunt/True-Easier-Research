@@ -1362,7 +1362,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="0" />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-stone-400 mb-1">Max Length</label>
+                  <label className="block text-[11px] text-stone-400 mb-1">{t('qe.maxLength')}</label>
                   <input type="number" value={localQuestion.validation_rule?.max_length ?? ''} min={1}
                     onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, max_length: e.target.value ? Number(e.target.value) : undefined } })}
                     className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="No limit" />
