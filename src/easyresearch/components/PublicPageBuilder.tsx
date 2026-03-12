@@ -134,7 +134,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       style_height: type === 'spacer' ? '32px' : null,
     };
     const { data, error } = await (supabase as any).from('app_public_page_block').insert(newBlock).select().single();
-    if (error) { toast.error('Failed to add block'); return; }
+    if (error) { bToast.error('Failed to add block', '添加区块失败'); return; }
     setPages(prev => prev.map(p => p.id === pageId ? { ...p, blocks: [...p.blocks, data] } : p));
     setEditingBlockId(data.id);
     setShowAddElement(false);
