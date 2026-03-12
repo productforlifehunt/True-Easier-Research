@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Globe, Lock, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { saveProjectAsTemplate, saveQuestionnaireAsTemplate } from '../services/templateService';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface Props {
   projectId: string;

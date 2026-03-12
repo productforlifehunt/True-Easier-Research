@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Map, Plus, Trash2, Edit2, Save, X, MoveHorizontal, Smile, Frown, Meh } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Journey Map Designer – Visual customer/user journey mapping tool
 // 旅程地图设计器 – 可视化客户/用户旅程映射工具

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot, Minimize2, CheckCircle2, Mic, MicOff } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
-import toast from 'react-hot-toast';
+import { bToast } from '../../utils/bilingualToast';
 import { useI18n } from '../../hooks/useI18n';
 
 interface AIChatbotPopupProps {

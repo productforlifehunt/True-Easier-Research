@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 import { Plus, Trash2, GripVertical, Home, FileText, Settings, HelpCircle, BarChart3, Layout, Eye, EyeOff, X, Edit3, Link2, Calendar, CheckSquare, Maximize2, Minus, MousePointer, Image, Shield, ClipboardCheck, User, Layers, icons, Lock, Mail } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import type { QuestionnaireConfig } from './QuestionnaireList';

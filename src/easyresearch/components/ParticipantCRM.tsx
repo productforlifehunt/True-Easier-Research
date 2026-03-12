@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Users, Mail, Tag, Search, Filter, Download, Clock, Star, MessageSquare, ChevronDown, Phone, Globe, BarChart3, Plus, X, Edit2, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Participant CRM – Full participant relationship management system
 // 参与者CRM – 完整参与者关系管理系统

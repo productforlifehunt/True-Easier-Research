@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Globe, Plus, Check, AlertTriangle, Copy, Languages, Loader2, Sparkles } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Multi-Language Survey Translation Manager
 // 多语言调查翻译管理器

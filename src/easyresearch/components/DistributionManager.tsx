@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link2, Mail, QrCode, Code, Share2, Copy, Check, ExternalLink, Users, BarChart3 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Distribution Manager — Multi-channel survey distribution
 // 分发管理器 — 多渠道调查分发

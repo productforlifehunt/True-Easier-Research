@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, HelpCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();

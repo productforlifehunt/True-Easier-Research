@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { X, Send, Loader2, CheckCircle2, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { SurveyProject } from './SurveyBuilder';
 import type { LogicRule } from '../utils/logicEngine';
