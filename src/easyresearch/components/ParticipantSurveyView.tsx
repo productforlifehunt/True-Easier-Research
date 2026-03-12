@@ -376,7 +376,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
     // Check terminal actions (disqualify / end_survey)
     const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
     if (terminal.disqualified) {
-      toast.error('Based on your responses, you are not eligible for this study.');
+      bToast.error('Based on your responses, you are not eligible for this study.', '根据您的回答，您不符合此研究的资格。');
       return;
     }
     if (terminal.endSurvey) {
