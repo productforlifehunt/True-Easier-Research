@@ -4,7 +4,7 @@ import { Bell, Users, Save, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface UserSettings {
   email_notifications: boolean;
