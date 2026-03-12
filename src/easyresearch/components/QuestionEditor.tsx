@@ -626,14 +626,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {/* Date/Time Configuration */}
         {(localQuestion.question_type === 'date' || localQuestion.question_type === 'time') && (
           <div className="space-y-2">
-            <label className="text-[12px] font-medium text-stone-400">Date/Time Settings</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.dateTimeSettings')}</label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.validation_rule?.allow_future_dates !== false} onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, allow_future_dates: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow future dates/times
+              {t('qe.allowFuture')}
             </label>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.validation_rule?.allow_past_dates !== false} onChange={(e) => updateLocal({ validation_rule: { ...localQuestion.validation_rule, allow_past_dates: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Allow past dates/times
+              {t('qe.allowPast')}
             </label>
           </div>
         )}
