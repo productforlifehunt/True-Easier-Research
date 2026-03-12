@@ -1338,7 +1338,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
 
         {!['section_header', 'text_block', 'instruction', 'divider', 'image_block', 'video_block', 'audio_block', 'embed_block'].includes(localQuestion.question_type) && (
           <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-            <label className="text-[12px] font-medium text-stone-400">Response Type</label>
+            <label className="text-[12px] font-medium text-stone-400">{t('qe.responseType')}</label>
             <select value={localQuestion.response_required || 'optional'} onChange={(e) => {
               const val = e.target.value;
               updateLocal({ response_required: val, required: val === 'force' });
