@@ -3,7 +3,7 @@ import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Bell,
 import { loadNotificationConfigs, saveNotificationConfigs, createDefaultNotificationConfig, type NotificationConfig } from '../utils/notificationConfigSync';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface NotificationEditorProps {
   projectId: string;
