@@ -643,7 +643,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
             onClick={addQuestionnaire}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-200/50 transition-all"
           >
-            <Plus size={14} /> Add Questionnaire
+            <Plus size={14} /> {t('ql.addQuestionnaire')}
           </button>
         </div>
       </div>
