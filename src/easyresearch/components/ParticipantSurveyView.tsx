@@ -684,7 +684,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         navigate(`/easyresearch/survey/${projectId}/complete`);
       }
     } catch (error) {
-      toast.error('Error submitting survey. Please try again.');
+      bToast.error('Error submitting survey. Please try again.', '提交调查时出错，请重试。');
     } finally {
       setSubmitting(false);
     }
