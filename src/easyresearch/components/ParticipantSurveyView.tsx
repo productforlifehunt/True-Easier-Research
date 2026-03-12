@@ -624,7 +624,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
         .insert(responseInserts);
 
       if (responseError) {
-        toast.error(`Error saving responses: ${responseError.message}`);
+        bToast.error(`Error saving responses: ${responseError.message}`, `保存回答时出错: ${responseError.message}`);
         setSubmitting(false);
         return;
       }
