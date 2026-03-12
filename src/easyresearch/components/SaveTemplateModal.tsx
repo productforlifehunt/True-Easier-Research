@@ -49,9 +49,9 @@ const SaveTemplateModal: React.FC<Props> = ({ projectId, questionnaires, project
       }
 
       if ('error' in result) {
-        toast.error(result.error);
+        bToast.error(result.error, result.error);
       } else {
-        toast.success('Template saved!');
+        bToast.success('Template saved!', '模板已保存！');
         onClose();
       }
     } catch (err: any) {
