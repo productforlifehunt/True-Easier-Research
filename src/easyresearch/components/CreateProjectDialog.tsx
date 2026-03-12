@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, ChevronRight, ChevronLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';

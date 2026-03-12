@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { UserCircle, Plus, Trash2, Edit2, Save, X, Target, Quote, Heart, Frown, Star, BarChart3 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 // Persona Builder – Create research personas from survey data
 // 用户画像构建器 – 从调查数据创建研究用户画像

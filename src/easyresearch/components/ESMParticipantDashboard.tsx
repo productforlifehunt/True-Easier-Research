@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import ParticipantNotificationSettings from './ParticipantNotificationSettings';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 import ParticipantSurveyView from './ParticipantSurveyView';
 import CompletedSurveyView from './CompletedSurveyView';
 import AddEntryDialog from './AddEntryDialog';

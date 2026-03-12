@@ -6,7 +6,7 @@ import {
   Calendar, Shield, ClipboardCheck, User, HelpCircle, Layers, BarChart3, Link2, CheckSquare, Maximize2,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import { DEVICE_PRESETS, DEFAULT_DEVICE, type DevicePreset } from '../constants/devicePresets';
 import BrandIcon from './BrandIcon';
@@ -88,7 +88,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       if (!activePageId && mapped.length > 0) setActivePageId(mapped[0].id);
     } catch (e: any) {
       console.error('Failed to load public pages:', e);
-      toast.error('Failed to load pages');
+      bToast.error('Failed to load pages', '加载页面失败');
     } finally { setLoading(false); }
   }, [projectId]);
 
@@ -104,19 +104,19 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       order_index: pages.length,
     };
     const { data, error } = await (supabase as any).from('app_public_page').insert(newPage).select().single();
-    if (error) { toast.error('Failed to create page'); return; }
+    if (error) { bToast.error('Failed to create page', '创建页面失败'); return; }
     const created: PublicPage = { ...data, blocks: [] };
     setPages(prev => [...prev, created]);
     setActivePageId(created.id);
-    toast.success('Page created');
+    bToast.success('Page created', '页面已创建');
   };
 
   const deletePage = async (id: string) => {
     const { error } = await (supabase as any).from('app_public_page').delete().eq('id', id);
-    if (error) { toast.error('Failed to delete'); return; }
+    if (error) { bToast.error('Failed to delete', '删除失败'); return; }
     setPages(prev => prev.filter(p => p.id !== id));
     if (activePageId === id) setActivePageId(pages.find(p => p.id !== id)?.id || null);
-    toast.success('Page deleted');
+    bToast.success('Page deleted', '页面已删除');
   };
 
   const updatePage = async (id: string, field: string, value: any) => {
@@ -134,7 +134,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       style_height: type === 'spacer' ? '32px' : null,
     };
     const { data, error } = await (supabase as any).from('app_public_page_block').insert(newBlock).select().single();
-    if (error) { toast.error('Failed to add block'); return; }
+    if (error) { bToast.error('Failed to add block', '添加区块失败'); return; }
     setPages(prev => prev.map(p => p.id === pageId ? { ...p, blocks: [...p.blocks, data] } : p));
     setEditingBlockId(data.id);
     setShowAddElement(false);
@@ -458,7 +458,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
                     <div className="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg border border-stone-100">
                       <Globe size={12} className="text-stone-400 shrink-0" />
                       <code className="text-[10px] text-stone-500 flex-1 truncate">{window.location.origin}/easyresearch/page/{projectId}/{activePage.slug}</code>
-                      <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${activePage.slug}`); toast.success('URL copied'); }}
+                      <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/easyresearch/page/${projectId}/${activePage.slug}`); bToast.success('URL copied', 'URL已复制'); }}
                         className="shrink-0"><Copy size={12} className="text-emerald-600 hover:text-emerald-700" /></button>
                     </div>
                   )}

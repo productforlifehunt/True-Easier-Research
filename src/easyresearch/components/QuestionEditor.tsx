@@ -3,7 +3,7 @@ import { Settings, Mic, GripVertical, X, Save, Check, Volume2, Globe, Sparkles, 
 import { normalizeLegacyQuestionType } from '../constants/questionTypes';
 import CustomDropdown from './CustomDropdown';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { useI18n } from '../hooks/useI18n';
 
 interface Question {
@@ -68,7 +68,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
     if (!localQuestion || !question) return;
     onUpdateQuestion(question.id, localQuestion);
     setHasChanges(false);
-    toast.success('Question saved!');
+    bToast.success('Question saved!', '问题已保存！');
   };
 
   if (!question || !localQuestion) {

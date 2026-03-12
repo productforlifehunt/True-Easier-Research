@@ -3,7 +3,7 @@ import { Plus, Link2, BarChart3, Calendar, MessageCircle, Copy, Edit3, Lock, Mai
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Public function elements — which ones can be customized / 公共功能部件——哪些可自定义
 const PUBLIC_FUNCTION_ELEMENTS = [
@@ -86,8 +86,8 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
       icon: base.icon,
       element_config: {},
     });
-    if (error) { toast.error(lang === 'zh' ? '失败: ' + error.message : 'Failed: ' + error.message); return; }
-    toast.success(lang === 'zh' ? '已创建自定义部件' : 'Custom element created');
+    if (error) { bToast.error('Failed: ' + error.message, '失败: ' + error.message); return; }
+    bToast.success('Custom element created', '已创建自定义部件');
     setShowCloneForm(null);
     setCloneName({ en: '', zh: '' });
     fetchElements();
@@ -109,8 +109,8 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
       icon: editForm.icon,
       element_config: editForm.element_config,
     }).eq('id', editingId);
-    if (error) { toast.error(lang === 'zh' ? '失败: ' + error.message : 'Failed: ' + error.message); return; }
-    toast.success(lang === 'zh' ? '已保存' : 'Saved');
+    if (error) { bToast.error('Failed: ' + error.message, '失败: ' + error.message); return; }
+    bToast.success('Saved', '已保存');
     setEditingId(null);
     setEditForm({});
     fetchElements();
@@ -124,7 +124,7 @@ const FunctionalElementsTab: React.FC<Props> = ({ projectId }) => {
 
   const deleteUserElement = async (id: string) => {
     await (supabase as any).from('user_function_element').delete().eq('id', id);
-    toast.success(lang === 'zh' ? '已删除' : 'Deleted');
+    bToast.success('Deleted', '已删除');
     fetchElements();
   };
 

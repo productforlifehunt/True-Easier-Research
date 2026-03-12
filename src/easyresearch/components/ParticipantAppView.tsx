@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Home, FileText, Settings, BarChart3, HelpCircle, Layout, ArrowLeft, MessageCircle, icons as allIcons } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { supabase } from '../../lib/supabase';
 import { fireWebhooks, runQualityChecks, checkQuotas } from '../utils/submissionRuntime';
 import { useAuth } from '../../hooks/useAuth';
@@ -173,7 +173,7 @@ const ParticipantAppView: React.FC = () => {
       return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0);
     });
     if (unanswered.length > 0) {
-      toast.error(`Please answer: "${unanswered[0].question_text}"`);
+      bToast.error(`Please answer: "${unanswered[0].question_text}"`, `请回答："${unanswered[0].question_text}"`);
       return;
     }
 
@@ -201,7 +201,7 @@ const ParticipantAppView: React.FC = () => {
       }
 
       if (!enrollmentId) {
-        toast.error('Unable to create enrollment.');
+        bToast.error('Unable to create enrollment.', '无法创建登记。');
         return;
       }
 
@@ -236,7 +236,7 @@ const ParticipantAppView: React.FC = () => {
         if (insertError) throw insertError;
       }
 
-      toast.success('Response submitted!');
+      bToast.success('Response submitted!', '回复已提交！');
 
       // Runtime: quality + webhooks (non-blocking) / 运行时：质量+Webhook（非阻塞）
       const qualityFlags = runQualityChecks(responses, {}, 60); // No per-question timing in app view
@@ -257,7 +257,7 @@ const ParticipantAppView: React.FC = () => {
       }
     } catch (err) {
       console.error('Error submitting:', err);
-      toast.error('Failed to submit. Please try again.');
+      bToast.error('Failed to submit. Please try again.', '提交失败，请重试。');
     } finally {
       setSubmitting(false);
     }
@@ -574,7 +574,7 @@ const ParticipantAppView: React.FC = () => {
                 onClick={async () => {
                   setShowDmConfirm(false);
                   if (!user || !projectId || !project?.user_id) {
-                    toast.error('Unable to start conversation');
+                    bToast.error('Unable to start conversation', '无法开始对话');
                     return;
                   }
                   try {
@@ -609,7 +609,7 @@ const ParticipantAppView: React.FC = () => {
                     navigate(`/easyresearch/inbox/${newConv.id}`);
                   } catch (err) {
                     console.error('Error creating conversation:', err);
-                    toast.error('Failed to open conversation');
+                    bToast.error('Failed to open conversation', '无法打开对话');
                   }
                 }}
                 className="flex-1 py-2 rounded-lg bg-emerald-500 text-white text-[13px] font-medium hover:bg-emerald-600"

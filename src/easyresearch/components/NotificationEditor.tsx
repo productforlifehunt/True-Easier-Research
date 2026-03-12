@@ -3,7 +3,7 @@ import { Plus, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Bell,
 import { loadNotificationConfigs, saveNotificationConfigs, createDefaultNotificationConfig, type NotificationConfig } from '../utils/notificationConfigSync';
 import type { QuestionnaireConfig } from './QuestionnaireList';
 import type { ParticipantType } from './ParticipantTypeManager';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface NotificationEditorProps {
   projectId: string;
@@ -50,7 +50,7 @@ const NotificationEditor: React.FC<NotificationEditorProps> = ({ projectId, ques
   const save = useCallback(async (updated: NotificationConfig[]) => {
     setConfigs(updated);
     await saveNotificationConfigs(projectId, updated);
-    toast.success('Notifications saved');
+    bToast.success('Notifications saved', '通知已保存');
   }, [projectId]);
 
   const addProjectNotification = () => {

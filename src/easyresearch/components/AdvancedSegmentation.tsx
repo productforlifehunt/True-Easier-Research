@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Layers, Plus, Trash2, Filter, Users, BarChart3, Save, Play, X, ChevronDown } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Advanced Segmentation Engine – Build complex participant segments for analysis
 // 高级分群引擎 – 构建复杂的参与者分群用于分析
@@ -215,18 +215,18 @@ const AdvancedSegmentation: React.FC<Props> = ({ projectId, questionnaires }) =>
       saveSegments([...segments, updated]);
     }
     setEditingSegment(null);
-    toast.success(`Segment saved: ${matched} matches / 分群已保存：${matched}个匹配`);
+    bToast.success(`Segment saved: ${matched} matches`, `分群已保存：${matched}个匹配`);
   };
 
   const deleteSegment = (id: string) => {
     saveSegments(segments.filter(s => s.id !== id));
-    toast.success('Segment deleted / 分群已删除');
+    bToast.success('Segment deleted', '分群已删除');
   };
 
   const runAllSegments = () => {
     const updated = segments.map(s => ({ ...s, matched_count: evaluateSegment(s) }));
     saveSegments(updated);
-    toast.success('All segments evaluated / 所有分群已评估');
+    bToast.success('All segments evaluated', '所有分群已评估');
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent" /></div>;

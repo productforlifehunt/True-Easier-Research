@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Eraser, Filter, AlertTriangle, CheckCircle2, Trash2, RotateCcw, Download, Zap, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Data Cleaning Studio – Pre-analysis data preparation and transformation tool
 // 数据清洗工作室 – 分析前数据准备和转换工具
@@ -148,10 +148,10 @@ const DataCleaningStudio: React.FC<Props> = ({ projectId, questionnaires }) => {
       setRules(updatedRules);
       setExcluded(newExcluded);
       setAnalyzed(true);
-      toast.success(`Analysis complete: ${newExcluded.size} responses flagged / 分析完成：${newExcluded.size}条响应被标记`);
+      bToast.success(`Analysis complete: ${newExcluded.size} responses flagged`, `分析完成：${newExcluded.size}条响应被标记`);
     } catch (e) {
       console.error(e);
-      toast.error('Analysis failed / 分析失败');
+      bToast.error('Analysis failed', '分析失败');
     } finally {
       setLoading(false);
     }
@@ -170,7 +170,7 @@ const DataCleaningStudio: React.FC<Props> = ({ projectId, questionnaires }) => {
     a.download = `clean_data_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Clean data exported / 清洁数据已导出');
+    bToast.success('Clean data exported', '清洁数据已导出');
   };
 
   const toggleRule = (id: string) => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { 
   BarChart3, Users, FileText, Plus, Clock, CheckCircle, Archive, AlertCircle,
   Search, Trash2, Copy, X, Sparkles
@@ -166,11 +166,11 @@ const ResearcherDashboard: React.FC = () => {
       const { error } = await supabase.from('research_project').delete().eq('id', projectId);
       if (error) throw error;
       setShowDeleteConfirm(null);
-      toast.success(t('toast.projectDeleted'));
+      bToast.success('Project deleted', '项目已删除');
       loadDashboardData();
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error(t('toast.deleteFailed'));
+      bToast.error('Delete failed', '删除失败');
     } finally {
       setActionLoading(false);
     }
@@ -181,7 +181,7 @@ const ResearcherDashboard: React.FC = () => {
     try {
       const { data: researcher } = await supabase
         .from('researcher').select('organization_id, id').eq('user_id', user?.id).maybeSingle();
-      if (!researcher) { toast.error(t('toast.researcherNotFound')); return; }
+      if (!researcher) { bToast.error('Researcher not found', '未找到研究者'); return; }
 
       const { data: newProject, error } = await supabase
         .from('research_project')
@@ -230,12 +230,12 @@ const ResearcherDashboard: React.FC = () => {
           sourceLayout.bottom_nav = sourceLayout.tabs.map(t => ({ icon: t.icon, label: t.label, tab_id: t.id }));
           await saveLayoutToDb(newProject.id, sourceLayout);
         }
-        toast.success(t('toast.duplicated'));
+        bToast.success('Project duplicated', '项目已复制');
         loadDashboardData();
       }
     } catch (error) {
       console.error('Error duplicating project:', error);
-      toast.error(t('toast.duplicateFailed'));
+      bToast.error('Duplicate failed', '复制失败');
     } finally {
       setActionLoading(false);
     }

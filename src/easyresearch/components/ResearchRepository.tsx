@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { BookOpen, Plus, Search, Tag, Star, Link2, Lightbulb, MessageSquare, TrendingUp, Trash2, Edit2, Check, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Research Repository – Insights Library for aggregating findings across projects
 // 研究仓库 – 洞察库，用于跨项目汇总研究发现
@@ -111,7 +111,7 @@ const ResearchRepository: React.FC<Props> = ({ projectId }) => {
     saveInsights([newInsight, ...insights]);
     setForm({ title: '', description: '', insight_type: 'finding', severity: 'medium', tags: '', status: 'draft' });
     setShowCreate(false);
-    toast.success('Insight created / 洞察已创建');
+    bToast.success('Insight created', '洞察已创建');
   };
 
   const handleUpdate = (id: string) => {
@@ -127,12 +127,12 @@ const ResearchRepository: React.FC<Props> = ({ projectId }) => {
     } : i);
     saveInsights(updated);
     setEditingId(null);
-    toast.success('Insight updated / 洞察已更新');
+    bToast.success('Insight updated', '洞察已更新');
   };
 
   const handleDelete = (id: string) => {
     saveInsights(insights.filter(i => i.id !== id));
-    toast.success('Insight deleted / 洞察已删除');
+    bToast.success('Insight deleted', '洞察已删除');
   };
 
   const startEdit = (insight: Insight) => {

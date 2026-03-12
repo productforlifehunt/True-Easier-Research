@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Edit2, Save, X } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 
 interface CompletedSurveyViewProps {
@@ -183,7 +183,7 @@ const CompletedSurveyView: React.FC<CompletedSurveyViewProps> = ({ instanceId })
       setEditMode(false);
     } catch (error) {
       console.error('Error saving responses:', error);
-      toast.error('Failed to save changes');
+      bToast.error('Failed to save changes', '保存更改失败');
     }
   };
 

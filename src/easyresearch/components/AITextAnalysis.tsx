@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Sparkles, MessageSquare, Tag, TrendingUp, Loader2, BarChart3 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 // AI-Powered Text & Sentiment Analysis for open-ended responses
 // AI 驱动的文本与情感分析（用于开放式回答）

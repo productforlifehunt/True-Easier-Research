@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
 import { User, Bell, Lock, Mail, Phone, LogOut, LogIn, Edit2, Save, Moon, Plus, X, Globe, Smartphone, Users, ChevronDown, ChevronUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 interface DndPeriod {
   id?: string;
@@ -96,10 +96,10 @@ const UserSettings: React.FC = () => {
       if (fields.full_name) {
         await supabase.auth.updateUser({ data: { full_name: fields.full_name } });
       }
-      toast.success(t('settings.saved'));
+      bToast.success('Saved', '已保存');
     } catch (err: any) {
       console.error('Save error:', err);
-      toast.error(t('toast.saveFailed'));
+      bToast.error('Save failed', '保存失败');
     }
   };
 
@@ -129,10 +129,10 @@ const UserSettings: React.FC = () => {
       if (error) throw error;
       await supabase.auth.updateUser({ data: { full_name: formData.full_name } });
       setEditingProfile(false);
-      toast.success(t('settings.profileSaved'));
+      bToast.success('Profile saved', '资料已保存');
     } catch (err: any) {
       console.error('Save error:', err);
-      toast.error(t('toast.saveProfileFailed'));
+      bToast.error('Failed to save profile', '保存资料失败');
     } finally {
       setSavingProfile(false);
     }
@@ -425,8 +425,8 @@ const UserSettings: React.FC = () => {
               try {
                 const { error } = await supabase.auth.resetPasswordForEmail(formData.email, { redirectTo: `${window.location.origin}/easyresearch/auth` });
                 if (error) throw error;
-                toast.success('Password reset email sent!');
-              } catch (err: any) { toast.error(err.message || 'Failed to send reset email'); }
+                bToast.success('Password reset email sent!', '密码重置邮件已发送！');
+              } catch (err: any) { bToast.error(err.message || 'Failed to send reset email', '发送重置邮件失败'); }
             }}
             className="w-full p-3.5 rounded-xl text-left hover:bg-stone-50 transition-colors border border-stone-100">
             <p className="text-[13px] font-medium text-stone-700">{t('settings.changePassword')}</p>

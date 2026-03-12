@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Webhook, Plus, Trash2, Play, Check, X, Loader2, Zap } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast, toast } from '../utils/bilingualToast';
 
 // Webhook / Integration Manager — trigger external actions on survey events
 // Webhook / 集成管理器 — 在调查事件上触发外部操作

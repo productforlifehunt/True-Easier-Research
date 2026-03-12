@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Search, Mail, CheckCircle, Clock, XCircle, Download, X, Eye, ChevronRight, Hash, Network } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { loadProfileData } from '../utils/enrollmentSync';
 
 interface Enrollment {
@@ -114,17 +114,17 @@ const ParticipantsPage: React.FC = () => {
   };
 
   const sendInvitation = async () => {
-    if (!inviteEmail.trim() || !selectedProject) { toast.error('Please enter a valid email and select a project'); return; }
+    if (!inviteEmail.trim() || !selectedProject) { bToast.error('Please enter a valid email and select a project', '请输入有效邮箱并选择项目'); return; }
     setSendingInvite(true);
     try {
       const emailLower = inviteEmail.trim().toLowerCase();
       const { data: existing } = await supabase.from('enrollment').select('id').eq('project_id', selectedProject).eq('participant_email', emailLower).maybeSingle();
-      if (existing) { toast.error('This participant is already enrolled'); setSendingInvite(false); return; }
+      if (existing) { bToast.error('This participant is already enrolled', '该参与者已经注册'); setSendingInvite(false); return; }
       const { error: enrollError } = await supabase.from('enrollment').insert({ project_id: selectedProject, participant_email: emailLower, status: 'invited' });
       if (enrollError) throw enrollError;
-      toast.success(`Participant ${emailLower} added`);
+      bToast.success(`Participant ${emailLower} added`, `参与者 ${emailLower} 已添加`);
       setShowInviteModal(false); setInviteEmail(''); loadEnrollments();
-    } catch (error: any) { console.error('Error sending invitation:', error); toast.error('Failed to create invitation'); }
+    } catch (error: any) { console.error('Error sending invitation:', error); bToast.error('Failed to create invitation', '创建邀请失败'); }
     finally { setSendingInvite(false); }
   };
 

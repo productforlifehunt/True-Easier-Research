@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Image as ImageIcon, Mic, MicOff } from 'lucide-react';
 import { normalizeLegacyQuestionType } from '../../constants/questionTypes';
-import toast from 'react-hot-toast';
+import { bToast } from '../../utils/bilingualToast';
 
 interface QuestionRendererProps {
   question: any;
@@ -32,7 +32,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return;
     }
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) { toast.error('Speech recognition not supported'); return; }
+    if (!SpeechRecognition) { bToast.error('Speech recognition not supported', '不支持语音识别'); return; }
     const recognition = new SpeechRecognition();
     recognition.lang = navigator.language || 'en-US';
     recognition.interimResults = false;
@@ -41,9 +41,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       const transcript = event.results[0][0].transcript;
       const currentVal = value || '';
       onResponse(question.id, currentVal ? `${currentVal} ${transcript}` : transcript);
-      toast.success('Voice input captured');
+      bToast.success('Voice input captured', '语音输入已捕获');
     };
-    recognition.onerror = () => { toast.error('Voice input failed'); setIsRecording(false); };
+    recognition.onerror = () => { bToast.error('Voice input failed', '语音输入失败'); setIsRecording(false); };
     recognition.onend = () => setIsRecording(false);
     recognitionRef.current = recognition;
     recognition.start();
