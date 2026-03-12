@@ -32,7 +32,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       return;
     }
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) { toast.error('Speech recognition not supported'); return; }
+    if (!SpeechRecognition) { bToast.error('Speech recognition not supported', '不支持语音识别'); return; }
     const recognition = new SpeechRecognition();
     recognition.lang = navigator.language || 'en-US';
     recognition.interimResults = false;
