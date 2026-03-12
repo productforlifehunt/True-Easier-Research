@@ -738,7 +738,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'instruction' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Content Type</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.contentType')}</label>
               <select value={localQuestion.question_config?.content_type || 'text'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, content_type: e.target.value } })}
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 bg-white">
                 <option value="text">Plain Text</option>
