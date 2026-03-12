@@ -1326,7 +1326,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" placeholder="How would you feel if this feature were absent?" />
             </div>
             <div>
-              <label className="block text-[11px] text-stone-400 mb-1">Response categories (one per line)</label>
+              <label className="block text-[11px] text-stone-400 mb-1">{t('qe.responseCategories')}</label>
               <textarea value={(localQuestion.question_config?.kano_categories || []).join('\n')}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, kano_categories: e.target.value.split('\n').filter(Boolean) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[11px] border border-stone-200 resize-none" rows={5}
