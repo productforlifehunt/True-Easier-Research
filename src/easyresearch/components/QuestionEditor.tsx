@@ -1294,7 +1294,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] text-stone-400 mb-1"># Choice tasks</label>
+                <label className="block text-[11px] text-stone-400 mb-1">{t('qe.choiceTasks')}</label>
                 <input type="number" value={localQuestion.question_config?.num_choice_tasks ?? 6} min={1} max={20}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, num_choice_tasks: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
