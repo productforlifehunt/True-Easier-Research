@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { ChevronRight, Calendar, Clock, ChevronLeft, AlertCircle, ShieldCheck, Users } from 'lucide-react';
 import { saveProfileData } from '../utils/enrollmentSync';
+import { useI18n } from '../hooks/useI18n';
 
 interface ParticipantTypeInfo {
   id: string;
@@ -38,6 +39,7 @@ interface ParticipantOnboardingProps {
 }
 
 const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId, onComplete }) => {
+  const { t, lang } = useI18n();
   const [project, setProject] = useState<any>(null);
   const [email, setEmail] = useState('');
   const [participantNumber, setParticipantNumber] = useState('');
@@ -235,14 +237,13 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-orange-50 flex items-center justify-center">
               <AlertCircle className="text-orange-500" size={24} />
             </div>
-            <h2 className="text-lg font-bold text-stone-800 mb-2">Not Eligible</h2>
+            <h2 className="text-lg font-bold text-stone-800 mb-2">{t('survey.notEligible')}</h2>
             <p className="text-[13px] text-stone-500 font-light mb-4">
-              Based on your screening responses, you do not meet the eligibility criteria for this study.
-              Thank you for your interest.
+              {t('onboard.notEligibleDesc')}
             </p>
             <button onClick={() => navigate('/easyresearch')}
               className="px-6 py-2.5 rounded-xl text-[13px] font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500">
-              Return Home
+              {t('onboard.returnHome')}
             </button>
           </div>
         </div>
@@ -284,7 +285,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
         {q.type === 'select' && (
           <select value={val || ''} onChange={(e) => update(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white">
-            <option value="">Select...</option>
+            <option value="">{t('onboard.select')}</option>
             {(q.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         )}
@@ -357,9 +358,9 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">
                   <ShieldCheck size={16} className="text-orange-500" />
                 </div>
-                <h2 className="text-lg font-bold text-stone-800">Eligibility Screening</h2>
+                <h2 className="text-lg font-bold text-stone-800">{t('onboard.screening')}</h2>
               </div>
-              <p className="text-[12px] text-stone-400 font-light mb-5">Please answer the following questions to check your eligibility.</p>
+              <p className="text-[12px] text-stone-400 font-light mb-5">{t('onboard.screeningDesc')}</p>
               <div className="space-y-4">
                 {screeningQuestions.map(sq => (
                   <div key={sq.id}>
@@ -372,7 +373,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                           <button key={v} onClick={() => setScreeningResponses(prev => ({ ...prev, [sq.id]: v }))}
                             className={`flex-1 py-3 rounded-xl text-[13px] font-medium border-2 transition-all capitalize ${
                               screeningResponses[sq.id] === v ? 'border-emerald-400 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-500'}`}>
-                            {v}
+                            {v === 'yes' ? t('onboard.yes') : t('onboard.no')}
                           </button>
                         ))}
                       </div>
@@ -386,7 +387,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                       <select value={screeningResponses[sq.id] || ''}
                         onChange={e => setScreeningResponses(prev => ({ ...prev, [sq.id]: e.target.value }))}
                         className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] bg-white">
-                        <option value="">Select...</option>
+                        <option value="">{t('onboard.select')}</option>
                         {(sq.options || []).map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     )}
@@ -396,7 +397,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               <button onClick={handleScreeningNext}
                 className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40"
                 disabled={screeningQuestions.some(sq => sq.required && !screeningResponses[sq.id])}>
-                Continue <ChevronRight size={16} />
+                {t('onboard.continue')} <ChevronRight size={16} />
               </button>
             </>
           )}
@@ -415,11 +416,11 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
               {project?.methodology_type === 'multi_time' && (
                 <div className="mb-6 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100">
                   <h3 className="text-[13px] font-semibold text-stone-700 mb-2 flex items-center gap-2">
-                    <Calendar size={14} className="text-emerald-500" /> Study Information
+                    <Calendar size={14} className="text-emerald-500" /> {t('onboard.studyInfo')}
                   </h3>
                   <div className="space-y-1.5 text-[12px] text-stone-500 font-light">
-                    <p>This longitudinal study tracks your experiences over time.</p>
-                    <p className="flex items-center gap-1.5"><Clock size={11} className="text-stone-400" /> Duration: {project?.study_duration || 7} days</p>
+                    <p>{t('onboard.longitudinalDesc')}</p>
+                    <p className="flex items-center gap-1.5"><Clock size={11} className="text-stone-400" /> {t('survey.duration')}: {project?.study_duration || 7} {t('survey.days')}</p>
                   </div>
                 </div>
               )}
@@ -432,17 +433,17 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[12px] font-medium text-stone-500 mb-1.5">Your Email Address</label>
+                  <label className="block text-[12px] font-medium text-stone-500 mb-1.5">{t('onboard.yourEmail')}</label>
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                    placeholder="Enter your email" required />
+                    placeholder={t('onboard.enterEmail')} required />
                 </div>
 
                 {/* Participant Type Selection */}
                 {participantTypes.length > 1 && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5 flex items-center gap-1">
-                      <Users size={12} /> Select Your Participant Type <span className="text-red-500">*</span>
+                      <Users size={12} /> {t('onboard.selectType')} <span className="text-red-500">*</span>
                     </label>
                     <div className="space-y-2">
                       {participantTypes.map(pt => (
@@ -472,17 +473,17 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 {selectedType?.numbering_enabled && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5">
-                      Participant Number <span className="text-stone-400">(e.g., {selectedType?.number_prefix || 'P'}001)</span>
+                      {lang === 'zh' ? '参与者编号' : 'Participant Number'} <span className="text-stone-400">(e.g., {selectedType?.number_prefix || 'P'}001)</span>
                     </label>
                     <input type="text" value={participantNumber} onChange={(e) => setParticipantNumber(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-stone-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-stone-50/50"
-                      placeholder={`${selectedType?.number_prefix || 'P'}### (leave blank for auto-assign)`} />
+                      placeholder={`${selectedType?.number_prefix || 'P'}### (${lang === 'zh' ? '留空自动分配' : 'leave blank for auto-assign'})`} />
                   </div>
                 )}
 
                 <button onClick={handleInfoNext} disabled={!email || (participantTypes.length > 1 && !selectedParticipantTypeId)}
                   className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
-                  {hasProfileQuestions ? 'Continue to Profile' : (project?.methodology_type === 'multi_time' ? 'Start Study' : 'Begin Survey')}
+                  {hasProfileQuestions ? (lang === 'zh' ? '继续填写资料' : 'Continue to Profile') : (project?.methodology_type === 'multi_time' ? (lang === 'zh' ? '开始研究' : 'Start Study') : (lang === 'zh' ? '开始问卷' : 'Begin Survey'))}
                   <ChevronRight size={16} />
                 </button>
               </div>
@@ -496,15 +497,15 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 <button onClick={() => setStep('info')} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors">
                   <ChevronLeft size={16} className="text-stone-500" />
                 </button>
-                <h2 className="text-lg font-bold text-stone-800">Your Profile</h2>
+                <h2 className="text-lg font-bold text-stone-800">{t('onboard.profileInfo')}</h2>
               </div>
-              <p className="text-[12px] text-stone-400 font-light mb-5">Please fill out the following information before starting.</p>
+              <p className="text-[12px] text-stone-400 font-light mb-5">{lang === 'zh' ? '请在开始前填写以下信息。' : 'Please fill out the following information before starting.'}</p>
               <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                 {profileQuestions.map(q => renderProfileField(q))}
               </div>
               <button onClick={handleEnroll} disabled={!validateProfile()}
                 className="w-full mt-6 py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
-                {project?.methodology_type === 'multi_time' ? 'Start Study' : 'Begin Survey'}
+                {project?.methodology_type === 'multi_time' ? (lang === 'zh' ? '开始研究' : 'Start Study') : (lang === 'zh' ? '开始问卷' : 'Begin Survey')}
                 <ChevronRight size={16} />
               </button>
             </>

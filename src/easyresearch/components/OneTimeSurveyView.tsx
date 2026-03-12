@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { hydrateQuestionRows } from '../utils/questionConfigSync';
 import { type LogicRule, dbRowToLogicRule, getVisibleQuestions as getVisibleQs, findSkipTarget, checkTerminalActions, checkRequiredBeforeNext, checkValidation, getPipedText, getCalculatedValues, checkQuotaReached, expandLoopQuestions } from '../utils/logicEngine';
 import { filterQuestionsByParticipantType } from '../utils/participantTypeFilter';
+import { useI18n } from '../hooks/useI18n';
 
 interface SurveyProject {
   id: string;
@@ -40,6 +41,7 @@ const OneTimeSurveyView: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t, lang } = useI18n();
   
   const [project, setProject] = useState<SurveyProject | null>(null);
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
@@ -70,7 +72,6 @@ const OneTimeSurveyView: React.FC = () => {
       if (project) {
         setProject(project as any);
 
-        // Load logic rules from research_logic table
         const { data: logicRows } = await supabase
           .from('research_logic')
           .select('*')
@@ -117,7 +118,7 @@ const OneTimeSurveyView: React.FC = () => {
 
   const handleVoiceInput = async (questionId: string) => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Voice input is not supported in this browser. Please use Chrome or Safari.');
+      toast.error(t('survey.voiceNotSupported'));
       return;
     }
 
@@ -126,7 +127,7 @@ const OneTimeSurveyView: React.FC = () => {
     
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
 
     setIsRecording(questionId);
 
@@ -140,7 +141,7 @@ const OneTimeSurveyView: React.FC = () => {
 
     recognition.onerror = () => {
       setIsRecording(null);
-      toast.error('Voice input failed. Please try again.');
+      toast.error(t('survey.voiceFailed'));
     };
 
     recognition.onend = () => {
@@ -161,12 +162,10 @@ const OneTimeSurveyView: React.FC = () => {
   // Use shared logic engine for visibility, piping, calculations, loops, and quota
   const expandedQuestions = expandLoopQuestions(questions, logicRules, responses);
   const logicVisibleQuestions = getVisibleQs(expandedQuestions, logicRules, responses);
-  // Apply participant type filtering (OneTimeSurveyView doesn't have enrollment, so pass null)
   const visibleQuestions = filterQuestionsByParticipantType(logicVisibleQuestions, null);
   const calculatedValues = getCalculatedValues(logicRules, responses);
   const isQuotaFull = checkQuotaReached(logicRules, questions.map(q => q.id), responses);
 
-  // Apply calculated values into responses so downstream logic sees them
   React.useEffect(() => {
     if (Object.keys(calculatedValues).length === 0) return;
     let changed = false;
@@ -180,14 +179,12 @@ const OneTimeSurveyView: React.FC = () => {
   const handleNext = () => {
     const currentQ = visibleQuestions[currentQuestionIndex];
 
-    // Check require_before_next rules
     if (currentQ) {
       const requiredError = checkRequiredBeforeNext(currentQ.id, logicRules, responses);
       if (requiredError) {
         toast.error(requiredError);
         return;
       }
-      // Check validate_format rules
       const validationError = checkValidation(currentQ.id, logicRules, responses);
       if (validationError) {
         toast.error(validationError);
@@ -195,13 +192,11 @@ const OneTimeSurveyView: React.FC = () => {
       }
     }
 
-    // Check quota
     if (isQuotaFull) {
-      toast.error('This survey has reached its quota. Thank you for your interest. / 此调查已达到配额上限，感谢您的关注。');
+      toast.error(t('survey.quotaReached'));
       return;
     }
 
-    // Check terminal actions (disqualify / end_survey)
     const terminal = checkTerminalActions(logicRules, questions.map(q => q.id), responses);
     if (terminal.disqualified) {
       setIsDisqualified(true);
@@ -211,7 +206,6 @@ const OneTimeSurveyView: React.FC = () => {
       handleSubmit();
       return;
     }
-    // Check skip logic
     const skipIdx = currentQ ? findSkipTarget(currentQ.id, visibleQuestions, logicRules, responses) : null;
     if (skipIdx !== null) {
       setCurrentQuestionIndex(skipIdx);
@@ -236,7 +230,7 @@ const OneTimeSurveyView: React.FC = () => {
     });
     if (unanswered.length > 0) {
       setCurrentQuestionIndex(visibleQuestions.findIndex(q => q.id === unanswered[0].id));
-      toast.error(`Please answer: "${unanswered[0].question_text}"`);
+      toast.error(`${t('survey.pleaseAnswer')} "${unanswered[0].question_text}"`);
       return;
     }
     setSubmitting(true);
@@ -269,7 +263,7 @@ const OneTimeSurveyView: React.FC = () => {
       }
 
       if (!currentEnrollmentId) {
-        toast.error('Unable to create enrollment. Please try again.');
+        toast.error(t('survey.enrollFailed'));
         return;
       }
 
@@ -354,7 +348,7 @@ const OneTimeSurveyView: React.FC = () => {
       navigate(`/easyresearch/survey/${projectId}/complete`);
     } catch (error) {
       console.error('Error submitting survey:', error);
-      toast.error('Failed to submit survey. Please try again.');
+      toast.error(t('survey.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -476,7 +470,7 @@ const OneTimeSurveyView: React.FC = () => {
               onChange={(e) => handleResponseChange(question.id, e.target.value)}
               className="w-full px-4 py-3 rounded-lg border-2"
               style={{ borderColor: 'var(--border-light)' }}
-              placeholder="Type your answer here..."
+              placeholder={t('survey.typeAnswer')}
             />
             {question.allow_voice && (
               <div className="flex gap-2">
@@ -487,7 +481,7 @@ const OneTimeSurveyView: React.FC = () => {
                   style={{ borderColor: 'var(--border-light)' }}
                 >
                   <Mic size={16} style={{ color: 'var(--color-green)' }} />
-                  {isRecording === question.id ? 'Recording...' : 'Voice Input'}
+                  {isRecording === question.id ? t('survey.recording') : t('survey.voiceInput')}
                 </button>
               </div>
             )}
@@ -503,7 +497,7 @@ const OneTimeSurveyView: React.FC = () => {
               className="w-full px-4 py-3 rounded-lg border-2 resize-none"
               style={{ borderColor: 'var(--border-light)' }}
               rows={6}
-              placeholder="Type your answer here..."
+              placeholder={t('survey.typeAnswer')}
             />
             {question.allow_voice && (
               <div className="flex gap-2">
@@ -514,7 +508,7 @@ const OneTimeSurveyView: React.FC = () => {
                   style={{ borderColor: 'var(--border-light)' }}
                 >
                   <Mic size={16} style={{ color: 'var(--color-green)' }} />
-                  {isRecording === question.id ? 'Recording...' : 'Voice Input'}
+                  {isRecording === question.id ? t('survey.recording') : t('survey.voiceInput')}
                 </button>
               </div>
             )}
@@ -529,7 +523,7 @@ const OneTimeSurveyView: React.FC = () => {
             onChange={(e) => handleResponseChange(question.id, e.target.value)}
             className="w-full px-4 py-3 rounded-lg border-2"
             style={{ borderColor: 'var(--border-light)' }}
-            placeholder="Enter a number..."
+            placeholder={t('survey.enterNumber')}
           />
         );
 
@@ -548,10 +542,10 @@ const OneTimeSurveyView: React.FC = () => {
         return (<input type="time" value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}}/>);
 
       case 'email':
-        return (<input type="email" value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}} placeholder="Enter your email..."/>);
+        return (<input type="email" value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2" style={{borderColor:'var(--border-light)'}} placeholder={t('survey.enterEmail')}/>);
 
       case 'dropdown':
-        return (<select value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2 bg-white" style={{borderColor:'var(--border-light)'}}><option value="">Select an option...</option>{question.options?.map((o:any,i:number)=>{const optVal = o.id || o.option_value || o.option_text || (typeof o === 'string' ? o : String(o)); const optLabel = o.option_text || o.text || o.label || (typeof o === 'string' ? o : String(o)); return (<option key={i} value={optVal}>{optLabel}</option>);})}</select>);
+        return (<select value={value||''} onChange={(e)=>handleResponseChange(question.id,e.target.value)} className="w-full px-4 py-3 rounded-lg border-2 bg-white" style={{borderColor:'var(--border-light)'}}><option value="">{t('survey.selectOption')}</option>{question.options?.map((o:any,i:number)=>{const optVal = o.id || o.option_value || o.option_text || (typeof o === 'string' ? o : String(o)); const optLabel = o.option_text || o.text || o.label || (typeof o === 'string' ? o : String(o)); return (<option key={i} value={optVal}>{optLabel}</option>);})}</select>);
 
       case 'slider':
         const sliderCfg = (question as any).question_config || {};
@@ -561,7 +555,7 @@ const OneTimeSurveyView: React.FC = () => {
         return (<div className="flex gap-3 justify-center py-4">{[1,2,3,4,5].map(s=>(<button key={s} type="button" onClick={()=>handleResponseChange(question.id,s)} className="text-4xl transition-transform hover:scale-110" style={{color:(value||0)>=s?'#fbbf24':'#d1d5db'}}>★</button>))}</div>);
 
       case 'nps':
-        return (<div className="space-y-3"><div className="flex flex-wrap gap-2 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n=>(<button key={n} type="button" onClick={()=>handleResponseChange(question.id,n)} className="w-11 h-11 rounded-lg font-semibold transition-all" style={{backgroundColor:value===n?'var(--color-green)':'var(--bg-secondary)',color:value===n?'white':'var(--text-primary)'}}>{n}</button>))}</div><div className="flex justify-between text-xs px-2" style={{color:'var(--text-secondary)'}}><span>Not at all likely</span><span>Extremely likely</span></div></div>);
+        return (<div className="space-y-3"><div className="flex flex-wrap gap-2 justify-center">{[0,1,2,3,4,5,6,7,8,9,10].map(n=>(<button key={n} type="button" onClick={()=>handleResponseChange(question.id,n)} className="w-11 h-11 rounded-lg font-semibold transition-all" style={{backgroundColor:value===n?'var(--color-green)':'var(--bg-secondary)',color:value===n?'white':'var(--text-primary)'}}>{n}</button>))}</div><div className="flex justify-between text-xs px-2" style={{color:'var(--text-secondary)'}}><span>{t('survey.notAtAllLikely')}</span><span>{t('survey.extremelyLikely')}</span></div></div>);
 
       case 'constant_sum':
         const csOpts = question.options || [];
@@ -572,8 +566,8 @@ const OneTimeSurveyView: React.FC = () => {
         return (
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 rounded-lg" style={{ backgroundColor: csRem === 0 ? '#f0fdf4' : csRem < 0 ? '#fef2f2' : '#f9fafb', border: '1px solid var(--border-light)' }}>
-              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Total: {csTot}</span>
-              <span className="text-sm font-semibold" style={{ color: csRem === 0 ? '#10b981' : csRem < 0 ? '#ef4444' : '#6b7280' }}>Remaining: {csRem}</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('survey.total')}: {csTot}</span>
+              <span className="text-sm font-semibold" style={{ color: csRem === 0 ? '#10b981' : csRem < 0 ? '#ef4444' : '#6b7280' }}>{t('survey.remaining')}: {csRem}</span>
             </div>
             {csOpts.map((opt: any) => (
               <div key={opt.id} className="flex items-center gap-3">
@@ -594,19 +588,19 @@ const OneTimeSurveyView: React.FC = () => {
               ) : (
                 <canvas className="w-full h-full cursor-crosshair"
                   onMouseDown={(e) => { const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; ctx.beginPath(); ctx.moveTo(e.clientX - r.left, e.clientY - r.top); const draw = (ev: MouseEvent) => { ctx.lineTo(ev.clientX - r.left, ev.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('mousemove', draw); c.removeEventListener('mouseup', stop); c.removeEventListener('mouseleave', stop); handleResponseChange(question.id, c.toDataURL('image/png')); }; c.addEventListener('mousemove', draw); c.addEventListener('mouseup', stop); c.addEventListener('mouseleave', stop); }}
-                  onTouchStart={(e) => { e.preventDefault(); const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; const t = e.touches[0]; ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); const draw = (ev: TouchEvent) => { ev.preventDefault(); const t2 = ev.touches[0]; ctx.lineTo(t2.clientX - r.left, t2.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('touchmove', draw); c.removeEventListener('touchend', stop); handleResponseChange(question.id, c.toDataURL('image/png')); }; c.addEventListener('touchmove', draw, { passive: false }); c.addEventListener('touchend', stop); }}
+                  onTouchStart={(e) => { e.preventDefault(); const c = e.currentTarget; const ctx = c.getContext('2d'); if (!ctx) return; const r = c.getBoundingClientRect(); c.width = r.width; c.height = r.height; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a1a1a'; const tt = e.touches[0]; ctx.beginPath(); ctx.moveTo(tt.clientX - r.left, tt.clientY - r.top); const draw = (ev: TouchEvent) => { ev.preventDefault(); const t2 = ev.touches[0]; ctx.lineTo(t2.clientX - r.left, t2.clientY - r.top); ctx.stroke(); }; const stop = () => { c.removeEventListener('touchmove', draw); c.removeEventListener('touchend', stop); handleResponseChange(question.id, c.toDataURL('image/png')); }; c.addEventListener('touchmove', draw, { passive: false }); c.addEventListener('touchend', stop); }}
                 />
               )}
-              {!sigV && <p className="absolute inset-0 flex items-center justify-center text-sm pointer-events-none" style={{ color: 'var(--text-secondary)' }}>Draw your signature here</p>}
+              {!sigV && <p className="absolute inset-0 flex items-center justify-center text-sm pointer-events-none" style={{ color: 'var(--text-secondary)' }}>{t('survey.drawSignature')}</p>}
             </div>
-            {sigV && <button onClick={() => handleResponseChange(question.id, '')} className="text-sm px-3 py-1 rounded-lg border hover:bg-red-50" style={{ borderColor: 'var(--border-light)', color: '#ef4444' }}>Clear signature</button>}
+            {sigV && <button onClick={() => handleResponseChange(question.id, '')} className="text-sm px-3 py-1 rounded-lg border hover:bg-red-50" style={{ borderColor: 'var(--border-light)', color: '#ef4444' }}>{t('survey.clearSignature')}</button>}
           </div>
         );
 
       case 'address':
         const aV: Record<string, string> = (typeof value === 'object' && value && !Array.isArray(value)) ? value : {};
         const aShowCountry = (question as any).question_config?.show_country !== false;
-        const aFields = [{ key: 'street', label: 'Street Address', ph: '123 Main St' }, { key: 'city', label: 'City', ph: 'San Francisco' }, { key: 'state', label: 'State / Province', ph: 'CA' }, { key: 'postal_code', label: 'Postal Code', ph: '94102' }, ...(aShowCountry ? [{ key: 'country', label: 'Country', ph: 'United States' }] : [])];
+        const aFields = [{ key: 'street', label: t('survey.streetAddress'), ph: '123 Main St' }, { key: 'city', label: t('survey.city'), ph: '' }, { key: 'state', label: t('survey.state'), ph: '' }, { key: 'postal_code', label: t('survey.postalCode'), ph: '' }, ...(aShowCountry ? [{ key: 'country', label: t('survey.country'), ph: '' }] : [])];
         return (
           <div className="space-y-3">
             {aFields.map(f => (
@@ -625,14 +619,14 @@ const OneTimeSurveyView: React.FC = () => {
         return (
           <div className="space-y-4">
             <div className="flex justify-between text-sm font-semibold" style={{ color: 'var(--color-green)' }}><span>Min: {srV.low ?? srMn}</span><span>Max: {srV.high ?? srMx}</span></div>
-            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Lower bound</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.low ?? srMn} onChange={(e) => { const low = Number(e.target.value); handleResponseChange(question.id, { low, high: Math.max(low, srV.high ?? srMx) }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
-            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>Upper bound</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.high ?? srMx} onChange={(e) => { const high = Number(e.target.value); handleResponseChange(question.id, { low: Math.min(high, srV.low ?? srMn), high }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
+            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>{t('survey.lowerBound')}</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.low ?? srMn} onChange={(e) => { const low = Number(e.target.value); handleResponseChange(question.id, { low, high: Math.max(low, srV.high ?? srMx) }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
+            <div className="space-y-2"><label className="block text-xs" style={{ color: 'var(--text-secondary)' }}>{t('survey.upperBound')}</label><input type="range" min={srMn} max={srMx} step={srSt} value={srV.high ?? srMx} onChange={(e) => { const high = Number(e.target.value); handleResponseChange(question.id, { low: Math.min(high, srV.low ?? srMn), high }); }} className="w-full" style={{ accentColor: 'var(--color-green)' }} /></div>
             <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}><span>{srC.min_label || srMn}</span><span>{srC.max_label || srMx}</span></div>
           </div>
         );
 
       default:
-        return <div>Question type not supported</div>;
+        return <div>{t('survey.unsupportedType')}</div>;
     }
   };
 
@@ -640,19 +634,19 @@ const OneTimeSurveyView: React.FC = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid var(--border-light)' }}>
         <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-          Survey Information
+          {t('survey.surveyInfo')}
         </h3>
         <div className="space-y-3">
           <div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Duration</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('survey.duration')}</p>
             <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-              {project?.study_duration || 7} days
+              {project?.study_duration || 7} {t('survey.days')}
             </p>
           </div>
           <div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Frequency</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t('survey.frequency')}</p>
             <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-              {project?.survey_frequency || 'One-time'}
+              {project?.survey_frequency || t('survey.oneTime')}
             </p>
           </div>
         </div>
@@ -673,10 +667,10 @@ const OneTimeSurveyView: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Survey Not Found
+            {t('survey.notFound')}
           </h2>
           <p style={{ color: 'var(--text-secondary)' }}>
-            This survey may have ended or been removed.
+            {t('survey.notFoundDesc')}
           </p>
         </div>
       </div>
@@ -694,8 +688,8 @@ const OneTimeSurveyView: React.FC = () => {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
             <X size={32} className="text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Not Eligible</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>Based on your responses, you are not eligible for this study. Thank you for your interest.</p>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{t('survey.notEligible')}</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{t('survey.notEligibleDesc')}</p>
         </div>
       </div>
     );
@@ -716,10 +710,10 @@ const OneTimeSurveyView: React.FC = () => {
         <div className="mb-8">
           <div className="flex justify-between text-sm mb-2">
             <span style={{ color: 'var(--text-secondary)' }}>
-              Question {currentQuestionIndex + 1} of {visibleQuestions.length}
+              {t('survey.questionOf').replace('{current}', String(currentQuestionIndex + 1)).replace('{total}', String(visibleQuestions.length))}
             </span>
             <span style={{ color: 'var(--text-secondary)' }}>
-              {Math.round(progress)}% Complete
+              {Math.round(progress)}% {t('survey.complete')}
             </span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--border-light)' }}>
@@ -760,7 +754,7 @@ const OneTimeSurveyView: React.FC = () => {
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <ChevronLeft size={20} />
-            Previous
+            {t('survey.previous')}
           </button>
 
           {currentQuestionIndex === visibleQuestions.length - 1 ? (
@@ -770,7 +764,7 @@ const OneTimeSurveyView: React.FC = () => {
               className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90"
               style={{ backgroundColor: 'var(--color-green)' }}
             >
-              {submitting ? 'Submitting...' : 'Submit Survey'}
+              {submitting ? t('survey.submitting') : t('survey.submit')}
               <Check size={20} />
             </button>
           ) : (
@@ -779,7 +773,7 @@ const OneTimeSurveyView: React.FC = () => {
               className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white hover:opacity-90"
               style={{ backgroundColor: 'var(--color-green)' }}
             >
-              Next
+              {t('survey.next')}
               <ChevronRight size={20} />
             </button>
           )}
