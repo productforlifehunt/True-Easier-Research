@@ -982,6 +982,7 @@ const translations: TranslationDict = {
   'pp.noResponsesYet': { en: 'No responses yet', zh: '暂无回复', es: 'Sin respuestas aún', fr: 'Pas encore de réponses', de: 'Noch keine Antworten', ja: '回答なし', ko: '응답 없음', pt: 'Sem respostas ainda', ar: 'لا ردود بعد', hi: 'अभी कोई प्रतिक्रिया नहीं', ru: 'Ответов пока нет', it: 'Nessuna risposta ancora' },
   'pp.close': { en: 'Close', zh: '关闭', es: 'Cerrar', fr: 'Fermer', de: 'Schließen', ja: '閉じる', ko: '닫기', pt: 'Fechar', ar: 'إغلاق', hi: 'बंद करें', ru: 'Закрыть', it: 'Chiudi' },
   'pp.more': { en: 'more', zh: '更多', es: 'más', fr: 'plus', de: 'mehr', ja: 'もっと', ko: '더', pt: 'mais', ar: 'المزيد', hi: 'और', ru: 'ещё', it: 'altro' },
+  'pp.withdrawn': { en: 'Withdrawn', zh: '已退出', es: 'Retirado', fr: 'Retiré', de: 'Zurückgezogen', ja: '辞退', ko: '철회됨', pt: 'Retirado', ar: 'انسحب', hi: 'वापस लिया', ru: 'Отказался', it: 'Ritirato' },
 
   // SurveySettings / 调查设置
   'ss.oneTime': { en: 'One-time', zh: '一次性', es: 'Una vez', fr: 'Ponctuel', de: 'Einmalig', ja: '1回限り', ko: '일회성', pt: 'Uma vez', ar: 'مرة واحدة', hi: 'एक बार', ru: 'Одноразовый', it: 'Una tantum' },
