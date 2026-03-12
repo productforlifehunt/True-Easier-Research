@@ -992,7 +992,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </select>
             </div>
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Cards (one per line)</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.cards')}</label>
               <textarea value={(localQuestion.question_config?.cards || []).join('\n')}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, cards: e.target.value.split('\n').filter((l: string) => l.trim()) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 resize-none" rows={5} placeholder="Navigation&#10;Search&#10;Cart" />
