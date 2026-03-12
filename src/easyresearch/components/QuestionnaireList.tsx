@@ -659,7 +659,6 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
             <p className="text-[12px] text-stone-500">
               {t('ql.configureNotifications')} <strong className={onSwitchToNotifications ? 'text-emerald-600 underline' : ''}>{t('ql.notificationsTab')}</strong>
             </p>
-            </p>
           </div>
         </div>
       )}
