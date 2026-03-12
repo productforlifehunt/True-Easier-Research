@@ -822,7 +822,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                               </div>
 
                               <div className="bg-white rounded-xl border border-stone-200 p-3 space-y-3">
-                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> Questions Per Page</h5>
+                                <h5 className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1.5"><LayoutList size={11} /> {t('ql.questionsPerPage')}</h5>
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <input
