@@ -5,6 +5,7 @@
 import React, { useState, useMemo } from 'react';
 import { Shield, Clock, Filter, Download, Search, User, FileText, Settings, Eye, FolderOpen, ClipboardList, HelpCircle, UserCheck, MessageCircle, Lock, Palette, Upload, File } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { useI18n } from '../hooks/useI18n';
 
 interface AuditEntry {
   id: string;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
+  const { t } = useI18n();
   // Demo data / 演示数据
   const auditLog: AuditEntry[] = inputLog || [
     { id: 'a1', timestamp: new Date(Date.now() - 300000).toISOString(), user_id: 'u1', user_name: 'Dr. Sarah Chen', action: 'Published project', entity_type: 'project', entity_name: 'UX Study 2026', details: { status: 'published' } },
@@ -102,56 +104,56 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header / 头部 */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Shield className="w-6 h-6 text-slate-600" />
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Audit Trail / 审计追踪</h2>
-            <p className="text-sm text-muted-foreground">{auditLog.length} events recorded / 条事件已记录</p>
+            <h2 className="text-lg font-semibold text-foreground">{t('at.title')}</h2>
+            <p className="text-sm text-muted-foreground">{auditLog.length} {t('at.eventsRecorded')}</p>
           </div>
         </div>
         <button className="flex items-center gap-1 text-xs text-primary hover:underline">
-          <Download className="w-3 h-3" /> Export Log / 导出日志
+          <Download className="w-3 h-3" /> {t('at.exportLog')}
         </button>
       </div>
 
-      {/* Filters / 筛选 */}
+      {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search actions... / 搜索操作..."
+            placeholder={t('at.searchActions')}
             className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground"
           />
         </div>
         <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)} className="text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground">
-          <option value="all">All Types / 所有类型</option>
-          <option value="project">Project / 项目</option>
-          <option value="questionnaire">Questionnaire / 问卷</option>
-          <option value="question">Question / 问题</option>
-          <option value="consent">Consent / 同意书</option>
-          <option value="setting">Setting / 设置</option>
-          <option value="export">Export / 导出</option>
-          <option value="layout">Layout / 布局</option>
+          <option value="all">{t('at.allTypes')}</option>
+          <option value="project">{t('at.project')}</option>
+          <option value="questionnaire">{t('at.questionnaire')}</option>
+          <option value="question">{t('at.question')}</option>
+          <option value="consent">{t('at.consent')}</option>
+          <option value="setting">{t('at.setting')}</option>
+          <option value="export">{t('at.export')}</option>
+          <option value="layout">{t('at.layout')}</option>
         </select>
         <select value={userFilter} onChange={e => setUserFilter(e.target.value)} className="text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground">
-          <option value="all">All Users / 所有用户</option>
+          <option value="all">{t('at.allUsers')}</option>
           {uniqueUsers.map(([id, name]) => (
             <option key={id} value={id}>{name}</option>
           ))}
         </select>
       </div>
 
-      {/* Summary Stats / 摘要统计 */}
+      {/* Summary Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Events / 总事件', value: auditLog.length },
-          { label: 'Today / 今日', value: auditLog.filter(e => new Date(e.timestamp).toDateString() === new Date().toDateString()).length },
-          { label: 'Contributors / 贡献者', value: uniqueUsers.length },
-          { label: 'Entity Types / 实体类型', value: new Set(auditLog.map(e => e.entity_type)).size },
+          { label: t('at.totalEvents'), value: auditLog.length },
+          { label: t('at.today'), value: auditLog.filter(e => new Date(e.timestamp).toDateString() === new Date().toDateString()).length },
+          { label: t('at.contributors'), value: uniqueUsers.length },
+          { label: t('at.entityTypes'), value: new Set(auditLog.map(e => e.entity_type)).size },
         ].map((stat, i) => (
           <div key={i} className="border border-border rounded-lg p-3 text-center">
             <p className="text-xl font-bold text-foreground">{stat.value}</p>
@@ -160,7 +162,7 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
         ))}
       </div>
 
-      {/* Timeline / 时间线 */}
+      {/* Timeline */}
       <div className="space-y-6">
         {[...groupedLog.entries()].map(([date, entries]) => (
           <div key={date}>
@@ -168,10 +170,7 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
             <div className="space-y-1">
               {entries.map(entry => (
                 <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group">
-                  {/* Icon / 图标 */}
                   <span className="text-lg mt-0.5">{entityIcon(entry.entity_type)}</span>
-
-                  {/* Content / 内容 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium text-foreground">{entry.action}</span>
@@ -191,8 +190,6 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
                       )}
                     </div>
                   </div>
-
-                  {/* Time / 时间 */}
                   <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {formatTime(entry.timestamp)}
                   </span>
@@ -205,7 +202,7 @@ const AuditTrail: React.FC<Props> = ({ projectId, auditLog: inputLog }) => {
         {filteredLog.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <Shield className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p className="text-sm">No matching audit entries / 无匹配的审计记录</p>
+            <p className="text-sm">{t('at.noMatching')}</p>
           </div>
         )}
       </div>
