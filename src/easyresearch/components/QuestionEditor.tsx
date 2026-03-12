@@ -1288,7 +1288,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             }} className="text-[11px] text-blue-500 hover:underline">{t('qe.addAttribute')}</button>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] text-stone-400 mb-1">Profiles per task</label>
+                <label className="block text-[11px] text-stone-400 mb-1">{t('qe.profilesPerTask')}</label>
                 <input type="number" value={localQuestion.question_config?.profiles_per_task ?? 3} min={2} max={5}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, profiles_per_task: Number(e.target.value) } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
