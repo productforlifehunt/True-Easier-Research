@@ -815,7 +815,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                     className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none" rows={2} placeholder="Describe this questionnaire..." />
                                 </div>
                                 <div>
-                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Est. Duration (min)</label>
+                                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('ql.estDuration')}</label>
                                   <input type="number" value={q.estimated_duration} onChange={(e) => updateQuestionnaire(q.id, { estimated_duration: parseInt(e.target.value) || 5 })}
                                     className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
                                 </div>
