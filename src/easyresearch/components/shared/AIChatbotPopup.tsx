@@ -31,7 +31,7 @@ const VoiceInputButton: React.FC<{ onTranscript: (text: string) => void; primary
     }
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error('Speech recognition not supported in this browser');
+      bToast.error('Speech recognition not supported in this browser', '此浏览器不支持语音识别');
       return;
     }
     const recognition = new SpeechRecognition();
