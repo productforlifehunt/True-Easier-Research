@@ -897,7 +897,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 placeholder="YouTube, Vimeo, or direct MP4 URL" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Poster Image (optional)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.posterImage')}</label>
               <input type="text" value={localQuestion.question_config?.poster_url || ''}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, poster_url: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" placeholder="Thumbnail URL" />
