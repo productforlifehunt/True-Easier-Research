@@ -789,7 +789,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Color</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.color')}</label>
                 <input type="color" value={localQuestion.question_config?.color || '#e5e7eb'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, color: e.target.value } })}
                   className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
