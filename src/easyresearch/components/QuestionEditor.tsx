@@ -1161,7 +1161,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'max_diff' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">Items Per Set</label>
+              <label className="block text-[12px] font-medium text-stone-400 mb-1.5">{t('qe.itemsPerSet')}</label>
               <input type="number" value={localQuestion.question_config?.items_per_set ?? 4} min={3} max={7}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, items_per_set: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
