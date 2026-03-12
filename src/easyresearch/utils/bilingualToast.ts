@@ -19,9 +19,8 @@ export const bToast = {
   },
 };
 
-// Backward-compat: files that still call toast.success('msg') / toast.error('msg')
-// These display the same string regardless of language (migration fallback)
-export const toast = {
-  success: (msg: string) => hotToast.success(msg),
-  error: (msg: string) => hotToast.error(msg),
-};
+// Backward-compat: files that still call toast.success('msg') / toast.error('msg') / toast('msg')
+const toastFn = (msg: string, opts?: any) => hotToast(msg, opts);
+toastFn.success = (msg: string) => hotToast.success(msg);
+toastFn.error = (msg: string) => hotToast.error(msg);
+export const toast = toastFn;
