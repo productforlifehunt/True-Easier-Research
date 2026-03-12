@@ -864,7 +864,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Accepted File Types</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.acceptedTypes')}</label>
               <input type="text" value={localQuestion.question_config?.accepted_types || 'image/*,.pdf,.doc,.docx'}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, accepted_types: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200"
