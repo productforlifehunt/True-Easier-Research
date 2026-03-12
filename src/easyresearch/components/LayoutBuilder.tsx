@@ -1626,7 +1626,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
                   <button onClick={() => setFilterParticipantTypeId(null)}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${!filterParticipantTypeId ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
-                    All Roles
+                    {t('layout.allRoles')}
                   </button>
                   {participantTypes.map(pt => (
                     <button key={pt.id} onClick={() => setFilterParticipantTypeId(pt.id)}
