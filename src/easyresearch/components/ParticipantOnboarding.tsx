@@ -358,9 +358,9 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center">
                   <ShieldCheck size={16} className="text-orange-500" />
                 </div>
-                <h2 className="text-lg font-bold text-stone-800">Eligibility Screening</h2>
+                <h2 className="text-lg font-bold text-stone-800">{t('onboard.screening')}</h2>
               </div>
-              <p className="text-[12px] text-stone-400 font-light mb-5">Please answer the following questions to check your eligibility.</p>
+              <p className="text-[12px] text-stone-400 font-light mb-5">{t('onboard.screeningDesc')}</p>
               <div className="space-y-4">
                 {screeningQuestions.map(sq => (
                   <div key={sq.id}>
