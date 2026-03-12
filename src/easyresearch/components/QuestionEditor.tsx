@@ -558,7 +558,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <label className="flex items-center gap-2 text-[12px] text-stone-600">
               <input type="checkbox" checked={localQuestion.question_config?.show_value_labels !== false} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, show_value_labels: e.target.checked } })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-              Show value labels on each point
+              {t('qe.showValueLabels')}
             </label>
           </div>
         )}
