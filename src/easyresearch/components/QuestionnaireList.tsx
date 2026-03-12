@@ -379,7 +379,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
               <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl border border-stone-200 shadow-xl py-1 min-w-[140px]" onClick={(e) => e.stopPropagation()}>
                 <button onClick={() => assignQuestionToTab(q.id, question.id, 'general')}
                   className={`w-full text-left px-3 py-1.5 text-[11px] hover:bg-stone-50 flex items-center justify-between ${currentTab === 'general' ? 'text-emerald-600 font-medium' : 'text-stone-600'}`}>
-                  General {currentTab === 'general' && <Check size={10} />}
+                   General {currentTab === 'general' && <Check size={10} />}
                 </button>
                 {q.tab_sections!.map(s => (
                   <button key={s.id} onClick={() => assignQuestionToTab(q.id, question.id, s.id)}
