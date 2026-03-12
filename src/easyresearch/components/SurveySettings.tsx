@@ -262,7 +262,7 @@ const ProfileQuestionsBuilder: React.FC<{
   };
 
   const typeLabels: Record<string, string> = {
-    text: 'Text', number: 'Number', date: 'Date', select: 'Dropdown', multiselect: 'Multi-Select', scale: 'Scale', section: '§ Section'
+    text: t('ss.typeText'), number: t('ss.typeNumber'), date: t('ss.typeDate'), select: t('ss.typeDropdown'), multiselect: t('ss.typeMultiSelect'), scale: t('ss.typeScale'), section: `§ ${t('ss.typeSection')}`
   };
 
   return (
