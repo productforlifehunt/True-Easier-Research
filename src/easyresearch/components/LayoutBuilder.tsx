@@ -1253,7 +1253,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Font Weight */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Weight</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.fontWeight')}</label>
               <div className="flex gap-1 flex-wrap">
                 {[
                   { value: undefined as string | undefined, label: 'Default' },
