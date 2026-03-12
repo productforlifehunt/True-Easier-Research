@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Tag, Plus, X, Filter, Search, Hash, MessageSquare, BarChart3 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Theme Annotator – Tag and categorize open-text responses with thematic codes
 // 主题标注器 – 为开放文本响应标注和分类主题代码

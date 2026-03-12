@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 import { 
   BarChart3, Users, FileText, Plus, Clock, CheckCircle, Archive, AlertCircle,
   Search, Trash2, Copy, X, Sparkles

@@ -3,7 +3,7 @@ import { Plus, Link2, BarChart3, Calendar, MessageCircle, Copy, Edit3, Lock, Mai
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../hooks/useI18n';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Public function elements — which ones can be customized / 公共功能部件——哪些可自定义
 const PUBLIC_FUNCTION_ELEMENTS = [

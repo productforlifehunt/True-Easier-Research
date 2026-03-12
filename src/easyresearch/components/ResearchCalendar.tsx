@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, Target, Bell, Users } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { bToast } from '../utils/bilingualToast';
 
 // Research Calendar – Project timeline and milestone management
 // 研究日历 – 项目时间线和里程碑管理
