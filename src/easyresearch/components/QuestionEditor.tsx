@@ -1175,7 +1175,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Worst Label</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.worstLabel')}</label>
                 <input type="text" value={localQuestion.question_config?.worst_label || 'Least Important'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, worst_label: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200" />
