@@ -951,7 +951,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Type</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.type')}</label>
                 <select value={localQuestion.question_config?.embed_type || 'iframe'}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, embed_type: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 bg-white">
