@@ -89,7 +89,7 @@ const AIProjectBuilder: React.FC<AIProjectBuilderProps> = ({ isOpen, onClose, on
           researcher = newR;
         }
       }
-      if (!researcher) { toast.error('Researcher profile not found'); return; }
+      if (!researcher) { bToast.error('Researcher profile not found', '未找到研究者资料'); return; }
 
       const p = generatedProject;
       const { data: project, error } = await supabase
