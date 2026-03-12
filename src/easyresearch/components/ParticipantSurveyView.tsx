@@ -526,7 +526,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
 
         if (enrollError || !newEnrollment?.id) {
           console.error('Error creating enrollment:', enrollError);
-          toast.error('Error enrolling in study. Please try again.');
+          bToast.error('Error enrolling in study. Please try again.', '加入研究时出错，请重试。');
           return;
         }
 
