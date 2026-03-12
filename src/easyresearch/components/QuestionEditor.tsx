@@ -1226,7 +1226,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 resize-none" rows={2} placeholder="Click all areas that grab your attention" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Max Clicks</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.maxClicks')}</label>
               <input type="number" value={localQuestion.question_config?.max_clicks ?? 10} min={1} max={50}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, max_clicks: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
