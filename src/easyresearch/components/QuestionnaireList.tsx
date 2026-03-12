@@ -573,7 +573,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
           <div className="text-center py-10 px-4">
             <FileText className="mx-auto text-stone-200 mb-2" size={28} />
             <p className="text-[12px] text-stone-400">
-              {q.questions.length === 0 ? 'No questions yet. Add your first question above.' : `No questions in this tab. Use the folder icon to assign questions.`}
+              {q.questions.length === 0 ? t('ql.noQuestionsYet') : t('ql.noQuestionsInTab')}
             </p>
           </div>
         ) : (
