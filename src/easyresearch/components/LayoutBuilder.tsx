@@ -1348,12 +1348,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.cardStyle')}</label>
                   <select value={layout.theme?.card_style || 'elevated'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
                     className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-                    <option value="flat">Flat</option>
-                    <option value="elevated">Elevated</option>
-                    <option value="outlined">Outlined</option>
+                    <option value="flat">{t('layout.flat')}</option>
+                    <option value="elevated">{t('layout.elevated')}</option>
+                    <option value="outlined">{t('layout.outlined')}</option>
                   </select>
                 </div>
               </div>
