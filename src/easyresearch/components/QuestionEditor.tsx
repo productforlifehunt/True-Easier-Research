@@ -824,7 +824,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                   placeholder="Optional caption" />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-stone-400 mb-1">Alt Text</label>
+                <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.altText')}</label>
                 <input type="text" value={localQuestion.question_config?.alt_text || ''}
                   onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, alt_text: e.target.value } })}
                   className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200"
