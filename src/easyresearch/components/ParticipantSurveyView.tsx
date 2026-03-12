@@ -637,7 +637,7 @@ const ParticipantSurveyView: React.FC<ParticipantSurveyViewProps> = ({
       // Quota check (non-blocking for per-row insert model, but fire webhooks)
       const quotaResult = await checkQuotas(projectId, responses);
       if (!quotaResult.allowed) {
-        toast.error(quotaResult.reason || 'Survey quota reached.');
+        bToast.error(quotaResult.reason || 'Survey quota reached.', quotaResult.reason || '调查配额已满。');
         setSubmitting(false);
         return;
       }
