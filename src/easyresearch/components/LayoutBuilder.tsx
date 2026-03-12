@@ -1338,7 +1338,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               {/* Colors */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.primaryColor')}</label>
                   <input type="color" value={layout.theme?.primary_color || '#10b981'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
