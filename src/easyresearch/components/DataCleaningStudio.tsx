@@ -148,10 +148,10 @@ const DataCleaningStudio: React.FC<Props> = ({ projectId, questionnaires }) => {
       setRules(updatedRules);
       setExcluded(newExcluded);
       setAnalyzed(true);
-      toast.success(`Analysis complete: ${newExcluded.size} responses flagged / 分析完成：${newExcluded.size}条响应被标记`);
+      bToast.success(`Analysis complete: ${newExcluded.size} responses flagged`, `分析完成：${newExcluded.size}条响应被标记`);
     } catch (e) {
       console.error(e);
-      toast.error('Analysis failed / 分析失败');
+      bToast.error('Analysis failed', '分析失败');
     } finally {
       setLoading(false);
     }
