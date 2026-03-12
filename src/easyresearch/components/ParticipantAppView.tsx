@@ -574,7 +574,7 @@ const ParticipantAppView: React.FC = () => {
                 onClick={async () => {
                   setShowDmConfirm(false);
                   if (!user || !projectId || !project?.user_id) {
-                    toast.error('Unable to start conversation');
+                    bToast.error('Unable to start conversation', '无法开始对话');
                     return;
                   }
                   try {
