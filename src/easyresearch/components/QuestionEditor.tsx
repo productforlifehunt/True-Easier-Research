@@ -722,7 +722,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
         {localQuestion.question_type === 'yes_no' && (
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Yes Label</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.yesLabel')}</label>
               <input type="text" value={localQuestion.question_config?.yes_label || 'Yes'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, yes_label: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
             </div>
