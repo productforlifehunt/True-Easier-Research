@@ -274,7 +274,7 @@ const ProfileQuestionsBuilder: React.FC<{
             <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-stone-100 text-stone-500 shrink-0">
               {typeLabels[q.type] || q.type}
             </span>
-            <span className="flex-1 text-[13px] text-stone-700 truncate">{q.question || 'Untitled'}</span>
+            <span className="flex-1 text-[13px] text-stone-700 truncate">{q.question || t('ss.untitled')}</span>
             {q.required && <span className="text-red-500 text-[11px]">*</span>}
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={(e) => { e.stopPropagation(); moveQuestion(q.id, 'up'); }} className="p-0.5 hover:bg-stone-100 rounded" disabled={idx === 0}>
