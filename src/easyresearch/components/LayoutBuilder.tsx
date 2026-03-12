@@ -1398,7 +1398,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 <div className="flex items-center gap-2">
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Tab Label</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">{t('layout.tabLabel')}</label>
                       <input type="text" value={activeTab.label} onChange={(e) => updateTab(activeTab.id, { label: e.target.value })}
                         className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                     </div>
