@@ -443,7 +443,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
                 {participantTypes.length > 1 && (
                   <div>
                     <label className="block text-[12px] font-medium text-stone-500 mb-1.5 flex items-center gap-1">
-                      <Users size={12} /> Select Your Participant Type <span className="text-red-500">*</span>
+                      <Users size={12} /> {t('onboard.selectType')} <span className="text-red-500">*</span>
                     </label>
                     <div className="space-y-2">
                       {participantTypes.map(pt => (
