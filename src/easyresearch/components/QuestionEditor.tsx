@@ -386,7 +386,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
             onChange={(e) => updateLocal({ question_description: e.target.value })}
             className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 resize-none"
             rows={2}
-            placeholder="Helper text"
+            placeholder={t('qe.helperText')}
           />
         </div>
 
