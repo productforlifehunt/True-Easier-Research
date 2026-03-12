@@ -727,7 +727,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">No Label</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.noLabel')}</label>
               <input type="text" value={localQuestion.question_config?.no_label || 'No'} onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, no_label: e.target.value } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400" />
             </div>
