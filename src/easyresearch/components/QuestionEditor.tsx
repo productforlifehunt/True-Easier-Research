@@ -1066,7 +1066,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
                 className="w-full px-3 py-2 rounded-xl text-[13px] border border-stone-200" placeholder="https://example.com/design.png" />
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Display Duration (sec)</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('qe.displayDuration')}</label>
               <input type="number" value={localQuestion.question_config?.test_duration ?? 5} min={1} max={30}
                 onChange={(e) => updateLocal({ question_config: { ...localQuestion.question_config, test_duration: Number(e.target.value) } })}
                 className="w-full px-2.5 py-1.5 rounded-lg text-[13px] border border-stone-200" />
