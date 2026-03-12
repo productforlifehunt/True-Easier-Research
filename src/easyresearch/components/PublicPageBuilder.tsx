@@ -88,7 +88,7 @@ const PublicPageBuilder: React.FC<PublicPageBuilderProps> = ({ projectId, questi
       if (!activePageId && mapped.length > 0) setActivePageId(mapped[0].id);
     } catch (e: any) {
       console.error('Failed to load public pages:', e);
-      toast.error('Failed to load pages');
+      bToast.error('Failed to load pages', '加载页面失败');
     } finally { setLoading(false); }
   }, [projectId]);
 
