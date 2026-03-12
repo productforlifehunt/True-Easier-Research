@@ -980,7 +980,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                           const updated = (q.notifications || []).map(n => n.id === notif.id ? { ...n, minutes_before: parseInt(e.target.value) || 5 } : n);
                                           updateQuestionnaire(q.id, { notifications: updated });
                                         }} className="w-14 px-1.5 py-1 rounded-lg text-[10px] border border-stone-200" />
-                                        <span className="text-[10px] text-stone-400">min</span>
+                                        <span className="text-[10px] text-stone-400">{t('ql.minUnit')}</span>
                                       </div>
                                       <label className="flex items-center gap-1 text-[10px] text-stone-400">
                                         <input type="checkbox" checked={notif.dnd_allowed} onChange={(e) => {
