@@ -1361,7 +1361,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <div className="pt-2 border-t border-stone-200">
                 <p className="text-[10px] text-stone-400">
                   <strong>{layout.tabs.length}</strong> {t('layout.tabs')} · <strong>{layout.bottom_nav.length}</strong> {t('layout.navItems')} · 
-                  <strong> {layout.tabs.reduce((acc, t) => acc + t.elements.length, 0)}</strong> {t('layout.totalElements')}
+                  <strong> {layout.tabs.reduce((acc, tab) => acc + tab.elements.length, 0)}</strong> {t('layout.totalElements')}
                 </p>
               </div>
             </div>
