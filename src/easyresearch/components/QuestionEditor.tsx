@@ -606,17 +606,17 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
               </Droppable>
             </DragDropContext>
             <button onClick={addOption} className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-stone-200 text-[12px] text-stone-400 hover:border-emerald-300 hover:text-emerald-500 transition-colors">
-              + Add Option
+              {t('qe.addOption')}
             </button>
             <div className="mt-3 space-y-2">
               <label className="flex items-center gap-2 text-[12px] text-stone-600">
                 <input type="checkbox" checked={localQuestion.allow_other || false} onChange={(e) => updateLocal({ allow_other: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                Add "Other" option
+                {t('qe.addOther')}
               </label>
               {localQuestion.question_type === 'multiple_choice' && (
                 <label className="flex items-center gap-2 text-[12px] text-stone-600">
                   <input type="checkbox" checked={localQuestion.allow_none || false} onChange={(e) => updateLocal({ allow_none: e.target.checked })} className="rounded border-stone-300 text-emerald-500 focus:ring-emerald-500" />
-                  Add "None of the above"
+                  {t('qe.addNone')}
                 </label>
               )}
             </div>
