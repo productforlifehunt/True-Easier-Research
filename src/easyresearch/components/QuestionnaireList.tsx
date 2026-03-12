@@ -304,7 +304,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
     const isAssigning = assigningQuestionId === question.id;
     const hasTabs = q.tab_sections && q.tab_sections.length > 0;
     const currentTab = hasTabs ? getQuestionTab(q, question.id) : null;
-    const currentTabLabel = currentTab === 'general' ? 'General' : q.tab_sections?.find(s => s.id === currentTab)?.label;
+    const currentTabLabel = currentTab === 'general' ? t('ql.general') : q.tab_sections?.find(s => s.id === currentTab)?.label;
 
     return (
       <div
