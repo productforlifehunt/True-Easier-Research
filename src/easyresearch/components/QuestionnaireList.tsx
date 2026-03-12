@@ -846,7 +846,7 @@ const QuestionnaireList: React.FC<QuestionnaireListProps> = ({
                                   <p className="text-[10px] text-stone-400 mt-1.5">{t('ql.unlimitedHint')}</p>
                                   {q.tab_sections && q.tab_sections.length > 0 && (
                                     <div className="mt-3 space-y-2">
-                                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">Per-tab overrides:</p>
+                                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider">{t('ql.perTabOverrides')}</p>
                                       {q.tab_sections.map((section, si) => (
                                         <div key={section.id} className="flex items-center gap-2">
                                           <span className="text-[11px] text-stone-500 w-20 truncate" title={section.label}>{section.label}</span>
