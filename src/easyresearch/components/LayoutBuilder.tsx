@@ -1225,7 +1225,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[11px] font-medium text-stone-400">
-                  Font Size: {el.config.style?.font_size || 'Default'}
+                  {t('layout.fontSize')}: {el.config.style?.font_size || (lang === 'zh' ? '默认' : 'Default')}
                 </label>
                 {el.config.style?.font_size && (
                   <button onClick={() => updateElement(el.id, { style: { ...el.config.style, font_size: undefined } })}
@@ -1253,7 +1253,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
 
             {/* Font Weight */}
             <div>
-              <label className="block text-[11px] font-medium text-stone-400 mb-1">Font Weight</label>
+              <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.fontWeight')}</label>
               <div className="flex gap-1 flex-wrap">
                 {[
                   { value: undefined as string | undefined, label: 'Default' },
@@ -1284,12 +1284,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-[15px] font-semibold text-stone-800">Layout Builder</h3>
-            <p className="text-[12px] text-stone-400 font-light mt-0.5">Design how participants see your study — preview is live and identical to the actual app</p>
+            <h3 className="text-[15px] font-semibold text-stone-800">{t('layout.title')}</h3>
+            <p className="text-[12px] text-stone-400 font-light mt-0.5">{t('layout.subtitle')} — {lang === 'zh' ? '预览与实际应用完全一致' : 'preview is live and identical to the actual app'}</p>
           </div>
           <button onClick={() => onUpdate(getDefaultLayout(questionnaires))}
             className="text-[12px] text-stone-400 hover:text-stone-600 transition-colors px-3 py-1.5 rounded-lg border border-stone-200 hover:border-stone-300">
-            Reset Default
+            {t('layout.resetDefault')}
           </button>
         </div>
 
@@ -1298,37 +1298,37 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
           <div className="xl:w-[320px] shrink-0 space-y-3">
             {/* Theme & Global Settings — above tab editor */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-3">
-              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">Research Design</h5>
+              <h5 className="text-[12px] font-semibold text-stone-600 uppercase tracking-wider">{t('layout.researchDesign')}</h5>
               
               {/* Header */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={layout.show_header !== false} onChange={(e) => onUpdate({ ...layout, show_header: e.target.checked })} className="rounded border-stone-300" />
-                  <span className="text-[11px] text-stone-600 font-medium">Show header bar</span>
+                  <span className="text-[11px] text-stone-600 font-medium">{t('layout.showHeader')}</span>
                 </label>
                 {layout.show_header !== false && (
                   <>
                     <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Title</label>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.headerTitle')}</label>
                       <input type="text"
                         value={layout.header_title || projectTitle || ''}
                         onChange={(e) => onUpdate({ ...layout, header_title: e.target.value })}
-                        placeholder="Enter header title"
+                        placeholder={t('layout.enterTitle')}
                         className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                       {projectTitle && (
-                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                        <p className="text-[9px] text-stone-400 mt-1">{t('layout.syncedFromSettings')}</p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-stone-400 mb-1">Header Description</label>
+                      <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.headerDesc')}</label>
                       <textarea
                         value={layout.header_description || projectDescription || ''}
                         onChange={(e) => onUpdate({ ...layout, header_description: e.target.value })}
-                        placeholder="Enter description"
+                        placeholder={t('layout.enterDescription')}
                         rows={2}
                         className="w-full px-2.5 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none" />
                       {projectDescription && (
-                        <p className="text-[9px] text-stone-400 mt-1">Synced from Settings. Edit here to override.</p>
+                        <p className="text-[9px] text-stone-400 mt-1">{t('layout.syncedFromSettings')}</p>
                       )}
                     </div>
                   </>
@@ -1338,30 +1338,30 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               {/* Colors */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Primary Color</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.primaryColor')}</label>
                   <input type="color" value={layout.theme?.primary_color || '#10b981'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, primary_color: e.target.value } })}
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Background</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.background')}</label>
                   <input type="color" value={layout.theme?.background_color || '#f5f5f4'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, background_color: e.target.value } })}
                     className="w-full h-8 rounded-lg border border-stone-200 cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-stone-400 mb-1">Card Style</label>
+                  <label className="block text-[11px] font-medium text-stone-400 mb-1">{t('layout.cardStyle')}</label>
                   <select value={layout.theme?.card_style || 'elevated'} onChange={(e) => onUpdate({ ...layout, theme: { ...layout.theme, card_style: e.target.value as any } })}
                     className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
-                    <option value="flat">Flat</option>
-                    <option value="elevated">Elevated</option>
-                    <option value="outlined">Outlined</option>
+                    <option value="flat">{t('layout.flat')}</option>
+                    <option value="elevated">{t('layout.elevated')}</option>
+                    <option value="outlined">{t('layout.outlined')}</option>
                   </select>
                 </div>
               </div>
 
               <div className="pt-2 border-t border-stone-200">
                 <p className="text-[10px] text-stone-400">
-                  <strong>{layout.tabs.length}</strong> tabs · <strong>{layout.bottom_nav.length}</strong> nav items · 
-                  <strong> {layout.tabs.reduce((acc, t) => acc + t.elements.length, 0)}</strong> total elements
+                  <strong>{layout.tabs.length}</strong> {t('layout.tabs')} · <strong>{layout.bottom_nav.length}</strong> {t('layout.navItems')} · 
+                  <strong> {layout.tabs.reduce((acc, tab) => acc + tab.elements.length, 0)}</strong> {t('layout.totalElements')}
                 </p>
               </div>
             </div>
@@ -1398,12 +1398,12 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 <div className="flex items-center gap-2">
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Tab Label</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">{t('layout.tabLabel')}</label>
                       <input type="text" value={activeTab.label} onChange={(e) => updateTab(activeTab.id, { label: e.target.value })}
                         className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">Icon</label>
+                      <label className="block text-[10px] font-medium text-stone-400 mb-0.5">{t('layout.icon')}</label>
                       <select value={activeTab.icon} onChange={(e) => updateTab(activeTab.id, { icon: e.target.value })}
                         className="w-full px-2 py-1.5 rounded-lg text-[12px] border border-stone-200 bg-white">
                         {ICON_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -1418,10 +1418,10 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <h5 className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">Elements</h5>
+                  <h5 className="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">{t('layout.elements')}</h5>
                   <button onClick={() => setShowAddElement(!showAddElement)}
                     className="flex items-center gap-1 text-[11px] text-emerald-500 hover:text-emerald-600 font-medium">
-                    <Plus size={12} /> Add
+                    <Plus size={12} /> {t('layout.addElement')}
                   </button>
                 </div>
 
@@ -1555,7 +1555,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                       className={`space-y-0.5 min-h-[60px] rounded-xl transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}>
                       {activeTab.elements.length === 0 ? (
                         <div className="py-6 text-center text-[11px] text-stone-400 border-2 border-dashed border-stone-200 rounded-xl">
-                          Click "Add" above to add elements
+                          {t('layout.clickAddAbove')}
                         </div>
                       ) : (
                         activeTab.elements.map((el, elIdx) => (
@@ -1626,7 +1626,7 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
                 <div className="flex gap-1 bg-stone-100 rounded-full p-0.5 mb-3 justify-center flex-wrap">
                   <button onClick={() => setFilterParticipantTypeId(null)}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${!filterParticipantTypeId ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-400 hover:text-stone-500'}`}>
-                    All Roles
+                    {t('layout.allRoles')}
                   </button>
                   {participantTypes.map(pt => (
                     <button key={pt.id} onClick={() => setFilterParticipantTypeId(pt.id)}
@@ -1668,8 +1668,8 @@ const LayoutBuilder: React.FC<LayoutBuilderProps> = ({ layout, questionnaires, p
               <div className="sticky top-24">
                 <div className="bg-stone-50 rounded-xl border border-dashed border-stone-200 p-6 text-center">
                   <Edit3 size={20} className="text-stone-300 mx-auto mb-2" />
-                  <p className="text-[12px] text-stone-400 font-medium">Select an element</p>
-                  <p className="text-[10px] text-stone-300 mt-1">Click any element in the list or preview to edit its properties</p>
+                  <p className="text-[12px] text-stone-400 font-medium">{t('layout.selectElement')}</p>
+                  <p className="text-[10px] text-stone-300 mt-1">{t('layout.selectElementDesc')}</p>
                 </div>
               </div>
             )}
