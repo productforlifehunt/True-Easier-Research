@@ -483,7 +483,7 @@ const ParticipantOnboarding: React.FC<ParticipantOnboardingProps> = ({ projectId
 
                 <button onClick={handleInfoNext} disabled={!email || (participantTypes.length > 1 && !selectedParticipantTypeId)}
                   className="w-full py-3 rounded-xl text-[13px] font-medium text-white flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg transition-all disabled:opacity-40">
-                  {hasProfileQuestions ? 'Continue to Profile' : (project?.methodology_type === 'multi_time' ? 'Start Study' : 'Begin Survey')}
+                  {hasProfileQuestions ? (lang === 'zh' ? '继续填写资料' : 'Continue to Profile') : (project?.methodology_type === 'multi_time' ? (lang === 'zh' ? '开始研究' : 'Start Study') : (lang === 'zh' ? '开始问卷' : 'Begin Survey'))}
                   <ChevronRight size={16} />
                 </button>
               </div>
