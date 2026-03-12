@@ -1179,7 +1179,7 @@ const QuestionLogicEditor: React.FC<{
       >
         {expanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         <GitBranch size={11} />
-        Logic Rules ({questionRules.length})
+        {t('ql.logicRules')} ({questionRules.length})
       </button>
 
       {expanded && (
