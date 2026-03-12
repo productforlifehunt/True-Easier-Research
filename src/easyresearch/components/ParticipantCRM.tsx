@@ -134,7 +134,7 @@ const ParticipantCRM: React.FC<Props> = ({ projectId }) => {
     if (!profile) return;
     saveMeta(enrollmentId, profile.tags, notesText);
     setEditingNotes(null);
-    toast.success('Notes saved / 备注已保存');
+    bToast.success('Notes saved', '备注已保存');
   };
 
   const getEngagementLevel = (score: number) => ENGAGEMENT_LEVELS.find(l => score >= l.min) || ENGAGEMENT_LEVELS[2];

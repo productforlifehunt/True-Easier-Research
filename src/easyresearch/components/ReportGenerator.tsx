@@ -166,7 +166,7 @@ const ReportGenerator: React.FC<Props> = ({ projectId, projectTitle, responses, 
       a.download = `report-${projectId.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.html`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Report generated! / 报告已生成！');
+      bToast.success('Report generated!', '报告已生成！');
     } finally {
       setGenerating(false);
     }

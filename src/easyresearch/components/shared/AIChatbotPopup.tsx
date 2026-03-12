@@ -170,7 +170,7 @@ const AIChatbotPopup: React.FC<AIChatbotPopupProps> = ({
         fills: fills.length > 0 ? fills : undefined,
       }]);
     } catch (err: any) {
-      toast.error(err.message || t('ai.requestFailed'));
+      bToast.error(err.message || t('ai.requestFailed'), err.message || t('ai.requestFailed'));
       setMessages(prev => [...prev, { role: 'assistant', content: t('ai.errorTryAgain') }]);
     } finally {
       setLoading(false);

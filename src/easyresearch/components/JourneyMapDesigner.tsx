@@ -80,7 +80,7 @@ const JourneyMapDesigner: React.FC<Props> = ({ projectId }) => {
     const exists = maps.find(m => m.id === editing.id);
     save(exists ? maps.map(m => m.id === editing.id ? editing : m) : [...maps, editing]);
     setEditing(null);
-    toast.success('Journey map saved / 旅程地图已保存');
+    bToast.success('Journey map saved', '旅程地图已保存');
   };
 
   const deleteMap = (id: string) => {

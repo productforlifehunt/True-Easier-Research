@@ -219,7 +219,7 @@ Respond with a JSON array matching the input structure with translated text/desc
       return q;
     });
     onQuestionsUpdate(updatedQuestions);
-    toast.success('Translations saved!');
+    bToast.success('Translations saved!', '翻译已保存！');
   };
 
   return (

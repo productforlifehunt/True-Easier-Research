@@ -411,7 +411,7 @@ const AIEditChatbot: React.FC<AIEditChatbotProps> = (props) => {
         fills: fills.length > 0 ? fills : undefined,
       }]);
     } catch (err: any) {
-      toast.error(err.message || 'AI request failed');
+      bToast.error(err.message || 'AI request failed', err.message || 'AI 请求失败');
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
     } finally {
       setLoading(false);

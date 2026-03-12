@@ -237,7 +237,7 @@ const DistributionManager: React.FC<Props> = ({ projectId, surveyCode, surveyTit
                 const a = document.createElement('a');
                 a.href = url; a.download = `survey-qr-${surveyCode || projectId}.svg`; a.click();
                 URL.revokeObjectURL(url);
-                toast.success('QR downloaded / 二维码已下载');
+                bToast.success('QR downloaded', '二维码已下载');
               }}
                 className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600">
                 Download SVG / 下载SVG

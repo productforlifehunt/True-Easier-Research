@@ -55,7 +55,7 @@ const SaveTemplateModal: React.FC<Props> = ({ projectId, questionnaires, project
         onClose();
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save template');
+      bToast.error(err.message || 'Failed to save template', err.message || '保存模板失败');
     } finally {
       setSaving(false);
     }
