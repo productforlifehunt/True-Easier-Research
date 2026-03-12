@@ -362,7 +362,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ question, project, ques
           }`}
         >
           {hasChanges ? <Save size={12} /> : <Check size={12} />}
-          {hasChanges ? 'Save' : 'Saved'}
+          {hasChanges ? t('qe.save') : t('qe.saved')}
         </button>
       </div>
 
