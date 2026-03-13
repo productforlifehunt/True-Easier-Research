@@ -462,7 +462,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, show_progress_bar: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Show Progress Bar</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.showProgressBar')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
