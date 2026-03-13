@@ -372,7 +372,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* Max Participants */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Max Participants (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxParticipants')}</label>
                   <input
                     type="number"
                     value={project.max_participants || ''}
