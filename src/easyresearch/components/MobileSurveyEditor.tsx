@@ -274,7 +274,7 @@ const MobileSurveyEditor: React.FC = () => {
                   style={{ backgroundColor: 'var(--color-green)' }}
                 >
                   <Save size={16} className="inline mr-2" />
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? t('me.saving') : t('me.save')}
                 </button>
               </div>
             </div>
