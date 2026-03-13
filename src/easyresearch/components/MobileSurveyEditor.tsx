@@ -755,7 +755,7 @@ const MobileSurveyEditor: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min Label</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.minLabel')}</label>
                     <input
                       type="text"
                       value={question.question_config?.min_label || ''}
