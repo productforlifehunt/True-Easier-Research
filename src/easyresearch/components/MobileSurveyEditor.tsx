@@ -430,7 +430,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, notification_enabled: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Enable Notifications</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.enableNotifications')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
