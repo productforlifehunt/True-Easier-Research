@@ -651,7 +651,7 @@ const MobileSurveyEditor: React.FC = () => {
               type="text"
               value={question.question_text}
               onChange={(e) => updateQuestion(question.id, { question_text: e.target.value })}
-              placeholder="Question text"
+              placeholder={t('me.questionText')}
               className="w-full px-3 py-2 rounded-lg border mb-3"
               style={{ borderColor: 'var(--border-light)' }}
             />
