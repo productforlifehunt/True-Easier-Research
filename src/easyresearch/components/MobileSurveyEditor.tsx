@@ -538,7 +538,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'schedule' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    Schedule
+                     {t('me.schedule')}
                   </button>
                 </div>
 
