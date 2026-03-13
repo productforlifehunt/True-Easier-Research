@@ -790,7 +790,7 @@ const MobileSurveyEditor: React.FC = () => {
                 <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.numberValidation')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min Value</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.minValue')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.min || ''}
