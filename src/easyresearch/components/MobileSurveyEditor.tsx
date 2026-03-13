@@ -714,7 +714,7 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Slider Configuration */}
             {question.question_type === 'slider' && (
               <div className="space-y-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4' }}>
-                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Slider Configuration</label>
+                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.sliderConfig')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min</label>
