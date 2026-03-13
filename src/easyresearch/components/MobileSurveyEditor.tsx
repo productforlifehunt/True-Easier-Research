@@ -926,7 +926,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => updateQuestion(question.id, { allow_other: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow "Other" option</span>
+                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowOther')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
