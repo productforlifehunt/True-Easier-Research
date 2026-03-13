@@ -500,7 +500,7 @@ const MobileSurveyEditor: React.FC = () => {
                     <textarea
                       value={project.onboarding_instructions || ''}
                       onChange={(e) => setProject({ ...project, onboarding_instructions: e.target.value })}
-                      placeholder="Instructions for participants before they start"
+                      placeholder={t('me.onboardingPlaceholder')}
                       rows={3}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
