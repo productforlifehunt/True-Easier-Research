@@ -386,7 +386,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Compensation */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Compensation</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.compensation')}</label>
                     <input
                       type="number"
                       value={project.compensation_amount || ''}
