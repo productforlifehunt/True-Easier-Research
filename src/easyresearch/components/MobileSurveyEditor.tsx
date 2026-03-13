@@ -881,7 +881,7 @@ const MobileSurveyEditor: React.FC = () => {
                     className="text-xs px-2 py-1 rounded border"
                     style={{ borderColor: 'var(--border-light)', color: 'var(--color-green)' }}
                   >
-                    <option value="">Template</option>
+                    <option value="">{t('me.template')}</option>
                     <option value="Yes - No">Yes - No</option>
                     <option value="Agree - Disagree">Agree - Disagree</option>
                     <option value="1-5 Scale">1-5 Scale</option>
