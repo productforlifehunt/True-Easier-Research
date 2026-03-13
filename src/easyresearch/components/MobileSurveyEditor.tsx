@@ -285,7 +285,7 @@ const MobileSurveyEditor: React.FC = () => {
               type="text"
               value={project.title}
               onChange={(e) => setProject({ ...project, title: e.target.value })}
-              placeholder="Survey Title"
+              placeholder={t('me.surveyTitle')}
               className="w-full px-3 py-2 rounded-lg border text-lg font-semibold"
               style={{ borderColor: 'var(--border-light)' }}
             />
