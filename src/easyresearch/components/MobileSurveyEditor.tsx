@@ -667,7 +667,7 @@ const MobileSurveyEditor: React.FC = () => {
 
             {/* Question Type Selector */}
             <div className="mb-3">
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Question Type</label>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.questionType')}</label>
               <select
                 value={question.question_type}
                 onChange={(e) => {
