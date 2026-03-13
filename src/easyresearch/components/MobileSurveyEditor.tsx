@@ -1046,7 +1046,7 @@ const MobileSurveyEditor: React.FC = () => {
           style={{ borderColor: 'var(--color-green)', color: 'var(--color-green)', backgroundColor: 'white' }}
         >
           <Plus size={20} className="inline mr-2" />
-          Add Question
+          {t('me.addQuestion')}
         </button>
 
         {/* Question Types Dropdown */}
