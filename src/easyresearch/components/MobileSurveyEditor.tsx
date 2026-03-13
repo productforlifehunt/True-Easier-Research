@@ -348,7 +348,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* Start Date */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Start Date (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.startDate')}</label>
                   <input
                     type="date"
                     value={project.starts_at ? project.starts_at.split('T')[0] : ''}
