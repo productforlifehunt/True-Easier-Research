@@ -1021,7 +1021,7 @@ const MobileSurveyEditor: React.FC = () => {
                       </div>
                     ))}
                     {question.options.length > 3 && (
-                      <div className="text-xs italic" style={{ color: 'var(--text-secondary)' }}>...and {question.options.length - 3} more</div>
+                      <div className="text-xs italic" style={{ color: 'var(--text-secondary)' }}>...{t('me.andMore').replace('{n}', String(question.options.length - 3))}</div>
                     )}
                   </div>
                 )}
