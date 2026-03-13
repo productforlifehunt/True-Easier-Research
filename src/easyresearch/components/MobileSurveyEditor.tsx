@@ -546,7 +546,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {questionnaireTab === 'library' && (
                   <div>
                     <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      Create multiple questionnaires for your study
+                      {t('me.createMultipleQuestionnaires')}
                     </p>
                     <QuestionnaireScheduler 
                       projectId={projectId} 
