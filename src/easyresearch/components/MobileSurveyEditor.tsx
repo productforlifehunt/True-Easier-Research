@@ -986,7 +986,7 @@ const MobileSurveyEditor: React.FC = () => {
               <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.preview')}</label>
               <div className="mt-2">
                 <p className="text-sm font-medium mb-2">
-                  {question.question_text || 'Enter your question'}
+                  {question.question_text || t('me.enterQuestion')}
                   {question.required && <span className="text-red-500">*</span>}
                 </p>
                 {question.question_description && (
