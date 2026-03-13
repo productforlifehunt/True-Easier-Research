@@ -935,7 +935,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => updateQuestion(question.id, { allow_none: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow "None of the above"</span>
+                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowNone')}</span>
                   </label>
                 </div>
               </div>
