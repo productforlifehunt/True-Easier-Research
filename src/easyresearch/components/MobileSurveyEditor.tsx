@@ -659,7 +659,7 @@ const MobileSurveyEditor: React.FC = () => {
             <textarea
               value={question.question_description || ''}
               onChange={(e) => updateQuestion(question.id, { question_description: e.target.value })}
-              placeholder="Description (optional)"
+              placeholder={t('me.descriptionOptional')}
               rows={2}
               className="w-full px-3 py-2 rounded-lg border mb-3 text-sm"
               style={{ borderColor: 'var(--border-light)' }}
