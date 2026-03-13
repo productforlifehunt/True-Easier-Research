@@ -454,7 +454,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* Survey Display & Behavior */}
                 <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: 'var(--border-light)' }}>
-                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Survey Display & Behavior</h4>
+                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('me.surveyDisplayBehavior')}</h4>
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
