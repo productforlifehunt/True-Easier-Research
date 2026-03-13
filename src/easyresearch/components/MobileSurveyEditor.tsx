@@ -421,7 +421,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, voice_enabled: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Enable Voice Input</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.enableVoice')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
