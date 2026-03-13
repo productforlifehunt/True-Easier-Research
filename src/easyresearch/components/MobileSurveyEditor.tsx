@@ -858,7 +858,7 @@ const MobileSurveyEditor: React.FC = () => {
             {['single_choice', 'multiple_choice', 'dropdown', 'likert_scale'].includes(normalizeLegacyQuestionType(question.question_type)) && (
               <div className="space-y-2 mb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Options:</label>
+                  <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.options')}</label>
                   <select
                     onChange={(e) => {
                       const templates = [
