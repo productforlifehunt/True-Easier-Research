@@ -397,17 +397,17 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.type')}</label>
                     <select
                       value={project.compensation_type || 'cash'}
                       onChange={(e) => setProject({ ...project, compensation_type: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     >
-                      <option value="cash">Cash</option>
-                      <option value="gift_card">Gift Card</option>
-                      <option value="credit">Course Credit</option>
-                      <option value="none">None</option>
+                      <option value="cash">{t('me.cash')}</option>
+                      <option value="gift_card">{t('me.giftCard')}</option>
+                      <option value="credit">{t('me.courseCredit')}</option>
+                      <option value="none">{t('me.none')}</option>
                     </select>
                   </div>
                 </div>
