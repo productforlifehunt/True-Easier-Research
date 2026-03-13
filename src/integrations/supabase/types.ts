@@ -229,6 +229,63 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_detail_metadata: {
+        Row: {
+          activeEnergyUnitKey: string | null
+          distanceUnitKey: string | null
+          elevationUnitKey: string | null
+          externalResources: Json | null
+          hiddenAt: string | null
+          id: string
+          location: Json | null
+          poolLengthUnitKey: string | null
+          preventWeatherCalls: boolean | null
+          sourceId: string | null
+          sourceTypeKey: string | null
+          syncedAt: string | null
+          title: string | null
+          user_id: string
+          weather: Json | null
+          workoutId: string | null
+        }
+        Insert: {
+          activeEnergyUnitKey?: string | null
+          distanceUnitKey?: string | null
+          elevationUnitKey?: string | null
+          externalResources?: Json | null
+          hiddenAt?: string | null
+          id?: string
+          location?: Json | null
+          poolLengthUnitKey?: string | null
+          preventWeatherCalls?: boolean | null
+          sourceId?: string | null
+          sourceTypeKey?: string | null
+          syncedAt?: string | null
+          title?: string | null
+          user_id: string
+          weather?: Json | null
+          workoutId?: string | null
+        }
+        Update: {
+          activeEnergyUnitKey?: string | null
+          distanceUnitKey?: string | null
+          elevationUnitKey?: string | null
+          externalResources?: Json | null
+          hiddenAt?: string | null
+          id?: string
+          location?: Json | null
+          poolLengthUnitKey?: string | null
+          preventWeatherCalls?: boolean | null
+          sourceId?: string | null
+          sourceTypeKey?: string | null
+          syncedAt?: string | null
+          title?: string | null
+          user_id?: string
+          weather?: Json | null
+          workoutId?: string | null
+        }
+        Relationships: []
+      }
       activity_feed: {
         Row: {
           activity_type: string
@@ -262,6 +319,39 @@ export type Database = {
           target_name?: string | null
           target_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      activity_history_cache: {
+        Row: {
+          data: Json | null
+          dataVersion: number | null
+          endDate: string | null
+          id: string
+          startDate: string | null
+          type: string | null
+          user_id: string
+          uuid: string | null
+        }
+        Insert: {
+          data?: Json | null
+          dataVersion?: number | null
+          endDate?: string | null
+          id?: string
+          startDate?: string | null
+          type?: string | null
+          user_id: string
+          uuid?: string | null
+        }
+        Update: {
+          data?: Json | null
+          dataVersion?: number | null
+          endDate?: string | null
+          id?: string
+          startDate?: string | null
+          type?: string | null
+          user_id?: string
+          uuid?: string | null
         }
         Relationships: []
       }
@@ -330,6 +420,45 @@ export type Database = {
           id?: string
           points_earned?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      activity_status_segment: {
+        Row: {
+          deletedAt: string | null
+          endDate: string | null
+          endDateYYYYMMDD: string | null
+          id: string
+          startDate: string | null
+          startDateYYYYMMDD: string | null
+          status: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          deletedAt?: string | null
+          endDate?: string | null
+          endDateYYYYMMDD?: string | null
+          id?: string
+          startDate?: string | null
+          startDateYYYYMMDD?: string | null
+          status?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          deletedAt?: string | null
+          endDate?: string | null
+          endDateYYYYMMDD?: string | null
+          id?: string
+          startDate?: string | null
+          startDateYYYYMMDD?: string | null
+          status?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1620,6 +1749,93 @@ export type Database = {
           },
         ]
       }
+      async_food_image_analysis: {
+        Row: {
+          analysis: Json | null
+          id: string
+          imageData: Json | null
+          imageDate: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json | null
+          id?: string
+          imageData?: Json | null
+          imageDate?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis?: Json | null
+          id?: string
+          imageData?: Json | null
+          imageDate?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      async_food_image_input: {
+        Row: {
+          id: string
+          images: Json | null
+          processingState: string | null
+          taskSource: string | null
+          text: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          images?: Json | null
+          processingState?: string | null
+          taskSource?: string | null
+          text?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          images?: Json | null
+          processingState?: string | null
+          taskSource?: string | null
+          text?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      async_food_unified_analysis: {
+        Row: {
+          batchId: string | null
+          defaultLogDate: string | null
+          id: string
+          images: Json | null
+          processingState: string | null
+          submittedAt: string | null
+          taskSource: string | null
+          text: string | null
+          user_id: string
+        }
+        Insert: {
+          batchId?: string | null
+          defaultLogDate?: string | null
+          id?: string
+          images?: Json | null
+          processingState?: string | null
+          submittedAt?: string | null
+          taskSource?: string | null
+          text?: string | null
+          user_id: string
+        }
+        Update: {
+          batchId?: string | null
+          defaultLogDate?: string | null
+          id?: string
+          images?: Json | null
+          processingState?: string | null
+          submittedAt?: string | null
+          taskSource?: string | null
+          text?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       background_checks: {
         Row: {
           adjudication: string | null
@@ -2336,6 +2552,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      boolean_journal: {
+        Row: {
+          boolValue: boolean | null
+          createdAt: string | null
+          deletedAt: string | null
+          endTime: string | null
+          identifyingDate: string | null
+          isNotSet: boolean | null
+          presetFactorKey: string | null
+          startTime: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          boolValue?: boolean | null
+          createdAt?: string | null
+          deletedAt?: string | null
+          endTime?: string | null
+          identifyingDate?: string | null
+          isNotSet?: boolean | null
+          presetFactorKey?: string | null
+          startTime?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          boolValue?: boolean | null
+          createdAt?: string | null
+          deletedAt?: string | null
+          endTime?: string | null
+          identifyingDate?: string | null
+          isNotSet?: boolean | null
+          presetFactorKey?: string | null
+          startTime?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      boolean_journal_default: {
+        Row: {
+          createdAt: string | null
+          deletedAt: string | null
+          isRemoved: boolean | null
+          isSelected: boolean | null
+          order: number | null
+          presetFactorKey: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          isRemoved?: boolean | null
+          isSelected?: boolean | null
+          order?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          isRemoved?: boolean | null
+          isSelected?: boolean | null
+          order?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
       }
       breathing_session: {
         Row: {
@@ -4224,6 +4524,42 @@ export type Database = {
         }
         Relationships: []
       }
+      categorical_journal_default: {
+        Row: {
+          createdAt: string | null
+          deletedAt: string | null
+          enumValue: number | null
+          presetFactorKey: string | null
+          syncedAt: string | null
+          time: number | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          enumValue?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          time?: number | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          enumValue?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          time?: number | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -4411,6 +4747,164 @@ export type Database = {
           id?: number
           layout?: Json | null
           name?: string
+        }
+        Relationships: []
+      }
+      coach_chat: {
+        Row: {
+          createdAt: string | null
+          deletedAt: string | null
+          embeddedContext: string | null
+          guidedChatMeta: Json | null
+          id: string
+          lastQuestionDate: string | null
+          syncedAt: string | null
+          title: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          embeddedContext?: string | null
+          guidedChatMeta?: Json | null
+          id?: string
+          lastQuestionDate?: string | null
+          syncedAt?: string | null
+          title?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          embeddedContext?: string | null
+          guidedChatMeta?: Json | null
+          id?: string
+          lastQuestionDate?: string | null
+          syncedAt?: string | null
+          title?: string | null
+          updatedAt?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coach_chat_message: {
+        Row: {
+          content: Json | null
+          hidden: boolean | null
+          id: string
+          parentMessageId: string | null
+          round_answer_id: string | null
+          round_question_id: string | null
+          sender: string | null
+          sentAt: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: Json | null
+          hidden?: boolean | null
+          id?: string
+          parentMessageId?: string | null
+          round_answer_id?: string | null
+          round_question_id?: string | null
+          sender?: string | null
+          sentAt?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: Json | null
+          hidden?: boolean | null
+          id?: string
+          parentMessageId?: string | null
+          round_answer_id?: string | null
+          round_question_id?: string | null
+          sender?: string | null
+          sentAt?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_chat_message_round_answer_id_fkey"
+            columns: ["round_answer_id"]
+            isOneToOne: false
+            referencedRelation: "coach_chat_round"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_chat_message_round_question_id_fkey"
+            columns: ["round_question_id"]
+            isOneToOne: false
+            referencedRelation: "coach_chat_round"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_chat_round: {
+        Row: {
+          chat_id: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chat_id?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chat_id?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_chat_round_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "coach_chat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_embedded_message: {
+        Row: {
+          additionalData: Json | null
+          category: string | null
+          domain: string | null
+          id: string
+          idempotencyKey: string | null
+          identifyingDate: string | null
+          message: string | null
+          responseId: string | null
+          sentAt: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          additionalData?: Json | null
+          category?: string | null
+          domain?: string | null
+          id?: string
+          idempotencyKey?: string | null
+          identifyingDate?: string | null
+          message?: string | null
+          responseId?: string | null
+          sentAt?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          additionalData?: Json | null
+          category?: string | null
+          domain?: string | null
+          id?: string
+          idempotencyKey?: string | null
+          identifyingDate?: string | null
+          message?: string | null
+          responseId?: string | null
+          sentAt?: string | null
+          title?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -4739,6 +5233,108 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      compound_food: {
+        Row: {
+          baseComponent: Json | null
+          components: Json | null
+          entity_type: string
+          favorite: Json | null
+          foodLog: Json | null
+          iconName: string | null
+          id: string
+          name: string | null
+          user_id: string
+        }
+        Insert: {
+          baseComponent?: Json | null
+          components?: Json | null
+          entity_type?: string
+          favorite?: Json | null
+          foodLog?: Json | null
+          iconName?: string | null
+          id?: string
+          name?: string | null
+          user_id: string
+        }
+        Update: {
+          baseComponent?: Json | null
+          components?: Json | null
+          entity_type?: string
+          favorite?: Json | null
+          foodLog?: Json | null
+          iconName?: string | null
+          id?: string
+          name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      compound_food_component: {
+        Row: {
+          compoundFood: Json | null
+          compoundFoodReference: Json | null
+          entity_type: string
+          id: string
+          numServings: number | null
+          user_id: string
+        }
+        Insert: {
+          compoundFood?: Json | null
+          compoundFoodReference?: Json | null
+          entity_type?: string
+          id?: string
+          numServings?: number | null
+          user_id: string
+        }
+        Update: {
+          compoundFood?: Json | null
+          compoundFoodReference?: Json | null
+          entity_type?: string
+          id?: string
+          numServings?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      compound_food_favorite: {
+        Row: {
+          compoundFood: Json | null
+          compoundFoodRef: Json | null
+          deletedAt: string | null
+          favoritedAt: string | null
+          id: string
+          numServings: number | null
+          relativePortion: Json | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          compoundFood?: Json | null
+          compoundFoodRef?: Json | null
+          deletedAt?: string | null
+          favoritedAt?: string | null
+          id?: string
+          numServings?: number | null
+          relativePortion?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          compoundFood?: Json | null
+          compoundFoodRef?: Json | null
+          deletedAt?: string | null
+          favoritedAt?: string | null
+          id?: string
+          numServings?: number | null
+          relativePortion?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       consent_records: {
         Row: {
@@ -5134,6 +5730,177 @@ export type Database = {
           },
         ]
       }
+      cumulative_metrics_cache: {
+        Row: {
+          algorithmVersion: string | null
+          data: Json | null
+          date: string | null
+          id: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          date?: string | null
+          id?: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          date?: string | null
+          id?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_food: {
+        Row: {
+          brandName: string | null
+          caloricPercentages: Json | null
+          defaultServing: Json | null
+          deletedAt: string | null
+          foodId: string | null
+          iconName: string | null
+          id: string
+          isMasterCopy: boolean | null
+          name: string | null
+          referenceDatabaseFood: Json | null
+          servingOptions: Json | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          brandName?: string | null
+          caloricPercentages?: Json | null
+          defaultServing?: Json | null
+          deletedAt?: string | null
+          foodId?: string | null
+          iconName?: string | null
+          id?: string
+          isMasterCopy?: boolean | null
+          name?: string | null
+          referenceDatabaseFood?: Json | null
+          servingOptions?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          brandName?: string | null
+          caloricPercentages?: Json | null
+          defaultServing?: Json | null
+          deletedAt?: string | null
+          foodId?: string | null
+          iconName?: string | null
+          id?: string
+          isMasterCopy?: boolean | null
+          name?: string | null
+          referenceDatabaseFood?: Json | null
+          servingOptions?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_food_serving: {
+        Row: {
+          amountPerServingCount: number | null
+          amountPerServingUnit: string | null
+          componentServing: Json | null
+          customFoodId: string | null
+          customServingId: string | null
+          fdbServingId: string | null
+          foodDefaultServing: Json | null
+          id: string
+          nutrients: Json | null
+          servingSizeCount: number | null
+          servingSizeType: string | null
+          servingSizeUnit: string | null
+          user_id: string
+        }
+        Insert: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          componentServing?: Json | null
+          customFoodId?: string | null
+          customServingId?: string | null
+          fdbServingId?: string | null
+          foodDefaultServing?: Json | null
+          id?: string
+          nutrients?: Json | null
+          servingSizeCount?: number | null
+          servingSizeType?: string | null
+          servingSizeUnit?: string | null
+          user_id: string
+        }
+        Update: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          componentServing?: Json | null
+          customFoodId?: string | null
+          customServingId?: string | null
+          fdbServingId?: string | null
+          foodDefaultServing?: Json | null
+          id?: string
+          nutrients?: Json | null
+          servingSizeCount?: number | null
+          servingSizeType?: string | null
+          servingSizeUnit?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_journal_type: {
+        Row: {
+          createdAt: string | null
+          deletedAt: string | null
+          emoji: string | null
+          isRemoved: boolean | null
+          name: string | null
+          order: number | null
+          presetFactorKey: string | null
+          syncedAt: string | null
+          type: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          emoji?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          order?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          type?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          emoji?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          order?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          type?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
       custom_products: {
         Row: {
           created_at: string | null
@@ -5154,6 +5921,126 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cycle_logs: {
+        Row: {
+          created_at: string
+          flow_intensity: string | null
+          id: string
+          log_date: string
+          notes: string | null
+          symptoms: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flow_intensity?: string | null
+          id?: string
+          log_date?: string
+          notes?: string | null
+          symptoms?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flow_intensity?: string | null
+          id?: string
+          log_date?: string
+          notes?: string | null
+          symptoms?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cycle_tracking_contraception: {
+        Row: {
+          contraceptionId: string | null
+          contraceptiveType: string | null
+          externalSourceName: string | null
+          isBevelDataSource: boolean | null
+          overrideAllowsPhaseTracking: boolean | null
+          startDate: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          contraceptionId?: string | null
+          contraceptiveType?: string | null
+          externalSourceName?: string | null
+          isBevelDataSource?: boolean | null
+          overrideAllowsPhaseTracking?: boolean | null
+          startDate?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          contraceptionId?: string | null
+          contraceptiveType?: string | null
+          externalSourceName?: string | null
+          isBevelDataSource?: boolean | null
+          overrideAllowsPhaseTracking?: boolean | null
+          startDate?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      cycle_tracking_symptom: {
+        Row: {
+          deletedAt: string | null
+          identifyingDate: string | null
+          startDate: string | null
+          symptomId: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          deletedAt?: string | null
+          identifyingDate?: string | null
+          startDate?: string | null
+          symptomId?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          deletedAt?: string | null
+          identifyingDate?: string | null
+          startDate?: string | null
+          symptomId?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      cycle_tracking_temperature_baseline: {
+        Row: {
+          algorithmVersion: string | null
+          averageTemperature: number | null
+          id: string
+          temperatureBaseline: Json | null
+          user_id: string
+        }
+        Insert: {
+          algorithmVersion?: string | null
+          averageTemperature?: number | null
+          id?: string
+          temperatureBaseline?: Json | null
+          user_id: string
+        }
+        Update: {
+          algorithmVersion?: string | null
+          averageTemperature?: number | null
+          id?: string
+          temperatureBaseline?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -7418,6 +8305,27 @@ export type Database = {
           location_lng?: number | null
           message?: string | null
           notification_results?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      energy_data_point: {
+        Row: {
+          energyValue: number | null
+          id: string
+          timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          energyValue?: number | null
+          id?: string
+          timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          energyValue?: number | null
+          id?: string
+          timestamp?: string | null
           user_id?: string
         }
         Relationships: []
@@ -11570,6 +12478,99 @@ export type Database = {
         }
         Relationships: []
       }
+      food: {
+        Row: {
+          applyLiveUpdates: boolean | null
+          brandName: string | null
+          caloricPercentages: Json | null
+          dataSource: string | null
+          dataUpdatedAt: string | null
+          deletedAt: string | null
+          fdbId: string | null
+          iconName: string | null
+          id: string
+          isMasterCopy: boolean | null
+          name: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          applyLiveUpdates?: boolean | null
+          brandName?: string | null
+          caloricPercentages?: Json | null
+          dataSource?: string | null
+          dataUpdatedAt?: string | null
+          deletedAt?: string | null
+          fdbId?: string | null
+          iconName?: string | null
+          id?: string
+          isMasterCopy?: boolean | null
+          name?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          applyLiveUpdates?: boolean | null
+          brandName?: string | null
+          caloricPercentages?: Json | null
+          dataSource?: string | null
+          dataUpdatedAt?: string | null
+          deletedAt?: string | null
+          fdbId?: string | null
+          iconName?: string | null
+          id?: string
+          isMasterCopy?: boolean | null
+          name?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      food_log: {
+        Row: {
+          analysisSessionId: string | null
+          deletedAt: string | null
+          id: string
+          identifyingDate: string | null
+          imageUrl: string | null
+          loggedAt: string | null
+          numServings: number | null
+          syncedAt: string | null
+          timeCategory: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          analysisSessionId?: string | null
+          deletedAt?: string | null
+          id?: string
+          identifyingDate?: string | null
+          imageUrl?: string | null
+          loggedAt?: string | null
+          numServings?: number | null
+          syncedAt?: string | null
+          timeCategory?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          analysisSessionId?: string | null
+          deletedAt?: string | null
+          id?: string
+          identifyingDate?: string | null
+          imageUrl?: string | null
+          loggedAt?: string | null
+          numServings?: number | null
+          syncedAt?: string | null
+          timeCategory?: string | null
+          updatedAt?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       food_logs: {
         Row: {
           barcode: string | null
@@ -11648,6 +12649,129 @@ export type Database = {
           vitaminA_mcg?: number | null
           vitaminC_mg?: number | null
           vitaminD_mcg?: number | null
+        }
+        Relationships: []
+      }
+      food_recipe: {
+        Row: {
+          deletedAt: string | null
+          id: string
+          isFavorited: boolean | null
+          name: string | null
+          numServings: number | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          userInputtedTotalYield: number | null
+        }
+        Insert: {
+          deletedAt?: string | null
+          id?: string
+          isFavorited?: boolean | null
+          name?: string | null
+          numServings?: number | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          userInputtedTotalYield?: number | null
+        }
+        Update: {
+          deletedAt?: string | null
+          id?: string
+          isFavorited?: boolean | null
+          name?: string | null
+          numServings?: number | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          userInputtedTotalYield?: number | null
+        }
+        Relationships: []
+      }
+      food_relative_portion: {
+        Row: {
+          amountPerServingCount: number | null
+          amountPerServingUnit: string | null
+          id: string
+          name: string | null
+          servingSizeCount: number | null
+          servingSizeType: string | null
+          servingSizeUnit: string | null
+          user_id: string
+        }
+        Insert: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          id?: string
+          name?: string | null
+          servingSizeCount?: number | null
+          servingSizeType?: string | null
+          servingSizeUnit?: string | null
+          user_id: string
+        }
+        Update: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          id?: string
+          name?: string | null
+          servingSizeCount?: number | null
+          servingSizeType?: string | null
+          servingSizeUnit?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      food_serving: {
+        Row: {
+          amountPerServingCount: number | null
+          amountPerServingUnit: string | null
+          fdbServingId: string | null
+          id: string
+          nutrients: Json | null
+          servingSizeCount: number | null
+          servingSizeUnit: string | null
+          user_id: string
+        }
+        Insert: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          fdbServingId?: string | null
+          id?: string
+          nutrients?: Json | null
+          servingSizeCount?: number | null
+          servingSizeUnit?: string | null
+          user_id: string
+        }
+        Update: {
+          amountPerServingCount?: number | null
+          amountPerServingUnit?: string | null
+          fdbServingId?: string | null
+          id?: string
+          nutrients?: Json | null
+          servingSizeCount?: number | null
+          servingSizeUnit?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      food_suggestion: {
+        Row: {
+          id: string
+          identifyingDate: string | null
+          isHidden: boolean | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          identifyingDate?: string | null
+          isHidden?: boolean | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          identifyingDate?: string | null
+          isHidden?: boolean | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -11970,6 +13094,288 @@ export type Database = {
           id?: string
           level?: number | null
           score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      garmin_activity_sample: {
+        Row: {
+          airTemperatureCelcius: number | null
+          bikeCadenceInRPM: number | null
+          clockDurationInSeconds: number | null
+          elevationInMeters: number | null
+          heartRate: number | null
+          id: string
+          latitudeInDegree: number | null
+          longitudeInDegree: number | null
+          movingDurationInSeconds: number | null
+          powerInWatts: number | null
+          speedMetersPerSecond: number | null
+          startTime: string | null
+          stepsPerMinute: number | null
+          swimCadenceInStrokesPerMinute: number | null
+          timerDurationInSeconds: number | null
+          totalDistanceInMeters: number | null
+          user_id: string
+          wheelChairCadenceInPushesPerMinute: number | null
+        }
+        Insert: {
+          airTemperatureCelcius?: number | null
+          bikeCadenceInRPM?: number | null
+          clockDurationInSeconds?: number | null
+          elevationInMeters?: number | null
+          heartRate?: number | null
+          id?: string
+          latitudeInDegree?: number | null
+          longitudeInDegree?: number | null
+          movingDurationInSeconds?: number | null
+          powerInWatts?: number | null
+          speedMetersPerSecond?: number | null
+          startTime?: string | null
+          stepsPerMinute?: number | null
+          swimCadenceInStrokesPerMinute?: number | null
+          timerDurationInSeconds?: number | null
+          totalDistanceInMeters?: number | null
+          user_id: string
+          wheelChairCadenceInPushesPerMinute?: number | null
+        }
+        Update: {
+          airTemperatureCelcius?: number | null
+          bikeCadenceInRPM?: number | null
+          clockDurationInSeconds?: number | null
+          elevationInMeters?: number | null
+          heartRate?: number | null
+          id?: string
+          latitudeInDegree?: number | null
+          longitudeInDegree?: number | null
+          movingDurationInSeconds?: number | null
+          powerInWatts?: number | null
+          speedMetersPerSecond?: number | null
+          startTime?: string | null
+          stepsPerMinute?: number | null
+          swimCadenceInStrokesPerMinute?: number | null
+          timerDurationInSeconds?: number | null
+          totalDistanceInMeters?: number | null
+          user_id?: string
+          wheelChairCadenceInPushesPerMinute?: number | null
+        }
+        Relationships: []
+      }
+      garmin_activity_summary: {
+        Row: {
+          activeKilocalories: number | null
+          activityDescription: string | null
+          activityName: string | null
+          activityType: string | null
+          averageBikeCadenceInRoundsPerMinute: number | null
+          averageHeartRateInBeatsPerMinute: number | null
+          averagePaceInMinutesPerKilometer: number | null
+          averagePushCadenceInPushesPerMinute: number | null
+          averageRunCadenceInStepsPerMinute: number | null
+          averageSpeedInMetersPerSecond: number | null
+          averageSwimCadenceInStrokesPerMinute: number | null
+          deviceName: string | null
+          distanceInMeters: number | null
+          durationInSeconds: number | null
+          id: string
+          isParent: boolean | null
+          isWebUpload: boolean | null
+          laps: Json | null
+          manual: boolean | null
+          maxBikeCadenceInRoundsPerMinute: number | null
+          maxHeartRateInBeatsPerMinute: number | null
+          maxPaceInMinutesPerKilometer: number | null
+          maxPushCadenceInPushesPerMinute: number | null
+          maxRunCadenceInStepsPerMinute: number | null
+          maxSpeedInMetersPerSecond: number | null
+          numberOfActiveLengths: number | null
+          parentSummaryId: string | null
+          pauses: Json | null
+          pushes: number | null
+          startDate: string | null
+          startingLatitudeInDegree: number | null
+          startingLongitudeInDegree: number | null
+          steps: number | null
+          summaryId: string | null
+          totalElevationGainInMeters: number | null
+          totalElevationLossInMeters: number | null
+          user_id: string
+        }
+        Insert: {
+          activeKilocalories?: number | null
+          activityDescription?: string | null
+          activityName?: string | null
+          activityType?: string | null
+          averageBikeCadenceInRoundsPerMinute?: number | null
+          averageHeartRateInBeatsPerMinute?: number | null
+          averagePaceInMinutesPerKilometer?: number | null
+          averagePushCadenceInPushesPerMinute?: number | null
+          averageRunCadenceInStepsPerMinute?: number | null
+          averageSpeedInMetersPerSecond?: number | null
+          averageSwimCadenceInStrokesPerMinute?: number | null
+          deviceName?: string | null
+          distanceInMeters?: number | null
+          durationInSeconds?: number | null
+          id?: string
+          isParent?: boolean | null
+          isWebUpload?: boolean | null
+          laps?: Json | null
+          manual?: boolean | null
+          maxBikeCadenceInRoundsPerMinute?: number | null
+          maxHeartRateInBeatsPerMinute?: number | null
+          maxPaceInMinutesPerKilometer?: number | null
+          maxPushCadenceInPushesPerMinute?: number | null
+          maxRunCadenceInStepsPerMinute?: number | null
+          maxSpeedInMetersPerSecond?: number | null
+          numberOfActiveLengths?: number | null
+          parentSummaryId?: string | null
+          pauses?: Json | null
+          pushes?: number | null
+          startDate?: string | null
+          startingLatitudeInDegree?: number | null
+          startingLongitudeInDegree?: number | null
+          steps?: number | null
+          summaryId?: string | null
+          totalElevationGainInMeters?: number | null
+          totalElevationLossInMeters?: number | null
+          user_id: string
+        }
+        Update: {
+          activeKilocalories?: number | null
+          activityDescription?: string | null
+          activityName?: string | null
+          activityType?: string | null
+          averageBikeCadenceInRoundsPerMinute?: number | null
+          averageHeartRateInBeatsPerMinute?: number | null
+          averagePaceInMinutesPerKilometer?: number | null
+          averagePushCadenceInPushesPerMinute?: number | null
+          averageRunCadenceInStepsPerMinute?: number | null
+          averageSpeedInMetersPerSecond?: number | null
+          averageSwimCadenceInStrokesPerMinute?: number | null
+          deviceName?: string | null
+          distanceInMeters?: number | null
+          durationInSeconds?: number | null
+          id?: string
+          isParent?: boolean | null
+          isWebUpload?: boolean | null
+          laps?: Json | null
+          manual?: boolean | null
+          maxBikeCadenceInRoundsPerMinute?: number | null
+          maxHeartRateInBeatsPerMinute?: number | null
+          maxPaceInMinutesPerKilometer?: number | null
+          maxPushCadenceInPushesPerMinute?: number | null
+          maxRunCadenceInStepsPerMinute?: number | null
+          maxSpeedInMetersPerSecond?: number | null
+          numberOfActiveLengths?: number | null
+          parentSummaryId?: string | null
+          pauses?: Json | null
+          pushes?: number | null
+          startDate?: string | null
+          startingLatitudeInDegree?: number | null
+          startingLongitudeInDegree?: number | null
+          steps?: number | null
+          summaryId?: string | null
+          totalElevationGainInMeters?: number | null
+          totalElevationLossInMeters?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      garmin_health_quantity_sample: {
+        Row: {
+          endDate: string | null
+          id: string
+          sourceId: string | null
+          startDate: string | null
+          type: string | null
+          unit: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          endDate?: string | null
+          id?: string
+          sourceId?: string | null
+          startDate?: string | null
+          type?: string | null
+          unit?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          endDate?: string | null
+          id?: string
+          sourceId?: string | null
+          startDate?: string | null
+          type?: string | null
+          unit?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      garmin_sleep_summary: {
+        Row: {
+          calendarDate: string | null
+          endTime: string | null
+          id: string
+          sleepStageSegments: Json | null
+          startTime: string | null
+          summaryId: string | null
+          user_id: string
+        }
+        Insert: {
+          calendarDate?: string | null
+          endTime?: string | null
+          id?: string
+          sleepStageSegments?: Json | null
+          startTime?: string | null
+          summaryId?: string | null
+          user_id: string
+        }
+        Update: {
+          calendarDate?: string | null
+          endTime?: string | null
+          id?: string
+          sleepStageSegments?: Json | null
+          startTime?: string | null
+          summaryId?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      glucose_logs: {
+        Row: {
+          context: string | null
+          created_at: string
+          glucose_mg_dl: number
+          id: string
+          log_date: string
+          log_time: string | null
+          meal_notes: string | null
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          glucose_mg_dl: number
+          id?: string
+          log_date?: string
+          log_time?: string | null
+          meal_notes?: string | null
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          glucose_mg_dl?: number
+          id?: string
+          log_date?: string
+          log_time?: string | null
+          meal_notes?: string | null
+          notes?: string | null
           user_id?: string
         }
         Relationships: []
@@ -12528,6 +13934,30 @@ export type Database = {
           },
         ]
       }
+      health_aggregated_cache: {
+        Row: {
+          algorithmVersion: string | null
+          data: Json | null
+          id: string
+          identifyingDate: string | null
+          user_id: string
+        }
+        Insert: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          id?: string
+          identifyingDate?: string | null
+          user_id: string
+        }
+        Update: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          id?: string
+          identifyingDate?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_metric: {
         Row: {
           created_at: string | null
@@ -12581,6 +14011,39 @@ export type Database = {
           stress_level?: number | null
           symptoms?: string[] | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_metrics_cache: {
+        Row: {
+          algorithmVersion: string | null
+          data: Json | null
+          dayEnd: string | null
+          dayStart: string | null
+          id: string
+          metricType: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          dayEnd?: string | null
+          dayStart?: string | null
+          id?: string
+          metricType?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          algorithmVersion?: string | null
+          data?: Json | null
+          dayEnd?: string | null
+          dayStart?: string | null
+          id?: string
+          metricType?: string | null
+          status?: string | null
           user_id?: string
         }
         Relationships: []
@@ -14627,6 +16090,1057 @@ export type Database = {
           },
         ]
       }
+      kwit_activities: {
+        Row: {
+          activitytype: string
+          created_at: string
+          data: Json | null
+          id: string
+          user_id: string
+          weekid: string
+        }
+        Insert: {
+          activitytype: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          user_id: string
+          weekid: string
+        }
+        Update: {
+          activitytype?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          user_id?: string
+          weekid?: string
+        }
+        Relationships: []
+      }
+      kwit_avatar_builder: {
+        Row: {
+          accessory: string | null
+          avatar: string | null
+          backgroundcolor: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accessory?: string | null
+          avatar?: string | null
+          backgroundcolor?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accessory?: string | null
+          avatar?: string | null
+          backgroundcolor?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_avatar_options: {
+        Row: {
+          id: string
+          optiontype: string
+          optionvalue: string
+          sortorder: number
+        }
+        Insert: {
+          id?: string
+          optiontype: string
+          optionvalue: string
+          sortorder?: number
+        }
+        Update: {
+          id?: string
+          optiontype?: string
+          optionvalue?: string
+          sortorder?: number
+        }
+        Relationships: []
+      }
+      kwit_breathing_definitions: {
+        Row: {
+          description: string
+          exhale: number
+          hold: number
+          id: string
+          inhale: number
+          name: string
+          sort_order: number
+          type: string
+        }
+        Insert: {
+          description: string
+          exhale: number
+          hold?: number
+          id: string
+          inhale: number
+          name: string
+          sort_order?: number
+          type: string
+        }
+        Update: {
+          description?: string
+          exhale?: number
+          hold?: number
+          id?: string
+          inhale?: number
+          name?: string
+          sort_order?: number
+          type?: string
+        }
+        Relationships: []
+      }
+      kwit_breathing_sessions: {
+        Row: {
+          completedat: string
+          created_at: string
+          durationseconds: number
+          exercisetype: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completedat?: string
+          created_at?: string
+          durationseconds: number
+          exercisetype: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completedat?: string
+          created_at?: string
+          durationseconds?: number
+          exercisetype?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_cessation_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          notes: string | null
+          step_id: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          step_id: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          step_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kwit_cessation_progress_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "kwit_cessation_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kwit_cessation_steps: {
+        Row: {
+          activity: string
+          day: number
+          description: string
+          id: number
+          sort_order: number
+          tip: string | null
+          title: string
+        }
+        Insert: {
+          activity: string
+          day: number
+          description: string
+          id?: number
+          sort_order?: number
+          tip?: string | null
+          title: string
+        }
+        Update: {
+          activity?: string
+          day?: number
+          description?: string
+          id?: number
+          sort_order?: number
+          tip?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      kwit_community_experts: {
+        Row: {
+          created_at: string
+          displayname: string
+          id: string
+          speciality: string | null
+        }
+        Insert: {
+          created_at?: string
+          displayname: string
+          id?: string
+          speciality?: string | null
+        }
+        Update: {
+          created_at?: string
+          displayname?: string
+          id?: string
+          speciality?: string | null
+        }
+        Relationships: []
+      }
+      kwit_community_messages: {
+        Row: {
+          author: string
+          content: string
+          created_at: string
+          creationdate: string
+          id: string
+          isexpert: boolean
+          user_id: string
+        }
+        Insert: {
+          author: string
+          content: string
+          created_at?: string
+          creationdate: string
+          id?: string
+          isexpert?: boolean
+          user_id: string
+        }
+        Update: {
+          author?: string
+          content?: string
+          created_at?: string
+          creationdate?: string
+          id?: string
+          isexpert?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_community_post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kwit_community_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "kwit_community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kwit_community_posts: {
+        Row: {
+          content: string
+          created_at: string
+          displayname: string
+          id: string
+          likes: number
+          locale: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          displayname: string
+          id?: string
+          likes?: number
+          locale?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          displayname?: string
+          id?: string
+          likes?: number
+          locale?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_config: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      kwit_daily_affirmations: {
+        Row: {
+          affirmationindex: number
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          affirmationindex: number
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          affirmationindex?: number
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      kwit_daily_checkins: {
+        Row: {
+          completed: boolean
+          confidence: number | null
+          created_at: string
+          date: string
+          effort: string | null
+          energy: number | null
+          id: string
+          mood: string | null
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          confidence?: number | null
+          created_at?: string
+          date: string
+          effort?: string | null
+          energy?: number | null
+          id?: string
+          mood?: string | null
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          confidence?: number | null
+          created_at?: string
+          date?: string
+          effort?: string | null
+          energy?: number | null
+          id?: string
+          mood?: string | null
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_day_milestones: {
+        Row: {
+          days: number
+          emoji: string
+          id: number
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          days: number
+          emoji: string
+          id?: number
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          days?: number
+          emoji?: string
+          id?: number
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      kwit_diary_cigarettes: {
+        Row: {
+          created_at: string
+          feeling: string | null
+          id: string
+          intensity: number | null
+          intensityafter: number | null
+          strategies: Json | null
+          timestamp: number
+          trigger: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feeling?: string | null
+          id?: string
+          intensity?: number | null
+          intensityafter?: number | null
+          strategies?: Json | null
+          timestamp: number
+          trigger?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feeling?: string | null
+          id?: string
+          intensity?: number | null
+          intensityafter?: number | null
+          strategies?: Json | null
+          timestamp?: number
+          trigger?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_diary_cravings: {
+        Row: {
+          created_at: string
+          feeling: string | null
+          id: string
+          intensity: number | null
+          intensityafter: number | null
+          strategies: Json | null
+          text: string | null
+          timestamp: number
+          trigger: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feeling?: string | null
+          id?: string
+          intensity?: number | null
+          intensityafter?: number | null
+          strategies?: Json | null
+          text?: string | null
+          timestamp: number
+          trigger?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feeling?: string | null
+          id?: string
+          intensity?: number | null
+          intensityafter?: number | null
+          strategies?: Json | null
+          text?: string | null
+          timestamp?: number
+          trigger?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_explore_articles: {
+        Row: {
+          articleid: string
+          color: string | null
+          content: string | null
+          created_at: string
+          id: string
+          img: string | null
+          locale: string
+          publicationdate: string | null
+          req_premium: boolean
+          title: string
+          type: string | null
+        }
+        Insert: {
+          articleid: string
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          img?: string | null
+          locale?: string
+          publicationdate?: string | null
+          req_premium?: boolean
+          title: string
+          type?: string | null
+        }
+        Update: {
+          articleid?: string
+          color?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          img?: string | null
+          locale?: string
+          publicationdate?: string | null
+          req_premium?: boolean
+          title?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      kwit_explore_authors: {
+        Row: {
+          authorid: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          authorid: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          authorid?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      kwit_explore_categories: {
+        Row: {
+          categoryindex: number
+          content: Json | null
+          created_at: string
+          id: string
+          locale: string
+          name: string
+        }
+        Insert: {
+          categoryindex: number
+          content?: Json | null
+          created_at?: string
+          id?: string
+          locale?: string
+          name: string
+        }
+        Update: {
+          categoryindex?: number
+          content?: Json | null
+          created_at?: string
+          id?: string
+          locale?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      kwit_explore_keywords: {
+        Row: {
+          content: string | null
+          created_at: string
+          header: string
+          id: string
+          keywordid: string
+          locale: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          header: string
+          id?: string
+          keywordid: string
+          locale?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          header?: string
+          id?: string
+          keywordid?: string
+          locale?: string
+        }
+        Relationships: []
+      }
+      kwit_goal_definitions: {
+        Row: {
+          category: string
+          id: number
+          level: number
+          sort_order: number
+          text: string
+          threshold: number | null
+          xp: number
+        }
+        Insert: {
+          category: string
+          id?: number
+          level: number
+          sort_order?: number
+          text: string
+          threshold?: number | null
+          xp?: number
+        }
+        Update: {
+          category?: string
+          id?: number
+          level?: number
+          sort_order?: number
+          text?: string
+          threshold?: number | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      kwit_goals: {
+        Row: {
+          created_at: string
+          goalid: string
+          id: string
+          status: Json | null
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          goalid: string
+          id?: string
+          status?: Json | null
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          goalid?: string
+          id?: string
+          status?: Json | null
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      kwit_health_milestones: {
+        Row: {
+          description: string
+          hours: number
+          id: number
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          description: string
+          hours: number
+          id?: number
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          description?: string
+          hours?: number
+          id?: number
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      kwit_level_thresholds: {
+        Row: {
+          level: number
+          title: string
+          xp: number
+        }
+        Insert: {
+          level: number
+          title: string
+          xp: number
+        }
+        Update: {
+          level?: number
+          title?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      kwit_motivations: {
+        Row: {
+          author: string | null
+          content: string
+          created_at: string
+          id: string
+          quoteindex: number
+        }
+        Insert: {
+          author?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          quoteindex: number
+        }
+        Update: {
+          author?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          quoteindex?: number
+        }
+        Relationships: []
+      }
+      kwit_nrt_logs: {
+        Row: {
+          action: string
+          contenance: string | null
+          created_at: string
+          dosage: string | null
+          id: string
+          nrttype: string
+          timestamp: number
+          user_id: string
+        }
+        Insert: {
+          action: string
+          contenance?: string | null
+          created_at?: string
+          dosage?: string | null
+          id?: string
+          nrttype: string
+          timestamp: number
+          user_id: string
+        }
+        Update: {
+          action?: string
+          contenance?: string | null
+          created_at?: string
+          dosage?: string | null
+          id?: string
+          nrttype?: string
+          timestamp?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_personal_goals: {
+        Row: {
+          completed: boolean
+          created_at: string
+          goaltype: string
+          id: string
+          savedmoney: number | null
+          targetdate: string | null
+          targetmoney: number | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          goaltype: string
+          id?: string
+          savedmoney?: number | null
+          targetdate?: string | null
+          targetmoney?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          goaltype?: string
+          id?: string
+          savedmoney?: number | null
+          targetdate?: string | null
+          targetmoney?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_progression: {
+        Row: {
+          created_at: string
+          daysstreak_count: number
+          daysstreak_lastupdate: string | null
+          daysstreak_start: string | null
+          entrycount: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daysstreak_count?: number
+          daysstreak_lastupdate?: string | null
+          daysstreak_start?: string | null
+          entrycount?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daysstreak_count?: number
+          daysstreak_lastupdate?: string | null
+          daysstreak_start?: string | null
+          entrycount?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_sessions: {
+        Row: {
+          appversion: string | null
+          created_at: string
+          deviceid: string | null
+          devicemodel: string | null
+          id: string
+          sessiontimestamp: number
+          user_id: string
+        }
+        Insert: {
+          appversion?: string | null
+          created_at?: string
+          deviceid?: string | null
+          devicemodel?: string | null
+          id?: string
+          sessiontimestamp: number
+          user_id: string
+        }
+        Update: {
+          appversion?: string | null
+          created_at?: string
+          deviceid?: string | null
+          devicemodel?: string | null
+          id?: string
+          sessiontimestamp?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_trophies: {
+        Row: {
+          created_at: string
+          id: string
+          trophyid: string
+          unlockedat: number[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trophyid: string
+          unlockedat?: number[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trophyid?: string
+          unlockedat?: number[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_trophy_definitions: {
+        Row: {
+          icon: string
+          id: string
+          locked_description: string
+          sort_order: number
+          title: string
+          unlocked_description: string
+        }
+        Insert: {
+          icon?: string
+          id: string
+          locked_description: string
+          sort_order?: number
+          title: string
+          unlocked_description: string
+        }
+        Update: {
+          icon?: string
+          id?: string
+          locked_description?: string
+          sort_order?: number
+          title?: string
+          unlocked_description?: string
+        }
+        Relationships: []
+      }
+      kwit_ui_state: {
+        Row: {
+          created_at: string
+          id: string
+          lastaffirmationdate: string | null
+          onboarding: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lastaffirmationdate?: string | null
+          onboarding?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lastaffirmationdate?: string | null
+          onboarding?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kwit_users: {
+        Row: {
+          cigarettesperday: number
+          cigarettesperpack: number
+          created_at: string
+          firstlaunchtime: string | null
+          gender: string | null
+          id: string
+          lastconnection: string | null
+          locale: string | null
+          notificationstatus: string | null
+          osversion: string | null
+          packcosthistory: Json | null
+          platform: string | null
+          providerid: string | null
+          quitdate: string
+          reasontochange: string | null
+          smokingstatushistory: Json | null
+          startsmokingage: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+          weeklyofferstartdate: string | null
+          yearlyofferstartdate: string | null
+        }
+        Insert: {
+          cigarettesperday?: number
+          cigarettesperpack?: number
+          created_at?: string
+          firstlaunchtime?: string | null
+          gender?: string | null
+          id?: string
+          lastconnection?: string | null
+          locale?: string | null
+          notificationstatus?: string | null
+          osversion?: string | null
+          packcosthistory?: Json | null
+          platform?: string | null
+          providerid?: string | null
+          quitdate: string
+          reasontochange?: string | null
+          smokingstatushistory?: Json | null
+          startsmokingage?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+          weeklyofferstartdate?: string | null
+          yearlyofferstartdate?: string | null
+        }
+        Update: {
+          cigarettesperday?: number
+          cigarettesperpack?: number
+          created_at?: string
+          firstlaunchtime?: string | null
+          gender?: string | null
+          id?: string
+          lastconnection?: string | null
+          locale?: string | null
+          notificationstatus?: string | null
+          osversion?: string | null
+          packcosthistory?: Json | null
+          platform?: string | null
+          providerid?: string | null
+          quitdate?: string
+          reasontochange?: string | null
+          smokingstatushistory?: Json | null
+          startsmokingage?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+          weeklyofferstartdate?: string | null
+          yearlyofferstartdate?: string | null
+        }
+        Relationships: []
+      }
+      kwit_water_logs: {
+        Row: {
+          amount_ml: number
+          id: string
+          label: string | null
+          logged_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_ml: number
+          id?: string
+          label?: string | null
+          logged_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_ml?: number
+          id?: string
+          label?: string | null
+          logged_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_category: {
         Row: {
           created_at: string | null
@@ -14893,6 +17407,57 @@ export type Database = {
           id?: string
           label?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      macronutrient_goal: {
+        Row: {
+          caloriesGoal: number | null
+          carbsGoal: number | null
+          deletedAt: string | null
+          effectiveStartDate: string | null
+          endDate: string | null
+          fatsGoal: number | null
+          goalId: string | null
+          id: string
+          proteinGoal: number | null
+          syncedAt: string | null
+          totalDailyEnergyExpenditure: number | null
+          type: string | null
+          updatedAt: string | null
+          user_id: string
+        }
+        Insert: {
+          caloriesGoal?: number | null
+          carbsGoal?: number | null
+          deletedAt?: string | null
+          effectiveStartDate?: string | null
+          endDate?: string | null
+          fatsGoal?: number | null
+          goalId?: string | null
+          id?: string
+          proteinGoal?: number | null
+          syncedAt?: string | null
+          totalDailyEnergyExpenditure?: number | null
+          type?: string | null
+          updatedAt?: string | null
+          user_id: string
+        }
+        Update: {
+          caloriesGoal?: number | null
+          carbsGoal?: number | null
+          deletedAt?: string | null
+          effectiveStartDate?: string | null
+          endDate?: string | null
+          fatsGoal?: number | null
+          goalId?: string | null
+          id?: string
+          proteinGoal?: number | null
+          syncedAt?: string | null
+          totalDailyEnergyExpenditure?: number | null
+          type?: string | null
+          updatedAt?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -16152,6 +18717,42 @@ export type Database = {
           start_date?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      numeric_journal_default: {
+        Row: {
+          createdAt: string | null
+          deletedAt: string | null
+          numericValue: number | null
+          presetFactorKey: string | null
+          syncedAt: string | null
+          time: number | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          numericValue?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          time?: number | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          createdAt?: string | null
+          deletedAt?: string | null
+          numericValue?: number | null
+          presetFactorKey?: string | null
+          syncedAt?: string | null
+          time?: number | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
         }
         Relationships: []
       }
@@ -18664,6 +21265,8 @@ export type Database = {
           avatar_url: string | null
           calorie_target: number | null
           carb_target: number | null
+          cigarettes_per_day: number | null
+          cigarettes_per_pack: number | null
           created_at: string
           date_of_birth: string | null
           display_name: string | null
@@ -18671,7 +21274,9 @@ export type Database = {
           gender: string | null
           height_cm: number | null
           id: string
+          price_per_pack: number | null
           protein_target: number | null
+          quit_date: string | null
           sleep_goal_hours: number | null
           updated_at: string
           weight_kg: number | null
@@ -18681,6 +21286,8 @@ export type Database = {
           avatar_url?: string | null
           calorie_target?: number | null
           carb_target?: number | null
+          cigarettes_per_day?: number | null
+          cigarettes_per_pack?: number | null
           created_at?: string
           date_of_birth?: string | null
           display_name?: string | null
@@ -18688,7 +21295,9 @@ export type Database = {
           gender?: string | null
           height_cm?: number | null
           id: string
+          price_per_pack?: number | null
           protein_target?: number | null
+          quit_date?: string | null
           sleep_goal_hours?: number | null
           updated_at?: string
           weight_kg?: number | null
@@ -18698,6 +21307,8 @@ export type Database = {
           avatar_url?: string | null
           calorie_target?: number | null
           carb_target?: number | null
+          cigarettes_per_day?: number | null
+          cigarettes_per_pack?: number | null
           created_at?: string
           date_of_birth?: string | null
           display_name?: string | null
@@ -18705,7 +21316,9 @@ export type Database = {
           gender?: string | null
           height_cm?: number | null
           id?: string
+          price_per_pack?: number | null
           protein_target?: number | null
+          quit_date?: string | null
           sleep_goal_hours?: number | null
           updated_at?: string
           weight_kg?: number | null
@@ -22619,6 +25232,377 @@ export type Database = {
         }
         Relationships: []
       }
+      strength_custom_exercise: {
+        Row: {
+          baseWorkout: string | null
+          createdAt: string | null
+          equipment: string | null
+          exerciseTypeKey: string | null
+          isRemoved: boolean | null
+          name: string | null
+          primaryMuscleGroups: Json | null
+          secondaryMuscleGroups: Json | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+          weightConfiguration: string | null
+        }
+        Insert: {
+          baseWorkout?: string | null
+          createdAt?: string | null
+          equipment?: string | null
+          exerciseTypeKey?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          primaryMuscleGroups?: Json | null
+          secondaryMuscleGroups?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+          weightConfiguration?: string | null
+        }
+        Update: {
+          baseWorkout?: string | null
+          createdAt?: string | null
+          equipment?: string | null
+          exerciseTypeKey?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          primaryMuscleGroups?: Json | null
+          secondaryMuscleGroups?: Json | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+          weightConfiguration?: string | null
+        }
+        Relationships: []
+      }
+      strength_template_session: {
+        Row: {
+          createdAt: string | null
+          isRemoved: boolean | null
+          name: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          createdAt?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          createdAt?: string | null
+          isRemoved?: boolean | null
+          name?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      strength_template_set: {
+        Row: {
+          customExerciseId: string | null
+          duration: number | null
+          labelKey: string | null
+          order: number | null
+          reps: number | null
+          restDuration: number | null
+          set_group_id: string | null
+          user_id: string
+          uuid: string
+          weightLbs: number | null
+          workout: string | null
+        }
+        Insert: {
+          customExerciseId?: string | null
+          duration?: number | null
+          labelKey?: string | null
+          order?: number | null
+          reps?: number | null
+          restDuration?: number | null
+          set_group_id?: string | null
+          user_id: string
+          uuid?: string
+          weightLbs?: number | null
+          workout?: string | null
+        }
+        Update: {
+          customExerciseId?: string | null
+          duration?: number | null
+          labelKey?: string | null
+          order?: number | null
+          reps?: number | null
+          restDuration?: number | null
+          set_group_id?: string | null
+          user_id?: string
+          uuid?: string
+          weightLbs?: number | null
+          workout?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strength_template_set_set_group_id_fkey"
+            columns: ["set_group_id"]
+            isOneToOne: false
+            referencedRelation: "strength_template_set_group"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
+      strength_template_set_group: {
+        Row: {
+          customExerciseId: string | null
+          isRestTimersEnabled: boolean | null
+          order: number | null
+          session_id: string | null
+          superset_id: string | null
+          user_id: string
+          uuid: string
+          weightUnitKey: string | null
+          workout: string | null
+        }
+        Insert: {
+          customExerciseId?: string | null
+          isRestTimersEnabled?: boolean | null
+          order?: number | null
+          session_id?: string | null
+          superset_id?: string | null
+          user_id: string
+          uuid?: string
+          weightUnitKey?: string | null
+          workout?: string | null
+        }
+        Update: {
+          customExerciseId?: string | null
+          isRestTimersEnabled?: boolean | null
+          order?: number | null
+          session_id?: string | null
+          superset_id?: string | null
+          user_id?: string
+          uuid?: string
+          weightUnitKey?: string | null
+          workout?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strength_template_set_group_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "strength_template_session"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "strength_template_set_group_superset_id_fkey"
+            columns: ["superset_id"]
+            isOneToOne: false
+            referencedRelation: "strength_template_superset"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
+      strength_template_superset: {
+        Row: {
+          styleKey: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          styleKey?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          styleKey?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      strength_workout_session: {
+        Row: {
+          endDate: string | null
+          estimatedEffort: number | null
+          hkWorkoutId: string | null
+          isRemoved: boolean | null
+          sourceTypeKey: string | null
+          startDate: string | null
+          syncedAt: string | null
+          updatedAt: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          endDate?: string | null
+          estimatedEffort?: number | null
+          hkWorkoutId?: string | null
+          isRemoved?: boolean | null
+          sourceTypeKey?: string | null
+          startDate?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          endDate?: string | null
+          estimatedEffort?: number | null
+          hkWorkoutId?: string | null
+          isRemoved?: boolean | null
+          sourceTypeKey?: string | null
+          startDate?: string | null
+          syncedAt?: string | null
+          updatedAt?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
+      strength_workout_set: {
+        Row: {
+          activeDuration: number | null
+          analysis: Json | null
+          analysisVersion: string | null
+          customExerciseId: string | null
+          duration: number | null
+          endTime: string | null
+          labelKey: string | null
+          order: number | null
+          plannedRestDuration: number | null
+          reps: number | null
+          restDuration: number | null
+          restEndTime: string | null
+          restStartTime: string | null
+          session_id: string | null
+          startTime: string | null
+          superset_id: string | null
+          trailingRestDuration: number | null
+          trailingRestEndTime: string | null
+          trailingRestStartTime: string | null
+          user_id: string
+          uuid: string
+          weightLbs: number | null
+          weightUnitKey: string | null
+          workout: string | null
+        }
+        Insert: {
+          activeDuration?: number | null
+          analysis?: Json | null
+          analysisVersion?: string | null
+          customExerciseId?: string | null
+          duration?: number | null
+          endTime?: string | null
+          labelKey?: string | null
+          order?: number | null
+          plannedRestDuration?: number | null
+          reps?: number | null
+          restDuration?: number | null
+          restEndTime?: string | null
+          restStartTime?: string | null
+          session_id?: string | null
+          startTime?: string | null
+          superset_id?: string | null
+          trailingRestDuration?: number | null
+          trailingRestEndTime?: string | null
+          trailingRestStartTime?: string | null
+          user_id: string
+          uuid?: string
+          weightLbs?: number | null
+          weightUnitKey?: string | null
+          workout?: string | null
+        }
+        Update: {
+          activeDuration?: number | null
+          analysis?: Json | null
+          analysisVersion?: string | null
+          customExerciseId?: string | null
+          duration?: number | null
+          endTime?: string | null
+          labelKey?: string | null
+          order?: number | null
+          plannedRestDuration?: number | null
+          reps?: number | null
+          restDuration?: number | null
+          restEndTime?: string | null
+          restStartTime?: string | null
+          session_id?: string | null
+          startTime?: string | null
+          superset_id?: string | null
+          trailingRestDuration?: number | null
+          trailingRestEndTime?: string | null
+          trailingRestStartTime?: string | null
+          user_id?: string
+          uuid?: string
+          weightLbs?: number | null
+          weightUnitKey?: string | null
+          workout?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strength_workout_set_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "strength_workout_session"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "strength_workout_set_superset_id_fkey"
+            columns: ["superset_id"]
+            isOneToOne: false
+            referencedRelation: "strength_workout_superset"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
+      strength_workout_stored_label: {
+        Row: {
+          dataFrame: Json | null
+          id: string
+          label: string | null
+          user_id: string
+        }
+        Insert: {
+          dataFrame?: Json | null
+          id?: string
+          label?: string | null
+          user_id: string
+        }
+        Update: {
+          dataFrame?: Json | null
+          id?: string
+          label?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      strength_workout_superset: {
+        Row: {
+          styleKey: string | null
+          user_id: string
+          uuid: string
+        }
+        Insert: {
+          styleKey?: string | null
+          user_id: string
+          uuid?: string
+        }
+        Update: {
+          styleKey?: string | null
+          user_id?: string
+          uuid?: string
+        }
+        Relationships: []
+      }
       study_collaborators: {
         Row: {
           created_at: string | null
@@ -24283,6 +27267,33 @@ export type Database = {
           },
         ]
       }
+      user_location_metadata: {
+        Row: {
+          dayWeather: Json | null
+          id: string
+          lastInstantaneousWeather: Json | null
+          lastLocation: Json | null
+          noon: string | null
+          user_id: string
+        }
+        Insert: {
+          dayWeather?: Json | null
+          id?: string
+          lastInstantaneousWeather?: Json | null
+          lastLocation?: Json | null
+          noon?: string | null
+          user_id: string
+        }
+        Update: {
+          dayWeather?: Json | null
+          id?: string
+          lastInstantaneousWeather?: Json | null
+          lastLocation?: Json | null
+          noon?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_marketplace_profiles: {
         Row: {
           avatar_url: string | null
@@ -25573,6 +28584,105 @@ export type Database = {
           strain_contribution?: number | null
           user_id?: string
           workout_date?: string
+          workout_type?: string
+        }
+        Relationships: []
+      }
+      workout_overlay_cache: {
+        Row: {
+          algorithmVersion: string | null
+          cardioFocus: Json | null
+          cardioStrainUnits: number | null
+          distanceMetrics: Json | null
+          heartRateRecovery: number | null
+          heartRateRecoveryData: Json | null
+          hrDetails: Json | null
+          id: string
+          maxHR: number | null
+          muscularStrainUnits: number | null
+          resolvedWorkoutEffort: number | null
+          sourceTypeKey: string | null
+          strainScore: number | null
+          strainZones: Json | null
+          totalElevationFeet: number | null
+          trimp: number | null
+          user_id: string
+          workoutId: string | null
+        }
+        Insert: {
+          algorithmVersion?: string | null
+          cardioFocus?: Json | null
+          cardioStrainUnits?: number | null
+          distanceMetrics?: Json | null
+          heartRateRecovery?: number | null
+          heartRateRecoveryData?: Json | null
+          hrDetails?: Json | null
+          id?: string
+          maxHR?: number | null
+          muscularStrainUnits?: number | null
+          resolvedWorkoutEffort?: number | null
+          sourceTypeKey?: string | null
+          strainScore?: number | null
+          strainZones?: Json | null
+          totalElevationFeet?: number | null
+          trimp?: number | null
+          user_id: string
+          workoutId?: string | null
+        }
+        Update: {
+          algorithmVersion?: string | null
+          cardioFocus?: Json | null
+          cardioStrainUnits?: number | null
+          distanceMetrics?: Json | null
+          heartRateRecovery?: number | null
+          heartRateRecoveryData?: Json | null
+          hrDetails?: Json | null
+          id?: string
+          maxHR?: number | null
+          muscularStrainUnits?: number | null
+          resolvedWorkoutEffort?: number | null
+          sourceTypeKey?: string | null
+          strainScore?: number | null
+          strainZones?: Json | null
+          totalElevationFeet?: number | null
+          trimp?: number | null
+          user_id?: string
+          workoutId?: string | null
+        }
+        Relationships: []
+      }
+      workout_templates: {
+        Row: {
+          created_at: string
+          estimated_duration_minutes: number | null
+          exercises: Json | null
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+          workout_type: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_duration_minutes?: number | null
+          exercises?: Json | null
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          workout_type?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_duration_minutes?: number | null
+          exercises?: Json | null
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
           workout_type?: string
         }
         Relationships: []

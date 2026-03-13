@@ -5,6 +5,7 @@ import { ChevronRight, ChevronLeft, Save, Plus, Trash2, GripVertical, Settings, 
 import { QUESTION_TYPE_DEFINITIONS, normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
 import { hydrateQuestionRows, questionConfigToDbCols } from '../utils/questionConfigSync';
+import { useI18n } from '../hooks/useI18n';
 
 interface Question {
   id: string;
@@ -57,6 +58,7 @@ interface SurveyProject {
 }
 
 const MobileSurveyEditor: React.FC = () => {
+  const { t } = useI18n();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState<SurveyProject>({
@@ -262,8 +264,8 @@ const MobileSurveyEditor: React.FC = () => {
                   className="px-3 py-2 rounded-lg border text-sm font-medium"
                   style={{ borderColor: project.status === 'published' ? 'var(--color-green)' : 'var(--border-light)', color: project.status === 'published' ? 'var(--color-green)' : 'var(--text-secondary)' }}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="draft">{t('me.draft')}</option>
+                  <option value="published">{t('me.published')}</option>
                 </select>
                 <button
                   onClick={saveProject}
@@ -272,7 +274,7 @@ const MobileSurveyEditor: React.FC = () => {
                   style={{ backgroundColor: 'var(--color-green)' }}
                 >
                   <Save size={16} className="inline mr-2" />
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? t('me.saving') : t('me.save')}
                 </button>
               </div>
             </div>
@@ -283,14 +285,14 @@ const MobileSurveyEditor: React.FC = () => {
               type="text"
               value={project.title}
               onChange={(e) => setProject({ ...project, title: e.target.value })}
-              placeholder="Survey Title"
+              placeholder={t('me.surveyTitle')}
               className="w-full px-3 py-2 rounded-lg border text-lg font-semibold"
               style={{ borderColor: 'var(--border-light)' }}
             />
             <textarea
               value={project.description}
               onChange={(e) => setProject({ ...project, description: e.target.value })}
-              placeholder="Survey Description"
+              placeholder={t('me.surveyDescription')}
               rows={2}
               className="w-full px-3 py-2 rounded-lg border text-sm"
               style={{ borderColor: 'var(--border-light)' }}
@@ -302,7 +304,7 @@ const MobileSurveyEditor: React.FC = () => {
               className="w-full px-3 py-2 rounded-lg border text-sm font-medium flex items-center justify-between"
               style={{ borderColor: 'var(--border-light)', color: 'var(--color-green)' }}
             >
-              <span>{showSettings ? 'Hide' : 'Show'} Survey Settings</span>
+              <span>{showSettings ? t('me.hideSettings') : t('me.showSettings')}</span>
               <span>{showSettings ? '▼' : '▶'}</span>
             </button>
             
@@ -312,7 +314,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Duration */}
                 {(project.methodology_type === 'multi_time') && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Study Duration (days)</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.studyDuration')}</label>
                     <input
                       type="number"
                       value={project.study_duration || ''}
@@ -327,26 +329,26 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Frequency */}
                 {(project.methodology_type === 'multi_time') && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Survey Frequency</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.surveyFrequency')}</label>
                     <select
                       value={project.survey_frequency || 'daily'}
                       onChange={(e) => setProject({ ...project, survey_frequency: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     >
-                      <option value="hourly">Every Hour</option>
-                      <option value="twice_daily">Twice Daily</option>
-                      <option value="daily">Daily</option>
-                      <option value="twice_weekly">Twice Weekly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="custom">Custom Schedule</option>
+                      <option value="hourly">{t('me.everyHour')}</option>
+                      <option value="twice_daily">{t('me.twiceDaily')}</option>
+                      <option value="daily">{t('me.daily')}</option>
+                      <option value="twice_weekly">{t('me.twiceWeekly')}</option>
+                      <option value="weekly">{t('me.weekly')}</option>
+                      <option value="custom">{t('me.customSchedule')}</option>
                     </select>
                   </div>
                 )}
 
                 {/* Start Date */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Start Date (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.startDate')}</label>
                   <input
                     type="date"
                     value={project.starts_at ? project.starts_at.split('T')[0] : ''}
@@ -358,7 +360,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* End Date */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>End Date (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.endDate')}</label>
                   <input
                     type="date"
                     value={project.ends_at ? project.ends_at.split('T')[0] : ''}
@@ -370,7 +372,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* Max Participants */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Max Participants (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxParticipants')}</label>
                   <input
                     type="number"
                     value={project.max_participants || ''}
@@ -384,28 +386,28 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Compensation */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Compensation</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.compensation')}</label>
                     <input
                       type="number"
                       value={project.compensation_amount || ''}
                       onChange={(e) => setProject({ ...project, compensation_amount: parseFloat(e.target.value) || null })}
-                      placeholder="Amount"
+                      placeholder={t('me.amount')}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Type</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.type')}</label>
                     <select
                       value={project.compensation_type || 'cash'}
                       onChange={(e) => setProject({ ...project, compensation_type: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     >
-                      <option value="cash">Cash</option>
-                      <option value="gift_card">Gift Card</option>
-                      <option value="credit">Course Credit</option>
-                      <option value="none">None</option>
+                      <option value="cash">{t('me.cash')}</option>
+                      <option value="gift_card">{t('me.giftCard')}</option>
+                      <option value="credit">{t('me.courseCredit')}</option>
+                      <option value="none">{t('me.none')}</option>
                     </select>
                   </div>
                 </div>
@@ -419,7 +421,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, voice_enabled: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Enable Voice Input</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.enableVoice')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -428,7 +430,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, notification_enabled: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Enable Notifications</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.enableNotifications')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -437,7 +439,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, allow_participant_dnd: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Allow Do Not Disturb</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.allowDnd')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -446,13 +448,13 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, onboarding_required: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Require Onboarding</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.requireOnboarding')}</span>
                   </label>
                 </div>
 
                 {/* Survey Display & Behavior */}
                 <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: 'var(--border-light)' }}>
-                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Survey Display & Behavior</h4>
+                  <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t('me.surveyDisplayBehavior')}</h4>
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -460,7 +462,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, show_progress_bar: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Show Progress Bar</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.showProgressBar')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -469,7 +471,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, disable_backtracking: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Disable Backtracking</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.disableBacktracking')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -478,7 +480,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, randomize_questions: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Randomize Question Order</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.randomizeOrder')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -487,18 +489,18 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, auto_advance: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Auto-Advance Questions</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.autoAdvance')}</span>
                   </label>
                 </div>
 
                 {/* Onboarding Instructions */}
                 {project.onboarding_required && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Onboarding Instructions</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.onboardingInstructions')}</label>
                     <textarea
                       value={project.onboarding_instructions || ''}
                       onChange={(e) => setProject({ ...project, onboarding_instructions: e.target.value })}
-                      placeholder="Instructions for participants before they start"
+                      placeholder={t('me.onboardingPlaceholder')}
                       rows={3}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
@@ -513,7 +515,7 @@ const MobileSurveyEditor: React.FC = () => {
               <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: 'white', border: '2px solid var(--color-green)' }}>
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <List size={18} style={{ color: 'var(--color-green)' }} />
-                  Questionnaire Management
+                   {t('me.questionnaireManagement')}
                 </h3>
                 
                 {/* Tab Navigation */}
@@ -526,7 +528,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'library' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    Library
+                     {t('me.library')}
                   </button>
                   <button
                     onClick={() => setQuestionnaireTab('schedule')}
@@ -536,7 +538,7 @@ const MobileSurveyEditor: React.FC = () => {
                       color: questionnaireTab === 'schedule' ? 'white' : 'var(--text-secondary)'
                     }}
                   >
-                    Schedule
+                     {t('me.schedule')}
                   </button>
                 </div>
 
@@ -544,7 +546,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {questionnaireTab === 'library' && (
                   <div>
                     <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      Create multiple questionnaires for your study
+                      {t('me.createMultipleQuestionnaires')}
                     </p>
                     <QuestionnaireScheduler 
                       projectId={projectId} 
@@ -557,7 +559,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {questionnaireTab === 'schedule' && (
                   <div>
                     <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      Drag questionnaires from library to schedule on timeline
+                      {t('me.dragToSchedule')}
                     </p>
                     <QuestionnaireScheduler 
                       projectId={projectId} 
@@ -632,7 +634,7 @@ const MobileSurveyEditor: React.FC = () => {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   title="Duplicate"
                 >
-                  Copy
+                   Copy
                 </button>
                 <button
                   onClick={() => deleteQuestion(question.id)}
@@ -649,7 +651,7 @@ const MobileSurveyEditor: React.FC = () => {
               type="text"
               value={question.question_text}
               onChange={(e) => updateQuestion(question.id, { question_text: e.target.value })}
-              placeholder="Question text"
+              placeholder={t('me.questionText')}
               className="w-full px-3 py-2 rounded-lg border mb-3"
               style={{ borderColor: 'var(--border-light)' }}
             />
@@ -657,7 +659,7 @@ const MobileSurveyEditor: React.FC = () => {
             <textarea
               value={question.question_description || ''}
               onChange={(e) => updateQuestion(question.id, { question_description: e.target.value })}
-              placeholder="Description (optional)"
+              placeholder={t('me.descriptionOptional')}
               rows={2}
               className="w-full px-3 py-2 rounded-lg border mb-3 text-sm"
               style={{ borderColor: 'var(--border-light)' }}
@@ -665,7 +667,7 @@ const MobileSurveyEditor: React.FC = () => {
 
             {/* Question Type Selector */}
             <div className="mb-3">
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Question Type</label>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.questionType')}</label>
               <select
                 value={question.question_type}
                 onChange={(e) => {
@@ -690,32 +692,32 @@ const MobileSurveyEditor: React.FC = () => {
                 className="w-full px-3 py-2 rounded-lg border text-sm"
                 style={{ borderColor: 'var(--border-light)' }}
               >
-                <option value="text_short">Short Text</option>
-                <option value="text_long">Long Text</option>
-                <option value="single_choice">Single Choice</option>
-                <option value="multiple_choice">Multiple Choice</option>
-                <option value="dropdown">Dropdown</option>
-                <option value="slider">Slider</option>
-                <option value="number">Number</option>
-                <option value="date">Date</option>
-                <option value="time">Time</option>
-                <option value="likert">Likert Scale</option>
-                <option value="scale">Rating Scale</option>
-                <option value="ranking">Ranking</option>
-                <option value="matrix">Matrix/Grid</option>
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-                <option value="file_upload">File Upload</option>
+                <option value="text_short">{t('me.shortText')}</option>
+                <option value="text_long">{t('me.longText')}</option>
+                <option value="single_choice">{t('me.singleChoice')}</option>
+                <option value="multiple_choice">{t('me.multipleChoice')}</option>
+                <option value="dropdown">{t('me.dropdown')}</option>
+                <option value="slider">{t('me.slider')}</option>
+                <option value="number">{t('me.number')}</option>
+                <option value="date">{t('me.date')}</option>
+                <option value="time">{t('me.time')}</option>
+                <option value="likert">{t('me.likertScale')}</option>
+                <option value="scale">{t('me.ratingScale')}</option>
+                <option value="ranking">{t('me.ranking')}</option>
+                <option value="matrix">{t('me.matrixGrid')}</option>
+                <option value="email">{t('me.email')}</option>
+                <option value="phone">{t('me.phone')}</option>
+                <option value="file_upload">{t('me.fileUpload')}</option>
               </select>
             </div>
 
             {/* Slider Configuration */}
             {question.question_type === 'slider' && (
               <div className="space-y-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4' }}>
-                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Slider Configuration</label>
+                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.sliderConfig')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.min')}</label>
                     <input
                       type="number"
                       value={question.question_config?.min || 0}
@@ -727,7 +729,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.max')}</label>
                     <input
                       type="number"
                       value={question.question_config?.max || 10}
@@ -739,7 +741,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Step</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.step')}</label>
                     <input
                       type="number"
                       value={question.question_config?.step || 1}
@@ -753,7 +755,7 @@ const MobileSurveyEditor: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min Label</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.minLabel')}</label>
                     <input
                       type="text"
                       value={question.question_config?.min_label || ''}
@@ -766,7 +768,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max Label</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxLabel')}</label>
                     <input
                       type="text"
                       value={question.question_config?.max_label || ''}
@@ -785,23 +787,23 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Number Validation */}
             {question.question_type === 'number' && (
               <div className="space-y-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4' }}>
-                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Number Validation</label>
+                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.numberValidation')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min Value</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.minValue')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.min || ''}
                       onChange={(e) => updateQuestion(question.id, {
                         validation_rule: { ...question.validation_rule, min: e.target.value }
                       })}
-                      placeholder="Optional"
+                      placeholder={t('me.optional')}
                       className="w-full px-2 py-1 rounded border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max Value</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxValue')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.max || ''}
@@ -820,10 +822,10 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Text Validation */}
             {(question.question_type === 'text_short' || question.question_type === 'text_long') && (
               <div className="space-y-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4' }}>
-                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Text Validation</label>
+                <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.textValidation')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min Length</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.minLength')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.min_length || ''}
@@ -836,7 +838,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max Length</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxLength')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.max_length || ''}
@@ -856,7 +858,7 @@ const MobileSurveyEditor: React.FC = () => {
             {['single_choice', 'multiple_choice', 'dropdown', 'likert_scale'].includes(normalizeLegacyQuestionType(question.question_type)) && (
               <div className="space-y-2 mb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Options:</label>
+                  <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.options')}</label>
                   <select
                     onChange={(e) => {
                       const templates = [
@@ -879,7 +881,7 @@ const MobileSurveyEditor: React.FC = () => {
                     className="text-xs px-2 py-1 rounded border"
                     style={{ borderColor: 'var(--border-light)', color: 'var(--color-green)' }}
                   >
-                    <option value="">Template</option>
+                    <option value="">{t('me.template')}</option>
                     <option value="Yes - No">Yes - No</option>
                     <option value="Agree - Disagree">Agree - Disagree</option>
                     <option value="1-5 Scale">1-5 Scale</option>
@@ -913,7 +915,7 @@ const MobileSurveyEditor: React.FC = () => {
                   className="w-full py-2 rounded-lg border-2 border-dashed text-sm"
                   style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
                 >
-                  + Add Option
+                  {t('me.addOption')}
                 </button>
                 
                 <div className="mt-2 space-y-2 pt-2 border-t" style={{ borderColor: 'var(--border-light)' }}>
@@ -924,7 +926,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => updateQuestion(question.id, { allow_other: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow "Other" option</span>
+                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowOther')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -933,7 +935,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => updateQuestion(question.id, { allow_none: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow "None of the above"</span>
+                    <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowNone')}</span>
                   </label>
                 </div>
               </div>
@@ -942,16 +944,16 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Question Settings */}
             <div className="space-y-2 pt-3 border-t" style={{ borderColor: 'var(--border-light)' }}>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Response Type</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.responseType')}</label>
                 <select
                   value={question.response_required || 'optional'}
                   onChange={(e) => updateQuestion(question.id, { response_required: e.target.value, required: e.target.value === 'force' })}
                   className="w-full px-2 py-1 rounded border text-sm"
                   style={{ borderColor: 'var(--border-light)' }}
                 >
-                  <option value="optional">Optional (Allow Skip)</option>
-                  <option value="request">Request Response (Soft Prompt)</option>
-                  <option value="force">Required (Cannot Skip)</option>
+                  <option value="optional">{t('me.optionalAllowSkip')}</option>
+                  <option value="request">{t('me.requestResponse')}</option>
+                  <option value="force">{t('me.requiredCannotSkip')}</option>
                 </select>
               </div>
               
@@ -962,7 +964,7 @@ const MobileSurveyEditor: React.FC = () => {
                   onChange={(e) => updateQuestion(question.id, { required: e.target.checked })}
                   className="rounded"
                 />
-                <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Mark as Required (*)</span>
+                <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.markRequired')}</span>
               </label>
               
               {project.voice_enabled && ['text_short', 'text_long'].includes(question.question_type) && (
@@ -973,7 +975,7 @@ const MobileSurveyEditor: React.FC = () => {
                     onChange={(e) => updateQuestion(question.id, { allow_voice: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow Voice Input</span>
+                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowVoiceInput')}</span>
                 </label>
               )}
               
@@ -981,10 +983,10 @@ const MobileSurveyEditor: React.FC = () => {
 
             {/* Question Preview */}
             <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-              <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Preview</label>
+              <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.preview')}</label>
               <div className="mt-2">
                 <p className="text-sm font-medium mb-2">
-                  {question.question_text || 'Enter your question'}
+                  {question.question_text || t('me.enterQuestion')}
                   {question.required && <span className="text-red-500">*</span>}
                 </p>
                 {question.question_description && (
@@ -1019,14 +1021,14 @@ const MobileSurveyEditor: React.FC = () => {
                       </div>
                     ))}
                     {question.options.length > 3 && (
-                      <div className="text-xs italic" style={{ color: 'var(--text-secondary)' }}>...and {question.options.length - 3} more</div>
+                      <div className="text-xs italic" style={{ color: 'var(--text-secondary)' }}>...{t('me.andMore').replace('{n}', String(question.options.length - 3))}</div>
                     )}
                   </div>
                 )}
                 {['text_short', 'text_long', 'number', 'date', 'time', 'email'].includes(normalizeLegacyQuestionType(question.question_type)) && (
                   <input
                     type={question.question_type === 'number' ? 'number' : question.question_type === 'date' ? 'date' : question.question_type === 'time' ? 'time' : 'text'}
-                    placeholder={question.question_type === 'text_long' ? 'Long answer text...' : 'Your answer'}
+                    placeholder={question.question_type === 'text_long' ? t('me.longAnswerText') : t('me.yourAnswer')}
                     className="w-full px-2 py-1 rounded border text-xs"
                     style={{ borderColor: 'var(--border-light)' }}
                     disabled
@@ -1044,7 +1046,7 @@ const MobileSurveyEditor: React.FC = () => {
           style={{ borderColor: 'var(--color-green)', color: 'var(--color-green)', backgroundColor: 'white' }}
         >
           <Plus size={20} className="inline mr-2" />
-          Add Question
+          {t('me.addQuestion')}
         </button>
 
         {/* Question Types Dropdown */}
