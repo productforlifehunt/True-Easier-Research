@@ -797,7 +797,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => updateQuestion(question.id, {
                         validation_rule: { ...question.validation_rule, min: e.target.value }
                       })}
-                      placeholder="Optional"
+                      placeholder={t('me.optional')}
                       className="w-full px-2 py-1 rounded border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     />
