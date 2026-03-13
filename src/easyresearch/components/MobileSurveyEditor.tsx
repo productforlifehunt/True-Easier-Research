@@ -975,7 +975,7 @@ const MobileSurveyEditor: React.FC = () => {
                     onChange={(e) => updateQuestion(question.id, { allow_voice: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Allow Voice Input</span>
+                  <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.allowVoiceInput')}</span>
                 </label>
               )}
               
