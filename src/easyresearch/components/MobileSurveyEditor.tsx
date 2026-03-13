@@ -329,19 +329,19 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Frequency */}
                 {(project.methodology_type === 'multi_time') && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Survey Frequency</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.surveyFrequency')}</label>
                     <select
                       value={project.survey_frequency || 'daily'}
                       onChange={(e) => setProject({ ...project, survey_frequency: e.target.value })}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     >
-                      <option value="hourly">Every Hour</option>
-                      <option value="twice_daily">Twice Daily</option>
-                      <option value="daily">Daily</option>
-                      <option value="twice_weekly">Twice Weekly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="custom">Custom Schedule</option>
+                      <option value="hourly">{t('me.everyHour')}</option>
+                      <option value="twice_daily">{t('me.twiceDaily')}</option>
+                      <option value="daily">{t('me.daily')}</option>
+                      <option value="twice_weekly">{t('me.twiceWeekly')}</option>
+                      <option value="weekly">{t('me.weekly')}</option>
+                      <option value="custom">{t('me.customSchedule')}</option>
                     </select>
                   </div>
                 )}
