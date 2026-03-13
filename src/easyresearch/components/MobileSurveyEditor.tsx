@@ -264,8 +264,8 @@ const MobileSurveyEditor: React.FC = () => {
                   className="px-3 py-2 rounded-lg border text-sm font-medium"
                   style={{ borderColor: project.status === 'published' ? 'var(--color-green)' : 'var(--border-light)', color: project.status === 'published' ? 'var(--color-green)' : 'var(--text-secondary)' }}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="draft">{t('me.draft')}</option>
+                  <option value="published">{t('me.published')}</option>
                 </select>
                 <button
                   onClick={saveProject}
