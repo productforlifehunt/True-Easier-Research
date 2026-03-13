@@ -692,22 +692,22 @@ const MobileSurveyEditor: React.FC = () => {
                 className="w-full px-3 py-2 rounded-lg border text-sm"
                 style={{ borderColor: 'var(--border-light)' }}
               >
-                <option value="text_short">Short Text</option>
-                <option value="text_long">Long Text</option>
-                <option value="single_choice">Single Choice</option>
-                <option value="multiple_choice">Multiple Choice</option>
-                <option value="dropdown">Dropdown</option>
-                <option value="slider">Slider</option>
-                <option value="number">Number</option>
-                <option value="date">Date</option>
-                <option value="time">Time</option>
-                <option value="likert">Likert Scale</option>
-                <option value="scale">Rating Scale</option>
-                <option value="ranking">Ranking</option>
-                <option value="matrix">Matrix/Grid</option>
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-                <option value="file_upload">File Upload</option>
+                <option value="text_short">{t('me.shortText')}</option>
+                <option value="text_long">{t('me.longText')}</option>
+                <option value="single_choice">{t('me.singleChoice')}</option>
+                <option value="multiple_choice">{t('me.multipleChoice')}</option>
+                <option value="dropdown">{t('me.dropdown')}</option>
+                <option value="slider">{t('me.slider')}</option>
+                <option value="number">{t('me.number')}</option>
+                <option value="date">{t('me.date')}</option>
+                <option value="time">{t('me.time')}</option>
+                <option value="likert">{t('me.likertScale')}</option>
+                <option value="scale">{t('me.ratingScale')}</option>
+                <option value="ranking">{t('me.ranking')}</option>
+                <option value="matrix">{t('me.matrixGrid')}</option>
+                <option value="email">{t('me.email')}</option>
+                <option value="phone">{t('me.phone')}</option>
+                <option value="file_upload">{t('me.fileUpload')}</option>
               </select>
             </div>
 
