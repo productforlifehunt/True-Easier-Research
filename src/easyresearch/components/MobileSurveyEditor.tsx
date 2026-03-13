@@ -360,7 +360,7 @@ const MobileSurveyEditor: React.FC = () => {
 
                 {/* End Date */}
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>End Date (optional)</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.endDate')}</label>
                   <input
                     type="date"
                     value={project.ends_at ? project.ends_at.split('T')[0] : ''}
