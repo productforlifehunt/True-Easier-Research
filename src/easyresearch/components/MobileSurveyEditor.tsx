@@ -304,7 +304,7 @@ const MobileSurveyEditor: React.FC = () => {
               className="w-full px-3 py-2 rounded-lg border text-sm font-medium flex items-center justify-between"
               style={{ borderColor: 'var(--border-light)', color: 'var(--color-green)' }}
             >
-              <span>{showSettings ? 'Hide' : 'Show'} Survey Settings</span>
+              <span>{showSettings ? t('me.hideSettings') : t('me.showSettings')}</span>
               <span>{showSettings ? '▼' : '▶'}</span>
             </button>
             
