@@ -391,7 +391,7 @@ const MobileSurveyEditor: React.FC = () => {
                       type="number"
                       value={project.compensation_amount || ''}
                       onChange={(e) => setProject({ ...project, compensation_amount: parseFloat(e.target.value) || null })}
-                      placeholder="Amount"
+                      placeholder={t('me.amount')}
                       className="w-full px-3 py-2 rounded-lg border text-sm"
                       style={{ borderColor: 'var(--border-light)' }}
                     />
