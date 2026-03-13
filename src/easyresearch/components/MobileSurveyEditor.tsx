@@ -439,7 +439,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, allow_participant_dnd: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Allow Do Not Disturb</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.allowDnd')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
