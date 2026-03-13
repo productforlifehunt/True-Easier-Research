@@ -983,7 +983,7 @@ const MobileSurveyEditor: React.FC = () => {
 
             {/* Question Preview */}
             <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-              <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Preview</label>
+              <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.preview')}</label>
               <div className="mt-2">
                 <p className="text-sm font-medium mb-2">
                   {question.question_text || 'Enter your question'}
