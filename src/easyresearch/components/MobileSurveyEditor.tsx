@@ -515,7 +515,7 @@ const MobileSurveyEditor: React.FC = () => {
               <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: 'white', border: '2px solid var(--color-green)' }}>
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <List size={18} style={{ color: 'var(--color-green)' }} />
-                  Questionnaire Management
+                   {t('me.questionnaireManagement')}
                 </h3>
                 
                 {/* Tab Navigation */}
