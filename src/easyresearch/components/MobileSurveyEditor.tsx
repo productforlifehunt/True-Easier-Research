@@ -314,7 +314,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Duration */}
                 {(project.methodology_type === 'multi_time') && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Study Duration (days)</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.studyDuration')}</label>
                     <input
                       type="number"
                       value={project.study_duration || ''}
