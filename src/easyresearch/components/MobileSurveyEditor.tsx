@@ -559,7 +559,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {questionnaireTab === 'schedule' && (
                   <div>
                     <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      Drag questionnaires from library to schedule on timeline
+                      {t('me.dragToSchedule')}
                     </p>
                     <QuestionnaireScheduler 
                       projectId={projectId} 
