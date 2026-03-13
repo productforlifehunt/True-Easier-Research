@@ -489,7 +489,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, auto_advance: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Auto-Advance Questions</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.autoAdvance')}</span>
                   </label>
                 </div>
 
