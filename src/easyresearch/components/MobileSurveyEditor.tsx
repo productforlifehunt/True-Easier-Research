@@ -496,7 +496,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {/* Onboarding Instructions */}
                 {project.onboarding_required && (
                   <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Onboarding Instructions</label>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.onboardingInstructions')}</label>
                     <textarea
                       value={project.onboarding_instructions || ''}
                       onChange={(e) => setProject({ ...project, onboarding_instructions: e.target.value })}
