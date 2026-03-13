@@ -803,7 +803,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max Value</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxValue')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.max || ''}
