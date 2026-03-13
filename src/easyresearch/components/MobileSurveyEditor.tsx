@@ -838,7 +838,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max Length</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.maxLength')}</label>
                     <input
                       type="number"
                       value={question.validation_rule?.max_length || ''}
