@@ -729,7 +729,7 @@ const MobileSurveyEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Max</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.max')}</label>
                     <input
                       type="number"
                       value={question.question_config?.max || 10}
