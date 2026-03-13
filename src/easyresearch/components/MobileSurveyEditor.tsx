@@ -480,7 +480,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, randomize_questions: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Randomize Question Order</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.randomizeOrder')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
