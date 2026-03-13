@@ -448,7 +448,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, onboarding_required: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Require Onboarding</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.requireOnboarding')}</span>
                   </label>
                 </div>
 
