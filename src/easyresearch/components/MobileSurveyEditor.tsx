@@ -944,7 +944,7 @@ const MobileSurveyEditor: React.FC = () => {
             {/* Question Settings */}
             <div className="space-y-2 pt-3 border-t" style={{ borderColor: 'var(--border-light)' }}>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Response Type</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.responseType')}</label>
                 <select
                   value={question.response_required || 'optional'}
                   onChange={(e) => updateQuestion(question.id, { response_required: e.target.value, required: e.target.value === 'force' })}
