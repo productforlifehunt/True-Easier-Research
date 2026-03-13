@@ -964,7 +964,7 @@ const MobileSurveyEditor: React.FC = () => {
                   onChange={(e) => updateQuestion(question.id, { required: e.target.checked })}
                   className="rounded"
                 />
-                <span className="text-xs" style={{ color: 'var(--text-primary)' }}>Mark as Required (*)</span>
+                <span className="text-xs" style={{ color: 'var(--text-primary)' }}>{t('me.markRequired')}</span>
               </label>
               
               {project.voice_enabled && ['text_short', 'text_long'].includes(question.question_type) && (
