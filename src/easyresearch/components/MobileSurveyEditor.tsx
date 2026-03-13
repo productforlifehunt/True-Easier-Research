@@ -717,7 +717,7 @@ const MobileSurveyEditor: React.FC = () => {
                 <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('me.sliderConfig')}</label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Min</label>
+                    <label className="block text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>{t('me.min')}</label>
                     <input
                       type="number"
                       value={question.question_config?.min || 0}
