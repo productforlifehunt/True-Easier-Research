@@ -5,6 +5,7 @@ import { ChevronRight, ChevronLeft, Save, Plus, Trash2, GripVertical, Settings, 
 import { QUESTION_TYPE_DEFINITIONS, normalizeLegacyQuestionType } from '../constants/questionTypes';
 import QuestionnaireScheduler from './QuestionnaireScheduler';
 import { hydrateQuestionRows, questionConfigToDbCols } from '../utils/questionConfigSync';
+import { useI18n } from '../hooks/useI18n';
 
 interface Question {
   id: string;
