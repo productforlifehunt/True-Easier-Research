@@ -1028,7 +1028,7 @@ const MobileSurveyEditor: React.FC = () => {
                 {['text_short', 'text_long', 'number', 'date', 'time', 'email'].includes(normalizeLegacyQuestionType(question.question_type)) && (
                   <input
                     type={question.question_type === 'number' ? 'number' : question.question_type === 'date' ? 'date' : question.question_type === 'time' ? 'time' : 'text'}
-                    placeholder={question.question_type === 'text_long' ? 'Long answer text...' : 'Your answer'}
+                    placeholder={question.question_type === 'text_long' ? t('me.longAnswerText') : t('me.yourAnswer')}
                     className="w-full px-2 py-1 rounded border text-xs"
                     style={{ borderColor: 'var(--border-light)' }}
                     disabled
