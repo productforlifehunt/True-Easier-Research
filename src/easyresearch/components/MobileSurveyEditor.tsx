@@ -915,7 +915,7 @@ const MobileSurveyEditor: React.FC = () => {
                   className="w-full py-2 rounded-lg border-2 border-dashed text-sm"
                   style={{ borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
                 >
-                  + Add Option
+                  {t('me.addOption')}
                 </button>
                 
                 <div className="mt-2 space-y-2 pt-2 border-t" style={{ borderColor: 'var(--border-light)' }}>
