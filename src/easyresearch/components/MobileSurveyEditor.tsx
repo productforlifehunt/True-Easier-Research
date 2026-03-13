@@ -58,6 +58,7 @@ interface SurveyProject {
 }
 
 const MobileSurveyEditor: React.FC = () => {
+  const { t } = useI18n();
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState<SurveyProject>({
