@@ -951,9 +951,9 @@ const MobileSurveyEditor: React.FC = () => {
                   className="w-full px-2 py-1 rounded border text-sm"
                   style={{ borderColor: 'var(--border-light)' }}
                 >
-                  <option value="optional">Optional (Allow Skip)</option>
-                  <option value="request">Request Response (Soft Prompt)</option>
-                  <option value="force">Required (Cannot Skip)</option>
+                  <option value="optional">{t('me.optionalAllowSkip')}</option>
+                  <option value="request">{t('me.requestResponse')}</option>
+                  <option value="force">{t('me.requiredCannotSkip')}</option>
                 </select>
               </div>
               
