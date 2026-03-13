@@ -471,7 +471,7 @@ const MobileSurveyEditor: React.FC = () => {
                       onChange={(e) => setProject({ ...project, disable_backtracking: e.target.checked })}
                       className="rounded"
                     />
-                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>Disable Backtracking</span>
+                    <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{t('me.disableBacktracking')}</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
